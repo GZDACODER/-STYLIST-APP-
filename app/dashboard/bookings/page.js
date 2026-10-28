@@ -14,6 +14,17 @@ function formatPrice(cents) {
   );
 }
 
+// Deposit amount and whether it's paid.
+function DepositBadge({ booking }) {
+  const { deposit_cents: cents, deposit_status: status } = booking;
+  if (status === "none" || !cents) return <span className="badge">No deposit</span>;
+  if (status === "paid") return <span className="badge paid">{formatPrice(cents)} deposit paid</span>;
+  if (status === "refunded" || status === "refund_pending") {
+    return <span className="badge">{formatPrice(cents)} deposit refunded</span>;
+  }
+  return <span className="badge unpaid">{formatPrice(cents)} deposit unpaid</span>;
+}
+
 export default async function BookingsPage() {
   const supabase = await createClient();
   const {
@@ -33,7 +44,7 @@ export default async function BookingsPage() {
   const { data: bookings, error } = await supabase
     .from("bookings")
     .select(
-      "id, booking_date, start_time, end_time, service_name, price_cents, client_name, client_email, client_phone, status, client:clients(status)"
+      "id, booking_date, start_time, end_time, service_name, price_cents, client_name, client_email, client_phone, status, deposit_cents, deposit_status, hold_expires_at, client:clients(status)"
     )
     .gte("booking_date", today)
     .order("booking_date")
@@ -45,6 +56,17 @@ export default async function BookingsPage() {
 
   const upcoming = bookings.filter((b) => b.status === "confirmed");
   const cancelled = bookings.filter((b) => b.status === "cancelled");
+  // Clients on Stripe's payment page right now. Their time is held until then.
+  const now = Date.now();
+  const awaitingPayment = bookings.filter(
+    (b) => b.status === "pending_payment" && new Date(b.hold_expires_at).getTime() > now
+  );
+  const holdUntil = (b) =>
+    new Date(b.hold_expires_at).toLocaleTimeString("en-US", {
+      timeZone: stylist.timezone,
+      hour: "numeric",
+      minute: "2-digit",
+    });
 
   // Group by date.
   const days = [];
@@ -82,11 +104,14 @@ export default async function BookingsPage() {
                         <span className="opening-time">
                           {clockTime(b.start_time)} – {clockTime(b.end_time)}
                         </span>
-                        {clientStatus && (
-                          <span className={`badge ${clientStatus}`}>
-                            {STATUS_LABELS[clientStatus]}
-                          </span>
-                        )}
+                        <span className="badge-row">
+                          {clientStatus && (
+                            <span className={`badge ${clientStatus}`}>
+                              {STATUS_LABELS[clientStatus]}
+                            </span>
+                          )}
+                          <DepositBadge booking={b} />
+                        </span>
                       </div>
                       <div>
                         <div className="client-name">{b.client_name}</div>
@@ -99,7 +124,11 @@ export default async function BookingsPage() {
                         <a href={`mailto:${b.client_email}`}>{b.client_email}</a>
                       </div>
                       <div className="client-delete">
-                        <CancelBookingButton id={b.id} clientName={b.client_name} />
+                        <CancelBookingButton
+                          id={b.id}
+                          clientName={b.client_name}
+                          depositPaid={b.deposit_status === "paid"}
+                        />
                       </div>
                     </li>
                   );
@@ -109,6 +138,32 @@ export default async function BookingsPage() {
           ))}
         </ul>
       </section>
+
+      {awaitingPayment.length > 0 && (
+        <section className="card">
+          <h2>Waiting for deposit</h2>
+          <p className="muted small-text">
+            These clients are paying their deposit now. If they don&apos;t pay by the time shown,
+            the time opens up again.
+          </p>
+          <ul className="service-list">
+            {awaitingPayment.map((b) => (
+              <li key={b.id}>
+                <div>
+                  <div className="service-name">{b.client_name}</div>
+                  <div className="muted">
+                    {formatDate(b.booking_date)} · {clockTime(b.start_time)} · {b.service_name}
+                  </div>
+                  <div className="muted small-text">
+                    {formatPrice(b.deposit_cents)} deposit · held until {holdUntil(b)}
+                  </div>
+                </div>
+                <span className="badge unpaid">Unpaid</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {cancelled.length > 0 && (
         <section className="card">
@@ -121,7 +176,14 @@ export default async function BookingsPage() {
                   <div className="muted">
                     {formatDate(b.booking_date)} · {clockTime(b.start_time)} · {b.service_name}
                   </div>
+                  {b.deposit_status === "paid" && (
+                    <div className="muted small-text">
+                      {formatPrice(b.deposit_cents)} deposit was paid. To refund it, use Open
+                      Stripe on the Settings tab.
+                    </div>
+                  )}
                 </div>
+                <DepositBadge booking={b} />
               </li>
             ))}
           </ul>

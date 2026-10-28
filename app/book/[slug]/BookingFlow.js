@@ -23,9 +23,17 @@ function formatMinutes(minutes) {
   return `${m} min`;
 }
 
-export default function BookingFlow({ page }) {
+export default function BookingFlow({ page, paymentCancelled }) {
   const router = useRouter();
-  const { business_name, slug, timezone, viewer_status, viewer_email, services } = page;
+  const {
+    business_name,
+    slug,
+    timezone,
+    cancellation_policy: policy,
+    viewer_status,
+    viewer_email,
+    services,
+  } = page;
   const verified = viewer_status !== "anonymous";
 
   const [serviceId, setServiceId] = useState(null);
@@ -37,11 +45,14 @@ export default function BookingFlow({ page }) {
   const [showVerify, setShowVerify] = useState(false);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [agreed, setAgreed] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
   const [bookError, setBookError] = useState(null);
   const [confirmation, setConfirmation] = useState(null);
   const [pending, startTransition] = useTransition();
 
   const service = services.find((s) => s.id === serviceId);
+  const deposit = service?.deposit_cents || 0;
 
   // Load open times when a service is picked, and again after the visitor
   // verifies (regulars may see more times).
@@ -85,6 +96,7 @@ export default function BookingFlow({ page }) {
     setTime(null);
     setShowAllDates(false);
     setBookError(null);
+    setAgreed(false);
   }
 
   function submitBooking(event) {
@@ -99,6 +111,12 @@ export default function BookingFlow({ page }) {
           if (fresh.slots) setSlots(fresh.slots);
           setTime(null);
         }
+        return;
+      }
+      if (result.checkoutUrl) {
+        // Off to Stripe to pay the deposit. The time is held meanwhile.
+        setRedirecting(true);
+        window.location.assign(result.checkoutUrl);
         return;
       }
       setConfirmation(result.booking);
@@ -168,6 +186,12 @@ export default function BookingFlow({ page }) {
 
   return (
     <>
+      {paymentCancelled && (
+        <p className="message warning">
+          The deposit wasn&apos;t paid, so that time wasn&apos;t booked. You can pick a time again.
+        </p>
+      )}
+
       {/* ---------- Who's booking ---------- */}
       {viewer_status === "regular" && (
         <p className="message success">
@@ -220,6 +244,7 @@ export default function BookingFlow({ page }) {
               <span className="service-name">{s.name}</span>
               <span className="muted">
                 {formatMinutes(s.duration_minutes)} · {formatPrice(s.price_cents)}
+                {s.deposit_cents > 0 && ` · ${formatPrice(s.deposit_cents)} deposit`}
               </span>
             </button>
           ))}
@@ -338,9 +363,45 @@ export default function BookingFlow({ page }) {
                 />
               </label>
               <p className="muted small-text">Email: {viewer_email}</p>
-              <button type="submit" className="button" disabled={pending}>
-                {pending ? "Booking..." : "Book appointment"}
-              </button>
+
+              {policy && (
+                <div className="policy">
+                  <h3>Cancellation policy</h3>
+                  <p>{policy}</p>
+                </div>
+              )}
+
+              {deposit > 0 ? (
+                <>
+                  <p className="message info">
+                    A {formatPrice(deposit)} deposit is due now to book.
+                    {service.price_cents > deposit &&
+                      ` The other ${formatPrice(service.price_cents - deposit)} is paid at your appointment.`}{" "}
+                    You&apos;ll pay securely on Stripe. If you don&apos;t pay, the time isn&apos;t
+                    booked.
+                  </p>
+                  {policy && (
+                    <label className="check-row">
+                      <input
+                        type="checkbox"
+                        checked={agreed}
+                        onChange={(e) => setAgreed(e.target.checked)}
+                        required
+                      />
+                      I&apos;ve read and agree to the cancellation policy
+                    </label>
+                  )}
+                  <button type="submit" className="button" disabled={pending || redirecting}>
+                    {pending || redirecting
+                      ? "Opening payment..."
+                      : `Pay ${formatPrice(deposit)} deposit`}
+                  </button>
+                </>
+              ) : (
+                <button type="submit" className="button" disabled={pending}>
+                  {pending ? "Booking..." : "Book appointment"}
+                </button>
+              )}
               {bookError && <p className="message error">{bookError}</p>}
             </form>
           )}

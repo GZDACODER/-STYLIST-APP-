@@ -15,8 +15,9 @@ export async function generateMetadata({ params }) {
   return { title: data ? `Book with ${data.business_name}` : "Booking page not found" };
 }
 
-export default async function BookingPage({ params }) {
+export default async function BookingPage({ params, searchParams }) {
   const { slug } = await params;
+  const { payment } = await searchParams;
   const { data, error } = await loadPage(slug);
 
   if (error) {
@@ -27,7 +28,7 @@ export default async function BookingPage({ params }) {
   return (
     <>
       <h1>Book with {data.business_name}</h1>
-      <BookingFlow page={data} />
+      <BookingFlow page={data} paymentCancelled={payment === "cancelled"} />
     </>
   );
 }

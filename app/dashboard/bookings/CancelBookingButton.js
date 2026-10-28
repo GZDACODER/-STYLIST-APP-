@@ -3,10 +3,13 @@
 import { cancelBooking } from "./actions";
 import SubmitButton from "@/components/SubmitButton";
 
-export default function CancelBookingButton({ id, clientName }) {
+export default function CancelBookingButton({ id, clientName, depositPaid }) {
   function confirmCancel(event) {
+    const refundNote = depositPaid
+      ? " Their deposit isn't refunded automatically. If your policy says to refund it, do that in Stripe."
+      : "";
     const ok = window.confirm(
-      `Cancel ${clientName}'s booking? The time opens up again. ${clientName} isn't told automatically, so let them know.`
+      `Cancel ${clientName}'s booking? The time opens up again. ${clientName} isn't told automatically, so let them know.${refundNote}`
     );
     if (!ok) event.preventDefault();
   }

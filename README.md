@@ -17,8 +17,12 @@ and hosted on **Netlify**.
 - **Public booking page** at `/book/your-link`: clients pick a service and a time,
   confirm their email with a code, and book. No app or account needed.
   Verified regulars also see the "Regulars only" times.
-- **Bookings**: see upcoming bookings and cancel them.
+- **Bookings**: see upcoming bookings (with deposit paid or not) and cancel them.
 - **Settings**: business name, booking link, and time zone (Central Time by default).
+- **Deposits with Stripe**: each stylist connects their own Stripe account, turns
+  deposits on, and sets a dollar amount or percent per service, plus a
+  cancellation policy. Clients pay the deposit on Stripe before the booking is
+  confirmed; if they don't pay, the time isn't held. See **[DEPOSITS_SETUP.md](./DEPOSITS_SETUP.md)**.
 
 Each stylist only ever sees their own data. The database enforces this.
 
@@ -54,12 +58,20 @@ Before deploying (or right after, then redeploy), add two
 
 Then go to **Deploys → Trigger deploy → Deploy project**.
 
+For deposits you'll add three more secret keys later (`STRIPE_SECRET_KEY`,
+`STRIPE_WEBHOOK_SECRET`, `SUPABASE_SECRET_KEY`). **[DEPOSITS_SETUP.md](./DEPOSITS_SETUP.md)**
+walks you through it.
+
 When it finishes, Netlify gives you an address like `https://your-site.netlify.app`.
 Now do **SUPABASE_SETUP.md steps 4 and 5** with that address.
 
 ### 4. Try it
 
 Open your Netlify address → **Create a stylist account** → add a service.
+
+### 5. Deposits
+
+Follow **[DEPOSITS_SETUP.md](./DEPOSITS_SETUP.md)** to set up Stripe.
 
 ## How the code is organized
 
@@ -77,10 +89,14 @@ app/                      ← every folder here is a page (URL) on the site
     openings/             ← "Openings" tab + booking link
     clients/              ← "Clients" tab
     availability/         ← "Availability" tab
-    settings/             ← "Settings" tab (name, link, time zone)
+    settings/             ← "Settings" tab (name, link, time zone, deposits)
+    stripe/               ← connect a stylist's Stripe account
   book/[slug]/            ← the public booking page clients use
+    paid/, unpaid/        ← where Stripe sends clients after paying (or not)
+  api/stripe/webhook/     ← Stripe tells the app a deposit was paid
 components/               ← small reusable pieces (buttons, messages)
-lib/                      ← shared helpers; lib/supabase/ connects to Supabase
+lib/                      ← shared helpers; lib/supabase/ connects to Supabase,
+                            lib/stripe.js handles deposits
 proxy.js                  ← runs before each page: keeps logins fresh,
                             sends logged-out visitors to /login
 supabase/migrations/      ← database setup (paste each into Supabase SQL Editor)
@@ -97,7 +113,7 @@ npm install
 cp .env.example .env.local
 ```
 
-Put your two keys in `.env.local`, then:
+Put your keys in `.env.local`, then:
 
 ```bash
 npm run dev
@@ -109,4 +125,5 @@ Open http://localhost:3000.
 
 - Emails to the client and stylist when a booking is made or cancelled
 - Clients cancelling or changing their own booking
+- Refunding a deposit from the Bookings tab
 - Add-on features stylists can switch on (and only pay for what they use)

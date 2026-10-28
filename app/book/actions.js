@@ -3,6 +3,7 @@
 // Server actions for the public booking page. The real rules (who sees which
 // times, who can book) are enforced inside the database functions these call.
 import { createBookingClient } from "@/lib/supabase/booking";
+import { createDepositCheckout, siteOrigin } from "@/lib/stripe";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -83,6 +84,18 @@ export async function book({ slug, serviceId, date, time, name, phone }) {
       error: BOOKING_ERRORS[error.message] || "Something went wrong. Please try again.",
       code: error.message,
     };
+  }
+
+  // This service needs a deposit: the time is held while they pay on Stripe.
+  if (data.status === "pending_payment") {
+    const checkoutUrl = await createDepositCheckout(data.id, await siteOrigin()).catch((e) => {
+      console.error("Couldn't start deposit payment", e);
+      return null;
+    });
+    if (!checkoutUrl) {
+      return { error: "We couldn't open the payment page. Please try again in a moment." };
+    }
+    return { checkoutUrl };
   }
   return { booking: data };
 }

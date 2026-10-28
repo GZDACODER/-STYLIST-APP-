@@ -34,8 +34,9 @@ To check it worked: open **Table Editor**. You should see `stylists` and `servic
 3. Copy the **Publishable key**. It starts with `sb_publishable_`. If your
    project only shows an **anon** `public` key, use that one instead. It works the same way.
 
-These two values are safe to use in the website. **Never** copy the
-`secret` or `service_role` key anywhere in this project.
+These two values are safe to use in the website. **Never** put the
+`secret` or `service_role` key in the code. The only place it goes is Netlify,
+as `SUPABASE_SECRET_KEY`, when you set up deposits (DEPOSITS_SETUP.md).
 
 You'll paste them into Netlify (see README step 3).
 

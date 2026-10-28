@@ -1307,6 +1307,65 @@ select {
   color: var(--gold-light);
 }
 
+/* ---------- Deposits ---------- */
+
+.policy {
+  background: var(--input);
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+}
+
+.policy h3 {
+  margin-bottom: 6px;
+  font-size: 1rem;
+}
+
+.policy p {
+  margin: 0;
+  white-space: pre-wrap;
+  color: var(--muted);
+}
+
+.badge.paid {
+  background: var(--success-soft);
+  border-color: rgba(143, 203, 155, 0.35);
+  color: var(--success);
+}
+
+.badge.unpaid {
+  background: var(--warning-soft);
+  border-color: rgba(232, 176, 75, 0.35);
+  color: var(--warning);
+}
+
+.badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.deposit-row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--divider);
+}
+
+.deposit-row:last-child {
+  border-bottom: none;
+}
+
+.stripe-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 /* ---------- Home page ---------- */
 .hero {
   text-align: center;
