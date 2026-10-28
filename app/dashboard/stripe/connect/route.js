@@ -46,10 +46,10 @@ export async function GET(request) {
           identity: { country: "us" },
           defaults: {
             currency: "usd",
-            // Stripe sets the stylist's Stripe pricing and covers it if their
-            // account can't pay back a refund or dispute, so the platform
-            // isn't on the hook.
-            responsibilities: { fees_collector: "stripe", losses_collector: "stripe" },
+            // The platform (this app) handles Stripe's fees and covers it if a
+            // stylist's account can't pay back a refund or dispute. Stripe only
+            // allows "application" for recipient accounts like these.
+            responsibilities: { fees_collector: "application", losses_collector: "application" },
             profile: {
               doing_business_as: stylist.business_name,
               product_description: "Hair salon appointments",

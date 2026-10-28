@@ -40,9 +40,10 @@ Your app is the "platform".
    recipients"** (a marketplace). If it asks which dashboard your users get,
    choose **Express**.
 3. Stripe may ask you to fill in a **platform profile**. Fill it in. If it asks
-   who sets pricing and who covers losses (negative balances), choose
-   **Stripe** for both. The app creates stylist accounts that way, so your
-   platform isn't on the hook if a stylist's account can't pay back a refund.
+   who handles fees and who covers losses (negative balances), choose
+   **the platform** (you) for both. Stripe requires that for the kind of
+   stylist accounts this app creates, so your platform covers it if a
+   stylist's account can't pay back a refund or dispute.
    (The app uses Stripe's newer "Accounts v2" for stylist accounts.)
 4. Go to **Settings → Connect → Branding** and add your app's name, an icon
    and a color. Stylists see this when they connect their account.
