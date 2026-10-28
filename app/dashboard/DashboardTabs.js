@@ -4,9 +4,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const TABS = [
-  { href: "/dashboard", label: "Services" },
+  { href: "/dashboard/bookings", label: "Bookings" },
+  { href: "/dashboard/openings", label: "Openings" },
   { href: "/dashboard/clients", label: "Clients" },
   { href: "/dashboard/availability", label: "Availability" },
+  { href: "/dashboard", label: "Services" },
 ];
 
 export default function DashboardTabs() {

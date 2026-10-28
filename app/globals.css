@@ -214,8 +214,12 @@ h3 {
   margin-bottom: 20px;
 }
 
+.tabs {
+  flex-wrap: wrap;
+}
+
 .tab {
-  flex: 1;
+  flex: 1 1 30%;
   text-align: center;
   padding: 10px 12px;
   min-height: 44px;
@@ -654,4 +658,304 @@ textarea:focus {
 .link-button.danger {
   color: var(--error);
   font-size: 0.9rem;
+}
+
+/* ---------- Openings & bookings ---------- */
+.small-text {
+  font-size: 0.85rem;
+}
+
+select {
+  font: inherit;
+  font-size: 16px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  width: 100%;
+  min-width: 0;
+  color: var(--text);
+}
+
+.segment.everyone.checked,
+.segment.everyone:has(input:checked) {
+  background: var(--accent);
+  color: #fff;
+}
+
+.segment.regulars.checked,
+.segment.regulars:has(input:checked) {
+  background: var(--success);
+  color: #fff;
+}
+
+.segmented.small .segment {
+  min-height: 36px;
+  font-size: 0.85rem;
+}
+
+.booking-link {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+  background: var(--bg);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+}
+
+.row > a.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.link-settings {
+  margin-top: 16px;
+}
+
+.link-settings summary {
+  cursor: pointer;
+  color: var(--accent);
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.prefixed {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.prefixed span {
+  padding: 0 4px 0 12px;
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.prefixed input {
+  border: none;
+  padding-left: 0;
+}
+
+.day-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.day-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin-bottom: 10px;
+}
+
+.day-heading .segmented {
+  flex: 1;
+  min-width: 220px;
+}
+
+.opening-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.opening-list li {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.opening-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+}
+
+.opening-top form {
+  margin-left: auto;
+}
+
+.opening-time {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.badge {
+  display: inline-block;
+  white-space: nowrap;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: var(--bg);
+  color: var(--muted);
+}
+
+.badge.regular {
+  background: #ecfdf3;
+  color: var(--success);
+}
+
+.badge.new {
+  background: #f4ebff;
+  color: #53389e;
+}
+
+.badge.blocked {
+  background: #fef3f2;
+  color: var(--error);
+}
+
+/* ---------- Public booking page ---------- */
+.choice-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.choice {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  width: 100%;
+  min-height: 56px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.choice.selected {
+  border-color: var(--accent);
+  outline: 2px solid var(--accent);
+  background: #faf5ff;
+}
+
+.date-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.date-choice {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-height: 56px;
+  padding: 8px 4px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.date-choice.selected {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.early-star {
+  position: absolute;
+  top: 2px;
+  right: 6px;
+  font-size: 0.75rem;
+  color: var(--success);
+}
+
+.date-choice.selected .early-star {
+  color: #fff;
+}
+
+.time-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.time-choice {
+  min-height: 44px;
+  padding: 8px 4px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.time-choice.early {
+  border-color: #a6e3bf;
+  color: var(--success);
+}
+
+.time-choice.selected {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.summary {
+  background: var(--bg);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.code-input {
+  font-size: 1.5rem;
+  letter-spacing: 0.3em;
+  text-align: center;
+}
+
+.row-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.link-button:disabled {
+  color: var(--muted);
+  text-decoration: none;
+  cursor: default;
+}
+
+.regular-prompt {
+  margin: 0;
+}
+
+.confirmation h2 {
+  color: var(--success);
+}
+
+.message .link-button {
+  font-size: inherit;
 }
