@@ -20,10 +20,17 @@ export async function POST(request) {
   }
 
   try {
-    if (event.type === "checkout.session.completed") {
+    if (
+      event.type === "checkout.session.completed" ||
+      // A slow payment method (e.g. a bank payment) finally cleared.
+      event.type === "checkout.session.async_payment_succeeded"
+    ) {
       const outcome = await finalizeCheckoutSession(event.data.object);
       if (outcome === "not_found") console.error("Paid deposit has no booking", event.data.object.id);
-    } else if (event.type === "checkout.session.expired") {
+    } else if (
+      event.type === "checkout.session.expired" ||
+      event.type === "checkout.session.async_payment_failed"
+    ) {
       await releaseCheckoutSession(event.data.object);
     }
   } catch (error) {

@@ -51,6 +51,18 @@ Your app is the "platform".
 Stripe changes its menus from time to time. If a name doesn't match exactly,
 look for the closest one.
 
+### Choose how clients can pay
+
+Stripe decides which payment methods appear on the payment page from your
+dashboard settings, not from the app's code.
+
+1. Go to **Settings → Payment methods** (or search "Payment methods").
+2. Keep **Cards** on. **Apple Pay** and **Google Pay** are good to keep on too.
+3. Turn **off** slow payment methods that take days to clear, such as
+   **ACH Direct Debit / US bank account** and other bank debits. A time is only
+   held for about 30 minutes, so a payment that clears days later could find
+   the time already taken (the deposit would then be refunded automatically).
+
 ## 4. Copy your Stripe secret key
 
 1. Go to **Developers → API keys** (or search "API keys").
@@ -90,6 +102,11 @@ a web address. This is what confirms the booking.
 3. Select these two events (search for them):
    - `checkout.session.completed`
    - `checkout.session.expired`
+   - `checkout.session.async_payment_succeeded`
+   - `checkout.session.async_payment_failed`
+
+   (The last two only matter if a slow bank payment method is turned on.
+   Adding them is safe either way.)
 4. Destination type: **Webhook endpoint**.
 5. Endpoint URL: `https://your-site.netlify.app/api/stripe/webhook`
    (use your real Netlify address).
