@@ -1,4 +1,4 @@
-# Regulars First: booking for hair stylists
+# GZ Stylist App: booking for hair stylists
 
 A phone-friendly booking app where stylists can let their **regular clients
 book first**. Stylists only pay for the add-on features they switch on.

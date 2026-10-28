@@ -6,7 +6,7 @@ import BookingLink from "./BookingLink";
 import PostOpeningsForm from "./PostOpeningsForm";
 import OpeningsList from "./OpeningsList";
 
-export const metadata = { title: "Openings · Regulars First" };
+export const metadata = { title: "Openings · GZ Stylist App" };
 
 export default async function OpeningsPage() {
   const supabase = await createClient();

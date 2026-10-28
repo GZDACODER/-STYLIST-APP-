@@ -1,7 +1,7 @@
 import Link from "next/link";
 import LoginForm from "./LoginForm";
 
-export const metadata = { title: "Log in · Regulars First" };
+export const metadata = { title: "Log in · GZ Stylist App" };
 
 export default async function LoginPage({ searchParams }) {
   const { error } = await searchParams;

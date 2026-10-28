@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import AddClientForm from "./AddClientForm";
 import ClientList from "./ClientList";
 
-export const metadata = { title: "Clients · Regulars First" };
+export const metadata = { title: "Clients · GZ Stylist App" };
 
 export default async function ClientsPage() {
   const supabase = await createClient();

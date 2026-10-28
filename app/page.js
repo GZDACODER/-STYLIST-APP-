@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import Logo from "@/components/Logo";
 
 export default async function HomePage() {
   const supabase = await createClient();
@@ -12,12 +13,14 @@ export default async function HomePage() {
   if (user) redirect("/dashboard");
 
   return (
-    <div className="stack">
-      <h1>Regulars First</h1>
+    <div className="stack hero">
+      <Logo size="large" />
+      <p className="hero-tagline">Where your regulars come first.</p>
       <p className="muted">
-        Booking for hair stylists. Let your regular clients book first, and
-        only pay for the extras you turn on.
+        Elegant online booking for hair stylists. Give your loyal clients first pick of your
+        openings, and only pay for the extras you turn on.
       </p>
+      <div className="hero-divider" />
       <Link href="/signup" className="button">
         Create a stylist account
       </Link>

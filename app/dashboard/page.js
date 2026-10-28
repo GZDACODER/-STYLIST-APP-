@@ -4,7 +4,7 @@ import { deleteService } from "./actions";
 import AddServiceForm from "./AddServiceForm";
 import SubmitButton from "@/components/SubmitButton";
 
-export const metadata = { title: "Dashboard · Regulars First" };
+export const metadata = { title: "Dashboard · GZ Stylist App" };
 
 function formatPrice(cents) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(

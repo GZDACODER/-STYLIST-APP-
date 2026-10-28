@@ -7,7 +7,7 @@ import WeeklyHoursForm from "./WeeklyHoursForm";
 import BlockDatesForm from "./BlockDatesForm";
 import SubmitButton from "@/components/SubmitButton";
 
-export const metadata = { title: "Availability · Regulars First" };
+export const metadata = { title: "Availability · GZ Stylist App" };
 
 export default async function AvailabilityPage() {
   const supabase = await createClient();
