@@ -6,3 +6,6 @@ out/
 .env*.local
 .DS_Store
 .netlify/
+
+# Created automatically by "next dev"; not part of the app.
+AGENTS.md
