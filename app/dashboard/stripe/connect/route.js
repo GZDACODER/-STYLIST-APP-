@@ -8,7 +8,11 @@ import { getStripe, paymentsConfigured } from "@/lib/stripe";
 
 export async function GET(request) {
   const origin = new URL(request.url).origin;
-  const settings = (status) => NextResponse.redirect(`${origin}/dashboard/settings?stripe=${status}`);
+  const settings = (status, reason = "") =>
+    NextResponse.redirect(
+      `${origin}/dashboard/settings?stripe=${status}` +
+        (reason ? `&reason=${encodeURIComponent(reason.slice(0, 300))}` : "")
+    );
 
   if (!paymentsConfigured()) return settings("not_configured");
 
@@ -32,7 +36,15 @@ export async function GET(request) {
     if (!accountId) {
       const account = await stripe.accounts.create(
         {
-          type: "express",
+          // An Express account: Stripe collects the stylist's details, the
+          // stylist gets a simple Stripe dashboard, and the platform (this
+          // app) pays Stripe's fees and covers refunds and disputes.
+          controller: {
+            stripe_dashboard: { type: "express" },
+            fees: { payer: "application" },
+            losses: { payments: "application" },
+            requirement_collection: "stripe",
+          },
           country: "US",
           email: user.email,
           business_profile: { name: stylist.business_name, mcc: "7230" }, // 7230 = hair salons
@@ -42,8 +54,9 @@ export async function GET(request) {
           },
           metadata: { stylist_id: user.id },
         },
-        // A double tap still makes only one account.
-        { idempotencyKey: `connect-account-${user.id}` }
+        // A double tap within the same minute still makes only one account.
+        // (Kept short so a failed try isn't replayed for Stripe's 24 hours.)
+        { idempotencyKey: `connect-account-${user.id}-${Math.floor(Date.now() / 60000)}` }
       );
       accountId = account.id;
 
@@ -51,7 +64,7 @@ export async function GET(request) {
         .from("stylists")
         .update({ stripe_account_id: accountId, stripe_charges_enabled: false })
         .eq("id", user.id);
-      if (error) throw error;
+      if (error) throw new Error(`Saving to Supabase failed: ${error.message}`);
     }
 
     const link = await stripe.accountLinks.create({
@@ -63,6 +76,7 @@ export async function GET(request) {
     return NextResponse.redirect(link.url);
   } catch (error) {
     console.error("Stripe connect failed", error);
-    return settings("error");
+    // Show the real reason on Settings, so it can be fixed.
+    return settings("error", error?.raw?.message || error?.message || "");
   }
 }

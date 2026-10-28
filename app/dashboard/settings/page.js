@@ -35,7 +35,7 @@ async function refreshStripeStatus(userId, accountId, savedEnabled) {
 }
 
 export default async function SettingsPage({ searchParams }) {
-  const { stripe: stripeParam } = await searchParams;
+  const { stripe: stripeParam, reason } = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -84,7 +84,17 @@ export default async function SettingsPage({ searchParams }) {
 
       <section className="card">
         <h2>Get paid with Stripe</h2>
-        {notice && <p className={`message ${notice.kind}`}>{notice.text}</p>}
+        {notice && (
+          <p className={`message ${notice.kind}`}>
+            {notice.text}
+            {reason && (
+              <>
+                <br />
+                <span className="small-text">Details: {String(reason)}</span>
+              </>
+            )}
+          </p>
+        )}
         {!configured && !notice && (
           <p className="message warning">
             Stripe isn&apos;t set up for this app yet. Add the keys in Netlify (see
