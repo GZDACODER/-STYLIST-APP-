@@ -34,23 +34,31 @@ export async function GET(request) {
     let accountId = stylist.stripe_account_id;
 
     if (!accountId) {
-      const account = await stripe.accounts.create(
+      // Stripe's Accounts v2. The stylist gets an Express account: Stripe
+      // collects their details and gives them a simple Stripe dashboard.
+      // "recipient" means the account receives deposits that this app passes
+      // on to it (destination charges).
+      const account = await stripe.v2.core.accounts.create(
         {
-          // An Express account: Stripe collects the stylist's details, the
-          // stylist gets a simple Stripe dashboard, and the platform (this
-          // app) pays Stripe's fees and covers refunds and disputes.
-          controller: {
-            stripe_dashboard: { type: "express" },
-            fees: { payer: "application" },
-            losses: { payments: "application" },
-            requirement_collection: "stripe",
+          contact_email: user.email,
+          display_name: stylist.business_name,
+          dashboard: "express",
+          identity: { country: "us" },
+          defaults: {
+            currency: "usd",
+            // Stripe sets the stylist's Stripe pricing and covers it if their
+            // account can't pay back a refund or dispute, so the platform
+            // isn't on the hook.
+            responsibilities: { fees_collector: "stripe", losses_collector: "stripe" },
+            profile: {
+              doing_business_as: stylist.business_name,
+              product_description: "Hair salon appointments",
+            },
           },
-          country: "US",
-          email: user.email,
-          business_profile: { name: stylist.business_name, mcc: "7230" }, // 7230 = hair salons
-          capabilities: {
-            card_payments: { requested: true },
-            transfers: { requested: true },
+          configuration: {
+            recipient: {
+              capabilities: { stripe_balance: { stripe_transfers: { requested: true } } },
+            },
           },
           metadata: { stylist_id: user.id },
         },
@@ -67,11 +75,15 @@ export async function GET(request) {
       if (error) throw new Error(`Saving to Supabase failed: ${error.message}`);
     }
 
-    const link = await stripe.accountLinks.create({
+    const link = await stripe.v2.core.accountLinks.create({
       account: accountId,
-      type: "account_onboarding",
-      refresh_url: `${origin}/dashboard/stripe/connect`,
-      return_url: `${origin}/dashboard/settings?stripe=return`,
+      use_case: {
+        type: "account_onboarding",
+        account_onboarding: {
+          refresh_url: `${origin}/dashboard/stripe/connect`,
+          return_url: `${origin}/dashboard/settings?stripe=return`,
+        },
+      },
     });
     return NextResponse.redirect(link.url);
   } catch (error) {

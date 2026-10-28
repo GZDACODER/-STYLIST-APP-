@@ -15,19 +15,27 @@ const STRIPE_NOTICES = {
   error: { kind: "error", text: "Stripe had a problem. Please try again in a minute." },
 };
 
-// Asks Stripe whether the stylist's account can take payments yet, and saves
-// the answer. (Only Stripe can say so, which is why stylists can't edit it.)
+// Asks Stripe whether the stylist's account can receive deposits yet, and
+// saves the answer. (Only Stripe can say so, which is why stylists can't edit it.)
 async function refreshStripeStatus(userId, accountId, savedEnabled) {
   try {
-    const account = await getStripe().accounts.retrieve(accountId);
-    const enabled = Boolean(account.charges_enabled);
+    const account = await getStripe().v2.core.accounts.retrieve(accountId, {
+      include: ["configuration.recipient", "requirements"],
+    });
+    const transfers =
+      account.configuration?.recipient?.capabilities?.stripe_balance?.stripe_transfers;
+    const enabled = transfers?.status === "active";
+    // Finished = Stripe isn't waiting on anything more from the stylist.
+    const detailsSubmitted = !(account.requirements?.entries || []).some(
+      (entry) => entry.awaiting_action_from === "user"
+    );
     if (enabled !== savedEnabled) {
       await createAdminClient()
         .from("stylists")
         .update({ stripe_charges_enabled: enabled })
         .eq("id", userId);
     }
-    return { enabled, detailsSubmitted: Boolean(account.details_submitted) };
+    return { enabled, detailsSubmitted };
   } catch (error) {
     console.error("Couldn't check Stripe account", error);
     return { enabled: savedEnabled, detailsSubmitted: savedEnabled };

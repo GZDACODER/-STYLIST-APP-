@@ -36,13 +36,14 @@ Your app is the "platform".
 
 1. In the Stripe dashboard, search for **Connect** (search bar at the top) and
    tap **Get started**.
-2. When it asks what you're building, choose a **platform** (or
-   "marketplace") where **your users get paid**. If it asks which account type
-   your users get, choose **Express**.
-3. Stripe may ask you to fill in a **platform profile** (what your business
-   does, who is responsible for refunds and losses). Fill it in. For "losses",
-   pick the option where **the platform** is responsible: that's what Express
-   accounts need.
+2. When it asks how payments work, choose **"You collect payments and pay
+   recipients"** (a marketplace). If it asks which dashboard your users get,
+   choose **Express**.
+3. Stripe may ask you to fill in a **platform profile**. Fill it in. If it asks
+   who sets pricing and who covers losses (negative balances), choose
+   **Stripe** for both. The app creates stylist accounts that way, so your
+   platform isn't on the hook if a stylist's account can't pay back a refund.
+   (The app uses Stripe's newer "Accounts v2" for stylist accounts.)
 4. Go to **Settings → Connect → Branding** and add your app's name, an icon
    and a color. Stylists see this when they connect their account.
 
