@@ -41,6 +41,9 @@ export default async function BookingsPage() {
 
   const today = todayInTimeZone(stylist.timezone);
 
+  // Clients who've had enough appointments become Regulars (see Settings).
+  await supabase.rpc("refresh_my_regulars");
+
   const { data: bookings, error } = await supabase
     .from("bookings")
     .select(
@@ -121,7 +124,9 @@ export default async function BookingsPage() {
                       </div>
                       <div className="client-contact">
                         <a href={`tel:${b.client_phone}`}>{b.client_phone}</a>
-                        <a href={`mailto:${b.client_email}`}>{b.client_email}</a>
+                        {b.client_email && (
+                          <a href={`mailto:${b.client_email}`}>{b.client_email}</a>
+                        )}
                       </div>
                       <div className="client-delete">
                         <CancelBookingButton

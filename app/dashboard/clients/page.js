@@ -12,9 +12,12 @@ export default async function ClientsPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
+  // Clients who've had enough appointments become Regulars (see Settings).
+  await supabase.rpc("refresh_my_regulars");
+
   const { data: clients, error } = await supabase
     .from("clients")
-    .select("id, name, phone, email, notes, status")
+    .select("id, name, phone, email, notes, status, auto_regular, completed_visits")
     .order("name", { ascending: true });
 
   if (error) {
@@ -31,6 +34,7 @@ export default async function ClientsPage() {
           </summary>
           <p className="muted">
             Regulars will get first pick of your openings. Blocked clients won't be able to book.
+            Add their mobile number so the booking page recognizes them.
           </p>
           <AddClientForm />
         </details>

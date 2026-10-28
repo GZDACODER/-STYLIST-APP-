@@ -4,13 +4,15 @@
 // times, who can book) are enforced inside the database functions these call.
 import { createBookingClient } from "@/lib/supabase/booking";
 import { createDepositCheckout, siteOrigin, stripeTestMode } from "@/lib/stripe";
+import { normalizePhone } from "@/lib/phone";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const BOOKING_ERRORS = {
-  not_verified: "Please confirm your email first.",
+  not_verified: "Please confirm your phone number first.",
   invalid_name: "Please enter your name.",
   invalid_phone: "Please enter a phone number we can reach you on.",
+  invalid_email: "That email doesn't look right. You can also leave it empty.",
   blocked: "Sorry, online booking isn't available for you. Please contact the salon directly.",
   slot_unavailable: "Sorry, that time was just taken. Please pick another time.",
   too_many_bookings:
@@ -18,35 +20,72 @@ const BOOKING_ERRORS = {
   not_found: "That service isn't available any more. Please refresh the page.",
 };
 
-export async function sendCode(email) {
-  const cleanEmail = String(email || "").trim().toLowerCase();
-  if (!EMAIL_PATTERN.test(cleanEmail)) return { error: "Please enter a valid email." };
-
+// method is "phone" (a text message code) or "email".
+// Returns { success, value } where value is the cleaned-up number or email.
+export async function sendCode(method, value) {
   const supabase = await createBookingClient();
+
+  if (method === "phone") {
+    const phone = normalizePhone(value);
+    if (!phone) return { error: "Please enter your mobile number, like (555) 123-4567." };
+
+    const { error } = await supabase.auth.signInWithOtp({
+      phone,
+      options: { shouldCreateUser: true, channel: "sms" },
+    });
+    if (error) {
+      console.error("Couldn't send text code", error.code, error.message);
+      if (error.status === 429 || /rate limit|after \d+ seconds/i.test(error.message)) {
+        return { error: "Too many codes requested. Please wait a minute and try again." };
+      }
+      if (error.code === "phone_provider_disabled" || /provider|unsupported/i.test(error.message)) {
+        return { error: "Text message codes aren't working right now. Please use email instead." };
+      }
+      return {
+        error: "We couldn't text that number. Check it and try again, or use email instead.",
+      };
+    }
+    return { success: true, value: phone };
+  }
+
+  const email = String(value || "").trim().toLowerCase();
+  if (!EMAIL_PATTERN.test(email)) return { error: "Please enter a valid email." };
+
   const { error } = await supabase.auth.signInWithOtp({
-    email: cleanEmail,
+    email,
     options: { shouldCreateUser: true },
   });
-
   if (error) {
     if (error.status === 429 || /rate limit|after \d+ seconds/i.test(error.message)) {
       return { error: "Too many codes requested. Please wait a minute and try again." };
     }
     return { error: "We couldn't send a code right now. Please try again shortly." };
   }
-  return { success: true, email: cleanEmail };
+  return { success: true, value: email };
 }
 
-export async function verifyCode(email, code) {
+export async function verifyCode(method, value, code) {
   const cleanCode = String(code || "").replace(/\D/g, "");
-  if (cleanCode.length < 6) return { error: "Please enter the code from the email." };
+  if (cleanCode.length < 6) {
+    return {
+      error:
+        method === "phone" ? "Please enter the 6-digit code." : "Please enter the code from the email.",
+    };
+  }
 
   const supabase = await createBookingClient();
-  const { error } = await supabase.auth.verifyOtp({
-    email: String(email || "").trim().toLowerCase(),
-    token: cleanCode,
-    type: "email",
-  });
+  const { error } =
+    method === "phone"
+      ? await supabase.auth.verifyOtp({
+          phone: normalizePhone(value) || "",
+          token: cleanCode,
+          type: "sms",
+        })
+      : await supabase.auth.verifyOtp({
+          email: String(value || "").trim().toLowerCase(),
+          token: cleanCode,
+          type: "email",
+        });
 
   if (error) return { error: "That code didn't work or has expired. Check it, or send a new one." };
   return { success: true };
@@ -68,7 +107,7 @@ export async function getSlots(slug, serviceId) {
   return { slots: data };
 }
 
-export async function book({ slug, serviceId, date, time, name, phone }) {
+export async function book({ slug, serviceId, date, time, name, phone, email }) {
   const supabase = await createBookingClient();
   const { data, error } = await supabase.rpc("create_booking", {
     p_slug: String(slug),
@@ -77,6 +116,7 @@ export async function book({ slug, serviceId, date, time, name, phone }) {
     p_time: String(time),
     p_name: String(name || ""),
     p_phone: String(phone || ""),
+    p_email: String(email || ""),
   });
 
   if (error) {

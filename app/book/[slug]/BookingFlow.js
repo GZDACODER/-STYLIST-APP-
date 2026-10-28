@@ -4,7 +4,8 @@ import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { book, getSlots, signOutBooking } from "../actions";
 import { clockTime, formatDate, parseDateString, timeZoneLabel } from "@/lib/availability";
-import VerifyEmail from "./VerifyEmail";
+import { formatPhone } from "@/lib/phone";
+import VerifyClient from "./VerifyClient";
 
 // How many dates to show before "More dates".
 const FIRST_DATES = 12;
@@ -32,9 +33,12 @@ export default function BookingFlow({ page, paymentCancelled }) {
     cancellation_policy: policy,
     viewer_status,
     viewer_email,
+    viewer_phone,
     services,
   } = page;
   const verified = viewer_status !== "anonymous";
+  // How they confirmed: their phone number (by text) or their email.
+  const viewerLabel = viewer_phone ? formatPhone(viewer_phone) : viewer_email;
 
   const [serviceId, setServiceId] = useState(null);
   const [slots, setSlots] = useState(null);
@@ -45,6 +49,7 @@ export default function BookingFlow({ page, paymentCancelled }) {
   const [showVerify, setShowVerify] = useState(false);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [agreed, setAgreed] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
   const [bookError, setBookError] = useState(null);
@@ -69,7 +74,7 @@ export default function BookingFlow({ page, paymentCancelled }) {
     return () => {
       ignore = true;
     };
-  }, [slug, serviceId, viewer_status, viewer_email]);
+  }, [slug, serviceId, viewer_status, viewer_email, viewer_phone]);
 
   // If the chosen time disappeared after a reload, clear it.
   useEffect(() => {
@@ -103,7 +108,16 @@ export default function BookingFlow({ page, paymentCancelled }) {
     event.preventDefault();
     setBookError(null);
     startTransition(async () => {
-      const result = await book({ slug, serviceId, date, time, name, phone });
+      const result = await book({
+        slug,
+        serviceId,
+        date,
+        time,
+        name,
+        // Texted clients already proved their number, so it's used as is.
+        phone: viewer_phone ? formatPhone(viewer_phone) : phone,
+        email: viewer_phone ? email : "",
+      });
       if (result.error) {
         setBookError(result.error);
         if (result.code === "slot_unavailable") {
@@ -161,11 +175,11 @@ export default function BookingFlow({ page, paymentCancelled }) {
     return (
       <section className="card">
         <p>
-          Online booking isn&apos;t available for {viewer_email}. Please contact {business_name}{" "}
+          Online booking isn&apos;t available for {viewerLabel}. Please contact {business_name}{" "}
           directly.
         </p>
         <button type="button" className="link-button" onClick={notMe} disabled={pending}>
-          Not you? Use a different email
+          Not you? Use a different number
         </button>
       </section>
     );
@@ -197,13 +211,13 @@ export default function BookingFlow({ page, paymentCancelled }) {
         <p className="message success">
           Welcome back! As a regular, you can see times saved just for regulars (marked ★).{" "}
           <button type="button" className="link-button" onClick={notMe} disabled={pending}>
-            Not {viewer_email}?
+            Not {viewerLabel}?
           </button>
         </p>
       )}
       {(viewer_status === "new" || viewer_status === "unknown") && (
         <p className="message info">
-          Booking as {viewer_email}.{" "}
+          Booking as {viewerLabel}.{" "}
           <button type="button" className="link-button" onClick={notMe} disabled={pending}>
             Not you?
           </button>
@@ -213,15 +227,15 @@ export default function BookingFlow({ page, paymentCancelled }) {
         <section className="card">
           {showVerify ? (
             <>
-              <h2>Confirm your email</h2>
+              <h2>Confirm your phone number</h2>
               <p className="muted">Regulars see extra times once they confirm.</p>
-              <VerifyEmail onVerified={refreshAfterLogin} />
+              <VerifyClient onVerified={refreshAfterLogin} />
             </>
           ) : (
             <p className="regular-prompt">
               Already a regular?{" "}
               <button type="button" className="link-button" onClick={() => setShowVerify(true)}>
-                Confirm your email to see all your times
+                Confirm your phone number to see all your times
               </button>
             </p>
           )}
@@ -261,7 +275,8 @@ export default function BookingFlow({ page, paymentCancelled }) {
           {slots && dates.length === 0 && (
             <p className="muted">
               No open times right now. Please check back soon.
-              {!verified && " If you're a regular, confirm your email above to see more times."}
+              {!verified &&
+                " If you're a regular, confirm your phone number above to see more times."}
             </p>
           )}
 
@@ -334,8 +349,10 @@ export default function BookingFlow({ page, paymentCancelled }) {
 
           {!verified ? (
             <>
-              <p className="muted">To book, confirm your email. We&apos;ll send you a code.</p>
-              <VerifyEmail onVerified={refreshAfterLogin} />
+              <p className="muted">
+                To book, confirm your mobile number. We&apos;ll text you a code.
+              </p>
+              <VerifyClient onVerified={refreshAfterLogin} />
             </>
           ) : (
             <form onSubmit={submitBooking}>
@@ -350,19 +367,37 @@ export default function BookingFlow({ page, paymentCancelled }) {
                   required
                 />
               </label>
-              <label>
-                Phone
-                <input
-                  type="tel"
-                  autoComplete="tel"
-                  inputMode="tel"
-                  maxLength={30}
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  required
-                />
-              </label>
-              <p className="muted small-text">Email: {viewer_email}</p>
+              {viewer_phone ? (
+                <>
+                  <label>
+                    Email (optional, for your receipt)
+                    <input
+                      type="email"
+                      autoComplete="email"
+                      maxLength={254}
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                    />
+                  </label>
+                  <p className="muted small-text">Phone: {viewerLabel}</p>
+                </>
+              ) : (
+                <>
+                  <label>
+                    Phone
+                    <input
+                      type="tel"
+                      autoComplete="tel"
+                      inputMode="tel"
+                      maxLength={30}
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      required
+                    />
+                  </label>
+                  <p className="muted small-text">Email: {viewer_email}</p>
+                </>
+              )}
 
               {policy && (
                 <div className="policy">

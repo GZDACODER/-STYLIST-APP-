@@ -110,3 +110,35 @@ export async function saveDeposits(prevState, formData) {
   }
   return { success: "Saved. Clients now pay a deposit when they book." };
 }
+
+export async function saveRegulars(prevState, formData) {
+  const after = Number(formData.get("auto_regular_after"));
+  if (!Number.isInteger(after) || after < 0 || after > 50) {
+    return { error: "Please pick a number of appointments." };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Please log in again." };
+
+  const { error } = await supabase
+    .from("stylists")
+    .update({ auto_regular_after: after })
+    .eq("id", user.id);
+  if (error) return { error: error.message };
+
+  // Apply the new number straight away.
+  const { data: promoted } = await supabase.rpc("refresh_my_regulars");
+
+  revalidatePath("/dashboard/settings");
+  revalidatePath("/dashboard/clients");
+  if (after === 0) return { success: "Saved. You'll pick your Regulars by hand." };
+  if (promoted > 0) {
+    return {
+      success: `Saved. ${promoted} ${promoted === 1 ? "client is" : "clients are"} now Regulars.`,
+    };
+  }
+  return { success: "Saved." };
+}

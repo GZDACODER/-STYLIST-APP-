@@ -15,10 +15,14 @@ and hosted on **Netlify**.
 - **Openings**: open times for booking, marked **Everyone** or **Regulars only**
   (per opening or per day), plus your public booking link.
 - **Public booking page** at `/book/your-link`: clients pick a service and a time,
-  confirm their email with a code, and book. No app or account needed.
-  Verified regulars also see the "Regulars only" times.
+  confirm their mobile number with a text message code (or their email, as a
+  backup), and book. No app or account needed. iPhones fill in the code with one tap.
+  Regulars (matched by phone number) also see the "Regulars only" times.
+- **Automatic Regulars**: clients become Regulars after a number of completed
+  appointments you pick in Settings (3 to start with).
 - **Bookings**: see upcoming bookings (with deposit paid or not) and cancel them.
-- **Settings**: business name, booking link, and time zone (Central Time by default).
+- **Settings**: business name, booking link, time zone (Central Time by default),
+  Regulars, and deposits.
 - **Deposits with Stripe**: each stylist connects their own Stripe account, turns
   deposits on, and sets a dollar amount or percent per service, plus a
   cancellation policy. Clients pay the deposit on Stripe before the booking is
@@ -34,7 +38,8 @@ Every time new code is pushed to GitHub, Netlify rebuilds the site automatically
 ### 1. Set up Supabase
 
 Follow **[SUPABASE_SETUP.md](./SUPABASE_SETUP.md)** steps 1–3, then
-**[BOOKING_SETUP.md](./BOOKING_SETUP.md)**. Run every file in `supabase/migrations/`
+**[BOOKING_SETUP.md](./BOOKING_SETUP.md)**, **[DEPOSITS_SETUP.md](./DEPOSITS_SETUP.md)**
+and **[PHONE_SETUP.md](./PHONE_SETUP.md)** (text message codes with Twilio). Run every file in `supabase/migrations/`
 in number order. Keep the
 Project URL and the publishable key handy.
 

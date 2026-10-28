@@ -4,6 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe, paymentsConfigured } from "@/lib/stripe";
 import SettingsForm from "./SettingsForm";
 import DepositsForm from "./DepositsForm";
+import RegularsForm from "./RegularsForm";
 
 export const metadata = { title: "Settings · GZ Stylist App" };
 
@@ -54,7 +55,7 @@ export default async function SettingsPage({ searchParams }) {
     supabase
       .from("stylists")
       .select(
-        "business_name, slug, timezone, deposits_enabled, cancellation_policy, stripe_account_id, stripe_charges_enabled"
+        "business_name, slug, timezone, auto_regular_after, deposits_enabled, cancellation_policy, stripe_account_id, stripe_charges_enabled"
       )
       .eq("id", user.id)
       .maybeSingle(),
@@ -88,6 +89,15 @@ export default async function SettingsPage({ searchParams }) {
           slug={stylist.slug}
           timezone={stylist.timezone}
         />
+      </section>
+
+      <section className="card">
+        <h2>Regulars</h2>
+        <p className="muted">
+          Regulars see your &quot;Regulars only&quot; openings. Clients are matched by the phone
+          number they confirm with a text code.
+        </p>
+        <RegularsForm autoRegularAfter={stylist.auto_regular_after} />
       </section>
 
       <section className="card">

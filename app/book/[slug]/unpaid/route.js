@@ -16,7 +16,7 @@ export async function GET(request, { params }) {
   const admin = createAdminClient();
   const { data: booking } = await admin
     .from("bookings")
-    .select("id, status, client_email, stripe_checkout_session_id")
+    .select("id, status, client_email, booked_by, stripe_checkout_session_id")
     .eq("id", bookingId)
     .maybeSingle();
 
@@ -25,8 +25,13 @@ export async function GET(request, { params }) {
   const {
     data: { user },
   } = await bookingClient.auth.getUser();
+  // (Bookings from before step 6 have no booked_by, so check the email.)
   const isTheirs =
-    booking && user?.email && user.email.toLowerCase() === booking.client_email.toLowerCase();
+    booking &&
+    user &&
+    (booking.booked_by
+      ? booking.booked_by === user.id
+      : Boolean(user.email) && user.email.toLowerCase() === booking.client_email?.toLowerCase());
 
   if (isTheirs && booking.status === "pending_payment" && booking.stripe_checkout_session_id) {
     const sessionId = booking.stripe_checkout_session_id;

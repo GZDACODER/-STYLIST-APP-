@@ -69,6 +69,12 @@ export default function ClientCard({ client }) {
         </div>
       )}
       {client.notes && <p className="client-notes">{client.notes}</p>}
+      <p className="muted small-text">
+        {client.completed_visits === 1 ? "1 visit" : `${client.completed_visits || 0} visits`}
+        {status === "new" &&
+          !client.auto_regular &&
+          " · Won't be made a Regular automatically, because you took them off Regular"}
+      </p>
 
       <div className="segmented" role="group" aria-label={`Status for ${client.name}`}>
         {CLIENT_STATUSES.map((s) => (
