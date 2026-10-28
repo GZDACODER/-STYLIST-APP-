@@ -2,7 +2,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { timeZoneLabel, todayInTimeZone } from "@/lib/availability";
-import BookingLinkForm from "./BookingLinkForm";
+import BookingLink from "./BookingLink";
 import PostOpeningsForm from "./PostOpeningsForm";
 import OpeningsList from "./OpeningsList";
 
@@ -24,7 +24,7 @@ export default async function OpeningsPage() {
 
   const today = todayInTimeZone(stylist.timezone);
 
-  const [{ data: openings, error }, { data: bookings }] = await Promise.all([
+  const [{ data: openings, error }, { data: bookings }, { data: hourRows }] = await Promise.all([
     supabase
       .from("openings")
       .select("id, opening_date, start_time, end_time, visibility")
@@ -36,6 +36,7 @@ export default async function OpeningsPage() {
       .select("booking_date, start_time")
       .eq("status", "confirmed")
       .gte("booking_date", today),
+    supabase.from("working_hours").select("weekday, is_working"),
   ]);
 
   if (error) {
@@ -54,6 +55,9 @@ export default async function OpeningsPage() {
     if (o) bookingCounts[o.id] = (bookingCounts[o.id] || 0) + 1;
   }
 
+  // Weekdays marked as days off on the Availability tab.
+  const daysOff = (hourRows || []).filter((row) => !row.is_working).map((row) => row.weekday);
+
   const h = await headers();
   const host = h.get("x-forwarded-host") || h.get("host");
   const proto = h.get("x-forwarded-proto") || (host?.startsWith("localhost") ? "http" : "https");
@@ -64,7 +68,7 @@ export default async function OpeningsPage() {
       <section className="card">
         <h2>Your booking link</h2>
         <p className="muted">Share this with clients. No app or account needed.</p>
-        <BookingLinkForm origin={origin} slug={stylist.slug} timezone={stylist.timezone} />
+        <BookingLink link={`${origin}/book/${stylist.slug}`} />
       </section>
 
       <section className="card">
@@ -73,7 +77,7 @@ export default async function OpeningsPage() {
           Clients can only book times you open here. &quot;Regulars only&quot; times are hidden from
           everyone except verified regulars.
         </p>
-        <PostOpeningsForm today={today} />
+        <PostOpeningsForm today={today} daysOff={daysOff} />
       </section>
 
       <section className="card">

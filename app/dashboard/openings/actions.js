@@ -1,18 +1,16 @@
 "use server";
 
-// Server actions for the booking link and for posting openings.
+// Server actions for posting openings.
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import {
   isValidDateString,
-  isValidTimeZone,
   parseDateString,
   toDateString,
   todayInTimeZone,
 } from "@/lib/availability";
 
 const TIME_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/;
-const SLUG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 const VISIBILITIES = ["everyone", "regulars"];
 // Longest stretch that can be opened in one go.
 const MAX_DAYS = 60;
@@ -25,36 +23,6 @@ async function getUserAndClient() {
   return { supabase, user };
 }
 
-export async function saveBookingLink(prevState, formData) {
-  const slug = String(formData.get("slug") || "").trim().toLowerCase();
-  const timezone = String(formData.get("timezone") || "").trim();
-
-  if (slug.length < 3 || slug.length > 40 || !SLUG_PATTERN.test(slug)) {
-    return {
-      error:
-        "Your link can use lowercase letters, numbers and single dashes (3 to 40 characters), like cuts-by-sam.",
-    };
-  }
-  if (!isValidTimeZone(timezone)) return { error: "Please pick your time zone." };
-
-  const { supabase, user } = await getUserAndClient();
-  if (!user) return { error: "Please log in again." };
-
-  const { error } = await supabase
-    .from("stylists")
-    .update({ slug, timezone })
-    .eq("id", user.id);
-
-  if (error) {
-    // 23505 = "unique violation": another stylist already has this link.
-    if (error.code === "23505") return { error: "That link is already taken. Try another." };
-    return { error: error.message };
-  }
-
-  revalidatePath("/dashboard", "layout");
-  return { success: "Saved." };
-}
-
 export async function postOpenings(prevState, formData) {
   const start = String(formData.get("start_date") || "");
   const endText = String(formData.get("end_date") || "");
@@ -62,6 +30,8 @@ export async function postOpenings(prevState, formData) {
   const fromTime = String(formData.get("from") || "");
   const toTime = String(formData.get("to") || "");
   const visibility = String(formData.get("visibility") || "");
+  // Days off are skipped unless the stylist ticked "open my days off too".
+  const includeDaysOff = formData.get("include_days_off") === "on";
 
   if (!isValidDateString(start)) return { error: "Please pick a date." };
   const end = endText || start;
@@ -120,16 +90,21 @@ export async function postOpenings(prevState, formData) {
       continue;
     }
 
+    const day = hoursByDay[date.dow];
+    const isDayOff = day && !day.is_working;
+
     let from = fromTime;
     let to = toTime;
     if (mode === "hours") {
-      const day = hoursByDay[date.dow];
       if (!day?.is_working) {
         skipped.off++;
         continue;
       }
       from = day.start_time.slice(0, 5);
       to = day.end_time.slice(0, 5);
+    } else if (isDayOff && !includeDaysOff) {
+      skipped.off++;
+      continue;
     }
 
     // Skip if it would overlap an opening that's already posted that day.

@@ -18,6 +18,7 @@ and hosted on **Netlify**.
   confirm their email with a code, and book. No app or account needed.
   Verified regulars also see the "Regulars only" times.
 - **Bookings**: see upcoming bookings and cancel them.
+- **Settings**: business name, booking link, and time zone (Central Time by default).
 
 Each stylist only ever sees their own data. The database enforces this.
 
@@ -76,6 +77,7 @@ app/                      ← every folder here is a page (URL) on the site
     openings/             ← "Openings" tab + booking link
     clients/              ← "Clients" tab
     availability/         ← "Availability" tab
+    settings/             ← "Settings" tab (name, link, time zone)
   book/[slug]/            ← the public booking page clients use
 components/               ← small reusable pieces (buttons, messages)
 lib/                      ← shared helpers; lib/supabase/ connects to Supabase

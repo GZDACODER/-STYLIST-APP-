@@ -9,6 +9,7 @@ const TABS = [
   { href: "/dashboard/clients", label: "Clients" },
   { href: "/dashboard/availability", label: "Availability" },
   { href: "/dashboard", label: "Services" },
+  { href: "/dashboard/settings", label: "Settings" },
 ];
 
 export default function DashboardTabs() {

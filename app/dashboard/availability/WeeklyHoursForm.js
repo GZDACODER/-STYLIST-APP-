@@ -4,6 +4,7 @@ import { useActionState, useState, startTransition } from "react";
 import { saveHours } from "./actions";
 import { WEEKDAYS, DEFAULT_HOURS } from "@/lib/availability";
 import FormMessage from "@/components/FormMessage";
+import TimeSelect from "@/components/TimeSelect";
 
 // savedHours looks like { 1: { is_working, start_time, end_time }, ... }
 export default function WeeklyHoursForm({ savedHours }) {
@@ -61,22 +62,18 @@ export default function WeeklyHoursForm({ savedHours }) {
               </label>
               {h.is_working ? (
                 <div className="time-range">
-                  <input
-                    type="time"
+                  <TimeSelect
                     name={`start_${day.dow}`}
                     aria-label={`${day.name} start time`}
                     value={h.start_time}
                     onChange={(e) => update(day.dow, "start_time", e.target.value)}
-                    required
                   />
                   <span className="muted">to</span>
-                  <input
-                    type="time"
+                  <TimeSelect
                     name={`end_${day.dow}`}
                     aria-label={`${day.name} end time`}
                     value={h.end_time}
                     onChange={(e) => update(day.dow, "end_time", e.target.value)}
-                    required
                   />
                 </div>
               ) : (
