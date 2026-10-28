@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { logout } from "@/app/auth/actions";
 import { deleteService } from "./actions";
 import AddServiceForm from "./AddServiceForm";
 import SubmitButton from "@/components/SubmitButton";
@@ -28,12 +27,6 @@ export default async function DashboardPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { data: stylist } = await supabase
-    .from("stylists")
-    .select("business_name")
-    .eq("id", user.id)
-    .maybeSingle();
-
   const { data: services, error } = await supabase
     .from("services")
     .select("id, name, price_cents, duration_minutes")
@@ -41,18 +34,6 @@ export default async function DashboardPage() {
 
   return (
     <>
-      <div className="header">
-        <div>
-          <h1>{stylist?.business_name || "Your dashboard"}</h1>
-          <p className="muted">{user.email}</p>
-        </div>
-        <form action={logout}>
-          <button type="submit" className="button secondary small">
-            Log out
-          </button>
-        </form>
-      </div>
-
       <section className="card">
         <h2>Add a service</h2>
         <AddServiceForm />

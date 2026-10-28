@@ -78,6 +78,15 @@ input {
   border-radius: 8px;
   background: #fff;
   width: 100%;
+  min-width: 0;
+}
+
+/* iPhone Safari draws date/time boxes its own way; keep them full size. */
+input[type="date"],
+input[type="time"] {
+  -webkit-appearance: none;
+  appearance: none;
+  min-height: 46px;
 }
 
 input:focus {
@@ -186,4 +195,244 @@ input:focus {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+h3 {
+  font-size: 1.05rem;
+  margin: 0;
+}
+
+.message.info {
+  background: #f4ebff;
+  color: #53389e;
+}
+
+/* ---------- Dashboard tabs ---------- */
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.tab {
+  flex: 1;
+  text-align: center;
+  padding: 10px 12px;
+  min-height: 44px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.tab.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-text);
+}
+
+/* ---------- Weekly hours ---------- */
+.hours-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.hours-list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.hours-list li:last-child {
+  border-bottom: none;
+}
+
+.day-toggle {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  min-width: 130px;
+}
+
+.day-toggle input {
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+.time-range {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 220px;
+}
+
+.time-range input {
+  padding: 8px;
+  min-width: 0;
+}
+
+.day-off-label {
+  flex: 1;
+  min-width: 220px;
+}
+
+/* ---------- Calendar ---------- */
+.calendar-card {
+  padding: 16px 12px;
+}
+
+.calendar-card h2 {
+  padding: 0 8px;
+}
+
+.calendar-placeholder {
+  min-height: 360px;
+}
+
+.cal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.cal-header .button {
+  min-width: 44px;
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.cal-weekday {
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--muted);
+  padding-bottom: 4px;
+}
+
+.cal-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 2px;
+  min-height: 58px;
+  padding: 4px 2px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  font: inherit;
+  color: var(--text);
+  background: #f2eeeb;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.cal-cell.blank {
+  background: transparent;
+  cursor: default;
+}
+
+.cal-num {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.cal-label {
+  font-size: 0.62rem;
+  line-height: 1.2;
+}
+
+.cal-cell.working {
+  background: #ecfdf3;
+  color: var(--success);
+}
+
+.cal-cell.off,
+.cal-cell.unset {
+  background: #f2eeeb;
+  color: var(--muted);
+}
+
+.cal-cell.blocked {
+  background: repeating-linear-gradient(
+    135deg,
+    #fef3f2,
+    #fef3f2 6px,
+    #fde2df 6px,
+    #fde2df 12px
+  );
+  color: var(--error);
+}
+
+.cal-cell.past {
+  background: transparent;
+  color: #c4bbb5;
+  cursor: default;
+}
+
+.cal-cell.today {
+  border-color: var(--text);
+}
+
+.cal-cell.selected {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.cal-details {
+  margin: 12px 8px 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--bg);
+}
+
+.cal-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 12px 8px 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  margin-right: 4px;
+  vertical-align: -1px;
+}
+
+.swatch.working {
+  background: #c6f0d6;
+}
+
+.swatch.off {
+  background: #e6dfd9;
+}
+
+.swatch.blocked {
+  background: #fbc6c0;
+}
+
+.list-title {
+  margin-top: 20px;
 }
