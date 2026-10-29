@@ -38,11 +38,26 @@ export async function sendCode(method, value) {
       if (error.status === 429 || /rate limit|after \d+ seconds/i.test(error.message)) {
         return { error: "Too many codes requested. Please wait a minute and try again." };
       }
-      if (error.code === "phone_provider_disabled" || /provider|unsupported/i.test(error.message)) {
+      // Twilio refused the text. Supabase passes on Twilio's reason, e.g.
+      // "Error sending sms OTP to provider: The number +1555... is unverified".
+      const sendFailed = error.code === "sms_send_failed" || /error sending .*otp/i.test(error.message);
+      if (sendFailed) {
+        const reason = error.message.replace(/^.*?to provider:\s*/i, "").trim();
+        return {
+          error: `We couldn't text that number. Check it and try again, or use email instead.${
+            reason ? ` Details: ${reason}` : ""
+          }`,
+        };
+      }
+      // Phone codes are switched off (or not set up) in Supabase.
+      if (
+        error.code === "phone_provider_disabled" ||
+        /unsupported phone provider|phone.*disabled/i.test(error.message)
+      ) {
         return { error: "Text message codes aren't working right now. Please use email instead." };
       }
       return {
-        error: "We couldn't text that number. Check it and try again, or use email instead.",
+        error: `We couldn't send a text right now. Please try again, or use email instead. Details: ${error.message}`,
       };
     }
     return { success: true, value: phone };
