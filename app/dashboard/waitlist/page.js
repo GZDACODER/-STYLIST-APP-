@@ -65,7 +65,7 @@ export default async function WaitlistPage() {
         {!ready && (
           <p className="message warning">
             Email isn&apos;t set up for the app yet, so clients can&apos;t join the waitlist. Add
-            the email keys in Netlify (see WAITLIST_SETUP.md).
+            the email keys in Vercel (see WAITLIST_SETUP.md).
           </p>
         )}
         <p className="muted">

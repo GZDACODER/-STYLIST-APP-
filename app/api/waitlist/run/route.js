@@ -1,6 +1,6 @@
-// The every-minute waitlist check. Netlify calls this address (see
-// netlify/functions/waitlist-check.mjs) with the CRON_SECRET from Netlify,
-// so nobody else can set it off.
+// The every-minute waitlist check. Supabase calls this address every minute
+// (see supabase/waitlist_every_minute.sql) with the CRON_SECRET, so nobody
+// else can set it off.
 import { runWaitlist, waitlistConfigured } from "@/lib/waitlist";
 
 export async function POST(request) {

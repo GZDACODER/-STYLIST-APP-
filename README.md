@@ -115,7 +115,7 @@ lib/                      ← shared helpers; lib/supabase/ connects to Supabase
 proxy.js                  ← runs before each page: keeps logins fresh,
                             sends logged-out visitors to /login
 supabase/migrations/      ← database setup (paste each into Supabase SQL Editor)
-netlify/functions/        ← runs the waitlist check every minute on Netlify
+supabase/waitlist_every_minute.sql ← makes Supabase run the waitlist check every minute
 .env.example              ← the names of the keys the app needs
 ```
 

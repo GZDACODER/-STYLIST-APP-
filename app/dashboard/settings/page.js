@@ -11,7 +11,7 @@ export const metadata = { title: "Settings · GZ Stylist App" };
 const STRIPE_NOTICES = {
   not_configured: {
     kind: "error",
-    text: "Stripe isn't set up for this app yet. Add the Stripe keys in Netlify first (see DEPOSITS_SETUP.md).",
+    text: "Stripe isn't set up for this app yet. Add the Stripe keys in Vercel first (see DEPOSITS_SETUP.md).",
   },
   error: { kind: "error", text: "Stripe had a problem. Please try again in a minute." },
 };
@@ -115,7 +115,7 @@ export default async function SettingsPage({ searchParams }) {
         )}
         {!configured && !notice && (
           <p className="message warning">
-            Stripe isn&apos;t set up for this app yet. Add the keys in Netlify (see
+            Stripe isn&apos;t set up for this app yet. Add the keys in Vercel (see
             DEPOSITS_SETUP.md), then come back here.
           </p>
         )}
