@@ -3,6 +3,8 @@
 // Server actions for posting openings.
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { siteOrigin } from "@/lib/stripe";
+import { runWaitlistSafely } from "@/lib/waitlist";
 import {
   isValidDateString,
   parseDateString,
@@ -143,18 +145,27 @@ export async function postOpenings(prevState, formData) {
     return { error: error.message };
   }
 
+  // New times: tell anyone on the waitlist who wants them.
+  const { told } = await runWaitlistSafely(user.id, await siteOrigin());
+  const toldText = told
+    ? ` ${told} ${told === 1 ? "client" : "clients"} on your waitlist ${told === 1 ? "was" : "were"} emailed.`
+    : "";
+
   revalidatePath("/dashboard/openings");
   return {
-    success: `Opened ${rows.length} day${rows.length > 1 ? "s" : ""}.${skippedText}`,
+    success: `Opened ${rows.length} day${rows.length > 1 ? "s" : ""}.${skippedText}${toldText}`,
   };
 }
 
 // Called directly when a visibility button is tapped on one opening.
 export async function setOpeningVisibility(id, visibility) {
   if (!VISIBILITIES.includes(visibility)) return { error: "Unknown option." };
-  const { supabase } = await getUserAndClient();
+  const { supabase, user } = await getUserAndClient();
+  if (!user) return { error: "Please log in again." };
   const { error } = await supabase.from("openings").update({ visibility }).eq("id", String(id));
   if (error) return { error: error.message };
+  // Opening a "Regulars only" time to everyone is news for the waitlist.
+  if (visibility === "everyone") await runWaitlistSafely(user.id, await siteOrigin());
   revalidatePath("/dashboard/openings");
   return { success: true };
 }
@@ -172,6 +183,7 @@ export async function setDayVisibility(date, visibility) {
     .eq("stylist_id", user.id)
     .eq("opening_date", date);
   if (error) return { error: error.message };
+  if (visibility === "everyone") await runWaitlistSafely(user.id, await siteOrigin());
   revalidatePath("/dashboard/openings");
   return { success: true };
 }

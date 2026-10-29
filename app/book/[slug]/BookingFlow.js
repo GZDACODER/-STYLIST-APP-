@@ -6,6 +6,8 @@ import { book, getSlots, signOutBooking } from "../actions";
 import { clockTime, formatDate, parseDateString, timeZoneLabel } from "@/lib/availability";
 import { formatPhone } from "@/lib/phone";
 import VerifyClient from "./VerifyClient";
+import WaitlistForm from "./WaitlistForm";
+import MyBookings from "./MyBookings";
 
 // How many dates to show before "More dates".
 const FIRST_DATES = 12;
@@ -24,7 +26,7 @@ function formatMinutes(minutes) {
   return `${m} min`;
 }
 
-export default function BookingFlow({ page, paymentCancelled }) {
+export default function BookingFlow({ page, paymentCancelled, waitlistReady, textsAvailable }) {
   const router = useRouter();
   const {
     business_name,
@@ -35,10 +37,13 @@ export default function BookingFlow({ page, paymentCancelled }) {
     viewer_email,
     viewer_phone,
     services,
+    waitlist_enabled,
   } = page;
   const verified = viewer_status !== "anonymous";
   // How they confirmed: their phone number (by text) or their email.
   const viewerLabel = viewer_phone ? formatPhone(viewer_phone) : viewer_email;
+  // The waitlist needs email set up for the app, and the stylist to have it on.
+  const canWaitlist = waitlist_enabled && waitlistReady;
 
   const [serviceId, setServiceId] = useState(null);
   const [slots, setSlots] = useState(null);
@@ -54,6 +59,9 @@ export default function BookingFlow({ page, paymentCancelled }) {
   const [redirecting, setRedirecting] = useState(false);
   const [bookError, setBookError] = useState(null);
   const [confirmation, setConfirmation] = useState(null);
+  const [showWaitlist, setShowWaitlist] = useState(false);
+  // Bumped to reload open times and "Your upcoming appointments".
+  const [reloadKey, setReloadKey] = useState(0);
   const [pending, startTransition] = useTransition();
 
   const service = services.find((s) => s.id === serviceId);
@@ -74,7 +82,7 @@ export default function BookingFlow({ page, paymentCancelled }) {
     return () => {
       ignore = true;
     };
-  }, [slug, serviceId, viewer_status, viewer_email, viewer_phone]);
+  }, [slug, serviceId, viewer_status, viewer_email, viewer_phone, reloadKey]);
 
   // If the chosen time disappeared after a reload, clear it.
   useEffect(() => {
@@ -102,6 +110,7 @@ export default function BookingFlow({ page, paymentCancelled }) {
     setShowAllDates(false);
     setBookError(null);
     setAgreed(false);
+    setShowWaitlist(false);
   }
 
   function submitBooking(event) {
@@ -144,6 +153,7 @@ export default function BookingFlow({ page, paymentCancelled }) {
     setDate(null);
     setTime(null);
     setSlots(null);
+    setReloadKey((k) => k + 1);
   }
 
   const zoneNote = `Times are in ${timeZoneLabel(timezone)} time.`;
@@ -161,7 +171,8 @@ export default function BookingFlow({ page, paymentCancelled }) {
           {clockTime(confirmation.start_time)} – {clockTime(confirmation.end_time)}
         </p>
         <p className="muted small-text">
-          {zoneNote} To change or cancel, please contact {business_name} directly.
+          {zoneNote} To cancel, come back to this page. To change it, please contact{" "}
+          {business_name} directly.
         </p>
         <button type="button" className="button secondary" onClick={bookAnother}>
           Book another appointment
@@ -223,7 +234,16 @@ export default function BookingFlow({ page, paymentCancelled }) {
           </button>
         </p>
       )}
-      {!verified && !time && (
+      {verified && (
+        <MyBookings
+          slug={slug}
+          businessName={business_name}
+          policy={policy}
+          refreshKey={`${viewer_status}-${viewerLabel}-${reloadKey}`}
+          onCancelled={() => setReloadKey((k) => k + 1)}
+        />
+      )}
+      {!verified && !time && !showWaitlist && (
         <section className="card">
           {showVerify ? (
             <>
@@ -274,7 +294,10 @@ export default function BookingFlow({ page, paymentCancelled }) {
           {slotsError && <p className="message error">{slotsError}</p>}
           {slots && dates.length === 0 && (
             <p className="muted">
-              No open times right now. Please check back soon.
+              No open times right now.{" "}
+              {canWaitlist
+                ? "Join the waitlist below and we'll tell you when one opens up."
+                : "Please check back soon."}
               {!verified &&
                 " If you're a regular, confirm your phone number above to see more times."}
             </p>
@@ -334,11 +357,44 @@ export default function BookingFlow({ page, paymentCancelled }) {
               </div>
             </>
           )}
+
+          {canWaitlist && slots && !showWaitlist && (
+            <div className="waitlist-prompt">
+              <p>{dates.length ? "None of these times work?" : "Want to hear when a time opens up?"}</p>
+              <button
+                type="button"
+                className="button secondary"
+                onClick={() => {
+                  setShowWaitlist(true);
+                  setTime(null);
+                }}
+              >
+                Join the waitlist
+              </button>
+            </div>
+          )}
+        </section>
+      )}
+
+      {/* ---------- Waitlist ---------- */}
+      {service && showWaitlist && (
+        <section className="card">
+          <h2>Join the waitlist for {service.name}</h2>
+          <WaitlistForm
+            slug={slug}
+            service={service}
+            verified={verified}
+            viewerPhone={viewer_phone}
+            viewerEmail={viewer_email}
+            textsAvailable={textsAvailable}
+            onVerified={refreshAfterLogin}
+            onClose={() => setShowWaitlist(false)}
+          />
         </section>
       )}
 
       {/* ---------- 3. Details ---------- */}
-      {service && date && time && (
+      {service && date && time && !showWaitlist && (
         <section className="card">
           <h2>3. Your details</h2>
           <p className="summary">

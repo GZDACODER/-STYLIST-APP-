@@ -1,6 +1,8 @@
 import { cache } from "react";
 import { notFound } from "next/navigation";
 import { createBookingClient } from "@/lib/supabase/booking";
+import { waitlistConfigured } from "@/lib/waitlist";
+import { textsEnabled } from "@/lib/notify";
 import BookingFlow from "./BookingFlow";
 
 // cache() means the title and the page share one database call.
@@ -28,7 +30,12 @@ export default async function BookingPage({ params, searchParams }) {
   return (
     <>
       <h1>Book with {data.business_name}</h1>
-      <BookingFlow page={data} paymentCancelled={payment === "cancelled"} />
+      <BookingFlow
+        page={data}
+        paymentCancelled={payment === "cancelled"}
+        waitlistReady={waitlistConfigured()}
+        textsAvailable={textsEnabled()}
+      />
     </>
   );
 }

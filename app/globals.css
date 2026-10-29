@@ -1298,6 +1298,35 @@ select {
   margin: 0;
 }
 
+/* ---------- Waitlist ---------- */
+.waitlist-prompt {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--divider);
+}
+
+.waitlist-prompt p {
+  margin: 0 0 10px;
+  color: var(--muted);
+}
+
+.wish-group {
+  margin: 0 0 8px;
+  padding: 0;
+  border: 0;
+}
+
+.wish-group legend {
+  margin-bottom: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.wish-group .filter-chips {
+  margin-bottom: 8px;
+}
+
 .confirmation {
   text-align: center;
 }

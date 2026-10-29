@@ -9,7 +9,14 @@ export async function GET(request, { params }) {
   const { slug } = await params;
   const url = new URL(request.url);
   const bookingId = url.searchParams.get("booking") || "";
-  const back = new URL(`/book/${slug}?payment=cancelled`, url.origin);
+  // Set when the time was claimed from a waitlist message.
+  const claimToken = url.searchParams.get("t") || "";
+  const back = new URL(
+    claimToken
+      ? `/book/${slug}/claim?t=${encodeURIComponent(claimToken)}&payment=cancelled`
+      : `/book/${slug}?payment=cancelled`,
+    url.origin
+  );
 
   if (!/^[0-9a-f-]{36}$/i.test(bookingId)) return NextResponse.redirect(back);
 
@@ -26,12 +33,23 @@ export async function GET(request, { params }) {
     data: { user },
   } = await bookingClient.auth.getUser();
   // (Bookings from before step 6 have no booked_by, so check the email.)
-  const isTheirs =
+  let isTheirs =
     booking &&
     user &&
     (booking.booked_by
       ? booking.booked_by === user.id
       : Boolean(user.email) && user.email.toLowerCase() === booking.client_email?.toLowerCase());
+
+  // Or they have the waitlist claim link that made this booking.
+  if (booking && !isTheirs && claimToken) {
+    const { data: offer } = await admin
+      .from("waitlist_offers")
+      .select("id")
+      .eq("booking_id", booking.id)
+      .eq("claim_token", claimToken)
+      .maybeSingle();
+    isTheirs = Boolean(offer);
+  }
 
   if (isTheirs && booking.status === "pending_payment" && booking.stripe_checkout_session_id) {
     const sessionId = booking.stripe_checkout_session_id;

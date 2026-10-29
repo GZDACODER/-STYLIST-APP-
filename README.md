@@ -21,6 +21,11 @@ and hosted on **Netlify**.
 - **Automatic Regulars**: clients become Regulars after a number of completed
   appointments you pick in Settings (3 to start with).
 - **Bookings**: see upcoming bookings (with deposit paid or not) and cancel them.
+  Clients can also cancel their own bookings from the booking page.
+- **Waitlist**: when no times work, clients join a waitlist for a service and the
+  days and times they'd like. When a time opens up, they're emailed a one-tap
+  "Claim this time" link, Regulars first. First to claim gets it, deposits still
+  apply. Text messages can be switched on later. See **[WAITLIST_SETUP.md](./WAITLIST_SETUP.md)**.
 - **Settings**: business name, booking link, time zone (Central Time by default),
   Regulars, and deposits.
 - **Deposits with Stripe**: each stylist connects their own Stripe account, turns
@@ -39,7 +44,8 @@ Every time new code is pushed to GitHub, Netlify rebuilds the site automatically
 
 Follow **[SUPABASE_SETUP.md](./SUPABASE_SETUP.md)** steps 1–3, then
 **[BOOKING_SETUP.md](./BOOKING_SETUP.md)**, **[DEPOSITS_SETUP.md](./DEPOSITS_SETUP.md)**
-and **[PHONE_SETUP.md](./PHONE_SETUP.md)** (text message codes with Twilio). Run every file in `supabase/migrations/`
+**[PHONE_SETUP.md](./PHONE_SETUP.md)** (text message codes with Twilio)
+and **[WAITLIST_SETUP.md](./WAITLIST_SETUP.md)** (waitlist emails). Run every file in `supabase/migrations/`
 in number order. Keep the
 Project URL and the publishable key handy.
 
@@ -91,12 +97,16 @@ app/                      ← every folder here is a page (URL) on the site
     layout.js             ← header + tabs shared by every dashboard page
     page.js               ← "Services" tab
     bookings/             ← "Bookings" tab
+    waitlist/             ← "Waitlist" tab
     openings/             ← "Openings" tab + booking link
     clients/              ← "Clients" tab
     availability/         ← "Availability" tab
     settings/             ← "Settings" tab (name, link, time zone, deposits)
     stripe/               ← connect a stylist's Stripe account
   book/[slug]/            ← the public booking page clients use
+    claim/                ← "Claim this time" page (from waitlist emails)
+    waitlist/             ← a client's waitlist spot / leave the waitlist
+  api/waitlist/run/       ← the every-minute waitlist check
     paid/, unpaid/        ← where Stripe sends clients after paying (or not)
   api/stripe/webhook/     ← Stripe tells the app a deposit was paid
 components/               ← small reusable pieces (buttons, messages)
@@ -105,6 +115,7 @@ lib/                      ← shared helpers; lib/supabase/ connects to Supabase
 proxy.js                  ← runs before each page: keeps logins fresh,
                             sends logged-out visitors to /login
 supabase/migrations/      ← database setup (paste each into Supabase SQL Editor)
+netlify/functions/        ← runs the waitlist check every minute on Netlify
 .env.example              ← the names of the keys the app needs
 ```
 
@@ -128,7 +139,7 @@ Open http://localhost:3000.
 
 ## Coming next
 
-- Emails to the client and stylist when a booking is made or cancelled
-- Clients cancelling or changing their own booking
+- Emails to the client when a booking is made, and to the stylist for new bookings
+- Clients changing their own booking
 - Refunding a deposit from the Bookings tab
 - Add-on features stylists can switch on (and only pay for what they use)
