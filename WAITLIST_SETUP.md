@@ -33,6 +33,8 @@ Do everything below in Safari on your iPad.
    all and copy.
 2. In Supabase go to **SQL Editor → New query**, paste, and tap **Run**.
    You should see "Success. No rows returned".
+3. Do the same with `supabase/migrations/0009_waitlist_retry.sql` (it makes
+   failed emails try again every 15 minutes).
 
 ## Part 2: Email (Resend)
 
@@ -58,15 +60,9 @@ the waitlist with that email), but **real clients won't get waitlist emails**
 until you add a domain. Emails to anyone else are refused by Resend; the app
 tries them 3 times and then gives up, and nothing else breaks.
 
-### Later: when you have a domain
+### When you're ready for real clients: your own domain
 
-1. Buy a domain (about $10 to $15 a year from places like Cloudflare, Porkbun or
-   Namecheap, or in Vercel under **Domains**).
-2. In Resend, go to **Domains → Add domain**, type it, and add the DNS records
-   Resend shows you where you bought the domain. It can take a few minutes to an
-   hour to show **Verified**.
-3. In Vercel, change `EMAIL_FROM` to an address on that domain, like
-   `GZ Stylist App <bookings@yoursalonapp.com>`, and redeploy.
+See **[Send from your own domain](#send-from-your-own-domain)** near the end.
 
 ## Part 3: Make a secret for the every-minute check
 
@@ -150,6 +146,23 @@ non-regular. The Regular is emailed first; the other one after the head start.
 
 ### If no email arrives
 
+The **Waitlist** tab shows a red note under a client when their email couldn't
+be sent, with Resend's reason. The app tries again every 15 minutes for up to a
+day, so once you fix the problem the email goes out by itself.
+
+Common reasons:
+
+- **"You can only send testing emails to your own email address"**: you're using
+  the test sender (`onboarding@resend.dev`) and the client's email isn't the one
+  you signed up to Resend with. Fix: send from your own domain (below).
+- **"The ... domain is not verified"**: `EMAIL_FROM` uses a domain Resend hasn't
+  verified yet. Check **Domains** in Resend says **Verified**.
+- **"API key is invalid"**: `RESEND_API_KEY` in Vercel is wrong or was deleted.
+- **"Invalid `from` field"**: `EMAIL_FROM` must look exactly like
+  `GZ Stylist App <bookings@yourdomain.com>` (no quote marks around it).
+
+Other things to check:
+
 1. Check your spam folder.
 2. In Resend, open **Emails** (or **Logs**). If the email is there with an error,
    it says why (often the `EMAIL_FROM` address isn't on your verified domain).
@@ -162,6 +175,84 @@ non-regular. The Regular is emailed first; the other one after the head start.
    posting times emails people straight away even without it, but the second
    round (everyone else, after the Regulars' head start) is only sent by the
    every-minute check.
+
+## Send from your own domain
+
+The test sender only delivers to your own Resend email. To email real clients,
+send from a domain you own. Do this in Safari; it takes about 20 minutes plus
+waiting for the domain to verify.
+
+### Step 1: Buy a domain (about $10 to $15 a year)
+
+1. Pick a place to buy it: **Cloudflare** (dash.cloudflare.com → **Domain
+   Registration → Register Domains**), **Porkbun**, **Namecheap**, or right in
+   Vercel (your project → **Settings → Domains → Buy**).
+2. Search for a name, like `cutsbysam.com`, and buy it. Write down where you
+   bought it; that's where you'll add Resend's records.
+
+### Step 2: Add the domain to Resend
+
+1. Go to **resend.com → Domains → Add domain**.
+2. Type a **sending subdomain**, like `mail.cutsbysam.com` (Resend recommends a
+   subdomain so your main domain stays clean). Pick the region closest to you
+   (**us-east-1** is fine in the US) and tap **Add**.
+3. Resend shows a list of **DNS records** (usually 3 or 4: one **MX**, one or two
+   **TXT** for SPF and DKIM, and sometimes a TXT for DMARC). Keep this page open.
+
+### Step 3: Add Resend's records where you bought the domain
+
+Open the DNS settings for your domain in a second Safari tab:
+
+- **Cloudflare:** your domain → **DNS → Records → Add record**.
+- **Porkbun:** **Domain Management** → your domain → **DNS**.
+- **Namecheap:** **Domain List → Manage → Advanced DNS → Add new record**.
+- **Vercel:** **Settings → Domains** → your domain → **DNS Records**.
+
+For **each** record on Resend's page, add one record with the same:
+
+- **Type** (MX or TXT)
+- **Name** (also called Host). Copy it exactly, like `send.mail` or
+  `resend._domainkey.mail`. Some sites add your domain on the end by themselves;
+  if the site shows the full name after you save (like
+  `send.mail.cutsbysam.com`), that's right.
+- **Value** (also called Content or Target). Tap the copy button on Resend's
+  page and paste. DKIM values are long; paste the whole thing.
+- **Priority** for the MX record: the number Resend shows (usually `10`).
+- On Cloudflare, leave **Proxy status** as **DNS only**.
+
+Save each one.
+
+### Step 4: Verify
+
+1. Back on Resend's domain page, tap **Verify DNS records** (or **Verify**).
+2. It usually shows **Verified** within a few minutes, sometimes up to a few
+   hours. Refresh now and then. If a record says **Failed**, compare its Name and
+   Value with what you typed (a missing letter or an extra space is the usual
+   cause), fix it, and tap Verify again.
+
+### Step 5: Change EMAIL_FROM in Vercel
+
+1. In Vercel, open your project → **Settings → Environment Variables**.
+2. Find `EMAIL_FROM`, tap **⋯ → Edit**, and change it to an address on your
+   verified domain, like:
+
+   ```
+   GZ Stylist App <bookings@mail.cutsbysam.com>
+   ```
+
+   The part before `@` can be anything; it doesn't need to be a real inbox.
+   Clients' replies go to your stylist login email.
+3. Tap **Save**, then **Deployments → ⋯ → Redeploy**. New values only work after
+   a redeploy.
+
+### Step 6: Check the waitlist emails go out
+
+Emails that failed earlier are tried again by themselves every 15 minutes for up
+to a day, so within 15 minutes of redeploying they should arrive. To send them
+straight away, or if more than a day has passed, run
+`supabase/migrations/0009_waitlist_retry.sql` again in Supabase (it gives failed
+emails a fresh start; nobody gets a duplicate). Then check the Waitlist tab: the
+red note disappears and it says "Told about ... times".
 
 ## Later: text messages too
 
