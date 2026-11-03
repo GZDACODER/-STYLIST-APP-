@@ -962,3 +962,31 @@ body:has(.db) {
 .db .business-section-links {
   margin-top: 28px;
 }
+
+/* "Upload photo": a label styled as a button, with the real file input
+   inside it, hidden but still tappable through the label. */
+.db label.cover-photo-pick {
+  position: relative;
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin: 0;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.db label.cover-photo-pick.is-busy {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.db .cover-photo-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
