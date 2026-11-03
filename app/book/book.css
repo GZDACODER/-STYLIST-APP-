@@ -58,7 +58,49 @@ body:has(.bk) {
 }
 
 .bk-bar {
+  align-items: center;
+  min-height: 48px;
   border-bottom: 1px solid var(--ink);
+}
+
+/* The stylist's business name, in small caps. */
+.bk-bar-name {
+  min-width: 0;
+  font-family: var(--font-sans), sans-serif;
+  font-size: 0.95rem;
+  font-weight: 500;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.14em;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+/* Instagram and Location, if the stylist has added them. */
+.bk-bar-links {
+  display: flex;
+  flex-shrink: 0;
+  gap: 20px;
+}
+
+.bk .bk-bar-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  color: var(--ink-soft);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.bk .bk-bar-links a:hover,
+.bk .bk-bar-links a:focus-visible {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
 }
 
 .bk-foot {
@@ -229,16 +271,12 @@ body:has(.bk) {
   margin: 0 0 22px;
 }
 
-/* Photo (or initials panel): full-bleed on phones. */
+/* The black panel (name, or cover photo): full-bleed on phones, on top,
+   right under the top bar. */
 .bk-visual {
+  order: -1;
   margin: 0 calc(-1 * var(--gutter)) 8px;
   overflow: hidden;
-}
-
-.bk-cover {
-  aspect-ratio: 4 / 5;
-  max-height: 78vh;
-  background: #e7e1d6;
 }
 
 /* No photo: solid warm black, the name as a cursive signature in
@@ -273,11 +311,55 @@ body:has(.bk) {
   background: var(--accent);
 }
 
-.bk-cover img {
+/* No photo: the name and rule sit in the middle of the panel, so it
+   doesn't feel empty above them. */
+.bk-plate:not(.bk-plate-photo) {
+  justify-content: center;
+}
+
+/* With a cover photo: the photo fills the panel, a soft black fade at the
+   bottom keeps the name readable, and the name and gold rule sit on top. */
+.bk-plate-photo {
+  position: relative;
+  /* Shorter on phones, so the booking steps start sooner. */
+  aspect-ratio: 4 / 3;
+  max-height: 56vh;
+  min-height: 240px;
+  margin-top: 0;
+  margin-bottom: 8px;
+  padding-bottom: 22px;
+}
+
+.bk-plate-img {
+  position: absolute;
+  inset: 0;
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.bk-plate-photo::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(14, 13, 11, 0.88) 0%,
+    rgba(14, 13, 11, 0.55) 28%,
+    rgba(14, 13, 11, 0) 60%
+  );
+  pointer-events: none;
+}
+
+.bk-plate-photo .bk-plate-name,
+.bk-plate-photo::after {
+  position: relative;
+  z-index: 1;
+}
+
+.bk-plate-photo .bk-plate-name {
+  text-shadow: 0 1px 18px rgba(0, 0, 0, 0.35);
 }
 
 /* Wider screens: an asymmetric spread. Photo on the left, held in place
@@ -308,7 +390,7 @@ body:has(.bk) {
     padding: 28px 0 32px;
   }
 
-  /* The photo or initials panel stays in view while the steps scroll. */
+  /* The panel (photo or name) stays in view while the steps scroll. */
   .bk-visual {
     grid-column: 1;
     grid-row: 1 / span 2;
@@ -321,6 +403,14 @@ body:has(.bk) {
 
   .bk-plate {
     padding: 36px 32px;
+  }
+
+  .bk-plate-photo {
+    aspect-ratio: 4 / 5;
+    min-height: 0;
+    max-height: calc(100vh - 48px);
+    margin: 24px 0 0;
+    padding-bottom: 36px;
   }
 
   .bk-plate-name {
@@ -476,6 +566,61 @@ body:has(.bk) {
 
 .bk .link-button.danger {
   color: var(--red);
+}
+
+/* Cancel on "Your upcoming appointments": quiet, not red. */
+.bk .link-button.cancel-link {
+  flex-shrink: 0;
+  min-height: 32px;
+  color: var(--ink-soft);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  text-decoration-color: currentColor;
+  transition: color 0.15s;
+}
+
+.bk .link-button.cancel-link:hover:not(:disabled),
+.bk .link-button.cancel-link:focus-visible {
+  color: var(--ink);
+}
+
+.bk .link-button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* "Cancel your ... ?" with Keep appointment / Yes, cancel. */
+.bk .service-list li.confirming {
+  display: block;
+}
+
+.bk .cancel-confirm p {
+  margin: 0 0 6px;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.2rem;
+  line-height: 1.3;
+  color: var(--ink);
+}
+
+.bk .cancel-confirm .cancel-note {
+  font-family: var(--font-sans), sans-serif;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+.bk .cancel-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 12px;
+  margin-top: 14px;
+}
+
+@media (max-width: 599px) {
+  .bk .cancel-actions .button {
+    flex: 1 1 100%;
+  }
 }
 
 .bk .row-links {

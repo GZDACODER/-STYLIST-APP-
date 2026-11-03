@@ -5,6 +5,8 @@ import { getStripe, paymentsConfigured } from "@/lib/stripe";
 import SettingsForm from "./SettingsForm";
 import DepositsForm from "./DepositsForm";
 import RegularsForm from "./RegularsForm";
+import CoverPhotoForm from "./CoverPhotoForm";
+import BusinessLinksForm from "./BusinessLinksForm";
 import { BRAND_NAME } from "@/lib/brand";
 import RegularStar from "@/components/RegularStar";
 import Link from "next/link";
@@ -69,12 +71,16 @@ export default async function SettingsPage({ searchParams }) {
   ]);
   if (!stylist) redirect("/dashboard");
 
-  // Read on its own, so Settings still opens before the tagline SQL (0013) is run.
-  const { data: taglineRow } = await supabase
-    .from("stylists")
-    .select("tagline")
-    .eq("id", user.id)
-    .maybeSingle();
+  // Read on their own, so Settings still opens before the tagline SQL (0013)
+  // and the cover photo and links SQL (0014) are run.
+  const [{ data: taglineRow }, { data: profileRow }] = await Promise.all([
+    supabase.from("stylists").select("tagline").eq("id", user.id).maybeSingle(),
+    supabase
+      .from("stylists")
+      .select("cover_photo_url, instagram, location")
+      .eq("id", user.id)
+      .maybeSingle(),
+  ]);
 
   const configured = paymentsConfigured();
   let stripe = { connected: false, enabled: false, detailsSubmitted: false };
@@ -104,7 +110,12 @@ export default async function SettingsPage({ searchParams }) {
 
       <section className="card">
         <h2>Your business</h2>
-        <ul className="db-more">
+        <CoverPhotoForm userId={user.id} coverUrl={profileRow?.cover_photo_url || ""} />
+        <BusinessLinksForm
+          instagram={profileRow?.instagram || ""}
+          location={profileRow?.location || ""}
+        />
+        <ul className="db-more business-section-links">
           <li>
             <Link href="/dashboard/services">
               <span className="db-more-title">Services &amp; prices</span>

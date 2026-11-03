@@ -926,3 +926,39 @@ body:has(.db) {
 .db .card * {
   border-radius: 0 !important;
 }
+
+/* ---------- Settings: Your business (cover photo and links) ---------- */
+.db .field-label {
+  display: block;
+  margin-bottom: 10px;
+  font-family: var(--font-sans), sans-serif;
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.db .cover-photo {
+  margin-bottom: 28px;
+}
+
+.db .cover-photo-preview {
+  display: block;
+  width: 100%;
+  max-width: 360px;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  margin-bottom: 14px;
+  background: var(--ink, #0e0e0e);
+}
+
+.db .cover-photo .row-links {
+  justify-content: flex-start;
+  align-items: center;
+  gap: 12px 20px;
+}
+
+.db .business-section-links {
+  margin-top: 28px;
+}

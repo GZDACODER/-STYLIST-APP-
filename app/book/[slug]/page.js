@@ -19,8 +19,8 @@ const loadPage = cache(async (slug, invite) => {
 });
 
 // A stylist's own look on their page: their accent colour, logo and photo
-// replace the defaults when they're set. (Only the name is stored today; the
-// rest is used as soon as the booking page data includes it.)
+// replace the defaults when they're set. (The name and cover photo are stored
+// today; the rest is used as soon as the booking page data includes it.)
 function stylistLook(page) {
   const https = (url) => (typeof url === "string" && /^https:\/\//.test(url) ? url : null);
   const accent = /^#[0-9a-f]{6}$/i.test(page.accent_color || "") ? page.accent_color : null;
@@ -69,34 +69,33 @@ export default async function BookingPage({ params, searchParams }) {
 
   return (
     <div className="bk-layout" style={look.accent ? { "--accent": look.accent } : undefined}>
-      {/* The stylist's own masthead. With no photo, their name is shown once,
-          as the cursive signature in the black panel, so here there's just a
-          small label (or their tagline). With a photo, the name is set here. */}
-      <header className={look.photo ? "bk-masthead" : "bk-masthead bk-masthead-quiet"}>
+      {/* The stylist's name is shown once, as the cursive signature in the
+          black panel (over their cover photo, if they've added one). Here
+          there's just a small label, or their tagline. */}
+      <header className="bk-masthead bk-masthead-quiet">
         {look.logo && <img className="bk-logo" src={look.logo} alt="" decoding="async" />}
-        {look.photo ? (
+        <h1 className="visually-hidden">Book with {look.name}</h1>
+        {data.tagline ? (
           <>
             {!look.logo && <p className="bk-kicker">Book with</p>}
-            <h1 className="bk-name">{look.name}</h1>
-            {data.tagline && <p className="bk-tagline">{data.tagline}</p>}
+            <p className="bk-headline">{data.tagline}</p>
           </>
         ) : (
-          <>
-            <h1 className="visually-hidden">Book with {look.name}</h1>
-            {data.tagline ? (
-              <>
-                {!look.logo && <p className="bk-kicker">Book with</p>}
-                <p className="bk-headline">{data.tagline}</p>
-              </>
-            ) : (
-              !look.logo && <p className="bk-kicker">Reserve your appointment</p>
-            )}
-          </>
+          !look.logo && <p className="bk-kicker">Reserve your appointment</p>
         )}
       </header>
       {look.photo ? (
-        <figure className="bk-visual bk-cover">
-          <img src={look.photo} alt={data.business_name} fetchPriority="high" decoding="async" />
+        // Cover photo full-bleed, a soft black fade at the bottom, and the
+        // name and thin gold rule set on top of it.
+        <figure className="bk-visual bk-plate bk-plate-photo">
+          <img
+            className="bk-plate-img"
+            src={look.photo}
+            alt=""
+            fetchPriority="high"
+            decoding="async"
+          />
+          <figcaption className="bk-plate-name">{look.name}</figcaption>
         </figure>
       ) : (
         // No photo: a solid panel with the stylist's name as a signature (no stock images).

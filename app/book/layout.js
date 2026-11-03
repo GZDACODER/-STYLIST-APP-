@@ -17,11 +17,9 @@ export const viewport = { themeColor: "#F5F1EA" };
 export default function BookLayout({ children }) {
   return (
     <div className={`bk ${display.variable}`}>
-      <div className="bk-bar">
-        <span className="bk-bar-label">Appointments</span>
-        <span className="bk-bar-label">Online booking</span>
-      </div>
-      <main className="bk-main">{children}</main>
+      {/* The top bar (the stylist's name and links) and <main> come from
+          [slug]/layout.js, which knows whose page this is. */}
+      {children}
       <footer className="bk-foot">
         <span className="bk-bar-label">Booking by</span>
         {/* The app's cursive wordmark, used as a signature. */}
