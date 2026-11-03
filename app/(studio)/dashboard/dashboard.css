@@ -1,0 +1,928 @@
+/* =========================================================
+   Stylist dashboard: the same editorial look as the booking page.
+   Warm ivory page, white panels with hairline borders, black for
+   text, the sidebar and main buttons. Gold only for small accents
+   (active nav item, today's date, key numbers, focus rings).
+   Everything here is inside .db, so the booking pages and the
+   home/login pages are untouched.
+   ========================================================= */
+
+.db {
+  /* The shared colour settings from globals.css, redefined for the dashboard. */
+  --bg: #faf7f2;
+  --surface: #ffffff;
+  --surface-2: #ffffff;
+  --input: #ffffff;
+  --text: #0e0e0e;
+  --muted: #6b655b;
+  --faint: #a39c90;
+  --gold: #b8975a;
+  --gold-light: #0e0e0e; /* used for links and some labels: black on ivory */
+  --gold-dark: #8f7442;
+  --gold-soft: rgba(184, 151, 90, 0.14);
+  --gold-gradient: #0e0e0e; /* main buttons and selected chips: solid black */
+  --on-gold: #faf7f2;
+  --border: #e8e2d6;
+  --border-strong: #cfc6b4;
+  --divider: #efe9dd;
+  --success: #3d6b49;
+  --success-soft: rgba(61, 107, 73, 0.08);
+  --error: #9b3426;
+  --error-soft: rgba(155, 52, 38, 0.06);
+  --blocked: #9b3426;
+  --warning: #8a5a10;
+  --warning-soft: rgba(138, 90, 16, 0.07);
+  --radius: 0;
+  --radius-sm: 0;
+  --shadow: none;
+  --glow: none;
+
+  --ink: #0e0e0e;
+  --hair: #e8e2d6;
+  --side: 232px;
+
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  color-scheme: light;
+  font-family: var(--font-sans), "Helvetica Neue", Arial, sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+
+body:has(.db) {
+  background: #faf7f2;
+}
+
+.db ::selection {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+.db a {
+  color: var(--ink);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
+/* ---------- Type ---------- */
+.db h1,
+.db h2,
+.db h3 {
+  font-family: var(--font-display), "Cormorant Garamond", Georgia, serif;
+  font-weight: 500;
+  color: var(--ink);
+  letter-spacing: 0;
+}
+
+.db h1 {
+  font-size: clamp(2.4rem, 6vw, 3.4rem);
+  line-height: 1.05;
+  margin: 0 0 10px;
+}
+
+.db h2 {
+  font-size: 1.7rem;
+  line-height: 1.15;
+  margin: 0 0 18px;
+}
+
+.db h3 {
+  font-size: 1.25rem;
+}
+
+/* Small uppercase labels, like the booking page's numbered sections. */
+.db .db-label,
+.db label,
+.db legend,
+.db .list-title,
+.db .day-heading strong {
+  font-family: var(--font-sans), sans-serif;
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.db .day-heading strong {
+  color: var(--ink);
+}
+
+/* Labels wrap their inputs; the inputs keep normal text. */
+.db label input,
+.db label select,
+.db label textarea {
+  letter-spacing: 0;
+  text-transform: none;
+  font-size: 16px;
+  color: var(--ink);
+}
+
+.db .muted {
+  color: var(--muted);
+}
+
+/* ---------- Frame: sidebar, top bar and page ---------- */
+.db-side {
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 20;
+  width: var(--side);
+  display: flex;
+  flex-direction: column;
+  background: var(--ink);
+  color: #f5f1ea;
+}
+
+.db-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 32px 26px 28px;
+  border-bottom: 1px solid rgba(245, 241, 234, 0.12);
+}
+
+.db-brand-name {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.55rem;
+  font-weight: 500;
+  line-height: 1.1;
+  color: #f5f1ea;
+  overflow-wrap: anywhere;
+}
+
+/* The app's cursive wordmark, small, under the stylist's name. */
+.db-brand-mark {
+  font-family: var(--font-script), cursive;
+  font-size: 1.05rem;
+  color: rgba(245, 241, 234, 0.55);
+  word-spacing: 0.15em;
+}
+
+.db-nav {
+  display: flex;
+  flex-direction: column;
+  padding: 18px 0;
+}
+
+.db-nav-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 26px;
+  color: rgba(245, 241, 234, 0.62);
+  text-decoration: none;
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  transition: color 0.15s;
+}
+
+.db .db-nav-item {
+  color: rgba(245, 241, 234, 0.62);
+  text-decoration: none;
+}
+
+.db .db-nav-item:hover {
+  color: #f5f1ea;
+}
+
+/* The active item: white text and a gold bar on the left. */
+.db .db-nav-item.active {
+  color: #f5f1ea;
+}
+
+.db-nav-item.active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  background: var(--gold);
+}
+
+.db-nav-item.active .db-nav-icon {
+  color: var(--gold);
+}
+
+.db-side-foot {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 20px 26px 28px;
+  border-top: 1px solid rgba(245, 241, 234, 0.12);
+}
+
+.db-side-email {
+  font-size: 0.78rem;
+  color: rgba(245, 241, 234, 0.5);
+  overflow-wrap: anywhere;
+}
+
+.db-logout {
+  align-self: flex-start;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: rgba(245, 241, 234, 0.8);
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  cursor: pointer;
+}
+
+.db-topbar {
+  display: none;
+}
+
+.db-main {
+  margin-left: var(--side);
+}
+
+.db-page {
+  max-width: 940px;
+  padding: 56px 56px 96px;
+}
+
+/* Under 900px (iPad portrait, phones): the nav becomes a bottom tab bar. */
+@media (max-width: 899px) {
+  .db-side {
+    inset: auto 0 0 0;
+    width: auto;
+    height: auto;
+    flex-direction: row;
+    border-top: 1px solid rgba(245, 241, 234, 0.12);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .db-brand,
+  .db-side-foot {
+    display: none;
+  }
+
+  .db-nav {
+    flex-direction: row;
+    width: 100%;
+    padding: 0;
+  }
+
+  .db-nav-item {
+    flex: 1 1 0;
+    flex-direction: column;
+    gap: 5px;
+    padding: 10px 2px 9px;
+    font-size: 0.58rem;
+    letter-spacing: 0.08em;
+    text-align: center;
+  }
+
+  .db-nav-item.active::before {
+    left: 22%;
+    right: 22%;
+    top: 0;
+    bottom: auto;
+    width: auto;
+    height: 2px;
+  }
+
+  .db-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 15;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 20px;
+    background: var(--ink);
+    color: #f5f1ea;
+  }
+
+  .db-topbar .db-brand-name {
+    font-size: 1.25rem;
+  }
+
+  .db-main {
+    margin-left: 0;
+  }
+
+  .db-page {
+    padding: 32px 20px 120px;
+  }
+}
+
+@media (max-width: 380px) {
+  .db-nav-label {
+    font-size: 0.52rem;
+  }
+}
+
+/* ---------- Panels: white, a hairline border, no shadow ---------- */
+.db .card {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--hair);
+  border-radius: 0;
+  box-shadow: none;
+  padding: 28px;
+  margin-bottom: 20px;
+}
+
+.db .card::before {
+  content: none;
+}
+
+@media (max-width: 899px) {
+  .db .card {
+    padding: 22px 18px;
+  }
+}
+
+/* ---------- Buttons ---------- */
+.db .button {
+  border-radius: 0;
+  background: var(--ink);
+  color: var(--bg);
+  border: 1px solid var(--ink);
+  box-shadow: none;
+  font-family: var(--font-sans), sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.db .button.secondary {
+  background: transparent;
+  color: var(--ink);
+}
+
+.db .button:hover:not(:disabled),
+.db .button.secondary:hover:not(:disabled) {
+  transform: none;
+  box-shadow: none;
+}
+
+.db .button.secondary:hover:not(:disabled) {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+.db .button:active,
+.db .chip:active,
+.db .segment:active,
+.db .cal-cell:active:not(:disabled) {
+  transform: none;
+}
+
+.db .link-button {
+  color: var(--ink);
+  text-decoration-color: var(--border-strong);
+}
+
+.db .link-button.danger {
+  color: var(--error);
+}
+
+/* Gold focus rings. */
+.db input:focus,
+.db select:focus,
+.db textarea:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px var(--gold-soft);
+}
+
+.db button:focus-visible,
+.db a:focus-visible,
+.db .button:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.db input,
+.db select,
+.db textarea {
+  border-radius: 0;
+  background: #fff;
+  border-color: var(--border-strong);
+}
+
+/* ---------- Tags, chips and switches: square, outlined ---------- */
+.db .badge {
+  border-radius: 0;
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  color: var(--muted);
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  padding: 3px 9px;
+}
+
+/* "Regular": a gold outline. */
+.db .badge.regular {
+  border-color: var(--gold);
+  color: var(--ink);
+  background: transparent;
+}
+
+.db .badge.new {
+  border-color: var(--border-strong);
+  color: var(--ink);
+  background: transparent;
+}
+
+.db .badge.blocked {
+  border-color: rgba(155, 52, 38, 0.45);
+  color: var(--error);
+  background: transparent;
+}
+
+.db .badge.paid {
+  border-color: rgba(61, 107, 73, 0.45);
+  color: var(--success);
+  background: transparent;
+}
+
+.db .badge.unpaid {
+  border-color: rgba(138, 90, 16, 0.45);
+  color: var(--warning);
+  background: transparent;
+}
+
+.db .badge.invited {
+  border-color: var(--border-strong);
+  color: var(--muted);
+  background: transparent;
+}
+
+.db .chip {
+  border-radius: 0;
+  border-color: var(--border-strong);
+  color: var(--muted);
+}
+
+.db .chip.active {
+  background: var(--ink);
+  color: var(--bg);
+  border-color: var(--ink);
+}
+
+.db .segmented {
+  border-radius: 0;
+  border-color: var(--border-strong);
+  background: #fff;
+}
+
+.db .segment {
+  border-radius: 0;
+}
+
+.db .segment.checked,
+.db .segment input:checked + span {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+.db .regular-star {
+  fill: var(--gold);
+}
+
+.db .segment.checked .regular-star,
+.db .chip.active .regular-star,
+.db .segment input:checked + span .regular-star {
+  fill: var(--gold);
+}
+
+/* ---------- Messages: a rule down the left ---------- */
+.db .message {
+  border-radius: 0;
+  border: 0;
+  border-left: 2px solid var(--border-strong);
+  background: #fff;
+  color: var(--ink);
+}
+
+.db .message.success {
+  border-left-color: var(--success);
+  color: var(--success);
+}
+
+.db .message.error {
+  border-left-color: var(--error);
+  color: var(--error);
+}
+
+.db .message.warning {
+  border-left-color: var(--warning);
+  color: var(--warning);
+}
+
+.db .message.info {
+  border-left-color: var(--gold);
+  color: var(--ink);
+  background: #fff;
+}
+
+/* ---------- Lists: thin divider lines ---------- */
+.db .service-list li,
+.db .client-card,
+.db .day-group {
+  border-color: var(--divider);
+}
+
+.db .client-card {
+  border-radius: 0;
+  background: #fff;
+  border: 1px solid var(--hair);
+}
+
+.db .client-name,
+.db .service-name {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.db .opening-time,
+.db .time-range {
+  font-variant-numeric: tabular-nums;
+}
+
+.db .add-client summary::after {
+  color: var(--ink);
+}
+
+/* ---------- Availability calendar ---------- */
+.db .cal-cell {
+  border-radius: 0;
+  background: #fff;
+  border: 1px solid var(--divider);
+}
+
+.db .cal-cell.working {
+  background: #fff;
+  border-color: var(--border-strong);
+  color: var(--ink);
+}
+
+.db .cal-cell.off,
+.db .cal-cell.unset {
+  background: #f3efe7;
+  color: var(--faint);
+}
+
+.db .cal-cell.blocked {
+  background: repeating-linear-gradient(
+    135deg,
+    rgba(155, 52, 38, 0.05),
+    rgba(155, 52, 38, 0.05) 6px,
+    rgba(155, 52, 38, 0.11) 6px,
+    rgba(155, 52, 38, 0.11) 12px
+  );
+  color: var(--error);
+}
+
+.db .cal-cell.past {
+  background: transparent;
+  color: var(--faint);
+}
+
+/* Today's date: gold. */
+.db .cal-cell.today {
+  border-color: var(--gold);
+}
+
+.db .cal-cell.today .cal-num {
+  color: var(--gold-dark);
+}
+
+.db .cal-cell.selected {
+  border-color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--ink);
+}
+
+.db .cal-details {
+  border-radius: 0;
+  background: #fff;
+}
+
+.db .swatch {
+  border-radius: 0;
+}
+
+.db .swatch.working {
+  background: #fff;
+  border: 1px solid var(--border-strong);
+}
+
+.db .swatch.off {
+  background: #e7e1d5;
+}
+
+/* ---------- Today page ---------- */
+.db-greeting {
+  margin: 0 0 40px;
+}
+
+.db .db-greeting h1 {
+  margin: 10px 0 0;
+}
+
+.db-date {
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.db-date::before {
+  content: "";
+  display: inline-block;
+  width: 28px;
+  height: 1px;
+  margin-right: 12px;
+  vertical-align: middle;
+  background: var(--gold);
+}
+
+.db-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  margin: 0 0 48px;
+  border: 1px solid var(--hair);
+  background: #fff;
+}
+
+.db-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 26px 24px 24px;
+  border-left: 1px solid var(--hair);
+  color: inherit;
+  text-decoration: none;
+}
+
+.db-stat:first-child {
+  border-left: 0;
+}
+
+.db .db-stat {
+  text-decoration: none;
+}
+
+/* The key numbers: large, in gold. */
+.db-stat-number {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(2.4rem, 6vw, 3.2rem);
+  font-weight: 500;
+  line-height: 1;
+  color: var(--gold-dark);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.db-stat .db-label {
+  line-height: 1.4;
+}
+
+@media (max-width: 599px) {
+  .db-stats {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .db-stat {
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 18px 18px;
+    border-left: 0;
+    border-top: 1px solid var(--hair);
+  }
+
+  .db-stat:first-child {
+    border-top: 0;
+  }
+
+  .db-stat-number {
+    order: 2;
+    font-size: 2.2rem;
+  }
+}
+
+.db-section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--ink);
+  margin-bottom: 4px;
+}
+
+.db .db-section-head h2 {
+  margin: 0;
+}
+
+.db-section-head .db-label {
+  white-space: nowrap;
+}
+
+/* Today's appointments as a timeline: time on the left, a thin line. */
+.db-timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.db-slot {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  column-gap: 24px;
+  padding: 22px 0;
+  border-bottom: 1px solid var(--divider);
+}
+
+.db-slot-time {
+  white-space: nowrap;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--ink);
+  line-height: 1.3;
+}
+
+.db-slot-time span {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: var(--faint);
+}
+
+.db-slot-body {
+  position: relative;
+  padding-left: 22px;
+  border-left: 1px solid var(--hair);
+}
+
+/* A small dot on the line for each appointment. */
+.db-slot-body::before {
+  content: "";
+  position: absolute;
+  left: -4px;
+  top: 7px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ink);
+}
+
+.db-slot.past .db-slot-body::before {
+  background: var(--border-strong);
+}
+
+.db-slot.past .db-slot-time,
+.db-slot.past .db-slot-name {
+  color: var(--faint);
+}
+
+.db-slot-name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.35rem;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--ink);
+}
+
+.db-slot-meta {
+  margin-top: 4px;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.db-slot-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.db-empty {
+  padding: 28px 0;
+  color: var(--muted);
+}
+
+.db-empty .db-quiet {
+  font-family: var(--font-display), Georgia, serif;
+  font-style: italic;
+  font-size: 1.35rem;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+
+@media (max-width: 599px) {
+  .db-slot {
+    grid-template-columns: 76px minmax(0, 1fr);
+    column-gap: 12px;
+  }
+
+  .db-slot-time {
+    font-size: 0.85rem;
+  }
+
+  .db-slot-body {
+    padding-left: 16px;
+  }
+}
+
+/* Settings: links to Services and Working hours. */
+.db-more {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.db-more li {
+  border-top: 1px solid var(--divider);
+}
+
+.db-more li:first-child {
+  border-top: 0;
+}
+
+.db .db-more a {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  padding: 16px 0;
+  text-decoration: none;
+}
+
+.db-more .db-more-title {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+
+.db-more .db-more-note {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+/* ---------- Fixes for text inside labels ---------- */
+/* Only the label's own words are small capitals; anything inside it
+   (descriptions, notes, choices) stays normal text. */
+.db label * {
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.db label .message,
+.db label p {
+  font-size: 0.9rem;
+}
+
+.db .check-row {
+  text-transform: none;
+  letter-spacing: normal;
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: var(--ink);
+}
+
+.db .check-row strong {
+  font-weight: 600;
+}
+
+.db .check-row .muted {
+  color: var(--muted);
+}
+
+.db input[type="checkbox"],
+.db input[type="radio"] {
+  accent-color: var(--ink);
+}
+
+/* Calendar weekday names: quiet, not gold. */
+.db .cal-weekday {
+  color: var(--muted);
+}
+
+/* Sharp corners on everything inside a panel (openings, calendar, forms). */
+.db .card * {
+  border-radius: 0 !important;
+}

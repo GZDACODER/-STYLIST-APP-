@@ -85,7 +85,10 @@ export default async function BookingsPage() {
     <>
       <section className="card">
         <h2>Upcoming bookings</h2>
-        <p className="muted small-text">Times are in {timeZoneLabel(stylist.timezone)} time.</p>
+        <p className="muted small-text">
+          Times are in {timeZoneLabel(stylist.timezone)} time. ·{" "}
+          <Link href="/dashboard/availability">Working hours &amp; days off</Link>
+        </p>
 
         {upcoming.length === 0 && (
           <p className="muted">

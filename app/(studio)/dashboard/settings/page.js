@@ -7,6 +7,7 @@ import DepositsForm from "./DepositsForm";
 import RegularsForm from "./RegularsForm";
 import { BRAND_NAME } from "@/lib/brand";
 import RegularStar from "@/components/RegularStar";
+import Link from "next/link";
 
 export const metadata = { title: `Settings · ${BRAND_NAME}` };
 
@@ -99,6 +100,24 @@ export default async function SettingsPage({ searchParams }) {
           timezone={stylist.timezone}
           tagline={taglineRow?.tagline || ""}
         />
+      </section>
+
+      <section className="card">
+        <h2>Your business</h2>
+        <ul className="db-more">
+          <li>
+            <Link href="/dashboard/services">
+              <span className="db-more-title">Services &amp; prices</span>
+              <span className="db-more-note">What clients can book</span>
+            </Link>
+          </li>
+          <li>
+            <Link href="/dashboard/availability">
+              <span className="db-more-title">Working hours &amp; days off</span>
+              <span className="db-more-note">Your week and blocked dates</span>
+            </Link>
+          </li>
+        </ul>
       </section>
 
       <section className="card">

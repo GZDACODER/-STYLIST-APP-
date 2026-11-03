@@ -38,7 +38,7 @@ export async function addService(prevState, formData) {
 
   if (error) return { error: error.message, values };
 
-  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/services");
   return { success: `Added "${name}".` };
 }
 
@@ -49,5 +49,5 @@ export async function deleteService(formData) {
   // The database's security rules only let a stylist delete their own services.
   await supabase.from("services").delete().eq("id", id);
 
-  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/services");
 }

@@ -5,7 +5,7 @@ import AddServiceForm from "./AddServiceForm";
 import SubmitButton from "@/components/SubmitButton";
 import { BRAND_NAME } from "@/lib/brand";
 
-export const metadata = { title: `Dashboard · ${BRAND_NAME}` };
+export const metadata = { title: `Services · ${BRAND_NAME}` };
 
 function formatPrice(cents) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
@@ -21,7 +21,7 @@ function formatDuration(minutes) {
   return `${m} min`;
 }
 
-export default async function DashboardPage() {
+export default async function ServicesPage() {
   const supabase = await createClient();
   const {
     data: { user },
