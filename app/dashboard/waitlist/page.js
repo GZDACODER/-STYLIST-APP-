@@ -30,7 +30,7 @@ export default async function WaitlistPage() {
   const { data: entries, error } = await supabase
     .from("waitlist_entries")
     .select(
-      "id, name, phone, email, days, times, text_ok, status, created_at, ended_at, client_status, service:services(name), offers:waitlist_offers(notified_at, booking_id)"
+      "id, name, phone, email, days, times, text_ok, status, created_at, ended_at, client_status, service:services(name), offers:waitlist_offers(notified_at, booking_id, last_error, notify_attempts)"
     )
     .or(`status.eq.waiting,ended_at.gte."${since}"`)
     .order("created_at");
@@ -87,6 +87,8 @@ export default async function WaitlistPage() {
           {waiting.map((e) => {
             const told = e.offers.filter((o) => o.notified_at);
             const lastTold = told.map((o) => o.notified_at).sort().pop();
+            // Messages that couldn't be sent yet, and why (from Resend or Twilio).
+            const stuck = e.offers.filter((o) => !o.notified_at && o.notify_attempts > 0);
             return (
               <li key={e.id} className="client-card">
                 <div className="client-top">
@@ -106,6 +108,13 @@ export default async function WaitlistPage() {
                       ? ` · Told about ${told.length} ${told.length === 1 ? "time" : "times"}, last ${whenText(lastTold)}`
                       : " · Not told about any times yet"}
                   </div>
+                  {stuck.length > 0 && (
+                    <p className="message error small-text">
+                      Couldn&apos;t email {e.name} about {stuck.length}{" "}
+                      {stuck.length === 1 ? "time" : "times"} yet. Trying again every 15 minutes.
+                      {stuck[0].last_error && <> Reason: {stuck[0].last_error}</>}
+                    </p>
+                  )}
                 </div>
                 <div className="client-contact">
                   <a href={`tel:${e.phone}`}>{e.phone}</a>
