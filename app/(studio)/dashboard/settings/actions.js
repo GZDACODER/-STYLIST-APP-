@@ -171,42 +171,86 @@ function saveError(error) {
   return error.message;
 }
 
-// The public link a file in the stylist's own folder of the "covers" bucket gets.
-function coverPrefix(userId) {
-  return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/covers/${userId}/`;
-}
+// Cover photos live in the stylist's own folder: covers/<their id>/cover-<time>.jpg
+const COVER_FILE = /^cover-\d{10,16}\.jpg$/;
 
 // Deletes the stylist's older cover photos, keeping `keepPath` (if any).
 async function removeOldCovers(supabase, userId, keepPath) {
-  const { data: files } = await supabase.storage.from("covers").list(userId, { limit: 100 });
+  const { data: files, error } = await supabase.storage.from("covers").list(userId, { limit: 100 });
+  if (error) {
+    console.error("Couldn't list old cover photos", error);
+    return;
+  }
   const old = (files || [])
     .map((file) => `${userId}/${file.name}`)
     .filter((path) => path !== keepPath);
-  if (old.length) await supabase.storage.from("covers").remove(old);
+  if (old.length) {
+    const { error: removeError } = await supabase.storage.from("covers").remove(old);
+    if (removeError) console.error("Couldn't delete old cover photos", removeError);
+  }
 }
 
-// Called after the browser has uploaded the photo to Storage.
-export async function saveCoverPhoto(url) {
+// Step 1 of an upload: the server (where the stylist's login is always
+// available) asks Storage for a one-time upload link into their own folder.
+// The browser then sends the photo straight to Storage with it, so big photos
+// don't pass through the website.
+export async function startCoverUpload() {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { error: "Please log in again." };
 
-  const link = String(url || "");
-  const prefix = coverPrefix(user.id);
-  const fileName = link.slice(prefix.length);
-  if (!link.startsWith(prefix) || !/^[A-Za-z0-9._-]+$/.test(fileName) || link.length > 500) {
+  const path = `${user.id}/cover-${Date.now()}.jpg`;
+  const { data, error } = await supabase.storage.from("covers").createSignedUploadUrl(path);
+  if (error) {
+    console.error("Couldn't start cover photo upload", error);
+    if (/bucket not found/i.test(error.message)) {
+      return {
+        error:
+          "The \"covers\" storage bucket is missing. Run supabase/migrations/0014_cover_and_links.sql in Supabase, then try again.",
+      };
+    }
+    if (/row-level security|policy|unauthorized|403/i.test(error.message)) {
+      return {
+        error:
+          "Supabase didn't allow the upload. Run supabase/migrations/0014_cover_and_links.sql in Supabase again (it sets up the upload rules), then try again.",
+      };
+    }
+    return { error: `The photo couldn't be uploaded: ${error.message}` };
+  }
+  return { path: data.path, token: data.token };
+}
+
+// Step 2: after the browser has uploaded the photo, save its link.
+export async function saveCoverPhoto(path) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Please log in again." };
+
+  const filePath = String(path || "");
+  const [folder, fileName, ...rest] = filePath.split("/");
+  if (folder !== user.id || rest.length || !COVER_FILE.test(fileName || "")) {
     return { error: "That photo didn't upload properly. Please try again." };
   }
 
+  const {
+    data: { publicUrl },
+  } = supabase.storage.from("covers").getPublicUrl(filePath);
+
   const { error } = await supabase
     .from("stylists")
-    .update({ cover_photo_url: link })
+    .update({ cover_photo_url: publicUrl })
     .eq("id", user.id);
-  if (error) return { error: saveError(error) };
+  if (error) {
+    console.error("Couldn't save cover photo link", error);
+    await supabase.storage.from("covers").remove([filePath]);
+    return { error: saveError(error) };
+  }
 
-  await removeOldCovers(supabase, user.id, `${user.id}/${fileName}`);
+  await removeOldCovers(supabase, user.id, filePath);
   revalidatePath("/dashboard/settings");
   revalidatePath("/book", "layout");
   return { success: "Cover photo saved. It's on your booking page now." };
