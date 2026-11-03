@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { isValidTimeZone } from "@/lib/availability";
+import { cleanInstagram } from "@/lib/profileLinks";
 
 const SLUG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
@@ -157,4 +158,101 @@ export async function saveRegulars(prevState, formData) {
     notes.push(`${promoted} ${promoted === 1 ? "client is" : "clients are"} now Regulars.`);
   }
   return { success: ["Saved.", ...notes].join(" ") };
+}
+
+// ---------- Your business: cover photo, Instagram, location ----------
+
+// The message for a failed save. Before the step 10 SQL is run, the columns
+// don't exist yet (42703 from Postgres, PGRST204 from Supabase's API).
+function saveError(error) {
+  if (error.code === "42703" || error.code === "PGRST204") {
+    return "Run supabase/migrations/0014_cover_and_links.sql in Supabase first, then try again.";
+  }
+  return error.message;
+}
+
+// The public link a file in the stylist's own folder of the "covers" bucket gets.
+function coverPrefix(userId) {
+  return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/covers/${userId}/`;
+}
+
+// Deletes the stylist's older cover photos, keeping `keepPath` (if any).
+async function removeOldCovers(supabase, userId, keepPath) {
+  const { data: files } = await supabase.storage.from("covers").list(userId, { limit: 100 });
+  const old = (files || [])
+    .map((file) => `${userId}/${file.name}`)
+    .filter((path) => path !== keepPath);
+  if (old.length) await supabase.storage.from("covers").remove(old);
+}
+
+// Called after the browser has uploaded the photo to Storage.
+export async function saveCoverPhoto(url) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Please log in again." };
+
+  const link = String(url || "");
+  const prefix = coverPrefix(user.id);
+  const fileName = link.slice(prefix.length);
+  if (!link.startsWith(prefix) || !/^[A-Za-z0-9._-]+$/.test(fileName) || link.length > 500) {
+    return { error: "That photo didn't upload properly. Please try again." };
+  }
+
+  const { error } = await supabase
+    .from("stylists")
+    .update({ cover_photo_url: link })
+    .eq("id", user.id);
+  if (error) return { error: saveError(error) };
+
+  await removeOldCovers(supabase, user.id, `${user.id}/${fileName}`);
+  revalidatePath("/dashboard/settings");
+  revalidatePath("/book", "layout");
+  return { success: "Cover photo saved. It's on your booking page now." };
+}
+
+export async function removeCoverPhoto() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Please log in again." };
+
+  const { error } = await supabase
+    .from("stylists")
+    .update({ cover_photo_url: "" })
+    .eq("id", user.id);
+  if (error) return { error: saveError(error) };
+
+  await removeOldCovers(supabase, user.id, null);
+  revalidatePath("/dashboard/settings");
+  revalidatePath("/book", "layout");
+  return { success: "Cover photo removed." };
+}
+
+export async function saveBusinessLinks(prevState, formData) {
+  const instagram = cleanInstagram(formData.get("instagram"));
+  const location = String(formData.get("location") || "").trim();
+
+  if (instagram === null) {
+    return { error: "Please enter your Instagram name, like @cutsbysam, or leave it empty." };
+  }
+  if (location.length > 200) return { error: "Please keep the location to 200 characters." };
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Please log in again." };
+
+  const { error } = await supabase
+    .from("stylists")
+    .update({ instagram, location })
+    .eq("id", user.id);
+  if (error) return { error: saveError(error) };
+
+  revalidatePath("/dashboard/settings");
+  revalidatePath("/book", "layout");
+  return { success: "Saved." };
 }

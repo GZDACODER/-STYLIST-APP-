@@ -32,6 +32,10 @@ and hosted on **Netlify**.
   Invited. See **[REGULARS_ONLY_SETUP.md](./REGULARS_ONLY_SETUP.md)**.
 - **Settings**: business name, booking link, time zone (Central Time by default),
   Regulars, and deposits.
+- **Your business** (in Settings): a cover photo for the booking page's black
+  panel, plus optional Instagram and Location links shown in the booking page's
+  top bar. Run `supabase/migrations/0014_cover_and_links.sql` first; it also
+  creates the public "covers" storage bucket.
 - **Deposits with Stripe**: each stylist connects their own Stripe account, turns
   deposits on, and sets a dollar amount or percent per service, plus a
   cancellation policy. Clients pay the deposit on Stripe before the booking is
