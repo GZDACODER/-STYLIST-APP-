@@ -82,7 +82,7 @@ export default function WaitlistForm({
   return (
     <>
       <p className="muted">
-        Tell us when suits you. Leave everything unticked if any time works.
+        Which times work best for you? Leave everything unticked if any time works.
       </p>
 
       <fieldset className="wish-group">
