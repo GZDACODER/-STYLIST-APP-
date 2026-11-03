@@ -47,7 +47,7 @@ export default async function BookingsPage() {
   const { data: bookings, error } = await supabase
     .from("bookings")
     .select(
-      "id, booking_date, start_time, end_time, service_name, price_cents, client_name, client_email, client_phone, status, deposit_cents, deposit_status, hold_expires_at, client:clients(status)"
+      "id, booking_date, start_time, end_time, service_name, price_cents, client_name, client_email, client_phone, status, deposit_cents, deposit_status, hold_expires_at, client:clients(status, invited_at)"
     )
     .gte("booking_date", today)
     .order("booking_date")
@@ -113,6 +113,7 @@ export default async function BookingsPage() {
                               {STATUS_LABELS[clientStatus]}
                             </span>
                           )}
+                          {b.client?.invited_at && <span className="badge invited">Invited</span>}
                           <DepositBadge booking={b} />
                         </span>
                       </div>
