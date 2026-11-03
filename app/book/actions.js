@@ -137,7 +137,8 @@ export async function getSlots(slug, serviceId, invite) {
   const { data, error } = await supabase.rpc("get_open_slots", {
     p_slug: String(slug),
     p_service_id: String(serviceId),
-    p_invite: invite ? String(invite) : null,
+    // Only sent when there is one (works before the step 8 SQL is run).
+    ...(invite ? { p_invite: String(invite) } : {}),
   });
   if (error) return { error: "Couldn't load open times. Please refresh the page." };
   return { slots: data };
@@ -167,7 +168,7 @@ export async function book({ slug, serviceId, date, time, name, phone, email, in
     p_name: String(name || ""),
     p_phone: String(phone || ""),
     p_email: String(email || ""),
-    p_invite: invite ? String(invite) : null,
+    ...(invite ? { p_invite: String(invite) } : {}),
   });
 
   if (error) {
@@ -178,7 +179,9 @@ export async function book({ slug, serviceId, date, time, name, phone, email, in
   }
 
   // This service needs a deposit: the time is held while they pay on Stripe.
-  if (data.status === "pending_payment") return depositCheckout(data.id);
+  if (data.status === "pending_payment") {
+    return depositCheckout(data.id, { invite: invite ? String(invite) : undefined });
+  }
   return { booking: data };
 }
 

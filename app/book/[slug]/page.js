@@ -9,7 +9,12 @@ import BookingFlow from "./BookingFlow";
 // invite: the secret from a private invite link (?invite=...), if any.
 const loadPage = cache(async (slug, invite) => {
   const supabase = await createBookingClient();
-  return supabase.rpc("get_booking_page", { p_slug: slug, p_invite: invite });
+  // p_invite is only sent when there is one, so the page still works before
+  // the step 8 SQL has been run.
+  return supabase.rpc(
+    "get_booking_page",
+    invite ? { p_slug: slug, p_invite: invite } : { p_slug: slug }
+  );
 });
 
 function inviteFrom(searchParams) {

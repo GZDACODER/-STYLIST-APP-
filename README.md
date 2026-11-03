@@ -26,6 +26,10 @@ and hosted on **Netlify**.
   days and times they'd like. When a time opens up, they're emailed a one-tap
   "Claim this time" link, Regulars first. First to claim gets it, deposits still
   apply. Text messages can be switched on later. See **[WAITLIST_SETUP.md](./WAITLIST_SETUP.md)**.
+- **Regulars only mode**: one switch hides every time and the waitlist from new
+  clients. Cancelled Regulars bookings stay Regulars-only. Private one-time
+  **invite links** let a specific new client book anyway, and they show as
+  Invited. See **[REGULARS_ONLY_SETUP.md](./REGULARS_ONLY_SETUP.md)**.
 - **Settings**: business name, booking link, time zone (Central Time by default),
   Regulars, and deposits.
 - **Deposits with Stripe**: each stylist connects their own Stripe account, turns
@@ -45,7 +49,8 @@ Every time new code is pushed to GitHub, Netlify rebuilds the site automatically
 Follow **[SUPABASE_SETUP.md](./SUPABASE_SETUP.md)** steps 1–3, then
 **[BOOKING_SETUP.md](./BOOKING_SETUP.md)**, **[DEPOSITS_SETUP.md](./DEPOSITS_SETUP.md)**
 **[PHONE_SETUP.md](./PHONE_SETUP.md)** (text message codes with Twilio)
-and **[WAITLIST_SETUP.md](./WAITLIST_SETUP.md)** (waitlist emails). Run every file in `supabase/migrations/`
+**[WAITLIST_SETUP.md](./WAITLIST_SETUP.md)** (waitlist emails)
+and **[REGULARS_ONLY_SETUP.md](./REGULARS_ONLY_SETUP.md)** (Regulars only and invites). Run every file in `supabase/migrations/`
 in number order. Keep the
 Project URL and the publishable key handy.
 

@@ -292,7 +292,7 @@ export default function BookingFlow({ page, invite, paymentCancelled, waitlistRe
         </section>
       )}
 
-      {!verified && !time && !showWaitlist && !locked && (
+      {!verified && !time && !showWaitlist && !locked && access !== "invited" && (
         <section className="card">
           {showVerify ? (
             <>

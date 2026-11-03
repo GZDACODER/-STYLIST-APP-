@@ -11,10 +11,12 @@ export async function GET(request, { params }) {
   const bookingId = url.searchParams.get("booking") || "";
   // Set when the time was claimed from a waitlist message.
   const claimToken = url.searchParams.get("t") || "";
+  // Set when they booked with an invite link, so it still works when they're back.
+  const invite = url.searchParams.get("invite") || "";
   const back = new URL(
     claimToken
       ? `/book/${slug}/claim?t=${encodeURIComponent(claimToken)}&payment=cancelled`
-      : `/book/${slug}?payment=cancelled`,
+      : `/book/${slug}?payment=cancelled${invite ? `&invite=${encodeURIComponent(invite)}` : ""}`,
     url.origin
   );
 
