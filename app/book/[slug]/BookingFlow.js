@@ -26,7 +26,14 @@ function formatMinutes(minutes) {
   return `${m} min`;
 }
 
-export default function BookingFlow({ page, invite, paymentCancelled, waitlistReady, textsAvailable }) {
+export default function BookingFlow({
+  page,
+  invite,
+  paymentCancelled,
+  waitlistReady,
+  textsAvailable,
+  textCodes,
+}) {
   const router = useRouter();
   const {
     business_name,
@@ -45,6 +52,8 @@ export default function BookingFlow({ page, invite, paymentCancelled, waitlistRe
   const verified = viewer_status !== "anonymous";
   // How they confirmed: their phone number (by text) or their email.
   const viewerLabel = viewer_phone ? formatPhone(viewer_phone) : viewer_email;
+  // What clients confirm with a code: their phone (text codes on) or email.
+  const confirmWhat = textCodes ? "phone number" : "email";
   // "Regulars only" mode: only Regulars (and clients with an invite link) can book.
   const locked = regularsOnly && access !== "regular" && access !== "invited";
   // The waitlist needs email set up for the app, and the stylist to have it on.
@@ -198,7 +207,7 @@ export default function BookingFlow({ page, invite, paymentCancelled, waitlistRe
           directly.
         </p>
         <button type="button" className="link-button" onClick={notMe} disabled={pending}>
-          Not you? Use a different number
+          {textCodes ? "Not you? Use a different number" : "Not you? Use a different email"}
         </button>
       </section>
     );
@@ -284,9 +293,9 @@ export default function BookingFlow({ page, invite, paymentCancelled, waitlistRe
             <>
               <p className="muted">
                 Right now, {business_name} takes online bookings from regulars only. If you&apos;re
-                a regular, confirm your phone number to see your times.
+                a regular, confirm your {confirmWhat} to see your times.
               </p>
-              <VerifyClient onVerified={refreshAfterLogin} />
+              <VerifyClient onVerified={refreshAfterLogin} textCodes={textCodes} />
             </>
           )}
         </section>
@@ -296,15 +305,15 @@ export default function BookingFlow({ page, invite, paymentCancelled, waitlistRe
         <section className="card">
           {showVerify ? (
             <>
-              <h2>Confirm your phone number</h2>
+              <h2>Confirm your {confirmWhat}</h2>
               <p className="muted">Regulars see extra times once they confirm.</p>
-              <VerifyClient onVerified={refreshAfterLogin} />
+              <VerifyClient onVerified={refreshAfterLogin} textCodes={textCodes} />
             </>
           ) : (
             <p className="regular-prompt">
               Already a regular?{" "}
               <button type="button" className="link-button" onClick={() => setShowVerify(true)}>
-                Confirm your phone number to see all your times
+                Confirm your {confirmWhat} to see all your times
               </button>
             </p>
           )}
@@ -350,7 +359,7 @@ export default function BookingFlow({ page, invite, paymentCancelled, waitlistRe
                 ? "Join the waitlist below and we'll tell you when one opens up."
                 : "Please check back soon."}
               {!verified &&
-                " If you're a regular, confirm your phone number above to see more times."}
+                ` If you're a regular, confirm your ${confirmWhat} above to see more times.`}
             </p>
           )}
 
@@ -438,6 +447,7 @@ export default function BookingFlow({ page, invite, paymentCancelled, waitlistRe
             viewerPhone={viewer_phone}
             viewerEmail={viewer_email}
             textsAvailable={textsAvailable}
+            textCodes={textCodes}
             onVerified={refreshAfterLogin}
             onClose={() => setShowWaitlist(false)}
           />
@@ -457,9 +467,11 @@ export default function BookingFlow({ page, invite, paymentCancelled, waitlistRe
           {!verified ? (
             <>
               <p className="muted">
-                To book, confirm your mobile number. We&apos;ll text you a code.
+                {textCodes
+                  ? "To book, confirm your mobile number. We'll text you a code."
+                  : "To book, confirm your email. We'll email you a code."}
               </p>
-              <VerifyClient onVerified={refreshAfterLogin} />
+              <VerifyClient onVerified={refreshAfterLogin} textCodes={textCodes} />
             </>
           ) : (
             <form onSubmit={submitBooking}>
@@ -502,7 +514,10 @@ export default function BookingFlow({ page, invite, paymentCancelled, waitlistRe
                       required
                     />
                   </label>
-                  <p className="muted small-text">Email: {viewer_email}</p>
+                  <p className="muted small-text">
+                    Your mobile number is how {business_name} knows it&apos;s you. Email:{" "}
+                    {viewer_email}
+                  </p>
                 </>
               )}
 

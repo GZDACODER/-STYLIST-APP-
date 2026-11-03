@@ -48,7 +48,7 @@ Every time new code is pushed to GitHub, Netlify rebuilds the site automatically
 
 Follow **[SUPABASE_SETUP.md](./SUPABASE_SETUP.md)** steps 1–3, then
 **[BOOKING_SETUP.md](./BOOKING_SETUP.md)**, **[DEPOSITS_SETUP.md](./DEPOSITS_SETUP.md)**
-**[PHONE_SETUP.md](./PHONE_SETUP.md)** (text message codes with Twilio)
+**[PHONE_SETUP.md](./PHONE_SETUP.md)** (text message codes with Twilio; switched off for now)
 **[WAITLIST_SETUP.md](./WAITLIST_SETUP.md)** (waitlist emails)
 and **[REGULARS_ONLY_SETUP.md](./REGULARS_ONLY_SETUP.md)** (Regulars only and invites). Run every file in `supabase/migrations/`
 in number order. Keep the

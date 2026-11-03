@@ -1,5 +1,11 @@
 # Text message codes setup (step 6)
 
+> **Switched off for now.** Clients confirm by **email code** only; they still
+> type their mobile number when booking, and are matched to your Clients tab by
+> it. The Twilio code is all still here. To switch text codes back on, finish
+> this guide, then in Vercel add `TEXT_CODES` = `on` (**Settings → Environment
+> Variables**) and redeploy. To switch them off again, delete it and redeploy.
+
 Clients now confirm their **mobile number** with a 6-digit text message code
 (email still works as a backup). This needs a **Twilio** account (it sends the
 texts) connected to **Supabase**. Do everything below in Safari on your iPad.

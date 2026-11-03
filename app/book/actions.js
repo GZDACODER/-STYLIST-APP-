@@ -4,13 +4,13 @@
 // times, who can book) are enforced inside the database functions these call.
 import { createBookingClient } from "@/lib/supabase/booking";
 import { createDepositCheckout, siteOrigin, stripeTestMode } from "@/lib/stripe";
-import { normalizePhone } from "@/lib/phone";
+import { normalizePhone, textCodesEnabled } from "@/lib/phone";
 import { emailStylistCancellation, runWaitlistSafely } from "@/lib/waitlist";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const BOOKING_ERRORS = {
-  not_verified: "Please confirm your phone number first.",
+  not_verified: "Please confirm it's you with a code first.",
   invalid_name: "Please enter your name.",
   invalid_phone: "Please enter a phone number we can reach you on.",
   invalid_email: "That email doesn't look right. You can also leave it empty.",
@@ -22,11 +22,11 @@ const BOOKING_ERRORS = {
   already_claimed: "You've already claimed this time. You're booked!",
   waitlist_ended: "You're no longer on the waitlist for this, so this link has stopped working.",
   invite_wrong_person:
-    "This invite is for a different phone number. Please confirm with the number your stylist texted.",
+    "This invite is for a different phone number. Please book with the phone number your stylist has for you.",
 };
 
 const WAITLIST_ERRORS = {
-  not_verified: "Please confirm your phone number first.",
+  not_verified: "Please confirm it's you with a code first.",
   invalid_name: "Please enter your name.",
   invalid_phone: "Please enter a phone number we can reach you on.",
   invalid_email: "That email doesn't look right.",
@@ -45,6 +45,10 @@ export async function sendCode(method, value) {
   const supabase = await createBookingClient();
 
   if (method === "phone") {
+    // Text codes are switched off (see textCodesEnabled in lib/phone.js).
+    if (!textCodesEnabled()) {
+      return { error: "Text message codes are switched off. Please confirm with your email." };
+    }
     const phone = normalizePhone(value);
     if (!phone) return { error: "Please enter your mobile number, like (555) 123-4567." };
 
@@ -84,6 +88,8 @@ export async function sendCode(method, value) {
 
   const email = String(value || "").trim().toLowerCase();
   if (!EMAIL_PATTERN.test(email)) return { error: "Please enter a valid email." };
+  // Only suggest phone codes when they're switched on.
+  const orPhone = textCodesEnabled() ? ", or use your phone number" : "";
 
   const { error } = await supabase.auth.signInWithOtp({
     email,
@@ -99,15 +105,15 @@ export async function sendCode(method, value) {
     // to their exact address (name+test@gmail.com is a different address).
     if (error.code === "email_address_not_authorized" || /not authorized/i.test(error.message)) {
       return {
-        error: `Email codes aren't set up for this address yet. Please use your phone number instead. Details: ${error.message}`,
+        error: `Email codes aren't set up for this address yet. Please try a different email${orPhone}. Details: ${error.message}`,
       };
     }
     if (error.code === "email_address_invalid" || /invalid/i.test(error.message)) {
-      return { error: "That email address can't be used. Please check it, or use your phone number." };
+      return { error: `That email address can't be used. Please check it${orPhone}.` };
     }
     // Usually the email provider (Resend) refused: see Resend's Logs.
     return {
-      error: `We couldn't send a code right now. Please try again shortly, or use your phone number. Details: ${error.message}`,
+      error: `We couldn't send a code right now. Please try again shortly${orPhone}. Details: ${error.message}`,
     };
   }
   return { success: true, value: email };

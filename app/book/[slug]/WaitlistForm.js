@@ -16,6 +16,7 @@ export default function WaitlistForm({
   viewerPhone,
   viewerEmail,
   textsAvailable,
+  textCodes,
   onVerified,
   onClose,
 }) {
@@ -122,9 +123,11 @@ export default function WaitlistForm({
       {!verified ? (
         <>
           <p className="muted">
-            First, confirm your mobile number. We&apos;ll text you a code.
+            {textCodes
+              ? "First, confirm your mobile number. We'll text you a code."
+              : "First, confirm your email. We'll email you a code."}
           </p>
-          <VerifyClient onVerified={onVerified} />
+          <VerifyClient onVerified={onVerified} textCodes={textCodes} />
         </>
       ) : (
         <form onSubmit={submit}>

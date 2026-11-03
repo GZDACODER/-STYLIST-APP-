@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { createBookingClient } from "@/lib/supabase/booking";
 import { waitlistConfigured } from "@/lib/waitlist";
 import { textsEnabled } from "@/lib/notify";
+import { textCodesEnabled } from "@/lib/phone";
 import BookingFlow from "./BookingFlow";
 
 // cache() means the title and the page share one database call.
@@ -49,6 +50,7 @@ export default async function BookingPage({ params, searchParams }) {
         paymentCancelled={payment === "cancelled"}
         waitlistReady={waitlistConfigured()}
         textsAvailable={textsEnabled()}
+        textCodes={textCodesEnabled()}
       />
     </>
   );

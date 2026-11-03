@@ -4,10 +4,11 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { sendCode, verifyCode } from "../actions";
 import { formatPhone } from "@/lib/phone";
 
-// Two steps: type your mobile number -> type the code we texted you.
-// Email works the same way, as a backup.
-export default function VerifyClient({ onVerified }) {
-  const [method, setMethod] = useState("phone");
+// Two steps: type your email (or mobile number) -> type the code we sent you.
+// textCodes: false while text message codes are switched off; then it's
+// email only, with no "use my phone number" option.
+export default function VerifyClient({ onVerified, textCodes = false }) {
+  const [method, setMethod] = useState(textCodes ? "phone" : "email");
   const [value, setValue] = useState("");
   const [code, setCode] = useState("");
   const [stage, setStage] = useState("enter");
@@ -113,15 +114,17 @@ export default function VerifyClient({ onVerified }) {
           {pending ? "Sending..." : isPhone ? "Text me a code" : "Email me a code"}
         </button>
         {error && <p className="message error">{error}</p>}
-        <div className="row-links">
-          <button
-            type="button"
-            className="link-button"
-            onClick={() => switchMethod(isPhone ? "email" : "phone")}
-          >
-            {isPhone ? "Use email instead" : "Use my phone number instead"}
-          </button>
-        </div>
+        {textCodes && (
+          <div className="row-links">
+            <button
+              type="button"
+              className="link-button"
+              onClick={() => switchMethod(isPhone ? "email" : "phone")}
+            >
+              {isPhone ? "Use email instead" : "Use my phone number instead"}
+            </button>
+          </div>
+        )}
       </form>
     );
   }
@@ -183,15 +186,17 @@ export default function VerifyClient({ onVerified }) {
           {cooldown > 0 ? `Send a new code (${cooldown}s)` : "Send a new code"}
         </button>
       </div>
-      <div className="row-links">
-        <button
-          type="button"
-          className="link-button"
-          onClick={() => switchMethod(isPhone ? "email" : "phone")}
-        >
-          {isPhone ? "No text? Use email instead" : "Use my phone number instead"}
-        </button>
-      </div>
+      {textCodes && (
+        <div className="row-links">
+          <button
+            type="button"
+            className="link-button"
+            onClick={() => switchMethod(isPhone ? "email" : "phone")}
+          >
+            {isPhone ? "No text? Use email instead" : "Use my phone number instead"}
+          </button>
+        </div>
+      )}
     </form>
   );
 }
