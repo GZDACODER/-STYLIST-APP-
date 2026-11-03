@@ -19,6 +19,8 @@ Three things, all in Safari on your iPad:
    You should see "Success. No rows returned".
 4. Do the same with `supabase/migrations/0011_match_by_phone.sql` (clients are
    matched by phone number; see "How clients are matched" below).
+5. Do the same with `supabase/migrations/0012_invite_wins.sql` (an invite made
+   out to the number someone books with always makes them a new, Invited client).
 
 Nothing to add in Vercel. It redeploys by itself.
 
@@ -55,6 +57,10 @@ Clients are matched to your Clients tab by **phone number**:
   they book with that client's phone number (or that client has no number on
   file). Booking with a different number makes them a new client, so an invite
   link works for them.
+- With an **invite link** made out to the number they book with, they're always
+  a new, Invited client on their own card, even if their email is on another
+  client's card. (Unless that number belongs to a Regular: then they're that
+  Regular and the invite isn't used.)
 - A blocked client's number or email blocks the booking either way.
 
 ### Invite links
