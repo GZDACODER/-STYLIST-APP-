@@ -1,4 +1,5 @@
 import { CLIENT_STATUSES } from "@/lib/clients";
+import RegularStar from "@/components/RegularStar";
 
 // The inputs shared by the "add" and "edit" client forms.
 export default function ClientFields({ values = {} }) {
@@ -52,7 +53,14 @@ export default function ClientFields({ values = {} }) {
                 value={s.value}
                 defaultChecked={(values.status || "regular") === s.value}
               />
-              <span>{s.label}</span>
+              <span>
+                {s.value === "regular" && (
+                  <>
+                    <RegularStar label={null} />{" "}
+                  </>
+                )}
+                {s.label}
+              </span>
             </label>
           ))}
         </div>

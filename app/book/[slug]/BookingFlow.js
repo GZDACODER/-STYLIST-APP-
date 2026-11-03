@@ -258,7 +258,7 @@ export default function BookingFlow({
       {/* ---------- Who's booking ---------- */}
       {viewer_status === "regular" && (
         <p className="message regular">
-          <RegularStar label="Regular" size={13} /> Welcome back. As a Regular, you also see the
+          <RegularStar label={null} size={13} /> Welcome back. As a Regular, you also see the
           times kept for Regulars, marked with the gold star.{" "}
           <button type="button" className="link-button" onClick={notMe} disabled={pending}>
             Not {viewerLabel}?
@@ -285,7 +285,9 @@ export default function BookingFlow({
       {/* ---------- Regulars only ---------- */}
       {locked && (
         <section className="card">
-          <h2>Online booking is for regulars</h2>
+          <h2>
+            <RegularStar label={null} size={16} /> Online booking is for Regulars
+          </h2>
           {verified ? (
             <p className="muted">
               Right now, {business_name} takes online bookings from regulars only. Please contact{" "}
@@ -308,12 +310,14 @@ export default function BookingFlow({
           {showVerify ? (
             <>
               <h2>Confirm your {confirmWhat}</h2>
-              <p className="muted">Regulars see extra times once they confirm.</p>
+              <p className="muted">
+                <RegularStar label={null} /> Regulars see extra times once they confirm.
+              </p>
               <VerifyClient onVerified={refreshAfterLogin} textCodes={textCodes} />
             </>
           ) : (
             <p className="regular-prompt">
-              Already a regular?{" "}
+              <RegularStar label={null} /> Already a Regular?{" "}
               <button type="button" className="link-button" onClick={() => setShowVerify(true)}>
                 Confirm your {confirmWhat} to see all your times
               </button>
@@ -387,16 +391,16 @@ export default function BookingFlow({
                   >
                     <span className="date-weekday">
                       {day.toLocaleDateString("en-US", { weekday: "short" })}
+                      {d.early && (
+                        <span className="early-star">
+                          <RegularStar label="Has Regulars-only times" size={9} />
+                        </span>
+                      )}
                     </span>
                     <strong className="date-day">{day.getDate()}</strong>
                     <span className="date-month">
                       {day.toLocaleDateString("en-US", { month: "short" })}
                     </span>
-                    {d.early && (
-                      <span className="early-star">
-                        <RegularStar label="Has Regulars-only times" />
-                      </span>
-                    )}
                   </button>
                 );
               })}
@@ -411,6 +415,11 @@ export default function BookingFlow({
           {date && (
             <>
               <h3 className="list-title">{formatDate(date)}</h3>
+              {times.some((s) => s.visibility === "regulars") && (
+                <p className="bk-key">
+                  <RegularStar label={null} /> Regulars only
+                </p>
+              )}
               <div className="time-grid">
                 {times.map((s) => (
                   <button

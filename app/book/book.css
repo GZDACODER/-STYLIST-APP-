@@ -167,9 +167,10 @@ body:has(.bk) {
 }
 
 .bk .bk-name {
-  font-size: clamp(3.4rem, 17vw, 7.5rem);
+  font-size: clamp(2.9rem, 14vw, 6rem);
   font-weight: 500;
-  line-height: 0.9;
+  line-height: 0.95;
+  text-transform: none;
   letter-spacing: -0.015em;
   margin: 0;
   overflow-wrap: anywhere;
@@ -206,34 +207,35 @@ body:has(.bk) {
   background: #e7e1d6;
 }
 
-/* No photo: solid warm black, the initials set large, one accent rule. */
+/* No photo: solid warm black, the name as a cursive signature in
+   off-white, over a thin gold rule. */
 .bk-plate {
-  position: relative;
   display: flex;
-  align-items: flex-end;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 18px;
   aspect-ratio: 16 / 9;
-  padding: 24px var(--gutter);
+  padding: 28px var(--gutter);
   background: var(--ink);
   color: var(--paper);
 }
 
-.bk-plate::after {
-  content: "";
-  position: absolute;
-  left: var(--gutter);
-  top: 24px;
-  width: 40px;
-  height: 1px;
-  background: var(--accent);
+.bk-plate-name {
+  font-family: var(--font-script), cursive;
+  font-weight: 400;
+  font-size: clamp(2.6rem, 13vw, 4.6rem);
+  line-height: 1.1;
+  word-spacing: 0.15em;
+  /* Script letters lean past their box; padding stops them being clipped. */
+  padding: 0 0.2em 0.1em 0.1em;
+  overflow-wrap: anywhere;
 }
 
-.bk-monogram {
-  font-family: var(--font-display), Georgia, serif;
-  font-style: italic;
-  font-weight: 400;
-  font-size: clamp(5rem, 30vw, 12rem);
-  line-height: 0.8;
-  letter-spacing: -0.02em;
+.bk-plate::after {
+  content: "";
+  width: 56px;
+  height: 1px;
+  background: var(--accent);
 }
 
 .bk-cover img {
@@ -246,14 +248,14 @@ body:has(.bk) {
 /* Wider screens: an asymmetric spread. Photo on the left, held in place
    while the booking steps scroll on the right. Without a photo, the name
    sits left and the steps are set off to the right. */
-@media (min-width: 900px) {
+@media (min-width: 768px) {
   .bk {
-    --gutter: 40px;
+    --gutter: 32px;
   }
 
   .bk-layout {
     grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-    column-gap: 64px;
+    column-gap: clamp(32px, 5vw, 64px);
     align-items: start;
   }
 
@@ -275,12 +277,11 @@ body:has(.bk) {
   }
 
   .bk-plate {
-    padding: 32px;
+    padding: 36px 32px;
   }
 
-  .bk-plate::after {
-    left: 32px;
-    top: 32px;
+  .bk-plate-name {
+    font-size: clamp(2.6rem, 5.5vw, 4.4rem);
   }
 
   .bk-flow {
@@ -382,6 +383,11 @@ body:has(.bk) {
   background: #000;
   transform: none;
   box-shadow: none;
+}
+
+/* The main button (Book, Continue, Pay deposit): a gold line underneath. */
+.bk .button:not(.secondary) {
+  border-bottom: 3px solid var(--accent);
 }
 
 .bk .button.secondary {
@@ -554,10 +560,10 @@ body:has(.bk) {
   color: var(--ink-soft);
 }
 
-/* The chosen service: a black rule on the left. */
+/* The chosen service: a gold rule on the left. */
 .bk .choice.selected {
   padding-left: 16px;
-  box-shadow: inset 3px 0 0 var(--ink);
+  box-shadow: inset 3px 0 0 var(--accent);
 }
 
 .bk .choice:focus-visible,
@@ -572,31 +578,34 @@ body:has(.bk) {
 /* ---------- 02 Date & time ---------- */
 .bk .date-grid {
   display: flex;
-  gap: 0;
+  gap: 26px;
   overflow-x: auto;
   margin: 8px calc(-1 * var(--gutter)) 0 0;
-  padding-bottom: 4px;
-  border-left: 1px solid var(--hair);
+  padding: 0 var(--gutter) 2px 0;
   scroll-snap-type: x proximity;
   -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.bk .date-grid::-webkit-scrollbar {
+  display: none;
 }
 
 .bk .date-choice {
   position: relative;
-  flex: 0 0 76px;
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 2px;
-  padding: 12px 12px 14px;
+  min-width: 44px;
+  padding: 6px 2px 10px;
   border: 0;
-  border-right: 1px solid var(--hair);
-  border-top: 1px solid var(--hair);
-  border-bottom: 1px solid var(--hair);
+  border-bottom: 2px solid transparent;
   border-radius: 0;
   background: none;
   box-shadow: none;
-  color: var(--ink);
+  color: var(--ink-faint);
   scroll-snap-align: start;
   cursor: pointer;
 }
@@ -606,30 +615,30 @@ body:has(.bk) {
   font-size: 2.2rem;
   font-weight: 400;
   line-height: 1;
+  color: inherit;
 }
 
 .bk .date-choice .date-weekday,
 .bk .date-choice .date-month {
-  color: var(--ink-soft);
+  color: inherit;
   font-size: 0.62rem;
 }
 
 .bk .date-choice .early-star {
-  position: absolute;
-  top: 10px;
-  right: 10px;
+  margin-left: 5px;
   line-height: 0;
 }
 
-.bk .date-choice.selected {
-  background: var(--ink);
-  color: var(--paper);
+.bk .date-choice:hover {
+  color: var(--ink-soft);
+  background: none;
 }
 
-.bk .date-choice.selected .date-day,
-.bk .date-choice.selected .date-weekday,
-.bk .date-choice.selected .date-month {
-  color: var(--paper);
+.bk .date-choice.selected,
+.bk .date-choice.selected:hover {
+  color: var(--ink);
+  background: none;
+  border-bottom-color: var(--accent);
 }
 
 .bk .time-grid {
@@ -662,8 +671,7 @@ body:has(.bk) {
   cursor: pointer;
 }
 
-.bk .time-choice:hover,
-.bk .date-choice:hover {
+.bk .time-choice:hover {
   background: rgba(14, 13, 11, 0.05);
 }
 
@@ -675,6 +683,12 @@ body:has(.bk) {
 
 .bk .list-title {
   margin-top: 28px;
+}
+
+.bk .bk-key {
+  margin: -4px 0 12px;
+  font-size: 0.78rem;
+  color: var(--ink-soft);
 }
 
 .bk .waitlist-prompt {
@@ -825,11 +839,10 @@ body:has(.bk) {
 }
 
 .bk .choice.selected {
-  box-shadow: inset 3px 0 0 var(--ink);
+  box-shadow: inset 3px 0 0 var(--accent);
 }
 
 .bk .chip.active,
-.bk .date-choice.selected,
 .bk .time-choice.selected {
   background: var(--ink);
   border-color: var(--hair);

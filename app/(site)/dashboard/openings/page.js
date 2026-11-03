@@ -8,6 +8,7 @@ import BookingLink from "./BookingLink";
 import PostOpeningsForm from "./PostOpeningsForm";
 import OpeningsList from "./OpeningsList";
 import { BRAND_NAME } from "@/lib/brand";
+import RegularStar from "@/components/RegularStar";
 
 export const metadata = { title: `Openings · ${BRAND_NAME}` };
 
@@ -103,7 +104,9 @@ export default async function OpeningsPage() {
 
       {holds.length > 0 && (
         <section className="card">
-          <h2>Kept for Regulars</h2>
+          <h2>
+            <RegularStar label={null} size={14} /> Kept for Regulars
+          </h2>
           <p className="muted">
             Regulars bookings that were cancelled. These times stay Regulars only, and only
             waitlisted Regulars hear about them, until they&apos;re booked again or you open them to

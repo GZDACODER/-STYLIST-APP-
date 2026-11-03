@@ -6,6 +6,7 @@ import { CLIENT_STATUSES } from "@/lib/clients";
 import ClientFields from "./ClientFields";
 import SubmitButton from "@/components/SubmitButton";
 import FormMessage from "@/components/FormMessage";
+import RegularStar from "@/components/RegularStar";
 
 export default function ClientCard({ client }) {
   const [editing, setEditing] = useState(false);
@@ -88,6 +89,11 @@ export default function ClientCard({ client }) {
             aria-pressed={status === s.value}
             onClick={() => changeStatus(s.value)}
           >
+            {s.value === "regular" && (
+              <>
+                <RegularStar label={null} />{" "}
+              </>
+            )}
             {s.label}
           </button>
         ))}

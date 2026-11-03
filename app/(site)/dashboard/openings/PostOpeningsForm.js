@@ -6,6 +6,7 @@ import { WEEKDAYS, formatDate, isValidDateString, parseDateString, toDateString 
 import TimeSelect from "@/components/TimeSelect";
 import SubmitButton from "@/components/SubmitButton";
 import FormMessage from "@/components/FormMessage";
+import RegularStar from "@/components/RegularStar";
 
 // Same limit as the server.
 const MAX_DAYS = 60;
@@ -147,7 +148,9 @@ export default function PostOpeningsForm({ today, daysOff }) {
           </label>
           <label className="segment regulars">
             <input type="radio" name="visibility" value="regulars" />
-            <span>Regulars only</span>
+            <span>
+              <RegularStar label={null} /> Regulars only
+            </span>
           </label>
         </div>
       </fieldset>

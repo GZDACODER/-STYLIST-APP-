@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { clockTime, formatDate, timeZoneLabel, todayInTimeZone } from "@/lib/availability";
 import CancelBookingButton from "./CancelBookingButton";
 import { BRAND_NAME } from "@/lib/brand";
+import RegularStar from "@/components/RegularStar";
 
 export const metadata = { title: `Bookings · ${BRAND_NAME}` };
 
@@ -111,6 +112,7 @@ export default async function BookingsPage() {
                         <span className="badge-row">
                           {clientStatus && (
                             <span className={`badge ${clientStatus}`}>
+                              {clientStatus === "regular" && <><RegularStar label={null} /> </>}
                               {STATUS_LABELS[clientStatus]}
                             </span>
                           )}

@@ -24,18 +24,22 @@ const loadPage = cache(async (slug, invite) => {
 function stylistLook(page) {
   const https = (url) => (typeof url === "string" && /^https:\/\//.test(url) ? url : null);
   const accent = /^#[0-9a-f]{6}$/i.test(page.accent_color || "") ? page.accent_color : null;
-  const initials = String(page.business_name || "")
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((word) => word[0].toUpperCase())
-    .join("");
   return {
     accent,
     logo: https(page.logo_url),
     photo: https(page.cover_photo_url) || https(page.photos?.[0]),
-    initials,
+    name: displayName(page.business_name),
   };
+}
+
+// "CUTS BY SAM" -> "Cuts By Sam", so names read in mixed case. Short words
+// ("GT", "NYC") stay in capitals, and names already in mixed case are kept.
+function displayName(name) {
+  const text = String(name || "");
+  if (text !== text.toUpperCase() || !/[A-Z]/.test(text)) return text;
+  return text.replace(/[A-Z][A-Z']*/g, (word) =>
+    word.length <= 3 ? word : word[0] + word.slice(1).toLowerCase(),
+  );
 }
 
 function inviteFrom(searchParams) {
@@ -72,7 +76,7 @@ export default async function BookingPage({ params, searchParams }) {
         ) : (
           <p className="bk-kicker">Book with</p>
         )}
-        <h1 className="bk-name">{data.business_name}</h1>
+        <h1 className="bk-name">{look.name}</h1>
         {data.tagline && <p className="bk-tagline">{data.tagline}</p>}
       </header>
       {look.photo ? (
@@ -80,9 +84,9 @@ export default async function BookingPage({ params, searchParams }) {
           <img src={look.photo} alt={data.business_name} fetchPriority="high" decoding="async" />
         </figure>
       ) : (
-        // No photo: a solid panel set with the stylist's initials (no stock images).
+        // No photo: a solid panel with the stylist's name as a signature (no stock images).
         <div className="bk-visual bk-plate" aria-hidden="true">
-          <span className="bk-monogram">{look.initials}</span>
+          <span className="bk-plate-name">{look.name}</span>
         </div>
       )}
       <div className="bk-flow">

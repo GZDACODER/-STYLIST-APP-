@@ -6,6 +6,7 @@ import SettingsForm from "./SettingsForm";
 import DepositsForm from "./DepositsForm";
 import RegularsForm from "./RegularsForm";
 import { BRAND_NAME } from "@/lib/brand";
+import RegularStar from "@/components/RegularStar";
 
 export const metadata = { title: `Settings · ${BRAND_NAME}` };
 
@@ -93,7 +94,9 @@ export default async function SettingsPage({ searchParams }) {
       </section>
 
       <section className="card">
-        <h2>Regulars</h2>
+        <h2>
+          <RegularStar label={null} size={14} /> Regulars
+        </h2>
         <p className="muted">
           Regulars see your &quot;Regulars only&quot; openings. Clients are matched by the phone
           number they confirm with a text code.

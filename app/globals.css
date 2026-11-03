@@ -1473,3 +1473,17 @@ select {
     transition: none !important;
   }
 }
+
+/* ---------- The Regulars' star ---------- */
+.regular-star {
+  display: inline-block;
+  vertical-align: -1px;
+  fill: #c8a96a;
+}
+
+/* Dark on gold-filled buttons, so it stays visible. */
+.segment.checked .regular-star,
+.chip.active .regular-star,
+.segment input:checked + span .regular-star {
+  fill: var(--on-gold);
+}

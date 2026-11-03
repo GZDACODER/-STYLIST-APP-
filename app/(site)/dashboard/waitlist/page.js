@@ -7,6 +7,7 @@ import { formatDate, todayInTimeZone } from "@/lib/availability";
 import WaitlistSettingsForm from "./WaitlistSettingsForm";
 import RemoveEntryButton from "./RemoveEntryButton";
 import { BRAND_NAME } from "@/lib/brand";
+import RegularStar from "@/components/RegularStar";
 
 export const metadata = { title: `Waitlist · ${BRAND_NAME}` };
 
@@ -96,6 +97,7 @@ export default async function WaitlistPage() {
                   <div className="client-name">{e.name}</div>
                   {STATUS_LABELS[e.client_status] && (
                     <span className={`badge ${e.client_status}`}>
+                      {e.client_status === "regular" && <><RegularStar label={null} /> </>}
                       {STATUS_LABELS[e.client_status]}
                     </span>
                   )}

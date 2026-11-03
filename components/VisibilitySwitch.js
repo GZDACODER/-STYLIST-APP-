@@ -1,5 +1,7 @@
 "use client";
 
+import RegularStar from "@/components/RegularStar";
+
 // Two joined buttons: Everyone | Regulars only.
 // "value" can also be "mixed" when a day has both kinds of openings.
 export default function VisibilitySwitch({ value, onChange, label, small = false }) {
@@ -18,6 +20,11 @@ export default function VisibilitySwitch({ value, onChange, label, small = false
           aria-pressed={value === o.value}
           onClick={() => value !== o.value && onChange(o.value)}
         >
+          {o.value === "regulars" && (
+            <>
+              <RegularStar label={null} />{" "}
+            </>
+          )}
           {o.label}
         </button>
       ))}

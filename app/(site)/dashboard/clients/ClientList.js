@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { CLIENT_STATUSES } from "@/lib/clients";
 import ClientCard from "./ClientCard";
+import RegularStar from "@/components/RegularStar";
 
 // Lowercase, and also keep just the digits so "555-1234" matches "5551234".
 function matches(client, search) {
@@ -54,6 +55,11 @@ export default function ClientList({ clients }) {
             aria-pressed={filter === f.value}
             onClick={() => setFilter(f.value)}
           >
+            {f.value === "regular" && (
+              <>
+                <RegularStar label={null} />{" "}
+              </>
+            )}
             {f.label} ({counts[f.value]})
           </button>
         ))}
