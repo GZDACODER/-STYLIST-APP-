@@ -151,12 +151,24 @@ body:has(.bk) {
 }
 
 .bk-masthead-quiet {
-  padding: 32px 0 22px;
+  padding: 28px 0 22px;
 }
 
-.bk-masthead-quiet .bk-kicker,
-.bk .bk-masthead-quiet .bk-tagline {
+/* No tagline: the label stands alone, with no space under it. */
+.bk-masthead-quiet .bk-kicker:last-child {
   margin: 0;
+}
+
+/* The stylist's tagline, in the serif heading style (moderate size). */
+.bk .bk-headline {
+  font-family: var(--font-display), "Cormorant Garamond", Georgia, serif;
+  font-weight: 500;
+  font-size: clamp(1.7rem, 7vw, 2.4rem);
+  line-height: 1.12;
+  color: var(--ink);
+  margin: 0;
+  max-width: 22ch;
+  overflow-wrap: anywhere;
 }
 
 /* Read by screen readers, not shown. */
@@ -278,6 +290,9 @@ body:has(.bk) {
 
   .bk-layout {
     grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    /* The tall panel spans both rows; the extra height goes to the second
+       row, so there's no gap under the label or tagline. */
+    grid-template-rows: auto 1fr;
     column-gap: clamp(32px, 5vw, 64px);
     align-items: start;
   }
@@ -286,6 +301,11 @@ body:has(.bk) {
     grid-column: 2;
     grid-row: 1;
     padding: 72px 0 48px;
+  }
+
+  /* Line the label up with the top of the panel; no gap below it. */
+  .bk-masthead-quiet {
+    padding: 28px 0 32px;
   }
 
   /* The photo or initials panel stays in view while the steps scroll. */

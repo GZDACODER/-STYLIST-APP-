@@ -6,7 +6,7 @@ import TimeZoneSelect from "@/components/TimeZoneSelect";
 import SubmitButton from "@/components/SubmitButton";
 import FormMessage from "@/components/FormMessage";
 
-export default function SettingsForm({ businessName, slug, timezone }) {
+export default function SettingsForm({ businessName, slug, timezone, tagline }) {
   const [state, formAction] = useActionState(saveSettings, null);
 
   return (
@@ -15,6 +15,20 @@ export default function SettingsForm({ businessName, slug, timezone }) {
         Business name
         <input name="business_name" type="text" maxLength={100} defaultValue={businessName} required />
       </label>
+      <label>
+        Tagline (optional)
+        <input
+          name="tagline"
+          type="text"
+          maxLength={120}
+          defaultValue={tagline}
+          placeholder="Colour and precision cutting in Logan Square"
+        />
+      </label>
+      <p className="muted small-text">
+        A short line shown at the top of your booking page. Leave it empty to show &quot;Reserve
+        your appointment&quot; instead.
+      </p>
       <label>
         Booking link
         <div className="prefixed">

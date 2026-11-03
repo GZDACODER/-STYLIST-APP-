@@ -68,6 +68,13 @@ export default async function SettingsPage({ searchParams }) {
   ]);
   if (!stylist) redirect("/dashboard");
 
+  // Read on its own, so Settings still opens before the tagline SQL (0013) is run.
+  const { data: taglineRow } = await supabase
+    .from("stylists")
+    .select("tagline")
+    .eq("id", user.id)
+    .maybeSingle();
+
   const configured = paymentsConfigured();
   let stripe = { connected: false, enabled: false, detailsSubmitted: false };
   if (stylist.stripe_account_id) {
@@ -90,6 +97,7 @@ export default async function SettingsPage({ searchParams }) {
           businessName={stylist.business_name}
           slug={stylist.slug}
           timezone={stylist.timezone}
+          tagline={taglineRow?.tagline || ""}
         />
       </section>
 

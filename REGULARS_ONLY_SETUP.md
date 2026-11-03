@@ -21,6 +21,8 @@ Three things, all in Safari on your iPad:
    matched by phone number; see "How clients are matched" below).
 5. Do the same with `supabase/migrations/0012_invite_wins.sql` (an invite made
    out to the number someone books with always makes them a new, Invited client).
+6. Do the same with `supabase/migrations/0013_tagline.sql` (an optional tagline
+   for the top of the booking page, set in Settings).
 
 Nothing to add in Vercel. It redeploys by itself.
 

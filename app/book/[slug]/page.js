@@ -84,9 +84,12 @@ export default async function BookingPage({ params, searchParams }) {
           <>
             <h1 className="visually-hidden">Book with {look.name}</h1>
             {data.tagline ? (
-              <p className="bk-tagline">{data.tagline}</p>
+              <>
+                {!look.logo && <p className="bk-kicker">Book with</p>}
+                <p className="bk-headline">{data.tagline}</p>
+              </>
             ) : (
-              !look.logo && <p className="bk-kicker">Book with</p>
+              !look.logo && <p className="bk-kicker">Reserve your appointment</p>
             )}
           </>
         )}

@@ -10,6 +10,7 @@ export async function saveSettings(prevState, formData) {
   const businessName = String(formData.get("business_name") || "").trim();
   const slug = String(formData.get("slug") || "").trim().toLowerCase();
   const timezone = String(formData.get("timezone") || "").trim();
+  const tagline = String(formData.get("tagline") || "").trim();
 
   if (!businessName) return { error: "Please enter your business name." };
   if (businessName.length > 100) return { error: "Business name is too long." };
@@ -20,6 +21,7 @@ export async function saveSettings(prevState, formData) {
     };
   }
   if (!isValidTimeZone(timezone)) return { error: "Please pick your time zone." };
+  if (tagline.length > 120) return { error: "Please keep the tagline to 120 characters." };
 
   const supabase = await createClient();
   const {
@@ -36,6 +38,19 @@ export async function saveSettings(prevState, formData) {
     // 23505 = "unique violation": another stylist already has this link.
     if (error.code === "23505") return { error: "That link is already taken. Try another." };
     return { error: error.message };
+  }
+
+  // Saved on its own, so the rest still saves before the tagline SQL is run.
+  const { error: taglineError } = await supabase
+    .from("stylists")
+    .update({ tagline })
+    .eq("id", user.id);
+  if (taglineError) {
+    revalidatePath("/dashboard", "layout");
+    return {
+      error:
+        "Your other settings were saved, but not the tagline. Run supabase/migrations/0013_tagline.sql in Supabase first.",
+    };
   }
 
   // Name, link and time zone show up across the whole dashboard.
