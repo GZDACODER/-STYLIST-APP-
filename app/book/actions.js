@@ -90,10 +90,25 @@ export async function sendCode(method, value) {
     options: { shouldCreateUser: true },
   });
   if (error) {
+    // Shows in Vercel's logs (search for "Couldn't send email code").
+    console.error("Couldn't send email code", error.status, error.code, error.message);
     if (error.status === 429 || /rate limit|after \d+ seconds/i.test(error.message)) {
       return { error: "Too many codes requested. Please wait a minute and try again." };
     }
-    return { error: "We couldn't send a code right now. Please try again shortly." };
+    // Supabase's own email only goes to the project's team members, and only
+    // to their exact address (name+test@gmail.com is a different address).
+    if (error.code === "email_address_not_authorized" || /not authorized/i.test(error.message)) {
+      return {
+        error: `Email codes aren't set up for this address yet. Please use your phone number instead. Details: ${error.message}`,
+      };
+    }
+    if (error.code === "email_address_invalid" || /invalid/i.test(error.message)) {
+      return { error: "That email address can't be used. Please check it, or use your phone number." };
+    }
+    // Usually the email provider (Resend) refused: see Resend's Logs.
+    return {
+      error: `We couldn't send a code right now. Please try again shortly, or use your phone number. Details: ${error.message}`,
+    };
   }
   return { success: true, value: email };
 }
