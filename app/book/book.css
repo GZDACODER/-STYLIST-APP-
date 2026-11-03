@@ -150,6 +150,28 @@ body:has(.bk) {
   padding: 44px 0 28px;
 }
 
+.bk-masthead-quiet {
+  padding: 32px 0 22px;
+}
+
+.bk-masthead-quiet .bk-kicker,
+.bk .bk-masthead-quiet .bk-tagline {
+  margin: 0;
+}
+
+/* Read by screen readers, not shown. */
+.bk .visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .bk-kicker {
   display: flex;
   align-items: center;
@@ -213,9 +235,10 @@ body:has(.bk) {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  gap: 18px;
-  aspect-ratio: 16 / 9;
-  padding: 28px var(--gutter);
+  gap: 14px;
+  /* A third shorter than 16:9. It still grows if a long name needs room. */
+  aspect-ratio: 8 / 3;
+  padding: 18px var(--gutter);
   background: var(--ink);
   color: var(--paper);
 }
@@ -223,7 +246,7 @@ body:has(.bk) {
 .bk-plate-name {
   font-family: var(--font-script), cursive;
   font-weight: 400;
-  font-size: clamp(2.6rem, 13vw, 4.6rem);
+  font-size: clamp(2.2rem, 10.5vw, 4.2rem);
   line-height: 1.1;
   word-spacing: 0.15em;
   /* Script letters lean past their box; padding stops them being clipped. */
@@ -641,28 +664,27 @@ body:has(.bk) {
   border-bottom-color: var(--accent);
 }
 
+/* Times: open text set in rows, a hairline under each row, no boxes. */
 .bk .time-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
   gap: 0;
   border-top: 1px solid var(--hair);
-  border-left: 1px solid var(--hair);
 }
 
 .bk .time-choice {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 6px;
-  min-height: 48px;
-  padding: 10px 6px;
+  min-height: 52px;
+  padding: 12px 0;
   border: 0;
-  border-right: 1px solid var(--hair);
   border-bottom: 1px solid var(--hair);
   border-radius: 0;
   background: none;
   box-shadow: none;
-  color: var(--ink);
+  color: var(--ink-soft);
   font-family: var(--font-sans), sans-serif;
   font-size: 0.95rem;
   font-weight: 400;
@@ -672,13 +694,20 @@ body:has(.bk) {
 }
 
 .bk .time-choice:hover {
-  background: rgba(14, 13, 11, 0.05);
+  background: none;
+  color: var(--ink);
 }
 
+/* The chosen time: darker, with a thin gold underline. */
 .bk .time-choice.selected,
 .bk .time-choice.selected:hover {
-  background: var(--ink);
-  color: var(--paper);
+  background: none;
+  color: var(--ink);
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 8px;
 }
 
 .bk .list-title {
@@ -842,8 +871,7 @@ body:has(.bk) {
   box-shadow: inset 3px 0 0 var(--accent);
 }
 
-.bk .chip.active,
-.bk .time-choice.selected {
+.bk .chip.active {
   background: var(--ink);
   border-color: var(--hair);
   font-weight: 400;

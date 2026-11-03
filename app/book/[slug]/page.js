@@ -69,15 +69,27 @@ export default async function BookingPage({ params, searchParams }) {
 
   return (
     <div className="bk-layout" style={look.accent ? { "--accent": look.accent } : undefined}>
-      {/* The stylist's own masthead. */}
-      <header className="bk-masthead">
-        {look.logo ? (
-          <img className="bk-logo" src={look.logo} alt="" decoding="async" />
+      {/* The stylist's own masthead. With no photo, their name is shown once,
+          as the cursive signature in the black panel, so here there's just a
+          small label (or their tagline). With a photo, the name is set here. */}
+      <header className={look.photo ? "bk-masthead" : "bk-masthead bk-masthead-quiet"}>
+        {look.logo && <img className="bk-logo" src={look.logo} alt="" decoding="async" />}
+        {look.photo ? (
+          <>
+            {!look.logo && <p className="bk-kicker">Book with</p>}
+            <h1 className="bk-name">{look.name}</h1>
+            {data.tagline && <p className="bk-tagline">{data.tagline}</p>}
+          </>
         ) : (
-          <p className="bk-kicker">Book with</p>
+          <>
+            <h1 className="visually-hidden">Book with {look.name}</h1>
+            {data.tagline ? (
+              <p className="bk-tagline">{data.tagline}</p>
+            ) : (
+              !look.logo && <p className="bk-kicker">Book with</p>
+            )}
+          </>
         )}
-        <h1 className="bk-name">{look.name}</h1>
-        {data.tagline && <p className="bk-tagline">{data.tagline}</p>}
       </header>
       {look.photo ? (
         <figure className="bk-visual bk-cover">
