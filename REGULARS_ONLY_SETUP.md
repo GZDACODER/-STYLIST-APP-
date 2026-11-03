@@ -17,6 +17,8 @@ Three things, all in Safari on your iPad:
    select all and copy.
 3. In Supabase go to **SQL Editor → New query**, paste, and tap **Run**.
    You should see "Success. No rows returned".
+4. Do the same with `supabase/migrations/0011_match_by_phone.sql` (clients are
+   matched by phone number; see "How clients are matched" below).
 
 Nothing to add in Vercel. It redeploys by itself.
 
@@ -43,6 +45,17 @@ These kept times show on the **Openings** tab under **Kept for Regulars**. Tap
 **Open to everyone** to release one. Switching an opening (or a whole day) to
 **Everyone** releases any kept times inside it too. Either way, waitlisted
 non-Regulars who want that time are emailed.
+
+### How clients are matched
+
+Clients are matched to your Clients tab by **phone number**:
+
+- Confirmed by **text**: that phone number decides who they are.
+- Confirmed by **email**: they count as the client with that email only if
+  they book with that client's phone number (or that client has no number on
+  file). Booking with a different number makes them a new client, so an invite
+  link works for them.
+- A blocked client's number or email blocks the booking either way.
 
 ### Invite links
 
