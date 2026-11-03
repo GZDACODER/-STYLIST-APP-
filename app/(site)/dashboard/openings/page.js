@@ -7,8 +7,9 @@ import { openHoldToEveryone } from "./actions";
 import BookingLink from "./BookingLink";
 import PostOpeningsForm from "./PostOpeningsForm";
 import OpeningsList from "./OpeningsList";
+import { BRAND_NAME } from "@/lib/brand";
 
-export const metadata = { title: "Openings · GZ Stylist App" };
+export const metadata = { title: `Openings · ${BRAND_NAME}` };
 
 export default async function OpeningsPage() {
   const supabase = await createClient();

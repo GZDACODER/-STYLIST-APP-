@@ -6,8 +6,9 @@ import { describeWishes } from "@/lib/preferences";
 import { formatDate, todayInTimeZone } from "@/lib/availability";
 import WaitlistSettingsForm from "./WaitlistSettingsForm";
 import RemoveEntryButton from "./RemoveEntryButton";
+import { BRAND_NAME } from "@/lib/brand";
 
-export const metadata = { title: "Waitlist · GZ Stylist App" };
+export const metadata = { title: `Waitlist · ${BRAND_NAME}` };
 
 const STATUS_LABELS = { regular: "Regular", new: "New", blocked: "Blocked" };
 

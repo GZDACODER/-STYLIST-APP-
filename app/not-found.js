@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function NotFound() {
   return (
-    <div className="stack">
+    <main className="container stack">
       <h1>Page not found</h1>
       <p className="muted">
         If you&apos;re trying to book, check the link your stylist sent you.
@@ -10,6 +10,6 @@ export default function NotFound() {
       <Link href="/" className="button secondary">
         Go to the home page
       </Link>
-    </div>
+    </main>
   );
 }

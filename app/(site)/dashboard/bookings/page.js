@@ -3,8 +3,9 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { clockTime, formatDate, timeZoneLabel, todayInTimeZone } from "@/lib/availability";
 import CancelBookingButton from "./CancelBookingButton";
+import { BRAND_NAME } from "@/lib/brand";
 
-export const metadata = { title: "Bookings · GZ Stylist App" };
+export const metadata = { title: `Bookings · ${BRAND_NAME}` };
 
 const STATUS_LABELS = { regular: "Regular", new: "New", blocked: "Blocked" };
 

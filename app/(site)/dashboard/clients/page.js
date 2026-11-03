@@ -4,8 +4,9 @@ import AddClientForm from "./AddClientForm";
 import ClientList from "./ClientList";
 import InviteForm from "./InviteForm";
 import InviteList from "./InviteList";
+import { BRAND_NAME } from "@/lib/brand";
 
-export const metadata = { title: "Clients · GZ Stylist App" };
+export const metadata = { title: `Clients · ${BRAND_NAME}` };
 
 export default async function ClientsPage() {
   const supabase = await createClient();

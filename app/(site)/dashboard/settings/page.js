@@ -5,8 +5,9 @@ import { getStripe, paymentsConfigured } from "@/lib/stripe";
 import SettingsForm from "./SettingsForm";
 import DepositsForm from "./DepositsForm";
 import RegularsForm from "./RegularsForm";
+import { BRAND_NAME } from "@/lib/brand";
 
-export const metadata = { title: "Settings · GZ Stylist App" };
+export const metadata = { title: `Settings · ${BRAND_NAME}` };
 
 const STRIPE_NOTICES = {
   not_configured: {

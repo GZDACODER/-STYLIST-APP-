@@ -8,6 +8,7 @@ import { formatPhone } from "@/lib/phone";
 import VerifyClient from "./VerifyClient";
 import WaitlistForm from "./WaitlistForm";
 import MyBookings from "./MyBookings";
+import RegularStar from "@/components/RegularStar";
 
 // How many dates to show before "More dates".
 const FIRST_DATES = 12;
@@ -179,7 +180,7 @@ export default function BookingFlow({
   if (confirmation) {
     return (
       <section className="card confirmation">
-        <h2>You&apos;re booked!</h2>
+        <h2>You&apos;re booked.</h2>
         <p>
           <strong>{confirmation.service_name}</strong> with {confirmation.business_name}
           <br />
@@ -256,8 +257,9 @@ export default function BookingFlow({
 
       {/* ---------- Who's booking ---------- */}
       {viewer_status === "regular" && (
-        <p className="message success">
-          Welcome back! As a regular, you can see times saved just for regulars (marked ★).{" "}
+        <p className="message regular">
+          <RegularStar label="Regular" size={13} /> Welcome back. As a Regular, you also see the
+          times kept for Regulars, marked with the gold star.{" "}
           <button type="button" className="link-button" onClick={notMe} disabled={pending}>
             Not {viewerLabel}?
           </button>
@@ -323,7 +325,9 @@ export default function BookingFlow({
       {/* ---------- 1. Service ---------- */}
       {!locked && (
         <section className="card">
-          <h2>1. Choose a service</h2>
+          <h2>
+            <span className="bk-num">01</span>Service
+          </h2>
           {services.length === 0 && <p className="muted">No services are listed yet.</p>}
           <div className="choice-list">
             {services.map((s) => (
@@ -335,8 +339,9 @@ export default function BookingFlow({
                 onClick={() => chooseService(s.id)}
               >
                 <span className="service-name">{s.name}</span>
-                <span className="muted">
-                  {formatMinutes(s.duration_minutes)} · {formatPrice(s.price_cents)}
+                <span className="choice-price">{formatPrice(s.price_cents)}</span>
+                <span className="choice-meta">
+                  {formatMinutes(s.duration_minutes)}
                   {s.deposit_cents > 0 && ` · ${formatPrice(s.deposit_cents)} deposit`}
                 </span>
               </button>
@@ -348,7 +353,9 @@ export default function BookingFlow({
       {/* ---------- 2. Time ---------- */}
       {service && !locked && (
         <section className="card">
-          <h2>2. Choose a time</h2>
+          <h2>
+            <span className="bk-num">02</span>Date &amp; time
+          </h2>
           <p className="muted small-text">{zoneNote}</p>
           {!slots && !slotsError && <p className="muted">Loading open times...</p>}
           {slotsError && <p className="message error">{slotsError}</p>}
@@ -378,11 +385,18 @@ export default function BookingFlow({
                       setTime(null);
                     }}
                   >
-                    <span className="small-text">
+                    <span className="date-weekday">
                       {day.toLocaleDateString("en-US", { weekday: "short" })}
                     </span>
-                    <strong>{day.toLocaleDateString("en-US", { month: "short", day: "numeric" })}</strong>
-                    {d.early && <span className="early-star" aria-label="Has regulars-only times">★</span>}
+                    <strong className="date-day">{day.getDate()}</strong>
+                    <span className="date-month">
+                      {day.toLocaleDateString("en-US", { month: "short" })}
+                    </span>
+                    {d.early && (
+                      <span className="early-star">
+                        <RegularStar label="Has Regulars-only times" />
+                      </span>
+                    )}
                   </button>
                 );
               })}
@@ -411,7 +425,7 @@ export default function BookingFlow({
                     onClick={() => setTime(s.slot_time)}
                   >
                     {clockTime(s.slot_time)}
-                    {s.visibility === "regulars" && <span aria-label="Regulars only"> ★</span>}
+                    {s.visibility === "regulars" && <RegularStar />}
                   </button>
                 ))}
               </div>
@@ -439,7 +453,10 @@ export default function BookingFlow({
       {/* ---------- Waitlist ---------- */}
       {service && !locked && showWaitlist && (
         <section className="card">
-          <h2>Join the waitlist for {service.name}</h2>
+          <h2>
+            <span className="bk-num">—</span>Waitlist
+          </h2>
+          <p className="bk-lede">{service.name}</p>
           <WaitlistForm
             slug={slug}
             service={service}
@@ -457,7 +474,9 @@ export default function BookingFlow({
       {/* ---------- 3. Details ---------- */}
       {service && !locked && date && time && !showWaitlist && (
         <section className="card">
-          <h2>3. Your details</h2>
+          <h2>
+            <span className="bk-num">03</span>Your details
+          </h2>
           <p className="summary">
             <strong>{service.name}</strong>
             <br />

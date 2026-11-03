@@ -1,7 +1,8 @@
 import Link from "next/link";
 import SignupForm from "./SignupForm";
+import { BRAND_NAME } from "@/lib/brand";
 
-export const metadata = { title: "Sign up · GZ Stylist App" };
+export const metadata = { title: `Sign up · ${BRAND_NAME}` };
 
 export default function SignupPage() {
   return (

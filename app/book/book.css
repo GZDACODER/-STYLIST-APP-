@@ -1,0 +1,863 @@
+/* =========================================================
+   Public booking pages: an editorial look.
+   Warm black ink on off-white paper, thin rules instead of
+   boxes, Cormorant Garamond for headings, Inter for text, and
+   champagne gold used sparingly (the Regulars' star, a rule or
+   two). A stylist's own accent colour replaces the gold.
+   Everything here is inside .bk, so the dashboard is untouched.
+   ========================================================= */
+
+.bk {
+  --paper: #f5f1ea;
+  --ink: #0e0d0b;
+  --ink-soft: #57534b;
+  --ink-faint: #8f8a80;
+  --hair: rgba(14, 13, 11, 0.15);
+  /* The accent: champagne gold, unless the stylist has their own colour. */
+  --accent: #c8a96a;
+  --red: #8f2a1f;
+  --gutter: 20px;
+
+  min-height: 100vh;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans), "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.55;
+  color-scheme: light;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* The page behind (and when scrolling past the ends) matches the paper. */
+body:has(.bk) {
+  background: #f5f1ea;
+}
+
+.bk ::selection {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.bk a {
+  color: var(--ink);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
+/* ---------- Top bar and footer ---------- */
+.bk-bar,
+.bk-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 14px var(--gutter);
+}
+
+.bk-bar {
+  border-bottom: 1px solid var(--ink);
+}
+
+.bk-foot {
+  margin-top: 72px;
+  padding-top: 20px;
+  padding-bottom: 40px;
+  border-top: 1px solid var(--hair);
+  justify-content: flex-start;
+}
+
+.bk-bar-label,
+.bk-kicker,
+.bk .bk-num,
+.bk label,
+.bk legend,
+.bk .date-weekday,
+.bk .date-month,
+.bk .choice-meta {
+  font-family: var(--font-sans), sans-serif;
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.bk-signature {
+  font-family: var(--font-script), cursive;
+  font-size: 1.7rem;
+  line-height: 1;
+  color: var(--ink);
+  word-spacing: 0.18em;
+  padding: 0 0.15em;
+}
+
+.bk-main {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+
+/* ---------- Type ---------- */
+.bk h1,
+.bk h2,
+.bk h3 {
+  font-family: var(--font-display), "Cormorant Garamond", Garamond, Georgia, serif;
+  font-weight: 400;
+  color: var(--ink);
+  letter-spacing: 0;
+}
+
+.bk h1 {
+  font-size: clamp(2.5rem, 9vw, 3.8rem);
+  line-height: 1.02;
+  margin: 40px 0 24px;
+}
+
+.bk h2 {
+  font-size: 1.9rem;
+  font-weight: 500;
+  line-height: 1.15;
+  margin: 0 0 20px;
+}
+
+.bk h3 {
+  font-size: 1.15rem;
+  font-style: italic;
+  margin: 28px 0 12px;
+}
+
+.bk p {
+  margin: 0 0 14px;
+}
+
+.bk .muted {
+  color: var(--ink-soft);
+}
+
+.bk .small-text {
+  font-size: 0.85rem;
+}
+
+/* ---------- The stylist's masthead ---------- */
+.bk-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.bk-masthead {
+  padding: 44px 0 28px;
+}
+
+.bk-kicker {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 18px;
+  color: var(--ink-soft);
+}
+
+/* A short rule before "Book with". */
+.bk-kicker::before {
+  content: "";
+  width: 32px;
+  height: 1px;
+  background: var(--ink);
+}
+
+.bk .bk-name {
+  font-size: clamp(3.4rem, 17vw, 7.5rem);
+  font-weight: 500;
+  line-height: 0.9;
+  letter-spacing: -0.015em;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.bk .bk-tagline {
+  font-family: var(--font-display), Georgia, serif;
+  font-style: italic;
+  font-size: 1.35rem;
+  line-height: 1.35;
+  color: var(--ink-soft);
+  margin: 22px 0 0;
+  max-width: 30ch;
+}
+
+/* The stylist's logo, if they have one, above their name. */
+.bk-logo {
+  display: block;
+  max-height: 56px;
+  max-width: 200px;
+  width: auto;
+  margin: 0 0 22px;
+}
+
+/* Photo (or initials panel): full-bleed on phones. */
+.bk-visual {
+  margin: 0 calc(-1 * var(--gutter)) 8px;
+  overflow: hidden;
+}
+
+.bk-cover {
+  aspect-ratio: 4 / 5;
+  max-height: 78vh;
+  background: #e7e1d6;
+}
+
+/* No photo: solid warm black, the initials set large, one accent rule. */
+.bk-plate {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  aspect-ratio: 16 / 9;
+  padding: 24px var(--gutter);
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.bk-plate::after {
+  content: "";
+  position: absolute;
+  left: var(--gutter);
+  top: 24px;
+  width: 40px;
+  height: 1px;
+  background: var(--accent);
+}
+
+.bk-monogram {
+  font-family: var(--font-display), Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(5rem, 30vw, 12rem);
+  line-height: 0.8;
+  letter-spacing: -0.02em;
+}
+
+.bk-cover img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Wider screens: an asymmetric spread. Photo on the left, held in place
+   while the booking steps scroll on the right. Without a photo, the name
+   sits left and the steps are set off to the right. */
+@media (min-width: 900px) {
+  .bk {
+    --gutter: 40px;
+  }
+
+  .bk-layout {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    column-gap: 64px;
+    align-items: start;
+  }
+
+  .bk-masthead {
+    grid-column: 2;
+    grid-row: 1;
+    padding: 72px 0 48px;
+  }
+
+  /* The photo or initials panel stays in view while the steps scroll. */
+  .bk-visual {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    position: sticky;
+    top: 24px;
+    margin: 24px 0 0;
+    aspect-ratio: 4 / 5;
+    max-height: calc(100vh - 48px);
+  }
+
+  .bk-plate {
+    padding: 32px;
+  }
+
+  .bk-plate::after {
+    left: 32px;
+    top: 32px;
+  }
+
+  .bk-flow {
+    grid-column: 2;
+  }
+}
+
+/* ---------- Sections: thin rules, not boxes ---------- */
+.bk .card {
+  position: relative;
+  background: none;
+  border: 0;
+  border-top: 1px solid var(--ink);
+  border-radius: 0;
+  box-shadow: none;
+  padding: 22px 0 40px;
+  margin: 0;
+  overflow: visible;
+}
+
+.bk .card::before {
+  content: none;
+}
+
+.bk .bk-num {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.bk-lede {
+  font-family: var(--font-display), Georgia, serif;
+  font-style: italic;
+  font-size: 1.15rem;
+}
+
+/* ---------- Messages: a rule down the left, no fill ---------- */
+.bk .message {
+  background: none;
+  border: 0;
+  border-left: 2px solid var(--ink);
+  border-radius: 0;
+  padding: 2px 0 2px 14px;
+  margin: 18px 0;
+  color: var(--ink);
+  font-size: 0.95rem;
+}
+
+.bk .message.info {
+  border-left-color: var(--hair);
+  color: var(--ink-soft);
+}
+
+.bk .message.warning {
+  border-left-color: var(--ink);
+}
+
+.bk .message.error {
+  border-left-color: var(--red);
+  color: var(--red);
+}
+
+.bk .message.regular {
+  border-left-color: var(--accent);
+}
+
+/* The Regulars' star. */
+.bk .regular-star {
+  display: inline-block;
+  vertical-align: -1px;
+  fill: var(--accent);
+}
+
+/* ---------- Buttons ---------- */
+.bk .button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  width: 100%;
+  padding: 14px 26px;
+  border: 1px solid var(--ink);
+  border-radius: 0;
+  background: var(--ink);
+  color: var(--paper);
+  box-shadow: none;
+  font-family: var(--font-sans), sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.bk .button:hover:not(:disabled) {
+  background: #000;
+  transform: none;
+  box-shadow: none;
+}
+
+.bk .button.secondary {
+  background: transparent;
+  color: var(--ink);
+}
+
+.bk .button.secondary:hover:not(:disabled) {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.bk .button.small {
+  width: auto;
+  min-height: 40px;
+  padding: 8px 16px;
+}
+
+.bk .button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+@media (min-width: 600px) {
+  .bk .button {
+    width: auto;
+    min-width: 260px;
+  }
+}
+
+.bk .link-button {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.9rem;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  cursor: pointer;
+}
+
+.bk .link-button.danger {
+  color: var(--red);
+}
+
+.bk .row-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 24px;
+  margin-top: 16px;
+}
+
+/* ---------- Forms: an underline, not a box ---------- */
+.bk form {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.bk label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--ink-soft);
+}
+
+.bk input[type="text"],
+.bk input[type="email"],
+.bk input[type="tel"],
+.bk input:not([type]) {
+  width: 100%;
+  padding: 10px 0;
+  border: 0;
+  border-bottom: 1px solid var(--ink);
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  box-shadow: none;
+  font-family: var(--font-sans), sans-serif;
+  /* 16px or more stops iPhones zooming in. */
+  font-size: 1.05rem;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.bk input:focus {
+  outline: none;
+  border-bottom-width: 2px;
+  padding-bottom: 9px;
+}
+
+.bk input::placeholder {
+  color: var(--ink-faint);
+}
+
+.bk .code-input {
+  font-size: 1.6rem !important;
+  letter-spacing: 0.4em !important;
+  font-variant-numeric: tabular-nums;
+}
+
+.bk .check-row {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 0.9rem;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ink);
+}
+
+.bk .check-row input {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  accent-color: var(--ink);
+  border-radius: 0;
+}
+
+.bk fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+/* ---------- 01 Service: a price list ---------- */
+.bk .choice-list {
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid var(--hair);
+}
+
+.bk .choice {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  column-gap: 16px;
+  row-gap: 4px;
+  align-items: baseline;
+  width: 100%;
+  padding: 18px 0;
+  border: 0;
+  border-top: 1px solid var(--hair);
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  transition: padding-left 0.18s;
+}
+
+.bk .choice .service-name {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.55rem;
+  font-weight: 500;
+  font-weight: 400;
+  line-height: 1.2;
+  color: var(--ink);
+}
+
+.bk .choice-price {
+  font-variant-numeric: tabular-nums;
+  font-size: 1rem;
+}
+
+.bk .choice-meta {
+  grid-column: 1 / -1;
+  color: var(--ink-soft);
+}
+
+/* The chosen service: a black rule on the left. */
+.bk .choice.selected {
+  padding-left: 16px;
+  box-shadow: inset 3px 0 0 var(--ink);
+}
+
+.bk .choice:focus-visible,
+.bk .date-choice:focus-visible,
+.bk .time-choice:focus-visible,
+.bk .chip:focus-visible,
+.bk .button:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+/* ---------- 02 Date & time ---------- */
+.bk .date-grid {
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+  margin: 8px calc(-1 * var(--gutter)) 0 0;
+  padding-bottom: 4px;
+  border-left: 1px solid var(--hair);
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+}
+
+.bk .date-choice {
+  position: relative;
+  flex: 0 0 76px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 12px 12px 14px;
+  border: 0;
+  border-right: 1px solid var(--hair);
+  border-top: 1px solid var(--hair);
+  border-bottom: 1px solid var(--hair);
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  color: var(--ink);
+  scroll-snap-align: start;
+  cursor: pointer;
+}
+
+.bk .date-choice .date-day {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 2.2rem;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.bk .date-choice .date-weekday,
+.bk .date-choice .date-month {
+  color: var(--ink-soft);
+  font-size: 0.62rem;
+}
+
+.bk .date-choice .early-star {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  line-height: 0;
+}
+
+.bk .date-choice.selected {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.bk .date-choice.selected .date-day,
+.bk .date-choice.selected .date-weekday,
+.bk .date-choice.selected .date-month {
+  color: var(--paper);
+}
+
+.bk .time-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+  gap: 0;
+  border-top: 1px solid var(--hair);
+  border-left: 1px solid var(--hair);
+}
+
+.bk .time-choice {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 48px;
+  padding: 10px 6px;
+  border: 0;
+  border-right: 1px solid var(--hair);
+  border-bottom: 1px solid var(--hair);
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  color: var(--ink);
+  font-family: var(--font-sans), sans-serif;
+  font-size: 0.95rem;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.bk .time-choice:hover,
+.bk .date-choice:hover {
+  background: rgba(14, 13, 11, 0.05);
+}
+
+.bk .time-choice.selected,
+.bk .time-choice.selected:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.bk .list-title {
+  margin-top: 28px;
+}
+
+.bk .waitlist-prompt {
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid var(--hair);
+}
+
+.bk .waitlist-prompt p {
+  font-family: var(--font-display), Georgia, serif;
+  font-style: italic;
+  font-size: 1.15rem;
+  color: var(--ink);
+}
+
+/* Waitlist day and time choices. */
+.bk .filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  margin: 0 0 6px;
+  border-left: 1px solid var(--hair);
+  border-top: 1px solid var(--hair);
+}
+
+.bk .chip {
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 0;
+  border-right: 1px solid var(--hair);
+  border-bottom: 1px solid var(--hair);
+  border-radius: 0;
+  background: none;
+  color: var(--ink);
+  font-family: var(--font-sans), sans-serif;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.bk .chip.active {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.bk .wish-group legend {
+  margin-bottom: 10px;
+  color: var(--ink-soft);
+}
+
+/* ---------- 03 Details ---------- */
+.bk .summary {
+  border: 0;
+  border-radius: 0;
+  background: none;
+  padding: 0;
+  margin: 0 0 24px;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.6rem;
+  line-height: 1.3;
+}
+
+.bk .summary strong {
+  font-weight: 400;
+}
+
+.bk .policy {
+  border: 0;
+  border-top: 1px solid var(--hair);
+  border-radius: 0;
+  background: none;
+  padding: 14px 0 0;
+}
+
+.bk .policy h3 {
+  font-family: var(--font-sans), sans-serif;
+  font-style: normal;
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin: 0 0 6px;
+  color: var(--ink-soft);
+}
+
+.bk .policy p {
+  font-size: 0.9rem;
+}
+
+/* ---------- Booked ---------- */
+.bk .confirmation {
+  text-align: left;
+}
+
+.bk .confirmation h2 {
+  font-size: clamp(2.6rem, 12vw, 4.2rem);
+  line-height: 1;
+  color: var(--ink);
+  margin: 8px 0 24px;
+}
+
+.bk .confirmation p:first-of-type {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.3rem;
+  line-height: 1.4;
+}
+
+/* ---------- Lists (your appointments, waitlist times) ---------- */
+.bk .service-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-bottom: 1px solid var(--hair);
+}
+
+.bk .service-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 0;
+  border-top: 1px solid var(--hair);
+  border-bottom: 0;
+}
+
+.bk .service-list .service-name {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.15rem;
+  font-weight: 400;
+  color: var(--ink);
+}
+
+.bk .regular-prompt {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+/* ---------- Switch off the dashboard's effects inside the booking pages ---------- */
+/* No lifting, shrinking or glowing: things just change colour. */
+.bk button,
+.bk .button,
+.bk .choice,
+.bk .chip,
+.bk .date-choice,
+.bk .time-choice {
+  transform: none !important;
+  box-shadow: none;
+  transition: background-color 0.15s, color 0.15s, padding-left 0.18s;
+}
+
+.bk .choice.selected {
+  box-shadow: inset 3px 0 0 var(--ink);
+}
+
+.bk .chip.active,
+.bk .date-choice.selected,
+.bk .time-choice.selected {
+  background: var(--ink);
+  border-color: var(--hair);
+  font-weight: 400;
+}
+
+.bk input:focus,
+.bk select:focus,
+.bk textarea:focus {
+  box-shadow: none;
+  border-color: var(--ink);
+}
+
+.bk .check-row input {
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+@media (hover: hover) {
+  .bk .button:hover:not(:disabled) {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+/* Pages with no masthead (claim, waitlist, paid): space below the top bar. */
+.bk-main > .card:first-child,
+.bk-main > h1:first-child {
+  margin-top: 40px;
+}

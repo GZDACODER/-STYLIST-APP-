@@ -14,9 +14,29 @@ const loadPage = cache(async (slug, invite) => {
   // the step 8 SQL has been run.
   return supabase.rpc(
     "get_booking_page",
-    invite ? { p_slug: slug, p_invite: invite } : { p_slug: slug }
+    invite ? { p_slug: slug, p_invite: invite } : { p_slug: slug },
   );
 });
+
+// A stylist's own look on their page: their accent colour, logo and photo
+// replace the defaults when they're set. (Only the name is stored today; the
+// rest is used as soon as the booking page data includes it.)
+function stylistLook(page) {
+  const https = (url) => (typeof url === "string" && /^https:\/\//.test(url) ? url : null);
+  const accent = /^#[0-9a-f]{6}$/i.test(page.accent_color || "") ? page.accent_color : null;
+  const initials = String(page.business_name || "")
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((word) => word[0].toUpperCase())
+    .join("");
+  return {
+    accent,
+    logo: https(page.logo_url),
+    photo: https(page.cover_photo_url) || https(page.photos?.[0]),
+    initials,
+  };
+}
 
 function inviteFrom(searchParams) {
   const invite = searchParams?.invite;
@@ -41,17 +61,40 @@ export default async function BookingPage({ params, searchParams }) {
   }
   if (!data) notFound();
 
+  const look = stylistLook(data);
+
   return (
-    <>
-      <h1>Book with {data.business_name}</h1>
-      <BookingFlow
-        page={data}
-        invite={invite}
-        paymentCancelled={payment === "cancelled"}
-        waitlistReady={waitlistConfigured()}
-        textsAvailable={textsEnabled()}
-        textCodes={textCodesEnabled()}
-      />
-    </>
+    <div className="bk-layout" style={look.accent ? { "--accent": look.accent } : undefined}>
+      {/* The stylist's own masthead. */}
+      <header className="bk-masthead">
+        {look.logo ? (
+          <img className="bk-logo" src={look.logo} alt="" decoding="async" />
+        ) : (
+          <p className="bk-kicker">Book with</p>
+        )}
+        <h1 className="bk-name">{data.business_name}</h1>
+        {data.tagline && <p className="bk-tagline">{data.tagline}</p>}
+      </header>
+      {look.photo ? (
+        <figure className="bk-visual bk-cover">
+          <img src={look.photo} alt={data.business_name} fetchPriority="high" decoding="async" />
+        </figure>
+      ) : (
+        // No photo: a solid panel set with the stylist's initials (no stock images).
+        <div className="bk-visual bk-plate" aria-hidden="true">
+          <span className="bk-monogram">{look.initials}</span>
+        </div>
+      )}
+      <div className="bk-flow">
+        <BookingFlow
+          page={data}
+          invite={invite}
+          paymentCancelled={payment === "cancelled"}
+          waitlistReady={waitlistConfigured()}
+          textsAvailable={textsEnabled()}
+          textCodes={textCodesEnabled()}
+        />
+      </div>
+    </div>
   );
 }

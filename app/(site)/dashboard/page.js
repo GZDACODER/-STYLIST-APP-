@@ -3,8 +3,9 @@ import { createClient } from "@/lib/supabase/server";
 import { deleteService } from "./actions";
 import AddServiceForm from "./AddServiceForm";
 import SubmitButton from "@/components/SubmitButton";
+import { BRAND_NAME } from "@/lib/brand";
 
-export const metadata = { title: "Dashboard · GZ Stylist App" };
+export const metadata = { title: `Dashboard · ${BRAND_NAME}` };
 
 function formatPrice(cents) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
