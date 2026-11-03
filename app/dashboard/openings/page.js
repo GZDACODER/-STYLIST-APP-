@@ -1,7 +1,9 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { timeZoneLabel, todayInTimeZone } from "@/lib/availability";
+import { clockTime, formatDate, timeZoneLabel, todayInTimeZone } from "@/lib/availability";
+import SubmitButton from "@/components/SubmitButton";
+import { openHoldToEveryone } from "./actions";
 import BookingLink from "./BookingLink";
 import PostOpeningsForm from "./PostOpeningsForm";
 import OpeningsList from "./OpeningsList";
@@ -24,20 +26,38 @@ export default async function OpeningsPage() {
 
   const today = todayInTimeZone(stylist.timezone);
 
-  const [{ data: openings, error }, { data: bookings }, { data: hourRows }] = await Promise.all([
-    supabase
-      .from("openings")
-      .select("id, opening_date, start_time, end_time, visibility")
-      .gte("opening_date", today)
-      .order("opening_date")
-      .order("start_time"),
-    supabase
-      .from("bookings")
-      .select("booking_date, start_time")
-      .eq("status", "confirmed")
-      .gte("booking_date", today),
-    supabase.from("working_hours").select("weekday, is_working"),
-  ]);
+  const [{ data: openings, error }, { data: bookings }, { data: hourRows }, { data: holdRows }] =
+    await Promise.all([
+      supabase
+        .from("openings")
+        .select("id, opening_date, start_time, end_time, visibility")
+        .gte("opening_date", today)
+        .order("opening_date")
+        .order("start_time"),
+      supabase
+        .from("bookings")
+        .select("booking_date, start_time")
+        .eq("status", "confirmed")
+        .gte("booking_date", today),
+      supabase.from("working_hours").select("weekday, is_working"),
+      supabase
+        .from("regulars_holds")
+        .select("id, hold_date, start_time, end_time")
+        .gte("hold_date", today)
+        .order("hold_date")
+        .order("start_time"),
+    ]);
+  // Only holds inside an "Everyone" opening matter ("Regulars only" openings
+  // are for Regulars anyway).
+  const holds = (holdRows || []).filter((h) =>
+    (openings || []).some(
+      (o) =>
+        o.visibility === "everyone" &&
+        o.opening_date === h.hold_date &&
+        o.start_time < h.end_time &&
+        o.end_time > h.start_time
+    )
+  );
 
   if (error) {
     return <p className="message error">Couldn't load your openings: {error.message}</p>;
@@ -79,6 +99,35 @@ export default async function OpeningsPage() {
         </p>
         <PostOpeningsForm today={today} daysOff={daysOff} />
       </section>
+
+      {holds.length > 0 && (
+        <section className="card">
+          <h2>Kept for Regulars</h2>
+          <p className="muted">
+            Regulars bookings that were cancelled. These times stay Regulars only, and only
+            waitlisted Regulars hear about them, until they&apos;re booked again or you open them to
+            everyone.
+          </p>
+          <ul className="service-list">
+            {holds.map((h) => (
+              <li key={h.id}>
+                <div>
+                  <div className="service-name">{formatDate(h.hold_date)}</div>
+                  <div className="muted">
+                    {clockTime(h.start_time)} – {clockTime(h.end_time)}
+                  </div>
+                </div>
+                <form action={openHoldToEveryone}>
+                  <input type="hidden" name="id" value={h.id} />
+                  <SubmitButton className="button secondary small" pendingText="Opening...">
+                    Open to everyone
+                  </SubmitButton>
+                </form>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <section className="card">
         <h2>Upcoming openings</h2>

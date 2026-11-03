@@ -113,6 +113,7 @@ export async function saveDeposits(prevState, formData) {
 
 export async function saveRegulars(prevState, formData) {
   const after = Number(formData.get("auto_regular_after"));
+  const regularsOnly = formData.get("regulars_only") === "on";
   if (!Number.isInteger(after) || after < 0 || after > 50) {
     return { error: "Please pick a number of appointments." };
   }
@@ -125,7 +126,7 @@ export async function saveRegulars(prevState, formData) {
 
   const { error } = await supabase
     .from("stylists")
-    .update({ auto_regular_after: after })
+    .update({ auto_regular_after: after, regulars_only: regularsOnly })
     .eq("id", user.id);
   if (error) return { error: error.message };
 
@@ -134,11 +135,11 @@ export async function saveRegulars(prevState, formData) {
 
   revalidatePath("/dashboard/settings");
   revalidatePath("/dashboard/clients");
-  if (after === 0) return { success: "Saved. You'll pick your Regulars by hand." };
-  if (promoted > 0) {
-    return {
-      success: `Saved. ${promoted} ${promoted === 1 ? "client is" : "clients are"} now Regulars.`,
-    };
+  const notes = [];
+  if (regularsOnly) notes.push("Only Regulars (and invited clients) can book online.");
+  if (after === 0) notes.push("You'll pick your Regulars by hand.");
+  else if (promoted > 0) {
+    notes.push(`${promoted} ${promoted === 1 ? "client is" : "clients are"} now Regulars.`);
   }
-  return { success: "Saved." };
+  return { success: ["Saved.", ...notes].join(" ") };
 }

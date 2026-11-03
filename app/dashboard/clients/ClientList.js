@@ -21,17 +21,18 @@ export default function ClientList({ clients }) {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
 
-  const counts = { all: clients.length };
-  for (const s of CLIENT_STATUSES) {
-    counts[s.value] = clients.filter((c) => c.status === s.value).length;
-  }
-
-  const query = search.trim().toLowerCase();
-  const shown = clients.filter(
-    (c) => (filter === "all" || c.status === filter) && (!query || matches(c, query))
-  );
+  // "Invited" isn't a status: invited clients are New (or Regular later).
+  const inFilter = (c, value) =>
+    value === "all" || (value === "invited" ? Boolean(c.invited_at) : c.status === value);
 
   const filters = [{ value: "all", label: "All" }, ...CLIENT_STATUSES];
+  if (clients.some((c) => c.invited_at)) filters.push({ value: "invited", label: "Invited" });
+
+  const counts = {};
+  for (const f of filters) counts[f.value] = clients.filter((c) => inFilter(c, f.value)).length;
+
+  const query = search.trim().toLowerCase();
+  const shown = clients.filter((c) => inFilter(c, filter) && (!query || matches(c, query)));
 
   return (
     <>

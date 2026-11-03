@@ -7,11 +7,22 @@ import FormMessage from "@/components/FormMessage";
 
 const CHOICES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 20];
 
-export default function RegularsForm({ autoRegularAfter }) {
+export default function RegularsForm({ autoRegularAfter, regularsOnly }) {
   const [state, formAction] = useActionState(saveRegulars, null);
 
   return (
     <form action={formAction}>
+      <label className="check-row">
+        <input type="checkbox" name="regulars_only" defaultChecked={regularsOnly} />
+        <span>
+          <strong>Regulars only</strong>
+          <br />
+          <span className="muted small-text">
+            New clients see no times and can&apos;t join the waitlist. Only confirmed Regulars can
+            book, plus anyone you send an invite link to (Clients tab).
+          </span>
+        </span>
+      </label>
       <label>
         Make a client a Regular after
         <select name="auto_regular_after" defaultValue={String(autoRegularAfter)}>

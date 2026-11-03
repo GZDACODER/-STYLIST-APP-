@@ -162,10 +162,26 @@ export async function setOpeningVisibility(id, visibility) {
   if (!VISIBILITIES.includes(visibility)) return { error: "Unknown option." };
   const { supabase, user } = await getUserAndClient();
   if (!user) return { error: "Please log in again." };
-  const { error } = await supabase.from("openings").update({ visibility }).eq("id", String(id));
+  const { data: opening, error } = await supabase
+    .from("openings")
+    .update({ visibility })
+    .eq("id", String(id))
+    .select("opening_date, start_time, end_time")
+    .maybeSingle();
   if (error) return { error: error.message };
-  // Opening a "Regulars only" time to everyone is news for the waitlist.
-  if (visibility === "everyone") await runWaitlistSafely(user.id, await siteOrigin());
+  if (visibility === "everyone") {
+    // Freed times kept for Regulars inside it open to everyone too.
+    if (opening) {
+      await supabase
+        .from("regulars_holds")
+        .delete()
+        .eq("hold_date", opening.opening_date)
+        .lt("start_time", opening.end_time)
+        .gt("end_time", opening.start_time);
+    }
+    // Opening a "Regulars only" time to everyone is news for the waitlist.
+    await runWaitlistSafely(user.id, await siteOrigin());
+  }
   revalidatePath("/dashboard/openings");
   return { success: true };
 }
@@ -183,7 +199,10 @@ export async function setDayVisibility(date, visibility) {
     .eq("stylist_id", user.id)
     .eq("opening_date", date);
   if (error) return { error: error.message };
-  if (visibility === "everyone") await runWaitlistSafely(user.id, await siteOrigin());
+  if (visibility === "everyone") {
+    await supabase.from("regulars_holds").delete().eq("stylist_id", user.id).eq("hold_date", date);
+    await runWaitlistSafely(user.id, await siteOrigin());
+  }
   revalidatePath("/dashboard/openings");
   return { success: true };
 }
@@ -193,5 +212,16 @@ export async function deleteOpening(formData) {
   const { supabase } = await getUserAndClient();
   // The database's security rules only let a stylist remove their own openings.
   await supabase.from("openings").delete().eq("id", id);
+  revalidatePath("/dashboard/openings");
+}
+
+// A freed time from a cancelled Regulars booking: let everyone book it.
+export async function openHoldToEveryone(formData) {
+  const id = String(formData.get("id") || "");
+  const { supabase, user } = await getUserAndClient();
+  if (!user) return;
+  // The database's security rules only let a stylist remove their own holds.
+  await supabase.from("regulars_holds").delete().eq("id", id);
+  await runWaitlistSafely(user.id, await siteOrigin());
   revalidatePath("/dashboard/openings");
 }

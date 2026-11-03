@@ -55,7 +55,7 @@ export default async function SettingsPage({ searchParams }) {
     supabase
       .from("stylists")
       .select(
-        "business_name, slug, timezone, auto_regular_after, deposits_enabled, cancellation_policy, stripe_account_id, stripe_charges_enabled"
+        "business_name, slug, timezone, auto_regular_after, regulars_only, deposits_enabled, cancellation_policy, stripe_account_id, stripe_charges_enabled"
       )
       .eq("id", user.id)
       .maybeSingle(),
@@ -97,7 +97,10 @@ export default async function SettingsPage({ searchParams }) {
           Regulars see your &quot;Regulars only&quot; openings. Clients are matched by the phone
           number they confirm with a text code.
         </p>
-        <RegularsForm autoRegularAfter={stylist.auto_regular_after} />
+        <RegularsForm
+          autoRegularAfter={stylist.auto_regular_after}
+          regularsOnly={stylist.regulars_only}
+        />
       </section>
 
       <section className="card">

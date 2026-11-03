@@ -26,7 +26,7 @@ function formatMinutes(minutes) {
   return `${m} min`;
 }
 
-export default function BookingFlow({ page, paymentCancelled, waitlistReady, textsAvailable }) {
+export default function BookingFlow({ page, invite, paymentCancelled, waitlistReady, textsAvailable }) {
   const router = useRouter();
   const {
     business_name,
@@ -38,12 +38,19 @@ export default function BookingFlow({ page, paymentCancelled, waitlistReady, tex
     viewer_phone,
     services,
     waitlist_enabled,
+    regulars_only: regularsOnly,
+    access,
+    invite: inviteInfo,
   } = page;
   const verified = viewer_status !== "anonymous";
   // How they confirmed: their phone number (by text) or their email.
   const viewerLabel = viewer_phone ? formatPhone(viewer_phone) : viewer_email;
+  // "Regulars only" mode: only Regulars (and clients with an invite link) can book.
+  const locked = regularsOnly && access !== "regular" && access !== "invited";
   // The waitlist needs email set up for the app, and the stylist to have it on.
-  const canWaitlist = waitlist_enabled && waitlistReady;
+  // In "Regulars only" mode it's just for Regulars.
+  const canWaitlist =
+    waitlist_enabled && waitlistReady && (!regularsOnly || access === "regular");
 
   const [serviceId, setServiceId] = useState(null);
   const [slots, setSlots] = useState(null);
@@ -74,7 +81,7 @@ export default function BookingFlow({ page, paymentCancelled, waitlistReady, tex
     let ignore = false;
     setSlots(null);
     setSlotsError(null);
-    getSlots(slug, serviceId).then((result) => {
+    getSlots(slug, serviceId, invite).then((result) => {
       if (ignore) return;
       if (result.error) setSlotsError(result.error);
       else setSlots(result.slots);
@@ -82,7 +89,7 @@ export default function BookingFlow({ page, paymentCancelled, waitlistReady, tex
     return () => {
       ignore = true;
     };
-  }, [slug, serviceId, viewer_status, viewer_email, viewer_phone, reloadKey]);
+  }, [slug, serviceId, invite, viewer_status, viewer_email, viewer_phone, reloadKey]);
 
   // If the chosen time disappeared after a reload, clear it.
   useEffect(() => {
@@ -126,11 +133,12 @@ export default function BookingFlow({ page, paymentCancelled, waitlistReady, tex
         // Texted clients already proved their number, so it's used as is.
         phone: viewer_phone ? formatPhone(viewer_phone) : phone,
         email: viewer_phone ? email : "",
+        invite,
       });
       if (result.error) {
         setBookError(result.error);
         if (result.code === "slot_unavailable") {
-          const fresh = await getSlots(slug, serviceId);
+          const fresh = await getSlots(slug, serviceId, invite);
           if (fresh.slots) setSlots(fresh.slots);
           setTime(null);
         }
@@ -217,6 +225,26 @@ export default function BookingFlow({ page, paymentCancelled, waitlistReady, tex
         </p>
       )}
 
+      {/* ---------- Invite link ---------- */}
+      {inviteInfo?.state === "open" && access === "invited" && (
+        <p className="message success">
+          {inviteInfo.name ? `Hi ${inviteInfo.name}! ` : ""}You&apos;re invited to book with{" "}
+          {business_name}. This link works for one booking.
+        </p>
+      )}
+      {inviteInfo && inviteInfo.state !== "open" && access !== "regular" && (
+        <p className="message warning">
+          {inviteInfo.state === "used"
+            ? "This invite link has already been used to book."
+            : inviteInfo.state === "busy"
+              ? "Someone is booking with this invite link right now. Try again in half an hour."
+              : inviteInfo.state === "invalid"
+                ? "This invite link doesn't work. Check you have the whole link."
+                : "This invite link has expired."}{" "}
+          Please contact {business_name} for a new one.
+        </p>
+      )}
+
       {/* ---------- Who's booking ---------- */}
       {viewer_status === "regular" && (
         <p className="message success">
@@ -243,7 +271,28 @@ export default function BookingFlow({ page, paymentCancelled, waitlistReady, tex
           onCancelled={() => setReloadKey((k) => k + 1)}
         />
       )}
-      {!verified && !time && !showWaitlist && (
+      {/* ---------- Regulars only ---------- */}
+      {locked && (
+        <section className="card">
+          <h2>Online booking is for regulars</h2>
+          {verified ? (
+            <p className="muted">
+              Right now, {business_name} takes online bookings from regulars only. Please contact{" "}
+              {business_name} directly to book.
+            </p>
+          ) : (
+            <>
+              <p className="muted">
+                Right now, {business_name} takes online bookings from regulars only. If you&apos;re
+                a regular, confirm your phone number to see your times.
+              </p>
+              <VerifyClient onVerified={refreshAfterLogin} />
+            </>
+          )}
+        </section>
+      )}
+
+      {!verified && !time && !showWaitlist && !locked && (
         <section className="card">
           {showVerify ? (
             <>
@@ -263,30 +312,32 @@ export default function BookingFlow({ page, paymentCancelled, waitlistReady, tex
       )}
 
       {/* ---------- 1. Service ---------- */}
-      <section className="card">
-        <h2>1. Choose a service</h2>
-        {services.length === 0 && <p className="muted">No services are listed yet.</p>}
-        <div className="choice-list">
-          {services.map((s) => (
-            <button
-              key={s.id}
-              type="button"
-              className={s.id === serviceId ? "choice selected" : "choice"}
-              aria-pressed={s.id === serviceId}
-              onClick={() => chooseService(s.id)}
-            >
-              <span className="service-name">{s.name}</span>
-              <span className="muted">
-                {formatMinutes(s.duration_minutes)} · {formatPrice(s.price_cents)}
-                {s.deposit_cents > 0 && ` · ${formatPrice(s.deposit_cents)} deposit`}
-              </span>
-            </button>
-          ))}
-        </div>
-      </section>
+      {!locked && (
+        <section className="card">
+          <h2>1. Choose a service</h2>
+          {services.length === 0 && <p className="muted">No services are listed yet.</p>}
+          <div className="choice-list">
+            {services.map((s) => (
+              <button
+                key={s.id}
+                type="button"
+                className={s.id === serviceId ? "choice selected" : "choice"}
+                aria-pressed={s.id === serviceId}
+                onClick={() => chooseService(s.id)}
+              >
+                <span className="service-name">{s.name}</span>
+                <span className="muted">
+                  {formatMinutes(s.duration_minutes)} · {formatPrice(s.price_cents)}
+                  {s.deposit_cents > 0 && ` · ${formatPrice(s.deposit_cents)} deposit`}
+                </span>
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* ---------- 2. Time ---------- */}
-      {service && (
+      {service && !locked && (
         <section className="card">
           <h2>2. Choose a time</h2>
           <p className="muted small-text">{zoneNote}</p>
@@ -377,7 +428,7 @@ export default function BookingFlow({ page, paymentCancelled, waitlistReady, tex
       )}
 
       {/* ---------- Waitlist ---------- */}
-      {service && showWaitlist && (
+      {service && !locked && showWaitlist && (
         <section className="card">
           <h2>Join the waitlist for {service.name}</h2>
           <WaitlistForm
@@ -394,7 +445,7 @@ export default function BookingFlow({ page, paymentCancelled, waitlistReady, tex
       )}
 
       {/* ---------- 3. Details ---------- */}
-      {service && date && time && !showWaitlist && (
+      {service && !locked && date && time && !showWaitlist && (
         <section className="card">
           <h2>3. Your details</h2>
           <p className="summary">

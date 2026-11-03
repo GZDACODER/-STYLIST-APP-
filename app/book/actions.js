@@ -21,6 +21,8 @@ const BOOKING_ERRORS = {
   not_found: "That service isn't available any more. Please refresh the page.",
   already_claimed: "You've already claimed this time. You're booked!",
   waitlist_ended: "You're no longer on the waitlist for this, so this link has stopped working.",
+  invite_wrong_person:
+    "This invite is for a different phone number. Please confirm with the number your stylist texted.",
 };
 
 const WAITLIST_ERRORS = {
@@ -33,6 +35,7 @@ const WAITLIST_ERRORS = {
   blocked: "Sorry, the waitlist isn't available for you. Please contact the salon directly.",
   waitlist_off: "The waitlist is closed right now. Please check back soon.",
   too_many_waitlist: "You're already on the waitlist for 3 services here.",
+  regulars_only: "The waitlist is for regulars only right now.",
   not_found: "That service isn't available any more. Please refresh the page.",
 };
 
@@ -128,11 +131,13 @@ export async function signOutBooking() {
   return { success: true };
 }
 
-export async function getSlots(slug, serviceId) {
+// invite: the secret from a private invite link, if they came with one.
+export async function getSlots(slug, serviceId, invite) {
   const supabase = await createBookingClient();
   const { data, error } = await supabase.rpc("get_open_slots", {
     p_slug: String(slug),
     p_service_id: String(serviceId),
+    p_invite: invite ? String(invite) : null,
   });
   if (error) return { error: "Couldn't load open times. Please refresh the page." };
   return { slots: data };
@@ -152,7 +157,7 @@ async function depositCheckout(bookingId, options) {
   }
 }
 
-export async function book({ slug, serviceId, date, time, name, phone, email }) {
+export async function book({ slug, serviceId, date, time, name, phone, email, invite }) {
   const supabase = await createBookingClient();
   const { data, error } = await supabase.rpc("create_booking", {
     p_slug: String(slug),
@@ -162,6 +167,7 @@ export async function book({ slug, serviceId, date, time, name, phone, email }) 
     p_name: String(name || ""),
     p_phone: String(phone || ""),
     p_email: String(email || ""),
+    p_invite: invite ? String(invite) : null,
   });
 
   if (error) {

@@ -56,7 +56,10 @@ export default function ClientCard({ client }) {
   return (
     <li className="client-card">
       <div className="client-top">
-        <div className="client-name">{client.name}</div>
+        <div className="client-name">
+          {client.name}
+          {client.invited_at && <span className="badge invited">Invited</span>}
+        </div>
         <button type="button" className="link-button" onClick={() => setEditing(true)}>
           Edit
         </button>

@@ -1298,6 +1298,23 @@ select {
   margin: 0;
 }
 
+/* ---------- Invites ---------- */
+.badge.invited {
+  margin-left: 8px;
+  vertical-align: middle;
+  background: rgba(143, 203, 155, 0.08);
+  border-color: rgba(143, 203, 155, 0.35);
+  color: var(--success);
+}
+
+.service-list li.invite-row {
+  flex-wrap: wrap;
+}
+
+.message.success .row {
+  margin-top: 8px;
+}
+
 /* ---------- Waitlist ---------- */
 .waitlist-prompt {
   margin-top: 20px;
