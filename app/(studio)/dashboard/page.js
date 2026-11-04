@@ -81,8 +81,14 @@ export default async function TodayPage() {
   const week = weekRange(today);
   // A little over a week back, then narrowed to this week in the stylist's time zone.
   const paidSince = new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString();
+  const nowTime = new Intl.DateTimeFormat("en-GB", {
+    timeZone: tz,
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).format(new Date());
 
-  const [weekBookings, paidDeposits, waiting, todays] = await Promise.all([
+  const [weekBookings, paidDeposits, waiting, todays, upcoming] = await Promise.all([
     supabase
       .from("bookings")
       .select("id", { count: "exact", head: true })
@@ -106,6 +112,12 @@ export default async function TodayPage() {
       .eq("booking_date", today)
       .in("status", ["confirmed", "pending_payment"])
       .order("start_time"),
+    // Every confirmed appointment still to come: later days, plus later today.
+    supabase
+      .from("bookings")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "confirmed")
+      .or(`booking_date.gt.${today},and(booking_date.eq.${today},start_time.gt.${nowTime})`),
   ]);
 
   const dayOf = (iso) => new Intl.DateTimeFormat("en-CA", { timeZone: tz }).format(new Date(iso));
@@ -121,13 +133,6 @@ export default async function TodayPage() {
   const appointments = (todays.data || []).filter(
     (b) => b.status === "confirmed" || new Date(b.hold_expires_at).getTime() > now
   );
-  const nowTime = new Intl.DateTimeFormat("en-GB", {
-    timeZone: tz,
-    hour: "2-digit",
-    minute: "2-digit",
-    hourCycle: "h23",
-  }).format(new Date());
-
   const dateLine = parseDateString(today).toLocaleDateString("en-US", {
     weekday: "long",
     month: "long",
@@ -143,18 +148,24 @@ export default async function TodayPage() {
   const stats = [
     {
       number: weekBookings.error ? "—" : weekBookings.count ?? 0,
-      label: "Bookings this week",
+      // Confirmed appointments taking place Monday to Sunday this week.
+      label: "Appointments this week",
       href: "/dashboard/bookings",
     },
     {
       number: paidDeposits.error ? "—" : money(depositsThisWeek),
-      label: "Deposits collected this week",
+      label: "Deposits paid this week",
       href: "/dashboard/bookings",
     },
     {
       number: waiting.error ? "—" : waiting.count ?? 0,
       label: "On the waitlist",
       href: "/dashboard/waitlist",
+    },
+    {
+      number: upcoming.error ? "—" : upcoming.count ?? 0,
+      label: "Upcoming",
+      href: "/dashboard/bookings",
     },
   ];
 

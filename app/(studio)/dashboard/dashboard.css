@@ -657,7 +657,8 @@ body:has(.db) {
 
 .db-stats {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  /* Four cards in a row on wide screens, two by two in between, stacked on phones. */
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0;
   margin: 0 0 48px;
   border: 1px solid var(--hair);
@@ -694,6 +695,20 @@ body:has(.db) {
 
 .db-stat .db-label {
   line-height: 1.4;
+}
+
+@media (min-width: 600px) and (max-width: 1099px) {
+  .db-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .db-stat:nth-child(odd) {
+    border-left: 0;
+  }
+
+  .db-stat:nth-child(n + 3) {
+    border-top: 1px solid var(--hair);
+  }
 }
 
 @media (max-width: 599px) {
