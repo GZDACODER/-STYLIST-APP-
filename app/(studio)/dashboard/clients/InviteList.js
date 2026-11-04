@@ -1,7 +1,7 @@
 import { cancelInvite } from "./inviteActions";
 import { clockTime, formatDate } from "@/lib/availability";
 import { formatPhone } from "@/lib/phone";
-import SubmitButton from "@/components/SubmitButton";
+import ConfirmAction from "@/components/ConfirmAction";
 import InviteShare from "./InviteShare";
 
 // Invites that are still open, and ones used in the last 30 days.
@@ -34,12 +34,16 @@ export default function InviteList({ invites, slug, businessName }) {
                   phone={invite.phone}
                   businessName={businessName}
                 />
-                <form action={cancelInvite}>
-                  <input type="hidden" name="id" value={invite.id} />
-                  <SubmitButton className="link-button danger" pendingText="Cancelling...">
-                    Cancel invite
-                  </SubmitButton>
-                </form>
+                <ConfirmAction
+                  label="Cancel invite"
+                  question={`Cancel ${invite.name}'s invite?`}
+                  note="The link stops working. You can send a new invite any time."
+                  keepLabel="Keep invite"
+                  confirmLabel="Yes, cancel"
+                  pendingText="Cancelling..."
+                  action={cancelInvite}
+                  fields={{ id: invite.id }}
+                />
               </>
             ) : (
               <span className={invite.invite_state === "used" ? "badge paid" : "badge"}>

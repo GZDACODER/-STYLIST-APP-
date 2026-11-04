@@ -1186,3 +1186,15 @@ body:has(.db) {
   margin: 14px 0 0;
   font-size: 0.9rem;
 }
+
+/* Openings and invites: the quiet link sits on the right of its row, and
+   the confirm step takes the full width under it. */
+.db .opening-top > .quiet-link {
+  margin-left: auto;
+}
+
+.db .opening-top > .confirm-step,
+.db .invite-row > .confirm-step {
+  flex-basis: 100%;
+  margin: 8px 0 4px;
+}
