@@ -3,6 +3,8 @@ import { Cormorant_Garamond } from "next/font/google";
 import { createClient } from "@/lib/supabase/server";
 import { logout } from "@/app/auth/actions";
 import { BRAND_NAME } from "@/lib/brand";
+import PlanBanner from "./PlanBanner";
+import { getMyPlan } from "@/lib/plan";
 import DashboardNav from "./DashboardNav";
 import "./dashboard.css";
 
@@ -30,6 +32,8 @@ export default async function DashboardLayout({ children }) {
     .select("business_name")
     .eq("id", user.id)
     .maybeSingle();
+
+  const plan = stylist ? await getMyPlan(supabase, user.id) : null;
 
   // Clients who verified on a booking page have a login too, but no stylist
   // profile. They don't belong in the dashboard.
@@ -83,7 +87,10 @@ export default async function DashboardLayout({ children }) {
       </header>
 
       <main className="db-main">
-        <div className="db-page">{children}</div>
+        <div className="db-page">
+          <PlanBanner plan={plan} />
+          {children}
+        </div>
       </main>
     </div>
   );

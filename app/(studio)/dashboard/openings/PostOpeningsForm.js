@@ -25,7 +25,7 @@ function findDaysOff(start, end, daysOff) {
 }
 
 // daysOff: weekdays the stylist doesn't work, e.g. [0, 3] for Sunday and Wednesday.
-export default function PostOpeningsForm({ today, daysOff }) {
+export default function PostOpeningsForm({ today, daysOff, regularsAllowed = true }) {
   const [state, formAction] = useActionState(postOpenings, null);
   const [mode, setMode] = useState("hours");
   const [start, setStart] = useState("");
@@ -162,8 +162,8 @@ export default function PostOpeningsForm({ today, daysOff }) {
             <input type="radio" name="visibility" value="everyone" defaultChecked />
             <span>Everyone</span>
           </label>
-          <label className="segment regulars">
-            <input type="radio" name="visibility" value="regulars" />
+          <label className={regularsAllowed ? "segment regulars" : "segment regulars is-disabled"}>
+            <input type="radio" name="visibility" value="regulars" disabled={!regularsAllowed} />
             <span>
               <RegularStar label={null} /> Regulars only
             </span>

@@ -15,7 +15,7 @@ function applyChange(openings, change) {
   );
 }
 
-export default function OpeningsList({ openings, bookingCounts }) {
+export default function OpeningsList({ openings, bookingCounts, regularsAllowed = true }) {
   // Show changes straight away while they save in the background.
   const [shown, setOptimistic] = useOptimistic(openings, applyChange);
   const [error, setError] = useState(null);
@@ -56,6 +56,7 @@ export default function OpeningsList({ openings, bookingCounts }) {
                   <>
                     <span className="muted small-text">Whole day:</span>
                     <VisibilitySwitch
+                      regularsDisabled={!regularsAllowed}
                       small
                       value={dayValue}
                       label={`Who can book on ${formatDate(day.date)}`}
@@ -98,6 +99,7 @@ export default function OpeningsList({ openings, bookingCounts }) {
                         />
                       </div>
                       <VisibilitySwitch
+                      regularsDisabled={!regularsAllowed}
                         value={o.visibility}
                         label={`Who can book ${clockTime(o.start_time)} on ${formatDate(o.opening_date)}`}
                         onChange={(visibility) =>

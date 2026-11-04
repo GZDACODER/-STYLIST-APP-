@@ -7,13 +7,18 @@ import FormMessage from "@/components/FormMessage";
 
 const CHOICES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 20];
 
-export default function RegularsForm({ autoRegularAfter, regularsOnly }) {
+export default function RegularsForm({ autoRegularAfter, regularsOnly, regularsOnlyAllowed = true }) {
   const [state, formAction] = useActionState(saveRegulars, null);
 
   return (
     <form action={formAction}>
       <label className="check-row">
-        <input type="checkbox" name="regulars_only" defaultChecked={regularsOnly} />
+        <input
+          type="checkbox"
+          name="regulars_only"
+          defaultChecked={regularsOnly && regularsOnlyAllowed}
+          disabled={!regularsOnlyAllowed}
+        />
         <span>
           <strong>Regulars only</strong>
           <br />

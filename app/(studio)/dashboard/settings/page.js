@@ -8,6 +8,7 @@ import RegularsForm from "./RegularsForm";
 import CoverPhotoForm from "./CoverPhotoForm";
 import BusinessLinksForm from "./BusinessLinksForm";
 import PlanCard from "./PlanCard";
+import PausedNote from "@/components/PausedNote";
 import { getMyPlan } from "@/lib/plan";
 import { BRAND_NAME } from "@/lib/brand";
 import RegularStar from "@/components/RegularStar";
@@ -149,9 +150,15 @@ export default async function SettingsPage({ searchParams }) {
           Regulars see your &quot;Regulars only&quot; openings. Clients are matched by their
           phone number and confirm with an email code.
         </p>
+        {!plan.has.regulars && (
+          <PausedNote feature="regulars">
+            Regulars-only mode comes with Regulars First, which isn&apos;t on your plan right now.
+          </PausedNote>
+        )}
         <RegularsForm
           autoRegularAfter={stylist.auto_regular_after}
           regularsOnly={stylist.regulars_only}
+          regularsOnlyAllowed={plan.has.regulars}
         />
       </section>
 

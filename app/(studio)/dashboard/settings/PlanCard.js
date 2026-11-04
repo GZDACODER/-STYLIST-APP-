@@ -18,11 +18,13 @@ const NOTICES = {
 const day = (iso) =>
   iso ? new Date(iso).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : null;
 
+const daysText = (n) => (n <= 1 ? "less than a day" : `${n} days`);
+
 export default function PlanCard({ plan, billingNotice, canPay }) {
   const notice = NOTICES[billingNotice];
 
   return (
-    <section className="card">
+    <section className="card" id="plan">
       <h2>Your plan</h2>
       {notice && <p className={`message ${notice.kind}`}>{notice.text}</p>}
       {plan.comped ? (
@@ -32,13 +34,14 @@ export default function PlanCard({ plan, billingNotice, canPay }) {
           {plan.stripeStatus === "past_due"
             ? "Your last payment didn't go through. Stripe will try again; please check your card in Manage billing."
             : plan.stripeStatus === "trialing"
-              ? `Free trial until ${day(plan.trialEndsAt)}, then your plan starts.`
+              ? `Free trial: ${daysText(plan.daysLeft)} left. Your plan starts on ${day(plan.trialEndsAt)}.`
               : `Paid ${plan.interval === "year" ? "yearly" : "monthly"}. Next renewal ${day(plan.periodEnd)}.`}
         </p>
       ) : plan.inTrial ? (
         <p className="muted">
-          Free trial: everything is on until {day(plan.trialEndsAt)}. No card needed. Choose a plan
-          below to keep it going after that.
+          <strong>Free trial: {daysText(plan.daysLeft)} left.</strong> Everything is on until{" "}
+          {day(plan.trialEndsAt)}, and no card is needed. Choose a plan below to keep it going
+          after that.
         </p>
       ) : (
         <p className="muted">
