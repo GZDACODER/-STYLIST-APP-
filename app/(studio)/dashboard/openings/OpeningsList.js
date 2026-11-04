@@ -4,7 +4,7 @@ import { useOptimistic, useState, startTransition } from "react";
 import { deleteOpening, setDayVisibility, setOpeningVisibility } from "./actions";
 import { clockTime, formatDate } from "@/lib/availability";
 import VisibilitySwitch from "@/components/VisibilitySwitch";
-import SubmitButton from "@/components/SubmitButton";
+import ConfirmAction from "@/components/ConfirmAction";
 
 // Applies a visibility change to one opening ({ id }) or a whole day ({ date }).
 function applyChange(openings, change) {
@@ -27,13 +27,6 @@ export default function OpeningsList({ openings, bookingCounts }) {
       const result = await save();
       if (result?.error) setError(result.error);
     });
-  }
-
-  function confirmRemove(event, count) {
-    const extra = count
-      ? ` ${count} booking${count > 1 ? "s are" : " is"} already in it and will be kept.`
-      : "";
-    if (!window.confirm(`Remove this opening?${extra}`)) event.preventDefault();
   }
 
   if (shown.length === 0) {
@@ -89,12 +82,20 @@ export default function OpeningsList({ openings, bookingCounts }) {
                             {count} booked
                           </span>
                         )}
-                        <form action={deleteOpening} onSubmit={(e) => confirmRemove(e, count)}>
-                          <input type="hidden" name="id" value={o.id} />
-                          <SubmitButton className="link-button danger" pendingText="...">
-                            Remove
-                          </SubmitButton>
-                        </form>
+                        <ConfirmAction
+                          label="Remove"
+                          question={`Remove ${clockTime(o.start_time)} – ${clockTime(o.end_time)} on ${formatDate(o.opening_date)}?`}
+                          note={
+                            count
+                              ? `${count} booking${count > 1 ? "s are" : " is"} already in it and will be kept.`
+                              : "Clients won't be able to book it any more."
+                          }
+                          keepLabel="Keep opening"
+                          confirmLabel="Yes, remove"
+                          pendingText="Removing..."
+                          action={deleteOpening}
+                          fields={{ id: o.id }}
+                        />
                       </div>
                       <VisibilitySwitch
                         value={o.visibility}

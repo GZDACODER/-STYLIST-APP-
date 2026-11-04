@@ -1114,3 +1114,14 @@ body:has(.bk) {
 .bk-main > h1:first-child {
   margin-top: 40px;
 }
+
+/* Your waitlist spot: "Leave the waitlist" and its confirm step. */
+.bk .leave-link,
+.bk .leave-confirm {
+  margin-top: 24px;
+}
+
+.bk .leave-link {
+  display: inline-flex;
+  align-items: center;
+}
