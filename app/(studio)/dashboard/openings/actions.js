@@ -3,6 +3,7 @@
 // Server actions for posting openings.
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { planErrorMessage } from "@/lib/plan";
 import { siteOrigin } from "@/lib/stripe";
 import { runWaitlistSafely } from "@/lib/waitlist";
 import {
@@ -142,7 +143,7 @@ export async function postOpenings(prevState, formData) {
   if (error) {
     // 23P01 = "exclusion violation": overlaps an opening.
     if (error.code === "23P01") return { error: "That overlaps an opening you've already posted." };
-    return { error: error.message };
+    return { error: planErrorMessage(error) || error.message };
   }
 
   // New times: tell anyone on the waitlist who wants them.
@@ -168,7 +169,7 @@ export async function setOpeningVisibility(id, visibility) {
     .eq("id", String(id))
     .select("opening_date, start_time, end_time")
     .maybeSingle();
-  if (error) return { error: error.message };
+  if (error) return { error: planErrorMessage(error) || error.message };
   if (visibility === "everyone") {
     // Freed times kept for Regulars inside it open to everyone too.
     if (opening) {
@@ -198,7 +199,7 @@ export async function setDayVisibility(date, visibility) {
     .update({ visibility })
     .eq("stylist_id", user.id)
     .eq("opening_date", date);
-  if (error) return { error: error.message };
+  if (error) return { error: planErrorMessage(error) || error.message };
   if (visibility === "everyone") {
     await supabase.from("regulars_holds").delete().eq("stylist_id", user.id).eq("hold_date", date);
     await runWaitlistSafely(user.id, await siteOrigin());

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { isValidTimeZone } from "@/lib/availability";
 import { cleanInstagram } from "@/lib/profileLinks";
+import { planErrorMessage } from "@/lib/plan";
 
 const SLUG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
@@ -159,7 +160,7 @@ export async function saveRegulars(prevState, formData) {
     .from("stylists")
     .update({ auto_regular_after: after, regulars_only: regularsOnly })
     .eq("id", user.id);
-  if (error) return { error: error.message };
+  if (error) return { error: planErrorMessage(error) || error.message };
 
   // Apply the new number straight away.
   const { data: promoted } = await supabase.rpc("refresh_my_regulars");

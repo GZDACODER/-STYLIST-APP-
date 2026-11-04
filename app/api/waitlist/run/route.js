@@ -2,12 +2,26 @@
 // (see supabase/waitlist_every_minute.sql) with the CRON_SECRET, so nobody
 // else can set it off.
 import { runWaitlist, waitlistConfigured } from "@/lib/waitlist";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function POST(request) {
   const secret = process.env.CRON_SECRET;
   if (!secret || request.headers.get("authorization") !== `Bearer ${secret}`) {
     return new Response("Not allowed", { status: 401 });
   }
+  // Add-ons that have lapsed (trial over or not paid): switch off
+  // Regulars-only mode and the waitlist. Ignored until the plans SQL is run.
+  try {
+    if (process.env.SUPABASE_SECRET_KEY) {
+      const { error } = await createAdminClient().rpc("plan_apply_limits", {});
+      if (error && !/plan_apply_limits/.test(error.message)) {
+        console.error("Couldn't apply plan limits", error.message);
+      }
+    }
+  } catch (error) {
+    console.error("Couldn't apply plan limits", error);
+  }
+
   if (!waitlistConfigured()) {
     return Response.json({ skipped: "Email isn't set up yet (see WAITLIST_SETUP.md)." });
   }
