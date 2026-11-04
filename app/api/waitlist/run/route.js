@@ -3,6 +3,7 @@
 // else can set it off.
 import { runWaitlist, waitlistConfigured } from "@/lib/waitlist";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { runPlanReminders } from "@/lib/planReminders";
 
 export async function POST(request) {
   const secret = process.env.CRON_SECRET;
@@ -22,13 +23,21 @@ export async function POST(request) {
     console.error("Couldn't apply plan limits", error);
   }
 
+  // Trial-ending and "plan paused" reminder emails to stylists.
+  let reminders = { sent: 0 };
+  try {
+    reminders = await runPlanReminders();
+  } catch (error) {
+    console.error("Plan reminders failed", error);
+  }
+
   if (!waitlistConfigured()) {
     return Response.json({ skipped: "Email isn't set up yet (see WAITLIST_SETUP.md)." });
   }
 
   try {
     const result = await runWaitlist(null, new URL(request.url).origin);
-    return Response.json(result);
+    return Response.json({ ...result, planReminders: reminders.sent });
   } catch (error) {
     console.error("Waitlist check failed", error);
     return new Response("Waitlist check failed", { status: 500 });
