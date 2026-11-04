@@ -88,7 +88,10 @@ export default async function TodayPage() {
     hourCycle: "h23",
   }).format(new Date());
 
-  const [weekBookings, paidDeposits, waiting, todays, upcoming] = await Promise.all([
+  const stillToCome = `booking_date.gt.${today},and(booking_date.eq.${today},start_time.gt.${nowTime})`;
+
+  const [weekBookings, paidDeposits, waiting, todays, upcoming, nextUp, weekOpenings] =
+    await Promise.all([
     supabase
       .from("bookings")
       .select("id", { count: "exact", head: true })
@@ -117,8 +120,35 @@ export default async function TodayPage() {
       .from("bookings")
       .select("id", { count: "exact", head: true })
       .eq("status", "confirmed")
-      .or(`booking_date.gt.${today},and(booking_date.eq.${today},start_time.gt.${nowTime})`),
+      .or(stillToCome),
+    // Wide screens: the next appointment, and the open times left this week.
+    supabase
+      .from("bookings")
+      .select("booking_date, start_time, end_time, service_name, client_name")
+      .eq("status", "confirmed")
+      .or(stillToCome)
+      .order("booking_date")
+      .order("start_time")
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from("openings")
+      .select("id, opening_date, start_time, end_time, visibility")
+      .gte("opening_date", today)
+      .lte("opening_date", week.end)
+      .order("opening_date")
+      .order("start_time"),
   ]);
+  // Today's openings that have already finished don't count.
+  const openTimes = (weekOpenings.data || []).filter(
+    (o) => o.opening_date > today || o.end_time.slice(0, 5) > nowTime
+  );
+  const shortDay = (date) =>
+    parseDateString(date).toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+    });
 
   const dayOf = (iso) => new Intl.DateTimeFormat("en-CA", { timeZone: tz }).format(new Date(iso));
   const depositsThisWeek = (paidDeposits.data || [])
@@ -185,7 +215,8 @@ export default async function TodayPage() {
         ))}
       </section>
 
-      <section>
+      <div className="db-today">
+      <section className="db-today-main">
         <div className="db-section-head">
           <h2>Today&apos;s appointments</h2>
           <span className="db-label">{timeZoneLabel(tz)} time</span>
@@ -240,6 +271,61 @@ export default async function TodayPage() {
           </ol>
         )}
       </section>
+
+      {/* Wide screens only (1200px and up): a right-hand column. */}
+      <aside className="db-today-side" aria-label="Coming up">
+        <section>
+          <div className="db-section-head">
+            <h2>Next up</h2>
+          </div>
+          {nextUp.error ? (
+            <p className="muted small-text">Couldn&apos;t load your next appointment.</p>
+          ) : nextUp.data ? (
+            <div className="db-next">
+              <p className="db-next-when">
+                {nextUp.data.booking_date === today ? "Today" : shortDay(nextUp.data.booking_date)}{" "}
+                · {clockTime(nextUp.data.start_time)}
+              </p>
+              <p className="db-next-name">{nextUp.data.client_name}</p>
+              <p className="muted small-text">{nextUp.data.service_name}</p>
+            </div>
+          ) : (
+            <p className="db-quiet-small">Nothing booked yet.</p>
+          )}
+        </section>
+
+        <section>
+          <div className="db-section-head">
+            <h2>Open times this week</h2>
+          </div>
+          {weekOpenings.error ? (
+            <p className="muted small-text">Couldn&apos;t load your open times.</p>
+          ) : openTimes.length === 0 ? (
+            <p className="db-quiet-small">No open times left this week.</p>
+          ) : (
+            <ul className="db-open-list">
+              {openTimes.map((o) => (
+                <li key={o.id}>
+                  <span>{shortDay(o.opening_date)}</span>
+                  <span>
+                    {clockTime(o.start_time)} – {clockTime(o.end_time)}
+                    {o.visibility === "regulars" && (
+                      <>
+                        {" "}
+                        <RegularStar size={10} />
+                      </>
+                    )}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+          <p className="db-side-link">
+            <Link href="/dashboard/openings">Manage openings</Link>
+          </p>
+        </section>
+      </aside>
+      </div>
     </>
   );
 }

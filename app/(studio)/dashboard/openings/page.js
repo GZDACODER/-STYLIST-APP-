@@ -5,6 +5,7 @@ import { clockTime, formatDate, timeZoneLabel, todayInTimeZone } from "@/lib/ava
 import SubmitButton from "@/components/SubmitButton";
 import { openHoldToEveryone } from "./actions";
 import BookingLink from "./BookingLink";
+import { publicSiteUrl } from "@/lib/siteUrl";
 import PostOpeningsForm from "./PostOpeningsForm";
 import OpeningsList from "./OpeningsList";
 import { BRAND_NAME } from "@/lib/brand";
@@ -83,7 +84,10 @@ export default async function OpeningsPage() {
   const h = await headers();
   const host = h.get("x-forwarded-host") || h.get("host");
   const proto = h.get("x-forwarded-proto") || (host?.startsWith("localhost") ? "http" : "https");
-  const origin = `${proto}://${host}`;
+  // The booking link uses the app's public address (NEXT_PUBLIC_SITE_URL in
+  // Vercel), so it's the same wherever you open the dashboard. Until that's
+  // set, it uses this page's address.
+  const origin = publicSiteUrl(`${proto}://${host}`);
 
   return (
     <>

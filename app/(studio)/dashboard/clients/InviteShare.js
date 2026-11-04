@@ -1,16 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { publicSiteUrl } from "@/lib/siteUrl";
 
 // Share / Copy / Text buttons for one invite link.
 export default function InviteShare({ slug, token, name, phone, businessName }) {
   const [copied, setCopied] = useState(false);
-  // Filled in once the page is open in the browser.
-  const [origin, setOrigin] = useState("");
+  // The app's public address (NEXT_PUBLIC_SITE_URL), or this page's address.
+  const [origin, setOrigin] = useState(publicSiteUrl());
   const [canShare, setCanShare] = useState(false);
 
   useEffect(() => {
-    setOrigin(window.location.origin);
+    setOrigin(publicSiteUrl(window.location.origin));
     setCanShare(Boolean(navigator.share));
   }, []);
 

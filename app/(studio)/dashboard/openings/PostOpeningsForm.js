@@ -53,24 +53,40 @@ export default function PostOpeningsForm({ today, daysOff }) {
     <form action={formAction} key={formKey}>
       <label>
         Date
-        <input
-          name="start_date"
-          type="date"
-          min={today}
-          value={start}
-          onChange={(e) => setStart(e.target.value)}
-          required
-        />
+        <span className="date-field">
+          <input
+            name="start_date"
+            type="date"
+            min={today}
+            value={start}
+            onChange={(e) => setStart(e.target.value)}
+            className={start ? undefined : "is-empty"}
+            required
+          />
+          {!start && (
+            <span className="date-placeholder" aria-hidden="true">
+              Pick a date
+            </span>
+          )}
+        </span>
       </label>
       <label>
         Until (optional, to open several days)
-        <input
-          name="end_date"
-          type="date"
-          min={start || today}
-          value={end}
-          onChange={(e) => setEnd(e.target.value)}
-        />
+        <span className="date-field">
+          <input
+            name="end_date"
+            type="date"
+            min={start || today}
+            value={end}
+            onChange={(e) => setEnd(e.target.value)}
+            className={end ? undefined : "is-empty"}
+          />
+          {!end && (
+            <span className="date-placeholder" aria-hidden="true">
+              Optional end date
+            </span>
+          )}
+        </span>
       </label>
 
       <fieldset className="field">

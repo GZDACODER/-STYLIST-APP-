@@ -1006,27 +1006,183 @@ body:has(.db) {
   pointer-events: none;
 }
 
-/* Bookings: "Cancel Taura's Hair cut on ...?" with Keep booking / Yes, cancel. */
-.db .cancel-confirm {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  max-width: 420px;
+/* "Cancel booking" / "Delete client": a quiet grey link, not red. */
+.db .link-button.quiet-link {
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  text-decoration: underline;
+  text-decoration-color: currentColor;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  transition: color 0.15s;
 }
 
-.db .cancel-confirm .cancel-question {
+.db .link-button.quiet-link:hover,
+.db .link-button.quiet-link:focus-visible {
+  color: var(--ink);
+}
+
+/* The confirm step that replaces the link: question, note, then
+   "Keep ..." (black) and "Yes, ..." (the only muted red). */
+.db .confirm-step {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  max-width: 440px;
+  text-align: left;
+}
+
+.db .confirm-step p {
   margin: 0;
+}
+
+.db .confirm-question {
   font-weight: 500;
   color: var(--ink);
 }
 
-.db .cancel-confirm p {
-  margin: 0;
-}
-
-.db .cancel-actions {
+.db .confirm-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
   margin-top: 6px;
+}
+
+.db .button.confirm-danger {
+  background: transparent;
+  color: #8a3a30;
+  border: 1px solid rgba(138, 58, 48, 0.55);
+}
+
+.db .button.confirm-danger:hover:not(:disabled) {
+  background: #8a3a30;
+  color: #fff;
+  border-color: #8a3a30;
+}
+
+/* Cancelled bookings: "Deposit kept · $20.00", neutral outline. */
+.db .badge.kept {
+  border-color: var(--border-strong);
+  color: var(--ink);
+  background: transparent;
+}
+
+/* Openings: date boxes show "Pick a date" / "Optional end date" while
+   empty. Browsers ignore placeholder on date inputs, so the text is drawn
+   over the box and the browser's own "mm/dd/yyyy" is hidden until typing. */
+.db .date-field {
+  position: relative;
+  display: block;
+}
+
+.db .date-placeholder {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--faint);
+  font-size: 16px;
+  letter-spacing: 0;
+  text-transform: none;
+  font-weight: 400;
+  pointer-events: none;
+}
+
+.db input[type="date"].is-empty:not(:focus)::-webkit-datetime-edit {
+  color: transparent;
+}
+
+.db input[type="date"].is-empty:focus + .date-placeholder {
+  display: none;
+}
+
+/* Today, 1200px and up: today's appointments on the left, and a right-hand
+   column with "Next up" and "Open times this week". Narrower screens keep
+   the single column, without the extra column. */
+.db-today-side {
+  display: none;
+}
+
+@media (min-width: 1200px) {
+  .db-page:has(.db-today) {
+    max-width: 1180px;
+  }
+
+  .db-today {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 56px;
+    align-items: start;
+  }
+
+  .db-today-side {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+}
+
+.db-today-side h2 {
+  font-size: 1.25rem;
+}
+
+.db-next {
+  padding-top: 16px;
+}
+
+.db .db-next p {
+  margin: 0;
+}
+
+.db .db-next-when {
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold-dark);
+  margin-bottom: 6px;
+}
+
+.db .db-next-name {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.5rem;
+  line-height: 1.2;
+  color: var(--ink);
+}
+
+.db .db-quiet-small {
+  padding-top: 16px;
+  margin: 0;
+  font-family: var(--font-display), Georgia, serif;
+  font-style: italic;
+  color: var(--muted);
+}
+
+.db-open-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.db-open-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--hair);
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.db-open-list li span:first-child {
+  color: var(--muted);
+}
+
+.db .db-side-link {
+  margin: 14px 0 0;
+  font-size: 0.9rem;
 }
