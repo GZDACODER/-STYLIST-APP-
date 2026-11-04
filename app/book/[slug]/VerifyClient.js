@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 import { sendCode, verifyCode } from "../actions";
 import { formatPhone } from "@/lib/phone";
+import { maskEmail } from "@/lib/maskEmail";
 
 // Two steps: type your email (or mobile number) -> type the code we sent you.
 // textCodes: false while text message codes are switched off; then it's
@@ -139,7 +140,7 @@ export default function VerifyClient({ onVerified, textCodes = false }) {
           </>
         ) : (
           <>
-            We emailed a code to <strong>{value}</strong>. It can take a minute. Check your spam
+            We emailed a code to <strong>{maskEmail(value)}</strong>. It can take a minute. Check your spam
             folder if you don&apos;t see it.
           </>
         )}

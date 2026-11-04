@@ -6,7 +6,7 @@ import TimeZoneSelect from "@/components/TimeZoneSelect";
 import SubmitButton from "@/components/SubmitButton";
 import FormMessage from "@/components/FormMessage";
 
-export default function SettingsForm({ businessName, slug, timezone, tagline }) {
+export default function SettingsForm({ businessName, firstName, slug, timezone, tagline }) {
   const [state, formAction] = useActionState(saveSettings, null);
 
   return (
@@ -15,6 +15,19 @@ export default function SettingsForm({ businessName, slug, timezone, tagline }) 
         Business name
         <input name="business_name" type="text" maxLength={100} defaultValue={businessName} required />
       </label>
+      <label>
+        Your first name (optional)
+        <input
+          name="first_name"
+          type="text"
+          autoComplete="given-name"
+          maxLength={50}
+          defaultValue={firstName}
+        />
+      </label>
+      <p className="muted small-text">
+        Used to greet you on your dashboard. Clients don&apos;t see it.
+      </p>
       <label>
         Tagline (optional)
         <input
