@@ -8,10 +8,12 @@ import { createClient } from "@/lib/supabase/server";
 
 export async function signup(prevState, formData) {
   const businessName = String(formData.get("business_name") || "").trim();
+  const firstName = String(formData.get("first_name") || "").trim();
   const email = String(formData.get("email") || "").trim();
   const password = String(formData.get("password") || "");
 
   if (!businessName) return { error: "Please enter your business name." };
+  if (firstName.length > 50) return { error: "Please keep your first name to 50 characters." };
   if (!email) return { error: "Please enter your email." };
   if (password.length < 8) {
     return { error: "Password must be at least 8 characters." };
@@ -25,7 +27,7 @@ export async function signup(prevState, formData) {
     password,
     options: {
       // Saved with the account; the database copies it into "stylists".
-      data: { business_name: businessName },
+      data: { business_name: businessName, first_name: firstName },
       // Where the "confirm your email" link sends them.
       emailRedirectTo: `${origin}/auth/confirm`,
     },

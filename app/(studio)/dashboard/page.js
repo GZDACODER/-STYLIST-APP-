@@ -26,14 +26,11 @@ function greeting(timeZone) {
   return "Good evening";
 }
 
-// The first word of the business name ("Cuts by Sam" -> "Cuts"); all-caps
-// words are shown in mixed case unless they're short ("GT" stays "GT").
-function firstName(businessName) {
-  const word = String(businessName || "").trim().split(/\s+/)[0] || "";
-  if (word.length > 3 && word === word.toUpperCase()) {
-    return word[0] + word.slice(1).toLowerCase();
-  }
-  return word;
+// "Good afternoon, Gabrielle" with the first name from Settings, or just
+// "Good afternoon" when there isn't one.
+function greetingLine(timeZone, firstName) {
+  const name = String(firstName || "").trim();
+  return name ? `${greeting(timeZone)}, ${name}` : greeting(timeZone);
 }
 
 // Monday to Sunday of the week that contains `today` ("YYYY-MM-DD").
@@ -71,6 +68,13 @@ export default async function TodayPage() {
     .eq("id", user.id)
     .maybeSingle();
   if (!stylist) return null;
+
+  // Read on its own, so the dashboard still opens before the first name SQL (0015) is run.
+  const { data: firstNameRow } = await supabase
+    .from("stylists")
+    .select("first_name")
+    .eq("id", user.id)
+    .maybeSingle();
 
   const tz = stylist.timezone;
   const today = todayInTimeZone(tz);
@@ -158,9 +162,7 @@ export default async function TodayPage() {
     <>
       <header className="db-greeting">
         <p className="db-date">{dateLine}</p>
-        <h1>
-          {greeting(tz)}, {firstName(stylist.business_name)}
-        </h1>
+        <h1>{greetingLine(tz, firstNameRow?.first_name)}</h1>
       </header>
 
       <section className="db-stats" aria-label="This week">

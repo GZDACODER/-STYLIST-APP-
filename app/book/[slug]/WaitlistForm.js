@@ -6,6 +6,7 @@ import { WEEKDAYS } from "@/lib/availability";
 import { PARTS_OF_DAY } from "@/lib/preferences";
 import { formatPhone } from "@/lib/phone";
 import VerifyClient from "./VerifyClient";
+import { maskEmail } from "@/lib/maskEmail";
 
 // Join the waitlist for one service: pick days and times of day, confirm
 // your phone number, and we'll email you when a time opens up.
@@ -60,7 +61,7 @@ export default function WaitlistForm({
         <p className="message success">
           {joined.updated ? "Your waitlist spot is updated." : "You're on the waitlist!"}{" "}
           {joined.email
-            ? `We'll email ${joined.email} as soon as a time you'd like opens up.`
+            ? `We'll email ${maskEmail(joined.email)} as soon as a time you'd like opens up.`
             : "We'll text you as soon as a time you'd like opens up."}{" "}
           First to claim it gets it.
         </p>
@@ -171,7 +172,7 @@ export default function WaitlistForm({
                   required
                 />
               </label>
-              <p className="muted small-text">We&apos;ll email {viewerEmail}.</p>
+              <p className="muted small-text">We&apos;ll email {maskEmail(viewerEmail)}.</p>
             </>
           )}
           {textsAvailable && (

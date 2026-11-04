@@ -6,6 +6,7 @@ import { book, getSlots, signOutBooking } from "../actions";
 import { clockTime, formatDate, parseDateString, timeZoneLabel } from "@/lib/availability";
 import { formatPhone } from "@/lib/phone";
 import VerifyClient from "./VerifyClient";
+import { maskEmail } from "@/lib/maskEmail";
 import WaitlistForm from "./WaitlistForm";
 import MyBookings from "./MyBookings";
 import RegularStar from "@/components/RegularStar";
@@ -52,7 +53,7 @@ export default function BookingFlow({
   } = page;
   const verified = viewer_status !== "anonymous";
   // How they confirmed: their phone number (by text) or their email.
-  const viewerLabel = viewer_phone ? formatPhone(viewer_phone) : viewer_email;
+  const viewerLabel = viewer_phone ? formatPhone(viewer_phone) : maskEmail(viewer_email);
   // What clients confirm with a code: their phone (text codes on) or email.
   const confirmWhat = textCodes ? "phone number" : "email";
   // "Regulars only" mode: only Regulars (and clients with an invite link) can book.
@@ -544,7 +545,7 @@ export default function BookingFlow({
                   </label>
                   <p className="muted small-text">
                     Your mobile number is how {business_name} knows it&apos;s you. Email:{" "}
-                    {viewer_email}
+                    {maskEmail(viewer_email)}
                   </p>
                 </>
               )}

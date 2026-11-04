@@ -5,6 +5,7 @@ import { createBookingClient } from "@/lib/supabase/booking";
 import { clockTime, formatDate, timeZoneLabel } from "@/lib/availability";
 import { describeWishes } from "@/lib/preferences";
 import LeaveWaitlist from "./LeaveWaitlist";
+import { maskEmail } from "@/lib/maskEmail";
 
 export const metadata = { title: "Your waitlist spot" };
 
@@ -57,7 +58,7 @@ export default async function WaitlistPage({ params, searchParams }) {
           <>
             <p className="muted">
               You&apos;re on the waitlist.{" "}
-              {entry.email ? `We'll email ${entry.email}` : "We'll let you know"} when a time
+              {entry.email ? `We'll email ${maskEmail(entry.email)}` : "We'll let you know"} when a time
               you&apos;d like opens up.
             </p>
 

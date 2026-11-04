@@ -12,6 +12,7 @@ export async function saveSettings(prevState, formData) {
   const slug = String(formData.get("slug") || "").trim().toLowerCase();
   const timezone = String(formData.get("timezone") || "").trim();
   const tagline = String(formData.get("tagline") || "").trim();
+  const firstName = String(formData.get("first_name") || "").trim();
 
   if (!businessName) return { error: "Please enter your business name." };
   if (businessName.length > 100) return { error: "Business name is too long." };
@@ -23,6 +24,7 @@ export async function saveSettings(prevState, formData) {
   }
   if (!isValidTimeZone(timezone)) return { error: "Please pick your time zone." };
   if (tagline.length > 120) return { error: "Please keep the tagline to 120 characters." };
+  if (firstName.length > 50) return { error: "Please keep your first name to 50 characters." };
 
   const supabase = await createClient();
   const {
@@ -51,6 +53,19 @@ export async function saveSettings(prevState, formData) {
     return {
       error:
         "Your other settings were saved, but not the tagline. Run supabase/migrations/0013_tagline.sql in Supabase first.",
+    };
+  }
+
+  // Saved on its own too, so the rest still saves before the first name SQL is run.
+  const { error: firstNameError } = await supabase
+    .from("stylists")
+    .update({ first_name: firstName })
+    .eq("id", user.id);
+  if (firstNameError) {
+    revalidatePath("/dashboard", "layout");
+    return {
+      error:
+        "Your other settings were saved, but not your first name. Run supabase/migrations/0015_first_name.sql in Supabase first.",
     };
   }
 

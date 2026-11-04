@@ -36,6 +36,11 @@ and hosted on **Netlify**.
   panel, plus optional Instagram and Location links shown in the booking page's
   top bar. Run `supabase/migrations/0014_cover_and_links.sql` first; it also
   creates the public "covers" storage bucket.
+- **Your first name** (optional, in Settings and on sign-up): used in the
+  dashboard greeting ("Good afternoon, Gabrielle"). Run
+  `supabase/migrations/0015_first_name.sql` first.
+- **Private emails on the booking page**: a client's email is shown shortened
+  there ("tau…@gmail.com"). The dashboard always shows the full email.
 - **Deposits with Stripe**: each stylist connects their own Stripe account, turns
   deposits on, and sets a dollar amount or percent per service, plus a
   cancellation policy. Clients pay the deposit on Stripe before the booking is

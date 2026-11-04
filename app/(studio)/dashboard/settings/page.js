@@ -73,13 +73,15 @@ export default async function SettingsPage({ searchParams }) {
 
   // Read on their own, so Settings still opens before the tagline SQL (0013)
   // and the cover photo and links SQL (0014) are run.
-  const [{ data: taglineRow }, { data: profileRow }] = await Promise.all([
+  // Same for the first name (0015).
+  const [{ data: taglineRow }, { data: profileRow }, { data: firstNameRow }] = await Promise.all([
     supabase.from("stylists").select("tagline").eq("id", user.id).maybeSingle(),
     supabase
       .from("stylists")
       .select("cover_photo_url, instagram, location")
       .eq("id", user.id)
       .maybeSingle(),
+    supabase.from("stylists").select("first_name").eq("id", user.id).maybeSingle(),
   ]);
 
   const configured = paymentsConfigured();
@@ -102,6 +104,7 @@ export default async function SettingsPage({ searchParams }) {
         <h2>Settings</h2>
         <SettingsForm
           businessName={stylist.business_name}
+          firstName={firstNameRow?.first_name || ""}
           slug={stylist.slug}
           timezone={stylist.timezone}
           tagline={taglineRow?.tagline || ""}

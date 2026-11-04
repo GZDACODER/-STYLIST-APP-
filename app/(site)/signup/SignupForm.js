@@ -15,6 +15,10 @@ export default function SignupForm() {
         <input name="business_name" type="text" placeholder="e.g. Cuts by Sam" required />
       </label>
       <label>
+        Your first name (optional)
+        <input name="first_name" type="text" autoComplete="given-name" maxLength={50} />
+      </label>
+      <label>
         Email
         <input name="email" type="email" autoComplete="email" required />
       </label>
