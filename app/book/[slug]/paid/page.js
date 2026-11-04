@@ -1,5 +1,6 @@
 // Stripe sends the client here after they pay their deposit.
 import Link from "next/link";
+import StylistShell from "../StylistShell";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { finalizeCheckoutSession, getStripe } from "@/lib/stripe";
 import { clockTime, formatDate, timeZoneLabel } from "@/lib/availability";
@@ -31,7 +32,7 @@ async function loadResult(sessionId) {
   }
 }
 
-export default async function PaidPage({ params, searchParams }) {
+async function PaidPageContent({ params, searchParams }) {
   const { slug } = await params;
   const { session_id: sessionId } = await searchParams;
   const result = await loadResult(sessionId);
@@ -103,5 +104,15 @@ export default async function PaidPage({ params, searchParams }) {
         Book another appointment
       </Link>
     </section>
+  );
+}
+
+// The page, next to the stylist's panel (their name and cover photo).
+export default async function PaidPage(props) {
+  const { slug } = await props.params;
+  return (
+    <StylistShell slug={slug}>
+      <PaidPageContent {...props} />
+    </StylistShell>
   );
 }

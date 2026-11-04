@@ -5,6 +5,7 @@ import { waitlistConfigured } from "@/lib/waitlist";
 import { textsEnabled } from "@/lib/notify";
 import { textCodesEnabled } from "@/lib/phone";
 import BookingFlow from "./BookingFlow";
+import { displayName } from "@/lib/bookingHeader";
 
 // cache() means the title and the page share one database call.
 // invite: the secret from a private invite link (?invite=...), if any.
@@ -32,15 +33,6 @@ function stylistLook(page) {
   };
 }
 
-// "CUTS BY SAM" -> "Cuts By Sam", so names read in mixed case. Short words
-// ("GT", "NYC") stay in capitals, and names already in mixed case are kept.
-function displayName(name) {
-  const text = String(name || "");
-  if (text !== text.toUpperCase() || !/[A-Z]/.test(text)) return text;
-  return text.replace(/[A-Z][A-Z']*/g, (word) =>
-    word.length <= 3 ? word : word[0] + word.slice(1).toLowerCase(),
-  );
-}
 
 function inviteFrom(searchParams) {
   const invite = searchParams?.invite;

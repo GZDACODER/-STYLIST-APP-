@@ -1,14 +1,8 @@
-import { cache } from "react";
-import { createBookingClient } from "@/lib/supabase/booking";
+import { loadBookingHeader as loadHeader } from "@/lib/bookingHeader";
 import { instagramUrl, locationUrl } from "@/lib/profileLinks";
 
-// Just the name and links for the top bar. A separate, read-only call, so
-// every booking page (booking, waitlist, claim, paid) can show it.
-const loadHeader = cache(async (slug) => {
-  const supabase = await createBookingClient();
-  const { data, error } = await supabase.rpc("get_booking_header", { p_slug: slug });
-  return error ? null : data;
-});
+// The name and links for the top bar: a separate, read-only call, so every
+// booking page (booking, waitlist, claim, paid) can show it.
 
 export default async function StylistBookingLayout({ children, params }) {
   const { slug } = await params;
