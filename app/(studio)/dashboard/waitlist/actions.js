@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { planErrorMessage } from "@/lib/plan";
 
 // Minutes regulars get before everyone else hears about a time. 0 = nobody waits.
 const HEAD_STARTS = [0, 10, 15, 30, 45, 60, 90, 120, 180, 240];
@@ -21,7 +22,7 @@ export async function saveWaitlistSettings(prevState, formData) {
     .from("stylists")
     .update({ waitlist_enabled: enabled, waitlist_regulars_minutes: minutes })
     .eq("id", user.id);
-  if (error) return { error: error.message };
+  if (error) return { error: planErrorMessage(error) || error.message };
 
   revalidatePath("/dashboard/waitlist");
   return {

@@ -39,6 +39,12 @@ and hosted on **Netlify**.
 - **Your first name** (optional, in Settings and on sign-up): used in the
   dashboard greeting ("Good afternoon, Gabrielle"). Run
   `supabase/migrations/0015_first_name.sql` first.
+- **Plans (billing part 1)**: each stylist has a plan: Clientele ($15/mo), plus the
+  Regulars First ($10/mo) and Waitlist ($7/mo) add-ons, or All-in ($29/mo). Prices
+  live in `lib/plans.js`. New stylists get a 14-day trial with everything on;
+  existing accounts are free. A paused add-on can't be switched on or used for
+  anything new (the database refuses it). Run `supabase/migrations/0017_plans.sql`.
+  Paying with Stripe comes in part 2.
 - **Private emails on the booking page**: a client's email is shown shortened
   there ("tau…@gmail.com"). The dashboard always shows the full email.
 - **Deposits with Stripe**: each stylist connects their own Stripe account, turns

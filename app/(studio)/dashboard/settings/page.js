@@ -7,6 +7,8 @@ import DepositsForm from "./DepositsForm";
 import RegularsForm from "./RegularsForm";
 import CoverPhotoForm from "./CoverPhotoForm";
 import BusinessLinksForm from "./BusinessLinksForm";
+import PlanCard from "./PlanCard";
+import { getMyPlan } from "@/lib/plan";
 import { BRAND_NAME } from "@/lib/brand";
 import RegularStar from "@/components/RegularStar";
 import Link from "next/link";
@@ -84,6 +86,7 @@ export default async function SettingsPage({ searchParams }) {
     supabase.from("stylists").select("first_name").eq("id", user.id).maybeSingle(),
   ]);
 
+  const plan = await getMyPlan(supabase, user.id);
   const configured = paymentsConfigured();
   let stripe = { connected: false, enabled: false, detailsSubmitted: false };
   if (stylist.stripe_account_id) {
@@ -110,6 +113,8 @@ export default async function SettingsPage({ searchParams }) {
           tagline={taglineRow?.tagline || ""}
         />
       </section>
+
+      {plan.ready && <PlanCard plan={plan} />}
 
       <section className="card">
         <h2>Your business</h2>

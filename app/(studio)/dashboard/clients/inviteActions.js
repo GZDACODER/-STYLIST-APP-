@@ -3,6 +3,7 @@
 // Server actions for private invite links.
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { planErrorMessage } from "@/lib/plan";
 import { normalizePhone } from "@/lib/phone";
 
 export async function createInvite(prevState, formData) {
@@ -26,7 +27,7 @@ export async function createInvite(prevState, formData) {
     .insert({ stylist_id: user.id, name, phone })
     .select("id, token, name, phone")
     .single();
-  if (error) return { error: error.message };
+  if (error) return { error: planErrorMessage(error) || error.message };
 
   revalidatePath("/dashboard/clients");
   return { invite: data, createdAt: Date.now() };

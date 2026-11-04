@@ -26,6 +26,7 @@ const BOOKING_ERRORS = {
 };
 
 const WAITLIST_ERRORS = {
+  plan_waitlist_paused: "The waitlist isn't open right now. Please check back soon.",
   not_verified: "Please confirm it's you with a code first.",
   invalid_name: "Please enter your name.",
   invalid_phone: "Please enter a phone number we can reach you on.",
