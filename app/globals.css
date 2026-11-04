@@ -1487,3 +1487,8 @@ select {
 .segment input:checked + span .regular-star {
   fill: var(--on-gold);
 }
+
+/* "Resend confirmation email" under the sign-up and log-in forms. */
+.resend-confirmation {
+  margin-top: 12px;
+}

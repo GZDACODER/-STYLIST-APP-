@@ -4,11 +4,13 @@ import { useActionState } from "react";
 import { login } from "@/app/auth/actions";
 import SubmitButton from "@/components/SubmitButton";
 import FormMessage from "@/components/FormMessage";
+import ResendConfirmation from "@/components/ResendConfirmation";
 
 export default function LoginForm() {
   const [state, formAction] = useActionState(login, null);
 
   return (
+    <>
     <form action={formAction}>
       <label>
         Email
@@ -21,5 +23,7 @@ export default function LoginForm() {
       <SubmitButton pendingText="Logging in...">Log in</SubmitButton>
       <FormMessage state={state} />
     </form>
+    {state?.unconfirmedEmail && <ResendConfirmation email={state.unconfirmedEmail} />}
+    </>
   );
 }

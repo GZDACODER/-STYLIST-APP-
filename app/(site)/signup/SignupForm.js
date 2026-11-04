@@ -4,11 +4,13 @@ import { useActionState } from "react";
 import { signup } from "@/app/auth/actions";
 import SubmitButton from "@/components/SubmitButton";
 import FormMessage from "@/components/FormMessage";
+import ResendConfirmation from "@/components/ResendConfirmation";
 
 export default function SignupForm() {
   const [state, formAction] = useActionState(signup, null);
 
   return (
+    <>
     <form action={formAction}>
       <label>
         Business name
@@ -35,5 +37,8 @@ export default function SignupForm() {
       <SubmitButton pendingText="Creating account...">Create account</SubmitButton>
       <FormMessage state={state} />
     </form>
+    {/* Didn't get the email (or the account already exists unconfirmed). */}
+    {state?.email && <ResendConfirmation email={state.email} />}
+    </>
   );
 }

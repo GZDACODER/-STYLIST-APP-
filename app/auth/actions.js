@@ -33,13 +33,70 @@ export async function signup(prevState, formData) {
     },
   });
 
-  if (error) return { error: error.message };
+  // Shows in Vercel's logs (Deployments -> the deployment -> Logs), to see
+  // whether Supabase says it sent the confirmation email.
+  console.log("Stylist sign-up", {
+    email,
+    error: error ? `${error.status || ""} ${error.code || ""} ${error.message}` : null,
+    userId: data?.user?.id || null,
+    identities: data?.user?.identities?.length ?? null,
+    confirmationSentAt: data?.user?.confirmation_sent_at || null,
+  });
+
+  if (error) return { error: signupErrorMessage(error) };
 
   // If email confirmation is turned off in Supabase, they're logged in now.
   if (data.session) redirect("/dashboard");
 
+  // An account with this email already exists: Supabase sends no email and
+  // gives no error (so nobody can check who has an account), but the user it
+  // returns has no sign-in identities.
+  if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+    return {
+      error:
+        "This email already has an account. Log in instead, or use a different email. If it's waiting for confirmation, tap Resend confirmation email below.",
+      email,
+    };
+  }
+
   return {
-    success: "Almost done! Check your email and tap the link to confirm your account.",
+    success: `Almost done! We emailed a confirmation link to ${email}. Tap it to finish. It can take a minute; check your spam folder too.`,
+    email,
+  };
+}
+
+function signupErrorMessage(error) {
+  const text = `${error.code || ""} ${error.message || ""}`;
+  if (error.status === 429 || /rate limit|after \d+ seconds/i.test(text)) {
+    return "Too many emails were sent just now. Please wait a minute and try again.";
+  }
+  if (/sending|smtp|mail/i.test(text)) {
+    return `The confirmation email couldn't be sent. Details: ${error.message}`;
+  }
+  return error.message;
+}
+
+// "Resend confirmation email": sends the sign-up email again. Shows
+// Supabase's own reason if it can't be sent.
+export async function resendConfirmation(prevState, formData) {
+  const email = String(formData.get("email") || "").trim();
+  if (!email) return { error: "Please enter your email." };
+
+  const origin = (await headers()).get("origin");
+  const supabase = await createClient();
+  const { error } = await supabase.auth.resend({
+    type: "signup",
+    email,
+    options: { emailRedirectTo: `${origin}/auth/confirm` },
+  });
+  console.log("Resend sign-up confirmation", {
+    email,
+    error: error ? `${error.status || ""} ${error.code || ""} ${error.message}` : null,
+  });
+
+  if (error) return { error: signupErrorMessage(error) };
+  return {
+    success: `Sent. Check ${email} (and your spam folder) for the confirmation link.`,
   };
 }
 
@@ -54,7 +111,15 @@ export async function login(prevState, formData) {
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
-  if (error) return { error: error.message };
+  if (error) {
+    if (error.code === "email_not_confirmed" || /not confirmed/i.test(error.message)) {
+      return {
+        error: "Your email isn't confirmed yet. Tap the link in the email we sent, or resend it below.",
+        unconfirmedEmail: email,
+      };
+    }
+    return { error: error.message };
+  }
 
   redirect("/dashboard");
 }
