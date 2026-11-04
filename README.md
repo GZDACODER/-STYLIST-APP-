@@ -44,7 +44,8 @@ and hosted on **Netlify**.
   live in `lib/plans.js`. New stylists get a 14-day trial with everything on;
   existing accounts are free. A paused add-on can't be switched on or used for
   anything new (the database refuses it). Run `supabase/migrations/0017_plans.sql`.
-  Paying with Stripe comes in part 2.
+  Stylists pick and pay for a plan in Settings (Stripe Checkout), and manage or
+  cancel it on Stripe's billing page. See **[BILLING_SETUP.md](./BILLING_SETUP.md)**.
 - **Private emails on the booking page**: a client's email is shown shortened
   there ("tau…@gmail.com"). The dashboard always shows the full email.
 - **Deposits with Stripe**: each stylist connects their own Stripe account, turns

@@ -51,7 +51,7 @@ async function refreshStripeStatus(userId, accountId, savedEnabled) {
 }
 
 export default async function SettingsPage({ searchParams }) {
-  const { stripe: stripeParam, reason } = await searchParams;
+  const { stripe: stripeParam, reason, billing } = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -114,7 +114,9 @@ export default async function SettingsPage({ searchParams }) {
         />
       </section>
 
-      {plan.ready && <PlanCard plan={plan} />}
+      {plan.ready && (
+        <PlanCard plan={plan} billingNotice={billing} canPay={paymentsConfigured()} />
+      )}
 
       <section className="card">
         <h2>Your business</h2>

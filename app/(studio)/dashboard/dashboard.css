@@ -1198,3 +1198,14 @@ body:has(.db) {
   flex-basis: 100%;
   margin: 8px 0 4px;
 }
+
+/* Settings -> Your plan: choosing a plan. */
+.db .choose-plan {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--hair);
+}
+
+.db .plan-total {
+  margin: 4px 0 0;
+}

@@ -1,6 +1,16 @@
-// Stripe calls this address when a deposit is paid or a payment page times out.
-// Set it up in Stripe: Developers -> Webhooks (see DEPOSITS_SETUP.md).
+// Stripe calls this address when a deposit is paid or a payment page times
+// out (see DEPOSITS_SETUP.md), and when a stylist's Clientele subscription
+// starts, changes or ends (see BILLING_SETUP.md).
 import { finalizeCheckoutSession, getStripe, releaseCheckoutSession } from "@/lib/stripe";
+import { syncSubscription } from "@/lib/billing";
+
+const SUBSCRIPTION_EVENTS = [
+  "customer.subscription.created",
+  "customer.subscription.updated",
+  "customer.subscription.deleted",
+  "customer.subscription.paused",
+  "customer.subscription.resumed",
+];
 
 export async function POST(request) {
   const body = await request.text();
@@ -20,7 +30,17 @@ export async function POST(request) {
   }
 
   try {
-    if (
+    const object = event.data.object;
+    if (SUBSCRIPTION_EVENTS.includes(event.type)) {
+      await syncSubscription(object);
+    } else if (event.type.startsWith("checkout.session.") && object.mode === "subscription") {
+      // A stylist finished Clientele's payment page: switch their plan on now,
+      // without waiting for the subscription message.
+      if (event.type === "checkout.session.completed" && object.subscription) {
+        const id = typeof object.subscription === "string" ? object.subscription : object.subscription.id;
+        await syncSubscription(await getStripe().subscriptions.retrieve(id));
+      }
+    } else if (
       event.type === "checkout.session.completed" ||
       // A slow payment method (e.g. a bank payment) finally cleared.
       event.type === "checkout.session.async_payment_succeeded"

@@ -1,7 +1,7 @@
-// Settings: which plan the stylist is on and what's switched on. Read-only
-// for now; paying and changing plans come with Stripe (billing part 2).
+// Settings: the stylist's plan, what's switched on, and paying with Stripe.
 import { PLANS } from "@/lib/plans";
 import { formatPrice } from "@/lib/money";
+import ChoosePlanForm from "./ChoosePlanForm";
 
 const PARTS = [
   { feature: "base", plan: PLANS.base },
@@ -9,21 +9,44 @@ const PARTS = [
   { feature: "waitlist", plan: PLANS.waitlist },
 ];
 
-export default function PlanCard({ plan }) {
-  const trialEnds = plan.trialEndsAt
-    ? new Date(plan.trialEndsAt).toLocaleDateString("en-US", { month: "long", day: "numeric" })
-    : null;
+const NOTICES = {
+  success: { kind: "success", text: "Thanks! Your plan is being switched on. Refresh in a moment if it still says Paused." },
+  cancelled: { kind: "info", text: "Payment cancelled. Nothing was charged." },
+  portal_error: { kind: "error", text: "Stripe's billing page didn't open. Please try again in a minute." },
+};
+
+const day = (iso) =>
+  iso ? new Date(iso).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : null;
+
+export default function PlanCard({ plan, billingNotice, canPay }) {
+  const notice = NOTICES[billingNotice];
 
   return (
     <section className="card">
       <h2>Your plan</h2>
+      {notice && <p className={`message ${notice.kind}`}>{notice.text}</p>}
       {plan.comped ? (
         <p className="muted">Founding account: everything is on, and you&apos;re never billed.</p>
+      ) : plan.subscribed ? (
+        <p className="muted">
+          {plan.stripeStatus === "past_due"
+            ? "Your last payment didn't go through. Stripe will try again; please check your card in Manage billing."
+            : plan.stripeStatus === "trialing"
+              ? `Free trial until ${day(plan.trialEndsAt)}, then your plan starts.`
+              : `Paid ${plan.interval === "year" ? "yearly" : "monthly"}. Next renewal ${day(plan.periodEnd)}.`}
+        </p>
       ) : plan.inTrial ? (
-        <p className="muted">Free trial: everything is on until {trialEnds}. No card needed.</p>
+        <p className="muted">
+          Free trial: everything is on until {day(plan.trialEndsAt)}. No card needed. Choose a plan
+          below to keep it going after that.
+        </p>
       ) : (
-        <p className="muted">Paying for a plan is coming soon.</p>
+        <p className="muted">
+          Your free trial has ended. Choose a plan to switch your add-ons back on. Your bookings
+          and clients are all still here.
+        </p>
       )}
+
       <ul className="service-list plan-list">
         {PARTS.map(({ feature, plan: part }) => (
           <li key={feature}>
@@ -39,6 +62,22 @@ export default function PlanCard({ plan }) {
           </li>
         ))}
       </ul>
+
+      {!plan.comped && plan.hasCustomer && (
+        <p>
+          <a href="/dashboard/billing/portal" className="button secondary small">
+            Manage billing
+          </a>
+        </p>
+      )}
+
+      {!plan.comped && !plan.subscribed && (
+        canPay ? (
+          <ChoosePlanForm inTrial={plan.inTrial} />
+        ) : (
+          <p className="message warning">Paying isn&apos;t set up yet (the Stripe keys are missing in Vercel).</p>
+        )
+      )}
     </section>
   );
 }
