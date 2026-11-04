@@ -139,6 +139,9 @@ export default async function BookingsPage() {
                         <CancelBookingButton
                           id={b.id}
                           clientName={b.client_name}
+                          serviceName={b.service_name}
+                          date={b.booking_date}
+                          startTime={b.start_time}
                           depositPaid={b.deposit_status === "paid"}
                         />
                       </div>

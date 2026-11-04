@@ -51,7 +51,7 @@ Emails have to come from an address on a domain you own (like
 `bookings@yoursalonapp.com`). Until you have one, use Resend's test sender:
 
 ```
-GZ Stylist App <onboarding@resend.dev>
+Clientele <onboarding@resend.dev>
 ```
 
 **The catch:** with the test sender, Resend only delivers to **the email address
@@ -83,7 +83,7 @@ these three (leave **Environments** on all of them):
 | Key | Value |
 | --- | --- |
 | `RESEND_API_KEY` | the `re_...` key from Part 2 |
-| `EMAIL_FROM` | `GZ Stylist App <onboarding@resend.dev>` for now (see Part 2) |
+| `EMAIL_FROM` | `Clientele <onboarding@resend.dev>` for now (see Part 2) |
 | `CRON_SECRET` | the random password from Part 3 |
 
 `SUPABASE_SECRET_KEY` from the deposits step is needed too. If you skipped deposits,
@@ -159,7 +159,7 @@ Common reasons:
   verified yet. Check **Domains** in Resend says **Verified**.
 - **"API key is invalid"**: `RESEND_API_KEY` in Vercel is wrong or was deleted.
 - **"Invalid `from` field"**: `EMAIL_FROM` must look exactly like
-  `GZ Stylist App <bookings@yourdomain.com>` (no quote marks around it).
+  `Clientele <bookings@yourdomain.com>` (no quote marks around it).
 
 Other things to check:
 
@@ -237,7 +237,7 @@ Save each one.
    verified domain, like:
 
    ```
-   GZ Stylist App <bookings@mail.cutsbysam.com>
+   Clientele <bookings@mail.cutsbysam.com>
    ```
 
    The part before `@` can be anything; it doesn't need to be a real inbox.
