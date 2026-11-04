@@ -5,6 +5,8 @@ import { textsEnabled } from "@/lib/notify";
 import { describeWishes } from "@/lib/preferences";
 import { formatDate, todayInTimeZone } from "@/lib/availability";
 import WaitlistSettingsForm from "./WaitlistSettingsForm";
+import PausedNote from "@/components/PausedNote";
+import { getMyPlan } from "@/lib/plan";
 import RemoveEntryButton from "./RemoveEntryButton";
 import { displayPhone } from "@/lib/phone";
 import { BRAND_NAME } from "@/lib/brand";
@@ -27,6 +29,8 @@ export default async function WaitlistPage() {
     .eq("id", user.id)
     .maybeSingle();
   if (!stylist) redirect("/dashboard");
+
+  const plan = await getMyPlan(supabase, user.id);
 
   // Waiting now, plus anyone who left the list in the last 30 days.
   const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
@@ -77,9 +81,16 @@ export default async function WaitlistPage() {
           time&quot; link. First to claim it gets it, and deposits still apply.
           {textsEnabled() && " Clients who ask for texts get a text too."}
         </p>
+        {!plan.has.waitlist && (
+          <PausedNote feature="waitlist">
+            The Waitlist add-on isn&apos;t on your plan right now, so clients can&apos;t join and
+            nobody is emailed. Everyone already on it is kept.
+          </PausedNote>
+        )}
         <WaitlistSettingsForm
           enabled={stylist.waitlist_enabled}
           regularsMinutes={stylist.waitlist_regulars_minutes}
+          allowed={plan.has.waitlist}
         />
       </section>
 

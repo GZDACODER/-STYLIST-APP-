@@ -3,6 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import AddClientForm from "./AddClientForm";
 import ClientList from "./ClientList";
 import InviteForm from "./InviteForm";
+import PausedNote from "@/components/PausedNote";
+import { getMyPlan } from "@/lib/plan";
 import InviteList from "./InviteList";
 import { BRAND_NAME } from "@/lib/brand";
 
@@ -17,6 +19,8 @@ export default async function ClientsPage() {
 
   // Clients who've had enough appointments become Regulars (see Settings).
   await supabase.rpc("refresh_my_regulars");
+
+  const plan = await getMyPlan(supabase, user.id);
 
   // Invites still open, plus ones used (or made) in the last 30 days.
   const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
@@ -74,7 +78,13 @@ export default async function ClientsPage() {
               &quot;Regulars only&quot;. Links work for 30 days. Once they&apos;ve booked, they
               show below as Invited.
             </p>
-            <InviteForm slug={stylist.slug} businessName={stylist.business_name} />
+            {plan.has.regulars ? (
+              <InviteForm slug={stylist.slug} businessName={stylist.business_name} />
+            ) : (
+              <PausedNote feature="regulars">
+                Invite links come with Regulars First, which isn&apos;t on your plan right now.
+              </PausedNote>
+            )}
             {invites.length > 0 && (
               <>
                 <h3 className="list-title">Your invites</h3>

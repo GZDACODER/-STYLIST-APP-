@@ -13,13 +13,18 @@ function minutesLabel(n) {
   return hours === 1 ? "1 hour" : `${hours} hours`;
 }
 
-export default function WaitlistSettingsForm({ enabled, regularsMinutes }) {
+export default function WaitlistSettingsForm({ enabled, regularsMinutes, allowed = true }) {
   const [state, formAction] = useActionState(saveWaitlistSettings, null);
 
   return (
     <form action={formAction}>
       <label className="check-row">
-        <input type="checkbox" name="waitlist_enabled" defaultChecked={enabled} />
+        <input
+          type="checkbox"
+          name="waitlist_enabled"
+          defaultChecked={enabled && allowed}
+          disabled={!allowed}
+        />
         Let clients join a waitlist when no times work for them
       </label>
       <label>

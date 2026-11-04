@@ -1209,3 +1209,54 @@ body:has(.db) {
 .db .plan-total {
   margin: 4px 0 0;
 }
+
+/* Plan banner across the dashboard: trial ending, payment failed, trial over. */
+.db-plan-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 20px;
+  margin: 0 0 32px;
+  padding: 14px 18px;
+  border: 1px solid var(--gold);
+  border-left-width: 3px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 0.95rem;
+}
+
+.db .db-plan-banner a {
+  flex-shrink: 0;
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+/* "Regulars First isn't on your plan right now. Add Regulars First" */
+.db .message.paused-note {
+  background: transparent;
+  border: 1px solid var(--hair);
+  border-left: 3px solid var(--gold);
+  border-radius: 0;
+  color: var(--muted);
+}
+
+.db .message.paused-note a {
+  color: var(--ink);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* A paused "Regulars only" choice, and switched-off checkboxes. */
+.db .segment.is-disabled,
+.db .segment:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.db .check-row input:disabled {
+  opacity: 0.4;
+}

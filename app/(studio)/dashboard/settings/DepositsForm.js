@@ -3,7 +3,7 @@
 import { useActionState, useState } from "react";
 import { saveDeposits } from "./actions";
 import { formatPrice } from "@/lib/money";
-import { DEPOSIT_FEE_PERCENT } from "@/lib/plans";
+import { DEPOSIT_FEE_FIXED_CENTS, DEPOSIT_FEE_PERCENT } from "@/lib/plans";
 import SubmitButton from "@/components/SubmitButton";
 import FormMessage from "@/components/FormMessage";
 
@@ -89,8 +89,9 @@ export default function DepositsForm({ enabled, policy, stripeReady, services })
       )}
       <p className="muted small-text">
         Clients pay the deposit on Stripe before their booking is confirmed. If they don&apos;t
-        pay, the time isn&apos;t booked. Clientele keeps {DEPOSIT_FEE_PERCENT}% of each deposit to
-        cover card costs; the rest goes to your Stripe account.
+        pay, the time isn&apos;t booked. Clientele keeps {DEPOSIT_FEE_PERCENT}% +{" "}
+        {DEPOSIT_FEE_FIXED_CENTS}¢ of each deposit to cover card costs; the rest goes to your Stripe
+        account.
       </p>
 
       <h3 className="list-title">Deposit for each service</h3>

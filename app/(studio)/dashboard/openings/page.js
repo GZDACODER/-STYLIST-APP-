@@ -8,6 +8,8 @@ import BookingLink from "./BookingLink";
 import { publicSiteUrl } from "@/lib/siteUrl";
 import PostOpeningsForm from "./PostOpeningsForm";
 import OpeningsList from "./OpeningsList";
+import PausedNote from "@/components/PausedNote";
+import { getMyPlan } from "@/lib/plan";
 import { BRAND_NAME } from "@/lib/brand";
 import RegularStar from "@/components/RegularStar";
 
@@ -28,6 +30,7 @@ export default async function OpeningsPage() {
   if (!stylist) redirect("/dashboard");
 
   const today = todayInTimeZone(stylist.timezone);
+  const plan = await getMyPlan(supabase, user.id);
 
   const [{ data: openings, error }, { data: bookings }, { data: hourRows }, { data: holdRows }] =
     await Promise.all([
@@ -103,7 +106,12 @@ export default async function OpeningsPage() {
           Clients can only book times you open here. &quot;Regulars only&quot; times are hidden from
           everyone except verified regulars.
         </p>
-        <PostOpeningsForm today={today} daysOff={daysOff} />
+        {!plan.has.regulars && (
+          <PausedNote feature="regulars">
+            Regulars First isn&apos;t on your plan right now, so new openings are for everyone.
+          </PausedNote>
+        )}
+        <PostOpeningsForm today={today} daysOff={daysOff} regularsAllowed={plan.has.regulars} />
       </section>
 
       {holds.length > 0 && (
@@ -140,7 +148,11 @@ export default async function OpeningsPage() {
       <section className="card">
         <h2>Upcoming openings</h2>
         <p className="muted small-text">Times are in {timeZoneLabel(stylist.timezone)} time.</p>
-        <OpeningsList openings={openings} bookingCounts={bookingCounts} />
+        <OpeningsList
+          openings={openings}
+          bookingCounts={bookingCounts}
+          regularsAllowed={plan.has.regulars}
+        />
       </section>
     </>
   );

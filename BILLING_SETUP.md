@@ -20,7 +20,8 @@ Prices live in one file: `lib/plans.js`.
 | All-in (everything) | $29 | $290 |
 
 New stylists get a 14-day free trial with everything on and no card needed.
-Clientele keeps 2% of each deposit a client pays.
+Clientele keeps 3% + 30¢ of each deposit a client pays (about what Stripe
+charges for the card payment), so deposits cost Clientele nothing.
 
 You don't make the prices in Stripe yourself. The first time someone opens the
 payment page, the app makes the products and prices in Stripe. They're

@@ -4,7 +4,9 @@ import RegularStar from "@/components/RegularStar";
 
 // Two joined buttons: Everyone | Regulars only.
 // "value" can also be "mixed" when a day has both kinds of openings.
-export default function VisibilitySwitch({ value, onChange, label, small = false }) {
+// regularsDisabled: Regulars First is paused, so "Regulars only" can't be
+// picked (switching back to Everyone still works).
+export default function VisibilitySwitch({ value, onChange, label, small = false, regularsDisabled = false }) {
   const options = [
     { value: "everyone", label: "Everyone" },
     { value: "regulars", label: "Regulars only" },
@@ -18,6 +20,7 @@ export default function VisibilitySwitch({ value, onChange, label, small = false
           type="button"
           className={`segment ${o.value}${value === o.value ? " checked" : ""}`}
           aria-pressed={value === o.value}
+          disabled={regularsDisabled && o.value === "regulars" && value !== "regulars"}
           onClick={() => value !== o.value && onChange(o.value)}
         >
           {o.value === "regulars" && (
