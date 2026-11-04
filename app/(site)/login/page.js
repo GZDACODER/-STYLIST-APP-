@@ -11,9 +11,12 @@ export default async function LoginPage({ searchParams }) {
     <>
       <h1>Log in</h1>
       {error === "confirm" && (
-        <p className="message error">
-          That confirmation link didn't work or has expired. Try logging in, or
-          sign up again.
+        // The link confirms the email first. Finishing the log-in only works in
+        // the browser that signed up, so on another phone or browser this shows,
+        // but the account is confirmed and logging in works.
+        <p className="message info">
+          Your email is confirmed. Please log in below to finish. If logging in
+          doesn&apos;t work, the link may have expired: sign up again to get a new one.
         </p>
       )}
       <div className="card">
