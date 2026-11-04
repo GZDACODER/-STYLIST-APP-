@@ -3,6 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { clockTime, formatDate, timeZoneLabel, todayInTimeZone } from "@/lib/availability";
 import CancelBookingButton from "./CancelBookingButton";
+import { displayPhone } from "@/lib/phone";
 import { BRAND_NAME } from "@/lib/brand";
 import RegularStar from "@/components/RegularStar";
 
@@ -139,7 +140,7 @@ export default async function BookingsPage() {
                         </div>
                       </div>
                       <div className="client-contact">
-                        <a href={`tel:${b.client_phone}`}>{b.client_phone}</a>
+                        <a href={`tel:${b.client_phone}`}>{displayPhone(b.client_phone)}</a>
                         {b.client_email && (
                           <a href={`mailto:${b.client_email}`}>{b.client_email}</a>
                         )}

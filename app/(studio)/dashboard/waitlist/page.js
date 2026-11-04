@@ -6,6 +6,7 @@ import { describeWishes } from "@/lib/preferences";
 import { formatDate, todayInTimeZone } from "@/lib/availability";
 import WaitlistSettingsForm from "./WaitlistSettingsForm";
 import RemoveEntryButton from "./RemoveEntryButton";
+import { displayPhone } from "@/lib/phone";
 import { BRAND_NAME } from "@/lib/brand";
 import RegularStar from "@/components/RegularStar";
 
@@ -120,7 +121,7 @@ export default async function WaitlistPage() {
                   )}
                 </div>
                 <div className="client-contact">
-                  <a href={`tel:${e.phone}`}>{e.phone}</a>
+                  <a href={`tel:${e.phone}`}>{displayPhone(e.phone)}</a>
                   {e.email && <a href={`mailto:${e.email}`}>{e.email}</a>}
                   {e.text_ok && <span className="muted small-text">Wants texts</span>}
                 </div>

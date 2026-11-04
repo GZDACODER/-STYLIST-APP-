@@ -8,6 +8,7 @@ import SubmitButton from "@/components/SubmitButton";
 import FormMessage from "@/components/FormMessage";
 import RegularStar from "@/components/RegularStar";
 import ConfirmAction from "@/components/ConfirmAction";
+import { displayPhone } from "@/lib/phone";
 
 export default function ClientCard({ client }) {
   const [editing, setEditing] = useState(false);
@@ -63,7 +64,7 @@ export default function ClientCard({ client }) {
 
       {(client.phone || client.email) && (
         <div className="client-contact">
-          {client.phone && <a href={`tel:${client.phone}`}>{client.phone}</a>}
+          {client.phone && <a href={`tel:${client.phone}`}>{displayPhone(client.phone)}</a>}
           {client.email && <a href={`mailto:${client.email}`}>{client.email}</a>}
         </div>
       )}

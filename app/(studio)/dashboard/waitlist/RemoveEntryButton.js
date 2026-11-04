@@ -1,21 +1,20 @@
 "use client";
 
 import { removeWaitlistEntry } from "./actions";
-import SubmitButton from "@/components/SubmitButton";
+import ConfirmAction from "@/components/ConfirmAction";
 
+// "Remove from waitlist": a quiet link that asks first, on the page.
 export default function RemoveEntryButton({ id, name }) {
-  function confirmRemove(event) {
-    if (!window.confirm(`Take ${name} off the waitlist? They won't hear about new times.`)) {
-      event.preventDefault();
-    }
-  }
-
   return (
-    <form action={removeWaitlistEntry} onSubmit={confirmRemove}>
-      <input type="hidden" name="id" value={id} />
-      <SubmitButton className="link-button danger" pendingText="Removing...">
-        Remove from waitlist
-      </SubmitButton>
-    </form>
+    <ConfirmAction
+      label="Remove from waitlist"
+      question={`Take ${name} off the waitlist?`}
+      note="They won't hear about new times."
+      keepLabel="Keep on waitlist"
+      confirmLabel="Yes, remove"
+      pendingText="Removing..."
+      action={removeWaitlistEntry}
+      fields={{ id }}
+    />
   );
 }
