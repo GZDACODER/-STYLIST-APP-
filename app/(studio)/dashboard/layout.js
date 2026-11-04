@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { logout } from "@/app/auth/actions";
 import { BRAND_NAME } from "@/lib/brand";
 import PlanBanner from "./PlanBanner";
+import CreateStylistForm from "./CreateStylistForm";
 import { getMyPlan } from "@/lib/plan";
 import DashboardNav from "./DashboardNav";
 import "./dashboard.css";
@@ -27,11 +28,28 @@ export default async function DashboardLayout({ children }) {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { data: stylist } = await supabase
+  let { data: stylist } = await supabase
     .from("stylists")
     .select("business_name")
     .eq("id", user.id)
     .maybeSingle();
+
+  // Signed up as a stylist (the business name is on the login) but no
+  // profile was made, for example because the email already had a login
+  // from booking: make it now. Needs 0018_stylist_profile_repair.sql.
+  const signupName = String(user.user_metadata?.business_name || "").trim();
+  if (!stylist && signupName) {
+    const { error } = await supabase.rpc("create_my_stylist", {
+      p_business_name: signupName,
+      p_first_name: String(user.user_metadata?.first_name || ""),
+    });
+    if (error) console.error("Couldn't repair stylist profile", error.code, error.message);
+    ({ data: stylist } = await supabase
+      .from("stylists")
+      .select("business_name")
+      .eq("id", user.id)
+      .maybeSingle());
+  }
 
   const plan = stylist ? await getMyPlan(supabase, user.id) : null;
 
@@ -42,11 +60,15 @@ export default async function DashboardLayout({ children }) {
       <div className={`db ${display.variable}`}>
         <main className="db-main">
           <div className="db-page stack">
-            <h1>No stylist account</h1>
+            <h1>Finish your stylist account</h1>
             <p className="muted">
-              {user.email} isn&apos;t a stylist account. If you&apos;re booking an appointment,
-              please use your stylist&apos;s booking link.
+              {user.email} isn&apos;t set up as a stylist yet. If you&apos;re a stylist, add your
+              business name below to finish. If you&apos;re booking an appointment, please use
+              your stylist&apos;s booking link instead.
             </p>
+            <div className="card">
+              <CreateStylistForm />
+            </div>
             <form action={logout}>
               <button type="submit" className="button secondary">
                 Log out
