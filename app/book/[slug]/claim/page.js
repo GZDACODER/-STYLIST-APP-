@@ -1,11 +1,12 @@
 // Clients land here from the "Claim this time" button in a waitlist message.
 import Link from "next/link";
+import StylistShell from "../StylistShell";
 import { createBookingClient } from "@/lib/supabase/booking";
 import ClaimOffer from "./ClaimOffer";
 
 export const metadata = { title: "Claim this time" };
 
-export default async function ClaimPage({ params, searchParams }) {
+async function ClaimPageContent({ params, searchParams }) {
   const { slug } = await params;
   const { t: token, payment } = await searchParams;
   const bookingLink = `/book/${slug}`;
@@ -29,7 +30,6 @@ export default async function ClaimPage({ params, searchParams }) {
 
   return (
     <>
-      <h1>{offer.business_name}</h1>
       <ClaimOffer
         offer={offer}
         token={token}
@@ -37,5 +37,15 @@ export default async function ClaimPage({ params, searchParams }) {
         paymentCancelled={payment === "cancelled"}
       />
     </>
+  );
+}
+
+// The page, next to the stylist's panel (their name and cover photo).
+export default async function ClaimPage(props) {
+  const { slug } = await props.params;
+  return (
+    <StylistShell slug={slug}>
+      <ClaimPageContent {...props} />
+    </StylistShell>
   );
 }

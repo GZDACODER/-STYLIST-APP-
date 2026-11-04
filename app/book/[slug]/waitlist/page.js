@@ -1,6 +1,7 @@
 // Clients land here from a waitlist message: the times they were told about
 // that are still open, and a button to leave the waitlist.
 import Link from "next/link";
+import StylistShell from "../StylistShell";
 import { createBookingClient } from "@/lib/supabase/booking";
 import { clockTime, formatDate, timeZoneLabel } from "@/lib/availability";
 import { describeWishes } from "@/lib/preferences";
@@ -9,7 +10,7 @@ import { maskEmail } from "@/lib/maskEmail";
 
 export const metadata = { title: "Your waitlist spot" };
 
-export default async function WaitlistPage({ params, searchParams }) {
+async function WaitlistPageContent({ params, searchParams }) {
   const { slug } = await params;
   const { t: token } = await searchParams;
 
@@ -34,7 +35,6 @@ export default async function WaitlistPage({ params, searchParams }) {
 
   return (
     <>
-      <h1>{entry.business_name}</h1>
       <section className="card">
         <h2>Your waitlist spot</h2>
         <p className="summary">
@@ -94,5 +94,15 @@ export default async function WaitlistPage({ params, searchParams }) {
         )}
       </section>
     </>
+  );
+}
+
+// The page, next to the stylist's panel (their name and cover photo).
+export default async function WaitlistPage(props) {
+  const { slug } = await props.params;
+  return (
+    <StylistShell slug={slug}>
+      <WaitlistPageContent {...props} />
+    </StylistShell>
   );
 }

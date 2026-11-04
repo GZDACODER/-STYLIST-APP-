@@ -432,6 +432,43 @@ body:has(.bk) {
   }
 }
 
+/* ---------- Waitlist, claim and paid pages: a smaller panel ---------- */
+/* The same black panel (or cover photo) with the stylist's name, but
+   shorter, so the page's content comes first. */
+.bk-layout-small .bk-plate:not(.bk-plate-photo) {
+  aspect-ratio: 3 / 1;
+  min-height: 120px;
+}
+
+.bk-layout-small .bk-plate-photo {
+  aspect-ratio: 2 / 1;
+  max-height: 34vh;
+  min-height: 170px;
+}
+
+.bk-layout-small .bk-plate-name {
+  font-size: clamp(1.9rem, 8.5vw, 3rem);
+}
+
+.bk-layout-small .bk-flow > :first-child,
+.bk-layout-small .bk-flow > .card:first-of-type {
+  margin-top: 24px;
+}
+
+@media (min-width: 768px) {
+  .bk-layout-small .bk-visual,
+  .bk-layout-small .bk-plate:not(.bk-plate-photo),
+  .bk-layout-small .bk-plate-photo {
+    aspect-ratio: 1 / 1;
+    min-height: 0;
+    max-height: min(60vh, 440px);
+  }
+
+  .bk-layout-small .bk-plate-name {
+    font-size: clamp(2.2rem, 4.2vw, 3.4rem);
+  }
+}
+
 /* ---------- Sections: thin rules, not boxes ---------- */
 .bk .card {
   position: relative;
