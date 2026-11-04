@@ -27,6 +27,15 @@ function DepositBadge({ booking }) {
   return <span className="badge unpaid">{formatPrice(cents)} deposit unpaid</span>;
 }
 
+// Cancelled bookings: a paid deposit wasn't refunded automatically, so the
+// stylist still has it: "Deposit kept · $20.00" (neutral, not green).
+function CancelledDepositBadge({ booking }) {
+  if (booking.deposit_status === "paid" && booking.deposit_cents) {
+    return <span className="badge kept">Deposit kept · {formatPrice(booking.deposit_cents)}</span>;
+  }
+  return <DepositBadge booking={booking} />;
+}
+
 export default async function BookingsPage() {
   const supabase = await createClient();
   const {
@@ -198,7 +207,7 @@ export default async function BookingsPage() {
                     </div>
                   )}
                 </div>
-                <DepositBadge booking={b} />
+                <CancelledDepositBadge booking={b} />
               </li>
             ))}
           </ul>

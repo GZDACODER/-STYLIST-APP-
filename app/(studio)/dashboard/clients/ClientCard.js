@@ -7,6 +7,7 @@ import ClientFields from "./ClientFields";
 import SubmitButton from "@/components/SubmitButton";
 import FormMessage from "@/components/FormMessage";
 import RegularStar from "@/components/RegularStar";
+import ConfirmAction from "@/components/ConfirmAction";
 
 export default function ClientCard({ client }) {
   const [editing, setEditing] = useState(false);
@@ -28,12 +29,6 @@ export default function ClientCard({ client }) {
       const result = await setClientStatus(client.id, newStatus);
       if (result?.error) setStatusError(result.error);
     });
-  }
-
-  function confirmDelete(event) {
-    if (!window.confirm(`Delete ${client.name}? This can't be undone.`)) {
-      event.preventDefault();
-    }
   }
 
   if (editing) {
@@ -100,12 +95,18 @@ export default function ClientCard({ client }) {
       </div>
       {statusError && <p className="message error">Couldn't change status: {statusError}</p>}
 
-      <form action={deleteClient} onSubmit={confirmDelete} className="client-delete">
-        <input type="hidden" name="id" value={client.id} />
-        <SubmitButton className="link-button danger" pendingText="Deleting...">
-          Delete client
-        </SubmitButton>
-      </form>
+      <div className="client-delete">
+        <ConfirmAction
+          label="Delete client"
+          question={`Delete ${client.name}?`}
+          note="This can't be undone."
+          keepLabel="Keep client"
+          confirmLabel="Yes, delete"
+          pendingText="Deleting..."
+          action={deleteClient}
+          fields={{ id: client.id }}
+        />
+      </div>
     </li>
   );
 }

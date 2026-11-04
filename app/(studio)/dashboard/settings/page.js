@@ -139,8 +139,8 @@ export default async function SettingsPage({ searchParams }) {
           <RegularStar label={null} size={14} /> Regulars
         </h2>
         <p className="muted">
-          Regulars see your &quot;Regulars only&quot; openings. Clients are matched by the phone
-          number they confirm with a text code.
+          Regulars see your &quot;Regulars only&quot; openings. Clients are matched by their
+          phone number and confirm with an email code.
         </p>
         <RegularsForm
           autoRegularAfter={stylist.auto_regular_after}
