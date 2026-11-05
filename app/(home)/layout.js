@@ -1,8 +1,8 @@
 import { Cormorant_Garamond } from "next/font/google";
 import "./home.css";
 
-// The marketing homepage at clientelesuite.com: the booking pages' editorial
-// look (ivory paper, warm black ink, Cormorant headings, champagne gold).
+// The marketing homepage at clientelesuite.com: near-black, big serif type,
+// gold (#B8975A) accents (Cormorant headings, Inter text, Great Vibes logo).
 const display = Cormorant_Garamond({
   subsets: ["latin"],
   weight: ["400", "500", "600"],
@@ -10,7 +10,7 @@ const display = Cormorant_Garamond({
   variable: "--font-display",
 });
 
-export const viewport = { themeColor: "#F5F1EA" };
+export const viewport = { themeColor: "#0B0A09" };
 
 export default function HomeLayout({ children }) {
   return <div className={`hm ${display.variable}`}>{children}</div>;
