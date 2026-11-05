@@ -3,7 +3,7 @@ import SignupForm from "./SignupForm";
 import { BRAND_NAME } from "@/lib/brand";
 import { TRIAL_DAYS } from "@/lib/plans";
 
-export const metadata = { title: `Sign up · ${BRAND_NAME}` };
+export const metadata = { title: `Sign Up · ${BRAND_NAME}` };
 
 export default function SignupPage() {
   return (

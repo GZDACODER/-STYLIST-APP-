@@ -6,7 +6,7 @@ import { finalizeCheckoutSession, getStripe } from "@/lib/stripe";
 import { clockTime, formatDate, timeZoneLabel } from "@/lib/availability";
 import { formatPrice } from "@/lib/money";
 
-export const metadata = { title: "Deposit paid" };
+export const metadata = { title: "Deposit Paid" };
 
 async function loadResult(sessionId) {
   if (!sessionId?.startsWith("cs_")) return null;

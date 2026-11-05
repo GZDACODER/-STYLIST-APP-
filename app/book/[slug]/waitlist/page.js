@@ -8,7 +8,7 @@ import { describeWishes } from "@/lib/preferences";
 import LeaveWaitlist from "./LeaveWaitlist";
 import { maskEmail } from "@/lib/maskEmail";
 
-export const metadata = { title: "Your waitlist spot" };
+export const metadata = { title: "Your Waitlist Spot" };
 
 async function WaitlistPageContent({ params, searchParams }) {
   const { slug } = await params;
