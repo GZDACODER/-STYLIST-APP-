@@ -6,6 +6,7 @@ import InviteForm from "./InviteForm";
 import PausedNote from "@/components/PausedNote";
 import { getMyPlan } from "@/lib/plan";
 import InviteList from "./InviteList";
+import ImportClients from "./ImportClients";
 import { BRAND_NAME } from "@/lib/brand";
 import { todayInTimeZone } from "@/lib/availability";
 
@@ -92,6 +93,15 @@ export default async function ClientsPage() {
             Add their mobile number so the booking page recognizes them.
           </p>
           <AddClientForm />
+        </details>
+      </section>
+
+      <section className="card">
+        <details className="add-client">
+          <summary>
+            <h2>Import clients</h2>
+          </summary>
+          <ImportClients />
         </details>
       </section>
 

@@ -1377,3 +1377,34 @@ body:has(.db) {
 .db .db-flag-actions form {
   margin: 0;
 }
+
+/* ---------- Clients: import from a CSV file ---------- */
+.db .import-clients {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.db .import-pick {
+  align-self: flex-start;
+  cursor: pointer;
+}
+
+.db .import-columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.db .import-preview ul {
+  margin: 4px 0 0;
+  padding: 10px 14px;
+  list-style: none;
+  border: 1px solid var(--hair);
+  font-size: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-wrap: anywhere;
+}
