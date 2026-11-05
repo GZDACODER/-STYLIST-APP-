@@ -236,9 +236,9 @@ body:has(.hm) {
   justify-content: center;
 }
 
-/* The floating calendar / salon chair (HeroObject.js). The stage (glow,
+/* The floating calendar / "Fully booked" badge (HeroObject.js). The stage (glow,
    plinth, shadow) stays still; the object floats and turns on the Y axis:
-   calendar for 4s, a 1.2s turn, chair for 4s, a 1.2s turn back. */
+   calendar for 4s, a 1.2s turn, badge for 4s, a 1.2s turn back. */
 .hm-object {
   position: relative;
   width: min(78vw, 340px);
@@ -364,6 +364,44 @@ body:has(.hm) {
   .hm-object {
     width: 100%;
     max-width: 500px;
+  }
+}
+
+/* Who it's for: a quiet row of examples under the hero. */
+.hm-for {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 0 var(--gutter) 56px;
+}
+
+.hm-for ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 0;
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+}
+
+.hm-for li + li::before {
+  content: "·";
+  color: var(--gold);
+  margin: 0 14px;
+}
+
+@media (min-width: 900px) {
+  .hm-for {
+    padding: 0 32px 80px;
+    margin-top: -40px;
+  }
+
+  .hm-for ul {
+    font-size: 0.82rem;
   }
 }
 

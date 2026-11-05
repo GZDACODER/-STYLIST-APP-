@@ -20,15 +20,15 @@ const BOOKING_ERRORS = {
   invalid_name: "Please enter your name.",
   invalid_phone: "Please enter a phone number we can reach you on.",
   invalid_email: "That email doesn't look right. You can also leave it empty.",
-  blocked: "Sorry, online booking isn't available for you. Please contact the salon directly.",
+  blocked: "Sorry, online booking isn't available for you. Please contact the business directly.",
   slot_unavailable: "Sorry, that time was just taken. Please pick another time.",
   too_many_bookings:
-    "You already have 3 upcoming appointments here. Please contact the salon to book more.",
+    "You already have 3 upcoming appointments here. Please contact the business to book more.",
   not_found: "That service isn't available any more. Please refresh the page.",
   already_claimed: "You've already claimed this time. You're booked!",
   waitlist_ended: "You're no longer on the waitlist for this, so this link has stopped working.",
   invite_wrong_person:
-    "This invite is for a different phone number. Please book with the phone number your stylist has for you.",
+    "This invite is for a different phone number. Please book with the phone number the business has for you.",
 };
 
 const WAITLIST_ERRORS = {
@@ -39,7 +39,7 @@ const WAITLIST_ERRORS = {
   invalid_email: "That email doesn't look right.",
   email_required: "Please enter your email so we can tell you when a time opens up.",
   invalid_choice: "Please pick your days and times again.",
-  blocked: "Sorry, the waitlist isn't available for you. Please contact the salon directly.",
+  blocked: "Sorry, the waitlist isn't available for you. Please contact the business directly.",
   waitlist_off: "The waitlist is closed right now. Please check back soon.",
   too_many_waitlist: "You're already on the waitlist for 3 services here.",
   regulars_only: "The waitlist is for regulars only right now.",

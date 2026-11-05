@@ -20,7 +20,7 @@ export default function CreateStylistForm() {
         Your first name (optional)
         <input name="first_name" type="text" autoComplete="given-name" maxLength={50} />
       </label>
-      <SubmitButton pendingText="Creating...">Create my stylist account</SubmitButton>
+      <SubmitButton pendingText="Creating...">Create my business account</SubmitButton>
       <FormMessage state={state} />
     </form>
   );

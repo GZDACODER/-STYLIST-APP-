@@ -7,9 +7,9 @@ import { formatPrice } from "@/lib/money";
 import RegularStar from "@/components/RegularStar";
 import HeroObject from "./HeroObject";
 
-const TITLE = `${BRAND_NAME} — Booking for Hair Stylists`;
+const TITLE = `${BRAND_NAME}: Booking that puts your regulars first.`;
 const DESCRIPTION =
-  "Booking that puts your regulars first. Deposits, waitlists and regulars-only times for stylists with a full book.";
+  "Deposits, waitlists and regulars-only times for businesses built on regulars.";
 
 export const metadata = {
   title: TITLE,
@@ -21,6 +21,19 @@ export const metadata = {
 
 // Dollars without cents when they're whole ($15, not $15.00).
 const price = (cents) => formatPrice(cents).replace(/\.00$/, "");
+
+// Who it's for (shown under the hero).
+const EXAMPLES = [
+  "Hair",
+  "Barbers",
+  "Nails",
+  "Lashes",
+  "Tattoo",
+  "Trainers",
+  "Tutors",
+  "Pet grooming",
+  "Photographers",
+];
 
 const REGULARS = [
   {
@@ -100,12 +113,12 @@ export default async function HomePage() {
         {/* ---------- Hero ---------- */}
         <section className="hm-hero">
           <div className="hm-hero-copy">
-            <p className="hm-kicker">Booking for hair stylists</p>
+            <p className="hm-kicker">Booking for pros with a full book</p>
             <h1>
               Booking that puts your <em>regulars</em> first.
             </h1>
             <p className="hm-lede">
-              Deposits, waitlists and regulars-only times for stylists with a full book.
+              Deposits, waitlists and regulars-only times for businesses built on regulars.
             </p>
             <div className="hm-cta-row">
               <Link href="/signup" className="hm-button">
@@ -122,12 +135,21 @@ export default async function HomePage() {
           </div>
         </section>
 
+        {/* ---------- Who it's for ---------- */}
+        <section className="hm-for" aria-label="Who it's for">
+          <ul>
+            {EXAMPLES.map((name) => (
+              <li key={name}>{name}</li>
+            ))}
+          </ul>
+        </section>
+
         {/* ---------- 1. Regulars First ---------- */}
         <section id="features" className="hm-section">
           <p className="hm-kicker">01 · Regulars First</p>
           <h2>Your best clients never fight for a spot.</h2>
           <p className="hm-section-lede">
-            The clients who keep your chair full get first pick of your time. Everyone else books
+            The clients who keep your book full get first pick of your time. Everyone else books
             what&apos;s left.
           </p>
           <ul className="hm-cards">
@@ -153,7 +175,7 @@ export default async function HomePage() {
                 theirs, and it goes straight to your own Stripe account.
               </p>
               <div className="hm-mini" aria-hidden="true">
-                <span>Silk press · Thu 10:30 AM</span>
+                <span>Signature session · Thu 10:30 AM</span>
                 <strong>$20 deposit paid</strong>
               </div>
             </div>
@@ -178,7 +200,7 @@ export default async function HomePage() {
             <h2>A booking page that looks like you.</h2>
             <p className="hm-section-lede">
               Your name in script over your own cover photo, with your Instagram and location one
-              tap away. No marketplace, no other stylists on the page, no app for clients to
+              tap away. No marketplace, no other businesses on the page, no app for clients to
               download.
             </p>
           </div>
@@ -186,12 +208,12 @@ export default async function HomePage() {
           {/* A booking page, drawn in code (the "photo" is a gradient). */}
           <div className="hm-phone" aria-hidden="true">
             <div className="hm-phone-cover">
-              <span className="hm-phone-name">Royalty Stylist</span>
+              <span className="hm-phone-name">Royalty Studio</span>
               <span className="hm-phone-rule" />
-              <span className="hm-phone-meta">Chicago · @royaltystylist</span>
+              <span className="hm-phone-meta">Chicago · @royaltystudio</span>
             </div>
             <div className="hm-phone-body">
-              <p className="hm-phone-label">Silk press · 90 min · $80</p>
+              <p className="hm-phone-label">Signature session · 60 min · $80</p>
               <p className="hm-phone-label hm-phone-day">Thursday, Nov 12</p>
               <div className="hm-phone-times">
                 <span>9:00 AM</span>

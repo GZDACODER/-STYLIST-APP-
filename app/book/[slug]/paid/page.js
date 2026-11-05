@@ -43,7 +43,7 @@ async function PaidPageContent({ params, searchParams }) {
       <section className="card">
         <h2>We couldn&apos;t find this payment</h2>
         <p className="muted">
-          If you paid, check your email for a receipt from Stripe and contact the salon.
+          If you paid, check your email for a receipt from Stripe and contact the business.
         </p>
         <Link href={bookingLink}>Back to the booking page</Link>
       </section>

@@ -11,22 +11,22 @@ const sans = Inter({ subsets: ["latin"], variable: "--font-sans" });
 // www.clientelesuite.com (NEXT_PUBLIC_SITE_URL in Vercel).
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.clientelesuite.com";
 const DESCRIPTION =
-  "Luxury booking that puts your regulars first. Deposits, waitlist and regulars-only times.";
+  "Deposits, waitlists and regulars-only times for businesses built on regulars.";
 
 export const metadata = {
   metadataBase: new URL(SITE_URL),
-  title: `${BRAND_NAME} — Booking for Hair Stylists`,
+  title: `${BRAND_NAME}: Booking that puts your regulars first.`,
   description: DESCRIPTION,
   applicationName: BRAND_NAME,
   openGraph: {
     siteName: BRAND_NAME,
     type: "website",
-    title: `${BRAND_NAME} — Booking for Hair Stylists`,
+    title: `${BRAND_NAME}: Booking that puts your regulars first.`,
     description: DESCRIPTION,
   },
   twitter: {
     card: "summary_large_image",
-    title: `${BRAND_NAME} — Booking for Hair Stylists`,
+    title: `${BRAND_NAME}: Booking that puts your regulars first.`,
     description: DESCRIPTION,
   },
 };
