@@ -2,7 +2,7 @@ import Link from "next/link";
 import LoginForm from "./LoginForm";
 import { BRAND_NAME } from "@/lib/brand";
 
-export const metadata = { title: `Log in · ${BRAND_NAME}` };
+export const metadata = { title: `Log In · ${BRAND_NAME}` };
 
 export default async function LoginPage({ searchParams }) {
   const { error } = await searchParams;

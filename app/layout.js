@@ -7,9 +7,28 @@ const script = Great_Vibes({ subsets: ["latin"], weight: "400", variable: "--fon
 const serif = Playfair_Display({ subsets: ["latin"], variable: "--font-serif" });
 const sans = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
+// The site's public address, so shared links and preview images use
+// www.clientelesuite.com (NEXT_PUBLIC_SITE_URL in Vercel).
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.clientelesuite.com";
+const DESCRIPTION =
+  "Luxury booking that puts your regulars first. Deposits, waitlist and regulars-only times.";
+
 export const metadata = {
-  title: `${BRAND_NAME}`,
-  description: "Luxury booking for hair stylists — regulars get first pick.",
+  metadataBase: new URL(SITE_URL),
+  title: `${BRAND_NAME} — Booking for Hair Stylists`,
+  description: DESCRIPTION,
+  applicationName: BRAND_NAME,
+  openGraph: {
+    siteName: BRAND_NAME,
+    type: "website",
+    title: `${BRAND_NAME} — Booking for Hair Stylists`,
+    description: DESCRIPTION,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${BRAND_NAME} — Booking for Hair Stylists`,
+    description: DESCRIPTION,
+  },
 };
 
 export const viewport = {

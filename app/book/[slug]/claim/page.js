@@ -4,7 +4,7 @@ import StylistShell from "../StylistShell";
 import { createBookingClient } from "@/lib/supabase/booking";
 import ClaimOffer from "./ClaimOffer";
 
-export const metadata = { title: "Claim this time" };
+export const metadata = { title: "Claim This Time" };
 
 async function ClaimPageContent({ params, searchParams }) {
   const { slug } = await params;

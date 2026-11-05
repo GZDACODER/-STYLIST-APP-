@@ -6,6 +6,7 @@ import { textsEnabled } from "@/lib/notify";
 import { textCodesEnabled } from "@/lib/phone";
 import BookingFlow from "./BookingFlow";
 import { displayName } from "@/lib/bookingHeader";
+import { BRAND_NAME } from "@/lib/brand";
 
 // cache() means the title and the page share one database call.
 // invite: the secret from a private invite link (?invite=...), if any.
@@ -42,7 +43,20 @@ function inviteFrom(searchParams) {
 export async function generateMetadata({ params, searchParams }) {
   const { slug } = await params;
   const { data } = await loadPage(slug, inviteFrom(await searchParams));
-  return { title: data ? `Book with ${data.business_name}` : "Booking page not found" };
+  if (!data) return { title: "Booking Page Not Found" };
+
+  // What shows when the link is shared (iMessage, Instagram, WhatsApp...).
+  // The preview image is ./opengraph-image.js.
+  const name = displayName(data.business_name);
+  const title = `${name} — Book an Appointment`;
+  const tagline = String(data.tagline || "").trim();
+  const description = tagline || `Book your next appointment with ${name}.`;
+  return {
+    title,
+    description,
+    openGraph: { title, description, siteName: BRAND_NAME, type: "website", url: `/book/${slug}` },
+    twitter: { card: "summary_large_image", title, description },
+  };
 }
 
 export default async function BookingPage({ params, searchParams }) {

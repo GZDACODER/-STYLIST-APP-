@@ -5,10 +5,16 @@ import { DEPOSIT_FEE_FIXED_CENTS, DEPOSIT_FEE_PERCENT, PLANS, TRIAL_DAYS } from 
 import { formatPrice } from "@/lib/money";
 import RegularStar from "@/components/RegularStar";
 
+const TITLE = `${BRAND_NAME} — Booking for Hair Stylists`;
+const DESCRIPTION =
+  "Luxury booking that puts your regulars first. Deposits, waitlist and regulars-only times.";
+
 export const metadata = {
-  title: `${BRAND_NAME}: booking for hair stylists, regulars first`,
-  description:
-    "Online booking that gives your regulars first pick of your time, fills cancellations from a waitlist and takes deposits. Free for 14 days.",
+  title: TITLE,
+  description: DESCRIPTION,
+  alternates: { canonical: "/" },
+  openGraph: { title: TITLE, description: DESCRIPTION, siteName: BRAND_NAME, type: "website", url: "/" },
+  twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION },
 };
 
 // Dollars without cents when they're whole ($15, not $15.00).
