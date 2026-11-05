@@ -1260,3 +1260,120 @@ body:has(.db) {
 .db .check-row input:disabled {
   opacity: 0.4;
 }
+
+/* ---------- Standing appointments ---------- */
+/* "Standing": solid gold, so held visits stand out on the Calendar. */
+.db .badge.standing {
+  border-color: var(--gold);
+  background: var(--gold-soft);
+  color: var(--gold-dark);
+}
+
+.db .standing-section {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--divider);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.db .standing-series {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.db .standing-form {
+  width: 100%;
+}
+
+.db .standing-form h3 {
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.db .standing-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 420px) {
+  .db .standing-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.db .standing-deposit {
+  border: 1px solid var(--hair);
+  padding: 12px 14px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.db .standing-deposit .check-row {
+  text-transform: none;
+  letter-spacing: normal;
+  font-size: 0.95rem;
+  color: var(--ink);
+}
+
+.db .standing-deposit .check-row input {
+  width: 18px;
+  height: 18px;
+}
+
+.db .standing-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  align-items: flex-start;
+}
+
+.db .standing-controls > .message,
+.db .standing-controls > .confirm-step {
+  flex-basis: 100%;
+}
+
+.db .standing-move {
+  width: 100%;
+}
+
+/* Today: standing visits to check. */
+.db .db-flags {
+  margin: 0 0 28px;
+  padding: 18px 20px;
+  border: 1px solid var(--hair);
+  border-left: 3px solid var(--gold);
+  background: var(--surface);
+}
+
+.db .db-flag-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.db .db-flag p {
+  margin: 4px 0 6px;
+}
+
+.db .db-flag-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.db .db-flag-actions form {
+  margin: 0;
+}

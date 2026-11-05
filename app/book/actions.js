@@ -3,7 +3,13 @@
 // Server actions for the public booking page. The real rules (who sees which
 // times, who can book) are enforced inside the database functions these call.
 import { createBookingClient } from "@/lib/supabase/booking";
-import { createDepositCheckout, siteOrigin, stripeTestMode } from "@/lib/stripe";
+import {
+  createDepositCheckout,
+  createStandingDepositCheckout,
+  siteOrigin,
+  stripeTestMode,
+} from "@/lib/stripe";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { normalizePhone, textCodesEnabled } from "@/lib/phone";
 import { emailStylistCancellation, runWaitlistSafely } from "@/lib/waitlist";
 
@@ -274,4 +280,37 @@ export async function cancelMyBooking(slug, bookingId) {
   const origin = await siteOrigin();
   await Promise.all([emailStylistCancellation(data), runWaitlistSafely(data.stylist_id, origin)]);
   return { success: true };
+}
+
+// ---------- The links in booking emails ----------
+
+const TOKEN_PATTERN = /^[0-9a-f]{64}$/;
+
+// "Cancel this visit": the same rules as cancelling here on the booking page.
+export async function cancelVisitByToken(token) {
+  if (!TOKEN_PATTERN.test(String(token))) return { error: "This link doesn't work." };
+  const { data, error } = await createAdminClient().rpc("cancel_booking_by_token", {
+    p_token: String(token),
+  });
+  if (error) {
+    return { error: "This visit couldn't be cancelled. It may have already been cancelled or passed." };
+  }
+
+  // Let the stylist know, and tell anyone on the waitlist the time is free.
+  const origin = await siteOrigin();
+  await Promise.all([emailStylistCancellation(data), runWaitlistSafely(data.stylist_id, origin)]);
+  return { success: true };
+}
+
+// "Pay your deposit" on a standing visit: opens Stripe's payment page.
+export async function payVisitDeposit(token) {
+  if (!TOKEN_PATTERN.test(String(token))) return { error: "This link doesn't work." };
+  try {
+    return { checkoutUrl: await createStandingDepositCheckout(String(token), await siteOrigin()) };
+  } catch (e) {
+    console.error("Couldn't start standing deposit payment", e);
+    const message = "We couldn't open the payment page. Please try again in a moment.";
+    const detail = e?.raw?.message || e?.message;
+    return { error: stripeTestMode() && detail ? `${message} Details: ${detail}` : message };
+  }
 }

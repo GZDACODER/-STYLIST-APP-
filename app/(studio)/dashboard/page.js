@@ -11,6 +11,7 @@ import {
 import { formatPrice } from "@/lib/money";
 import { BRAND_NAME } from "@/lib/brand";
 import RegularStar from "@/components/RegularStar";
+import StandingFlags from "./standing/StandingFlags";
 
 export const metadata = { title: `Today · ${BRAND_NAME}` };
 
@@ -139,6 +140,18 @@ export default async function TodayPage() {
       .order("opening_date")
       .order("start_time"),
   ]);
+  // Standing appointments (read on their own, so the page still opens
+  // before the step 16 SQL is run).
+  const [{ data: standingFlags }, { data: standingToday }] = await Promise.all([
+    supabase.rpc("standing_flags"),
+    supabase
+      .from("bookings")
+      .select("id")
+      .eq("booking_date", today)
+      .not("standing_series_id", "is", null),
+  ]);
+  const standingIds = new Set((standingToday || []).map((r) => r.id));
+
   // Today's openings that have already finished don't count.
   const openTimes = (weekOpenings.data || []).filter(
     (o) => o.opening_date > today || o.end_time.slice(0, 5) > nowTime
@@ -215,6 +228,8 @@ export default async function TodayPage() {
         ))}
       </section>
 
+      <StandingFlags flags={Array.isArray(standingFlags) ? standingFlags : []} />
+
       <div className="db-today">
       <section className="db-today-main">
         <div className="db-section-head">
@@ -258,6 +273,7 @@ export default async function TodayPage() {
                     </div>
                     <div className="db-slot-meta">{b.service_name}</div>
                     <div className="db-slot-tags">
+                      {standingIds.has(b.id) && <span className="badge standing">Standing</span>}
                       {b.status === "pending_payment" ? (
                         <span className="badge unpaid">Paying deposit now</span>
                       ) : (

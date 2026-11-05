@@ -7,6 +7,7 @@ import PausedNote from "@/components/PausedNote";
 import { getMyPlan } from "@/lib/plan";
 import InviteList from "./InviteList";
 import { BRAND_NAME } from "@/lib/brand";
+import { todayInTimeZone } from "@/lib/availability";
 
 export const metadata = { title: `Clients · ${BRAND_NAME}` };
 
@@ -24,7 +25,14 @@ export default async function ClientsPage() {
 
   // Invites still open, plus ones used (or made) in the last 30 days.
   const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-  const [{ data: clients, error }, { data: stylist }, { data: inviteRows }] = await Promise.all([
+  const [
+    { data: clients, error },
+    { data: stylist },
+    { data: inviteRows },
+    { data: services },
+    { data: series },
+    { data: depositRow },
+  ] = await Promise.all([
     supabase
       .from("clients")
       .select("id, name, phone, email, notes, status, auto_regular, completed_visits, invited_at")
@@ -41,7 +49,28 @@ export default async function ClientsPage() {
       )
       .gte("created_at", since)
       .order("created_at", { ascending: false }),
+    supabase.from("services").select("id, name, duration_minutes").order("created_at"),
+    // Standing appointments (empty until the step 16 SQL is run).
+    supabase
+      .from("standing_series")
+      .select(
+        "id, client_id, interval_weeks, weekday, start_time, first_date, end_date, deposit_mode, service:services(name)"
+      )
+      .eq("status", "active")
+      .order("created_at"),
+    supabase
+      .from("stylists")
+      .select("timezone, deposits_enabled, stripe_charges_enabled")
+      .eq("id", user.id)
+      .maybeSingle(),
   ]);
+  const standing = {
+    services: services || [],
+    series: series || [],
+    regularsOn: plan.has.regulars,
+    depositsOn: Boolean(depositRow?.deposits_enabled && depositRow?.stripe_charges_enabled),
+    today: todayInTimeZone(depositRow?.timezone || "America/Chicago"),
+  };
   const invites = (inviteRows || []).filter(
     (i) => i.invite_state === "open" || i.invite_state === "used"
   );
@@ -101,7 +130,7 @@ export default async function ClientsPage() {
 
       <section className="card">
         <h2>Your clients</h2>
-        <ClientList clients={clients} />
+        <ClientList clients={clients} standing={standing} />
       </section>
     </>
   );
