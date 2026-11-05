@@ -139,7 +139,15 @@ export default async function ClientsPage() {
       )}
 
       <section className="card">
-        <h2>Your clients</h2>
+        <div className="clients-head">
+          <h2>Your clients</h2>
+          {clients.length > 0 && (
+            // A plain link: the browser downloads the CSV file.
+            <a href="/dashboard/clients/export" className="button secondary small" download>
+              Export clients
+            </a>
+          )}
+        </div>
         <ClientList clients={clients} standing={standing} />
       </section>
     </>
