@@ -10,6 +10,7 @@ import TimeSelect from "@/components/TimeSelect";
 import SubmitButton from "@/components/SubmitButton";
 import FormMessage from "@/components/FormMessage";
 import ConfirmAction from "@/components/ConfirmAction";
+import PausedNote from "@/components/PausedNote";
 
 const WEEK_CHOICES = Array.from({ length: 11 }, (_, i) => i + 2);
 
@@ -73,9 +74,21 @@ export default function StandingSection({ client, standing, isRegular }) {
       {state?.success && !open && <p className="message success">{state.success}</p>}
 
       {regularsOn && isRegular && !open && (
-        <button type="button" className="link-button" onClick={() => setOpen(true)}>
+        <button type="button" className="button secondary small" onClick={() => setOpen(true)}>
           Set standing appointment
         </button>
+      )}
+
+      {!regularsOn && isRegular && mine.length === 0 && (
+        <PausedNote feature="regulars">
+          Standing appointments come with Regulars First, which isn&apos;t on your plan right now.
+        </PausedNote>
+      )}
+
+      {regularsOn && !isRegular && mine.length === 0 && (
+        <p className="muted small-text">
+          Standing appointments are for Regulars. Tap Regular above to set one up.
+        </p>
       )}
 
       {regularsOn && isRegular && open && (
