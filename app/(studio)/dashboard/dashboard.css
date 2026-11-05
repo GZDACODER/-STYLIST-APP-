@@ -1408,3 +1408,16 @@ body:has(.db) {
   gap: 4px;
   overflow-wrap: anywhere;
 }
+
+/* "Your clients" with the Export clients button beside it. */
+.db .clients-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 16px;
+}
+
+.db .clients-head h2 {
+  margin-bottom: 18px;
+}
