@@ -52,7 +52,7 @@ export async function GET(request) {
             responsibilities: { fees_collector: "application", losses_collector: "application" },
             profile: {
               doing_business_as: stylist.business_name,
-              product_description: "Hair salon appointments",
+              product_description: "Appointments and bookings",
             },
           },
           configuration: {

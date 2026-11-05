@@ -60,11 +60,11 @@ export default async function DashboardLayout({ children }) {
       <div className={`db ${display.variable}`}>
         <main className="db-main">
           <div className="db-page stack">
-            <h1>Finish your stylist account</h1>
+            <h1>Finish setting up your business</h1>
             <p className="muted">
-              {user.email} isn&apos;t set up as a stylist yet. If you&apos;re a stylist, add your
+              {user.email} isn&apos;t set up as a business yet. If you take bookings, add your
               business name below to finish. If you&apos;re booking an appointment, please use
-              your stylist&apos;s booking link instead.
+              the booking link the business sent you instead.
             </p>
             <div className="card">
               <CreateStylistForm />

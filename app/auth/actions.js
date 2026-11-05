@@ -1,16 +1,20 @@
 "use server";
 
 // Server actions for sign-up, log-in and log-out.
-// These run on the server, never in the stylist's browser.
+// These run on the server, never in the browser.
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { BUSINESS_TYPE_VALUES } from "@/lib/businessTypes";
 
 export async function signup(prevState, formData) {
   const businessName = String(formData.get("business_name") || "").trim();
   const firstName = String(formData.get("first_name") || "").trim();
   const email = String(formData.get("email") || "").trim();
   const password = String(formData.get("password") || "");
+  // Optional; anything not on the list is left empty.
+  const rawType = String(formData.get("business_type") || "");
+  const businessType = BUSINESS_TYPE_VALUES.includes(rawType) ? rawType : "";
 
   if (!businessName) return { error: "Please enter your business name." };
   if (firstName.length > 50) return { error: "Please keep your first name to 50 characters." };
@@ -27,7 +31,7 @@ export async function signup(prevState, formData) {
     password,
     options: {
       // Saved with the account; the database copies it into "stylists".
-      data: { business_name: businessName, first_name: firstName },
+      data: { business_name: businessName, first_name: firstName, business_type: businessType },
       // Where the "confirm your email" link sends them.
       emailRedirectTo: `${origin}/auth/confirm`,
     },
@@ -35,7 +39,7 @@ export async function signup(prevState, formData) {
 
   // Shows in Vercel's logs (Deployments -> the deployment -> Logs), to see
   // whether Supabase says it sent the confirmation email.
-  console.log("Stylist sign-up", {
+  console.log("Business sign-up", {
     email,
     error: error ? `${error.status || ""} ${error.code || ""} ${error.message}` : null,
     userId: data?.user?.id || null,

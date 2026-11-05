@@ -1,5 +1,5 @@
 // The hero picture: a gold object floating over a dark plinth that slowly
-// turns between a calendar (front) and a salon chair (back). Both faces are
+// turns between a calendar (front) and a "Fully booked" badge (back). Both faces are
 // drawn here in SVG, and the turn is CSS 3D (see .hm-object in home.css).
 // No images, no 3D libraries. With "reduce motion" on, the calendar stays put.
 
@@ -125,60 +125,62 @@ function Calendar() {
   );
 }
 
-// Back: a classic salon chair, side view (facing left).
-function Chair() {
+// A seal's edge: many small points around a circle.
+function sealPath(cx, cy, outer, inner, points) {
+  const out = [];
+  for (let i = 0; i < points * 2; i += 1) {
+    const r = i % 2 ? inner : outer;
+    const a = (Math.PI / points) * i - Math.PI / 2;
+    out.push(`${(cx + r * Math.cos(a)).toFixed(2)} ${(cy + r * Math.sin(a)).toFixed(2)}`);
+  }
+  return `M ${out.join(" L ")} Z`;
+}
+
+// Back: a gold "Fully booked" seal with a star and two ribbon tails.
+function Badge() {
+  const cx = 170;
+  const cy = 156;
+  const words = { fontFamily: "var(--font-sans), Arial, sans-serif", fontWeight: 700 };
   return (
     <svg className="hm-face hm-face-back" viewBox="0 0 340 340" aria-hidden="true">
       <defs>
-        <Gold id="ch" />
+        <Gold id="bd" />
       </defs>
 
-      <g transform="translate(6 4)">
-        {/* Base and pump pedal. */}
-        <ellipse cx="170" cy="300" rx="78" ry="13" fill="url(#ch-deep)" />
-        <ellipse cx="170" cy="294" rx="78" ry="13" fill="url(#ch-face)" />
-        <rect x="196" y="276" width="34" height="7" rx="3.5" fill="url(#ch-face)" />
+      {/* Ribbon tails, behind the seal. */}
+      <path d="M 120 222 L 96 316 L 124 300 L 140 326 L 160 236 Z" fill="url(#bd-deep)" />
+      <path d="M 220 222 L 244 316 L 216 300 L 200 326 L 180 236 Z" fill="url(#bd-deep)" />
+      <path d="M 120 222 L 96 316 L 124 300 L 140 326 L 160 236 Z" fill="url(#bd-face)" opacity="0.55" />
+      <path d="M 220 222 L 244 316 L 216 300 L 200 326 L 180 236 Z" fill="url(#bd-face)" opacity="0.4" />
 
-        {/* The column. */}
-        <rect x="158" y="210" width="24" height="86" rx="6" fill="url(#ch-deep)" />
-        <rect x="160" y="210" width="10" height="86" rx="4" fill="#f6e6bd" opacity="0.25" />
+      {/* Depth, then the polished seal. */}
+      <path d={sealPath(cx + 6, cy + 7, 124, 114, 36)} fill="url(#bd-deep)" />
+      <path d={sealPath(cx, cy, 124, 114, 36)} fill="url(#bd-face)" />
+      <path d={sealPath(cx, cy, 124, 114, 36)} fill="url(#bd-shine)" />
+      <path d={sealPath(cx, cy, 124, 114, 36)} fill="none" stroke="url(#bd-edge)" strokeWidth="1.6" />
 
-        {/* Footrest. */}
-        <path d="M 104 214 L 76 268" stroke="url(#ch-deep)" strokeWidth="10" strokeLinecap="round" />
-        <rect x="50" y="262" width="56" height="10" rx="5" fill="url(#ch-face)" />
+      {/* Inner rings. */}
+      <circle cx={cx} cy={cy} r="96" fill="none" stroke="#4a3818" strokeOpacity="0.45" strokeWidth="2" />
+      <circle cx={cx} cy={cy} r="88" fill="#6b5328" fillOpacity="0.28" />
+      <circle cx={cx} cy={cy} r="88" fill="none" stroke="#f6e6bd" strokeOpacity="0.55" strokeWidth="1.2" />
 
-        {/* Backrest, leaning back, with a headrest on a stem. */}
-        <g transform="rotate(14 226 140)">
-          <rect x="234" y="34" width="8" height="34" rx="4" fill="url(#ch-deep)" />
-          <rect x="214" y="20" width="48" height="24" rx="12" fill="url(#ch-face)" />
-          <rect x="206" y="64" width="44" height="140" rx="20" fill="url(#ch-deep)" transform="translate(6 4)" />
-          <rect x="206" y="64" width="44" height="140" rx="20" fill="url(#ch-face)" />
-          <rect x="206" y="64" width="44" height="140" rx="20" fill="url(#ch-shine)" />
-          <rect x="206" y="64" width="44" height="140" rx="20" fill="none" stroke="url(#ch-edge)" strokeWidth="1.6" />
-          {/* Tufted lines in the upholstery. */}
-          {[100, 132, 164].map((y) => (
-            <line key={y} x1="216" y1={y} x2="240" y2={y} stroke="#4a3818" strokeOpacity="0.35" strokeWidth="2" />
-          ))}
-        </g>
-
-        {/* Seat cushion. */}
-        <rect x="96" y="190" width="150" height="34" rx="14" fill="url(#ch-deep)" transform="translate(5 5)" />
-        <rect x="96" y="190" width="150" height="34" rx="14" fill="url(#ch-face)" />
-        <rect x="96" y="190" width="150" height="34" rx="14" fill="url(#ch-shine)" />
-        <rect x="96" y="190" width="150" height="34" rx="14" fill="none" stroke="url(#ch-edge)" strokeWidth="1.6" />
-
-        {/* Armrest on its support. */}
-        <rect x="128" y="166" width="12" height="28" rx="4" fill="url(#ch-deep)" />
-        <rect x="100" y="152" width="122" height="18" rx="9" fill="url(#ch-face)" />
-        <rect x="100" y="152" width="122" height="18" rx="9" fill="none" stroke="url(#ch-edge)" strokeWidth="1.4" />
-      </g>
+      {/* The star, then the words. */}
+      <path d={starPath(cx, cy - 40, 20, 8.5)} fill="#1a140a" opacity="0.9" />
+      <path d={starPath(cx, cy - 42, 18, 7.6)} fill="#f6e6bd" />
+      <text x={cx} y={cy + 8} textAnchor="middle" fontSize="27" letterSpacing="5" fill="#1a140a" style={words}>
+        FULLY
+      </text>
+      <text x={cx} y={cy + 42} textAnchor="middle" fontSize="27" letterSpacing="5" fill="#1a140a" style={words}>
+        BOOKED
+      </text>
+      <line x1={cx - 34} y1={cy + 60} x2={cx + 34} y2={cy + 60} stroke="#1a140a" strokeOpacity="0.5" strokeWidth="1.5" />
     </svg>
   );
 }
 
 export default function HeroObject() {
   return (
-    <div className="hm-object" role="img" aria-label="A gold calendar that turns into a salon chair">
+    <div className="hm-object" role="img" aria-label="A gold calendar that turns into a Fully booked badge">
       {/* Soft gold light, the plinth and its shadow (these don't turn). */}
       <svg className="hm-object-stage" viewBox="0 0 400 420" aria-hidden="true">
         <defs>
@@ -205,7 +207,7 @@ export default function HeroObject() {
       <div className="hm-object-float">
         <div className="hm-object-turn">
           <Calendar />
-          <Chair />
+          <Badge />
         </div>
       </div>
     </div>

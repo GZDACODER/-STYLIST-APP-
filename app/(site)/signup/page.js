@@ -8,7 +8,7 @@ export const metadata = { title: `Sign Up · ${BRAND_NAME}` };
 export default function SignupPage() {
   return (
     <>
-      <h1>Create your stylist account</h1>
+      <h1>Create your business account</h1>
       <p className="muted">
         Free for {TRIAL_DAYS} days with everything included. No card needed.
       </p>
