@@ -4,6 +4,7 @@
 import { runWaitlist, waitlistConfigured } from "@/lib/waitlist";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { runPlanReminders } from "@/lib/planReminders";
+import { runBookingEmails } from "@/lib/bookingEmails";
 
 export async function POST(request) {
   const secret = process.env.CRON_SECRET;
@@ -31,13 +32,27 @@ export async function POST(request) {
     console.error("Plan reminders failed", error);
   }
 
+  // Standing appointments roll forward, then confirmation and 24-hour
+  // reminder emails to clients.
+  let bookingEmails = { held: 0, sent: 0 };
+  try {
+    bookingEmails = await runBookingEmails();
+  } catch (error) {
+    console.error("Booking emails failed", error);
+  }
+
   if (!waitlistConfigured()) {
     return Response.json({ skipped: "Email isn't set up yet (see WAITLIST_SETUP.md)." });
   }
 
   try {
     const result = await runWaitlist(null, new URL(request.url).origin);
-    return Response.json({ ...result, planReminders: reminders.sent });
+    return Response.json({
+      ...result,
+      planReminders: reminders.sent,
+      standingHeld: bookingEmails.held,
+      bookingEmails: bookingEmails.sent,
+    });
   } catch (error) {
     console.error("Waitlist check failed", error);
     return new Response("Waitlist check failed", { status: 500 });

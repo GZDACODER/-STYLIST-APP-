@@ -9,8 +9,10 @@ import FormMessage from "@/components/FormMessage";
 import RegularStar from "@/components/RegularStar";
 import ConfirmAction from "@/components/ConfirmAction";
 import { displayPhone } from "@/lib/phone";
+import StandingSection from "../standing/StandingSection";
 
-export default function ClientCard({ client }) {
+// standing: what the standing appointment part needs (see ClientsPage).
+export default function ClientCard({ client, standing }) {
   const [editing, setEditing] = useState(false);
   const [statusError, setStatusError] = useState(null);
   // Show the new status straight away while it saves in the background.
@@ -95,6 +97,11 @@ export default function ClientCard({ client }) {
         ))}
       </div>
       {statusError && <p className="message error">Couldn't change status: {statusError}</p>}
+
+      {/* Standing appointments are for Regulars only. */}
+      {standing && (status === "regular" || standing.series.some((x) => x.client_id === client.id)) && (
+        <StandingSection client={client} standing={standing} isRegular={status === "regular"} />
+      )}
 
       <div className="client-delete">
         <ConfirmAction

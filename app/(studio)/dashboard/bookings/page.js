@@ -6,6 +6,7 @@ import CancelBookingButton from "./CancelBookingButton";
 import { displayPhone } from "@/lib/phone";
 import { BRAND_NAME } from "@/lib/brand";
 import RegularStar from "@/components/RegularStar";
+import StandingVisitControls from "../standing/StandingVisitControls";
 
 export const metadata = { title: `Bookings · ${BRAND_NAME}` };
 
@@ -69,6 +70,15 @@ export default async function BookingsPage() {
     return <p className="message error">Couldn&apos;t load your bookings: {error.message}</p>;
   }
 
+  // Which bookings are standing visits (read on its own, so the Calendar
+  // still opens before the step 16 SQL is run).
+  const { data: standingRows } = await supabase
+    .from("bookings")
+    .select("id, standing_series_id")
+    .gte("booking_date", today)
+    .not("standing_series_id", "is", null);
+  const seriesOf = new Map((standingRows || []).map((r) => [r.id, r.standing_series_id]));
+
   const upcoming = bookings.filter((b) => b.status === "confirmed");
   const cancelled = bookings.filter((b) => b.status === "cancelled");
   // Clients on Stripe's payment page right now. Their time is held until then.
@@ -129,6 +139,7 @@ export default async function BookingsPage() {
                               {STATUS_LABELS[clientStatus]}
                             </span>
                           )}
+                          {seriesOf.has(b.id) && <span className="badge standing">Standing</span>}
                           {b.client?.invited_at && <span className="badge invited">Invited</span>}
                           <DepositBadge booking={b} />
                         </span>
@@ -146,6 +157,14 @@ export default async function BookingsPage() {
                         )}
                       </div>
                       <div className="client-delete">
+                        {seriesOf.has(b.id) ? (
+                          <StandingVisitControls
+                            booking={b}
+                            seriesId={seriesOf.get(b.id)}
+                            today={today}
+                            depositPaid={b.deposit_status === "paid"}
+                          />
+                        ) : (
                         <CancelBookingButton
                           id={b.id}
                           clientName={b.client_name}
@@ -154,6 +173,7 @@ export default async function BookingsPage() {
                           startTime={b.start_time}
                           depositPaid={b.deposit_status === "paid"}
                         />
+                        )}
                       </div>
                     </li>
                   );

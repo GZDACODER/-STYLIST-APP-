@@ -18,7 +18,7 @@ function matches(client, search) {
   return searchDigits.length >= 3 && phoneDigits.includes(searchDigits);
 }
 
-export default function ClientList({ clients }) {
+export default function ClientList({ clients, standing }) {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
 
@@ -72,7 +72,7 @@ export default function ClientList({ clients }) {
 
       <ul className="client-list">
         {shown.map((client) => (
-          <ClientCard key={client.id} client={client} />
+          <ClientCard key={client.id} client={client} standing={standing} />
         ))}
       </ul>
     </>
