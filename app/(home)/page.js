@@ -146,7 +146,7 @@ export default async function HomePage() {
           {/* A small picture of a stylist's booking page. */}
           <div className="hm-preview" aria-hidden="true">
             <div className="hm-preview-panel">
-              <span className="hm-preview-name">Studio Noir</span>
+              <span className="hm-preview-name">Royalty Stylist</span>
             </div>
             <div className="hm-preview-body">
               <p className="hm-preview-label">Thursday, Nov 12</p>
