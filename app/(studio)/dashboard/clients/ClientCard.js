@@ -99,7 +99,7 @@ export default function ClientCard({ client, standing }) {
       {statusError && <p className="message error">Couldn't change status: {statusError}</p>}
 
       {/* Standing appointments are for Regulars only. */}
-      {standing && (status === "regular" || standing.series.some((x) => x.client_id === client.id)) && (
+      {standing && (status !== "blocked" || standing.series.some((x) => x.client_id === client.id)) && (
         <StandingSection client={client} standing={standing} isRegular={status === "regular"} />
       )}
 
