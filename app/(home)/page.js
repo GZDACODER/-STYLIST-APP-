@@ -1,13 +1,15 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { BRAND_NAME } from "@/lib/brand";
 import { DEPOSIT_FEE_FIXED_CENTS, DEPOSIT_FEE_PERCENT, PLANS, TRIAL_DAYS } from "@/lib/plans";
 import { formatPrice } from "@/lib/money";
 import RegularStar from "@/components/RegularStar";
+import Monogram from "./Monogram";
 
 const TITLE = `${BRAND_NAME} — Booking for Hair Stylists`;
 const DESCRIPTION =
-  "Luxury booking that puts your regulars first. Deposits, waitlist and regulars-only times.";
+  "Booking that puts your regulars first. Deposits, waitlists and regulars-only times for stylists with a full book.";
 
 export const metadata = {
   title: TITLE,
@@ -20,104 +22,78 @@ export const metadata = {
 // Dollars without cents when they're whole ($15, not $15.00).
 const price = (cents) => formatPrice(cents).replace(/\.00$/, "");
 
-const STEPS = [
+const REGULARS = [
   {
-    title: "Open your times",
-    text: "Post the times you want to fill. Mark some \"Regulars only\", and your best clients see them before anyone else.",
+    title: "Regulars-only times",
+    text: "Mark any opening “Regulars only”. Everyone else never sees it, so your best clients always have somewhere to land.",
   },
   {
-    title: "Share your link",
-    text: "One booking page with your name, cover photo, Instagram and location. Clients book in a minute, with no app and no password.",
+    title: "Early access",
+    text: "New openings go to your regulars first. When the book is full, switch the whole page to regulars-only with one tap.",
   },
   {
-    title: "Get booked",
-    text: "Deposits protect your time. When someone cancels, your waitlist hears first, and the first to claim the time gets it.",
-  },
-];
-
-const FEATURES = [
-  {
-    star: true,
-    title: "Regulars First",
-    text: "Hold times for your regulars, switch to regulars-only when you're full, and send one-time invite links to new clients you want to take on.",
-  },
-  {
-    title: "A waitlist that fills cancellations",
-    text: "Clients choose the days and times they'd like. When a time opens, they get a \"Claim this time\" email. Regulars hear first.",
-  },
-  {
-    title: "Deposits, paid to you",
-    text: "Set a dollar amount or a percent per service. Clients pay on Stripe before the time is theirs, and it goes straight to your account.",
-  },
-  {
-    title: "A booking page that looks like you",
-    text: "Your business name in script over your own cover photo, with your Instagram and location one tap away.",
-  },
-  {
-    title: "Clients, sorted",
-    text: "Every client is Regular, New or Blocked. Regulars can be made automatically after a number of visits you choose.",
-  },
-  {
-    title: "Nothing to download",
-    text: "Clients confirm with a code sent to their email. You run everything from your phone, iPad or computer.",
-  },
-];
-
-const FAQ = [
-  {
-    q: "Do my clients need an app or an account?",
-    a: "No. They open your link, pick a time and confirm with a code we email them. That's it.",
-  },
-  {
-    q: "What happens after the free trial?",
-    a: `You get ${TRIAL_DAYS} days with everything switched on and no card needed. Before it ends, choose a plan. If you don't, your bookings and clients are kept and you can pick a plan any time.`,
-  },
-  {
-    q: "Can I change plans or cancel?",
-    a: "Yes, any time, from Settings. If you cancel, your plan runs to the end of the period you've paid for.",
-  },
-  {
-    q: "How do deposits work?",
-    a: `You connect your own Stripe account and choose a deposit per service. Clients pay it before the booking is confirmed, and Stripe pays you out. Clientele keeps ${DEPOSIT_FEE_PERCENT}% + ${DEPOSIT_FEE_FIXED_CENTS}¢ of each deposit to cover card costs.`,
-  },
-  {
-    q: "What makes someone a Regular?",
-    a: "You decide. Mark clients as Regulars yourself, or let Clientele do it after a number of visits you pick. Regulars are recognised by their phone number.",
+    title: "Invite links",
+    text: "Taking on someone new? Send a private link that lets just that person book once, even when you’re regulars-only.",
   },
 ];
 
 export default async function HomePage() {
+  // Stylists who are logged in go straight to their dashboard.
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  if (user) redirect("/dashboard");
 
-  const base = PLANS.base;
-  const bundle = PLANS.bundle;
-  const addOns = [PLANS.regulars, PLANS.waitlist];
+  const { base, regulars, waitlist, bundle } = PLANS;
+  const tiers = [
+    {
+      name: base.name,
+      amount: price(base.monthlyCents),
+      unit: "/mo",
+      text: "Your booking page, services, hours, openings, calendar, clients and deposits.",
+    },
+    {
+      name: regulars.name,
+      amount: `+${price(regulars.monthlyCents)}`,
+      unit: "/mo",
+      text: "Regulars-only times, regulars-only mode, invite links and standing appointments.",
+    },
+    {
+      name: waitlist.name,
+      amount: `+${price(waitlist.monthlyCents)}`,
+      unit: "/mo",
+      text: "A waitlist that emails clients the moment a time opens. Regulars hear first.",
+    },
+    {
+      name: bundle.name,
+      amount: price(bundle.monthlyCents),
+      unit: "/mo",
+      text: "Everything above, for less than buying it separately.",
+      featured: true,
+    },
+  ];
 
   return (
     <>
       <header className="hm-nav">
+        <div className="hm-nav-inner">
         <Link href="/" className="hm-logo" aria-label={`${BRAND_NAME} home`}>
           {BRAND_NAME}
         </Link>
         <nav className="hm-nav-links" aria-label="Main">
-          <a href="#how">How it works</a>
-          <a href="#pricing">Pricing</a>
-          {user ? (
-            <Link href="/dashboard" className="hm-button hm-button-small">
-              Your dashboard
-            </Link>
-          ) : (
-            <>
-              <Link href="/login">Log in</Link>
-              <Link href="/signup" className="hm-button hm-button-small">
-                Start free trial
-              </Link>
-            </>
-          )}
+          <a href="#features" className="hm-hide-phone">
+            Features
+          </a>
+          <a href="#pricing" className="hm-hide-phone">
+            Pricing
+          </a>
+          <Link href="/login">Log in</Link>
+          <Link href="/signup" className="hm-button hm-button-small">
+            Start free trial
+          </Link>
         </nav>
+        </div>
       </header>
 
       <main>
@@ -125,163 +101,151 @@ export default async function HomePage() {
         <section className="hm-hero">
           <div className="hm-hero-copy">
             <p className="hm-kicker">Booking for hair stylists</p>
-            <h1>Your regulars come first.</h1>
+            <h1>
+              Booking that puts your <em>regulars</em> first.
+            </h1>
             <p className="hm-lede">
-              {BRAND_NAME} is online booking that gives your loyal clients first pick of your time,
-              fills cancellations from a waitlist, and takes deposits so no-shows cost you less.
+              Deposits, waitlists and regulars-only times for stylists with a full book.
             </p>
             <div className="hm-cta-row">
-              <Link href={user ? "/dashboard" : "/signup"} className="hm-button">
-                {user ? "Go to your dashboard" : "Start your free trial"}
+              <Link href="/signup" className="hm-button">
+                Start free trial
               </Link>
-              <a href="#pricing" className="hm-link">
-                See pricing
+              <a href="#features" className="hm-button hm-button-ghost">
+                See how it works
               </a>
             </div>
-            <p className="hm-fine">
-              {TRIAL_DAYS} days free, everything included. No card needed.
-            </p>
+            <p className="hm-fine">{TRIAL_DAYS} days free. No card needed.</p>
           </div>
-
-          {/* A small picture of a stylist's booking page. */}
-          <div className="hm-preview" aria-hidden="true">
-            <div className="hm-preview-panel">
-              <span className="hm-preview-name">Royalty Stylist</span>
-            </div>
-            <div className="hm-preview-body">
-              <p className="hm-preview-label">Thursday, Nov 12</p>
-              <div className="hm-preview-times">
-                <span>9:00 AM</span>
-                <span className="is-regular">
-                  10:30 AM <RegularStar label={null} size={10} />
-                </span>
-                <span className="is-picked">1:00 PM</span>
-                <span className="is-regular">
-                  3:30 PM <RegularStar label={null} size={10} />
-                </span>
-              </div>
-              <p className="hm-preview-note">
-                <RegularStar label={null} size={10} /> Regulars only
-              </p>
-              <span className="hm-preview-button">Book · $20 deposit</span>
-            </div>
+          <div className="hm-hero-visual">
+            <Monogram />
           </div>
         </section>
 
-        {/* ---------- How it works ---------- */}
-        <section id="how" className="hm-section">
-          <p className="hm-kicker">How it works</p>
-          <h2>Three steps to a fuller book.</h2>
-          <ol className="hm-steps">
-            {STEPS.map((step, i) => (
-              <li key={step.title}>
-                <span className="hm-step-num">0{i + 1}</span>
-                <h3>{step.title}</h3>
-                <p>{step.text}</p>
-              </li>
-            ))}
-          </ol>
-        </section>
-
-        {/* ---------- Features ---------- */}
-        <section className="hm-section">
-          <p className="hm-kicker">What you get</p>
-          <h2>Made for stylists with a loyal book.</h2>
-          <ul className="hm-features">
-            {FEATURES.map((f) => (
+        {/* ---------- 1. Regulars First ---------- */}
+        <section id="features" className="hm-section">
+          <p className="hm-kicker">01 · Regulars First</p>
+          <h2>Your best clients never fight for a spot.</h2>
+          <p className="hm-section-lede">
+            The clients who keep your chair full get first pick of your time. Everyone else books
+            what&apos;s left.
+          </p>
+          <ul className="hm-cards">
+            {REGULARS.map((f) => (
               <li key={f.title}>
-                <h3>
-                  {f.star && (
-                    <>
-                      <RegularStar label={null} size={13} />{" "}
-                    </>
-                  )}
-                  {f.title}
-                </h3>
+                <RegularStar label={null} size={14} />
+                <h3>{f.title}</h3>
                 <p>{f.text}</p>
               </li>
             ))}
           </ul>
         </section>
 
-        {/* ---------- Pricing ---------- */}
-        <section id="pricing" className="hm-section">
-          <p className="hm-kicker">Pricing</p>
-          <h2>Pay for what you use.</h2>
-          <p className="hm-section-lede">
-            Start with {base.name}, add what you need, or take everything with All-in. Pay yearly
-            and get 2 months free.
-          </p>
-
-          <div className="hm-plans">
-            <div className="hm-plan">
-              <h3>{base.name}</h3>
-              <p className="hm-price">
-                {price(base.monthlyCents)}
-                <span>/month</span>
+        {/* ---------- 2. No more no-shows ---------- */}
+        <section className="hm-section">
+          <p className="hm-kicker">02 · No more no-shows</p>
+          <h2>Deposits up front. Cancellations filled for you.</h2>
+          <div className="hm-split">
+            <div className="hm-split-item">
+              <h3>Deposits, paid to you</h3>
+              <p>
+                Set a dollar amount or a percent for each service. Clients pay before the time is
+                theirs, and it goes straight to your own Stripe account.
               </p>
-              <p className="hm-plan-year">or {price(base.yearlyCents)}/year</p>
-              <p>{base.description}</p>
-              <div className="hm-addons">
-                <p className="hm-addons-title">Add-ons</p>
-                {addOns.map((a) => (
-                  <p key={a.key} className="hm-addon">
-                    <span>{a.name}</span>
-                    <span>+{price(a.monthlyCents)}/mo</span>
-                  </p>
-                ))}
+              <div className="hm-mini" aria-hidden="true">
+                <span>Silk press · Thu 10:30 AM</span>
+                <strong>$20 deposit paid</strong>
               </div>
             </div>
-
-            <div className="hm-plan hm-plan-featured">
-              <p className="hm-plan-badge">Best value</p>
-              <h3>{bundle.name}</h3>
-              <p className="hm-price">
-                {price(bundle.monthlyCents)}
-                <span>/month</span>
-              </p>
-              <p className="hm-plan-year">or {price(bundle.yearlyCents)}/year</p>
+            <div className="hm-split-item">
+              <h3>A waitlist that fills the gap</h3>
               <p>
-                Everything: {base.name}, Regulars First and Waitlist. Save{" "}
-                {price(
-                  base.monthlyCents + PLANS.regulars.monthlyCents + PLANS.waitlist.monthlyCents -
-                    bundle.monthlyCents
-                )}{" "}
-                a month on buying them separately.
+                Clients choose the days and times they want. When someone cancels, the waitlist is
+                emailed straight away, and the first to claim the time gets it.
               </p>
+              <div className="hm-mini" aria-hidden="true">
+                <span>A time just opened · Fri 2:00 PM</span>
+                <strong>Claim this time</strong>
+              </div>
             </div>
           </div>
+        </section>
 
-          <p className="hm-fine hm-center">
-            Every plan starts with a {TRIAL_DAYS}-day free trial. Deposits:{" "}
-            {DEPOSIT_FEE_PERCENT}% + {DEPOSIT_FEE_FIXED_CENTS}¢ per deposit, which covers card
-            processing.
-          </p>
-          <div className="hm-center">
-            <Link href={user ? "/dashboard/settings#plan" : "/signup"} className="hm-button">
-              {user ? "Choose your plan" : "Start your free trial"}
-            </Link>
+        {/* ---------- 3. Your brand ---------- */}
+        <section className="hm-section hm-brand">
+          <div className="hm-brand-copy">
+            <p className="hm-kicker">03 · Your brand, not ours</p>
+            <h2>A booking page that looks like you.</h2>
+            <p className="hm-section-lede">
+              Your name in script over your own cover photo, with your Instagram and location one
+              tap away. No marketplace, no other stylists on the page, no app for clients to
+              download.
+            </p>
+          </div>
+
+          {/* A booking page, drawn in code (the "photo" is a gradient). */}
+          <div className="hm-phone" aria-hidden="true">
+            <div className="hm-phone-cover">
+              <span className="hm-phone-name">Royalty Stylist</span>
+              <span className="hm-phone-rule" />
+              <span className="hm-phone-meta">Chicago · @royaltystylist</span>
+            </div>
+            <div className="hm-phone-body">
+              <p className="hm-phone-label">Silk press · 90 min · $80</p>
+              <p className="hm-phone-label hm-phone-day">Thursday, Nov 12</p>
+              <div className="hm-phone-times">
+                <span>9:00 AM</span>
+                <span className="is-regular">
+                  10:30 AM <RegularStar label={null} size={9} />
+                </span>
+                <span className="is-picked">1:00 PM</span>
+                <span>3:30 PM</span>
+              </div>
+              <span className="hm-phone-button">Book · $20 deposit</span>
+            </div>
           </div>
         </section>
 
-        {/* ---------- FAQ ---------- */}
-        <section className="hm-section hm-faq">
-          <p className="hm-kicker">Questions</p>
-          <h2>Good to know.</h2>
-          {FAQ.map((item) => (
-            <details key={item.q}>
-              <summary>{item.q}</summary>
-              <p>{item.a}</p>
-            </details>
-          ))}
+        {/* ---------- 4. Pricing ---------- */}
+        <section id="pricing" className="hm-section">
+          <p className="hm-kicker">04 · Pricing</p>
+          <h2>Simple monthly pricing.</h2>
+          <p className="hm-section-lede">
+            Start with {base.name} and add what you need, or take everything with {bundle.name}.
+            Pay yearly and get 2 months free.
+          </p>
+          <ul className="hm-tiers">
+            {tiers.map((t) => (
+              <li key={t.name} className={t.featured ? "is-featured" : undefined}>
+                {t.featured && <span className="hm-tier-badge">Best value</span>}
+                <h3>{t.name}</h3>
+                <p className="hm-price">
+                  {t.amount}
+                  <span>{t.unit}</span>
+                </p>
+                <p>{t.text}</p>
+              </li>
+            ))}
+          </ul>
+          <ul className="hm-promises">
+            <li>{TRIAL_DAYS}-day free trial with everything on</li>
+            <li>No card needed to start</li>
+            <li>No marketplace cut on your clients</li>
+          </ul>
+          <p className="hm-fine">
+            Deposits: {DEPOSIT_FEE_PERCENT}% + {DEPOSIT_FEE_FIXED_CENTS}¢ per deposit, which covers
+            card processing. Cancel any time.
+          </p>
         </section>
 
-        {/* ---------- Final call ---------- */}
+        {/* ---------- 5. Final call ---------- */}
         <section className="hm-final">
-          <h2>Give your regulars first pick.</h2>
-          <p>Set up in minutes. {TRIAL_DAYS} days free.</p>
-          <Link href={user ? "/dashboard" : "/signup"} className="hm-button hm-button-light">
-            {user ? "Go to your dashboard" : "Start your free trial"}
+          <h2>
+            Give your regulars <em>first pick.</em>
+          </h2>
+          <p>Set up in minutes. {TRIAL_DAYS} days free, no card.</p>
+          <Link href="/signup" className="hm-button">
+            Start free trial
           </Link>
         </section>
       </main>
@@ -290,8 +254,7 @@ export default async function HomePage() {
         <span className="hm-logo hm-logo-small">{BRAND_NAME}</span>
         <nav aria-label="Footer">
           <Link href="/login">Log in</Link>
-          <Link href="/signup">Sign up</Link>
-          <a href="mailto:hello@clientelesuite.com">hello@clientelesuite.com</a>
+          <a href="mailto:hello@clientelesuite.com">Contact · hello@clientelesuite.com</a>
         </nav>
         <p>© {new Date().getFullYear()} {BRAND_NAME}</p>
       </footer>
