@@ -1421,3 +1421,77 @@ body:has(.db) {
 .db .clients-head h2 {
   margin-bottom: 18px;
 }
+
+/* ---------- Clients: History on each card ---------- */
+.db .client-history {
+  margin-top: 12px;
+}
+
+.db .history-body {
+  margin-top: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--hair);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.db .history-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+
+.db .history-stats dt {
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.db .history-stats dd {
+  margin: 2px 0 0;
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 1.15rem;
+  color: var(--ink);
+}
+
+@media (max-width: 420px) {
+  .db .history-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.db .history-title {
+  margin: 6px 0 0;
+  font-family: var(--font-sans), sans-serif;
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.db .history-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.9rem;
+}
+
+.db .history-list li {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 2px 12px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--divider);
+}
+
+.db .history-list li:last-child {
+  border-bottom: none;
+}

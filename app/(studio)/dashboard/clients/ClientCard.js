@@ -10,6 +10,7 @@ import RegularStar from "@/components/RegularStar";
 import ConfirmAction from "@/components/ConfirmAction";
 import { displayPhone } from "@/lib/phone";
 import StandingSection from "../standing/StandingSection";
+import ClientHistory from "./ClientHistory";
 
 // standing: what the standing appointment part needs (see ClientsPage).
 export default function ClientCard({ client, standing }) {
@@ -97,6 +98,8 @@ export default function ClientCard({ client, standing }) {
         ))}
       </div>
       {statusError && <p className="message error">Couldn't change status: {statusError}</p>}
+
+      <ClientHistory clientId={client.id} />
 
       {/* Standing appointments are for Regulars only. */}
       {standing && (status !== "blocked" || standing.series.some((x) => x.client_id === client.id)) && (
