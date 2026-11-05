@@ -5,7 +5,7 @@ import { BRAND_NAME } from "@/lib/brand";
 import { DEPOSIT_FEE_FIXED_CENTS, DEPOSIT_FEE_PERCENT, PLANS, TRIAL_DAYS } from "@/lib/plans";
 import { formatPrice } from "@/lib/money";
 import RegularStar from "@/components/RegularStar";
-import Monogram from "./Monogram";
+import HeroObject from "./HeroObject";
 
 const TITLE = `${BRAND_NAME} — Booking for Hair Stylists`;
 const DESCRIPTION =
@@ -118,7 +118,7 @@ export default async function HomePage() {
             <p className="hm-fine">{TRIAL_DAYS} days free. No card needed.</p>
           </div>
           <div className="hm-hero-visual">
-            <Monogram />
+            <HeroObject />
           </div>
         </section>
 
