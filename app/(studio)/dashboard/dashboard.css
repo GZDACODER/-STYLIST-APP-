@@ -1567,3 +1567,12 @@ body:has(.db) {
   gap: 6px;
   margin: 0;
 }
+
+/* The wrap-up email's link page (/visits): no sidebar. */
+.db-solo .db-main {
+  margin-left: 0;
+}
+
+.db-solo .db-page {
+  margin: 0 auto;
+}

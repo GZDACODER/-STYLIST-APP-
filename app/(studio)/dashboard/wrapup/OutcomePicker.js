@@ -4,9 +4,11 @@
 // straight away while it saves.
 import { useOptimistic, useState, startTransition } from "react";
 import { setVisitOutcome } from "./actions";
+import { setVisitOutcomeWithPass } from "../../visits/actions";
 import { OUTCOMES } from "@/lib/outcomes";
 
-export default function OutcomePicker({ bookingId, outcome, clientName }) {
+// pass: set on the email-link page (no login); see lib/visitPass.js.
+export default function OutcomePicker({ bookingId, outcome, clientName, pass }) {
   const [current, setCurrent] = useOptimistic(outcome);
   const [error, setError] = useState(null);
 
@@ -15,7 +17,9 @@ export default function OutcomePicker({ bookingId, outcome, clientName }) {
     setError(null);
     startTransition(async () => {
       setCurrent(next);
-      const result = await setVisitOutcome(bookingId, next);
+      const result = pass
+        ? await setVisitOutcomeWithPass(pass, bookingId, next)
+        : await setVisitOutcome(bookingId, next);
       if (result?.error) setError(result.error);
     });
   }
