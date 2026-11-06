@@ -5,6 +5,7 @@ import { runWaitlist, waitlistConfigured } from "@/lib/waitlist";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { runPlanReminders } from "@/lib/planReminders";
 import { runBookingEmails } from "@/lib/bookingEmails";
+import { runWrapups } from "@/lib/wrapupEmails";
 
 export async function POST(request) {
   const secret = process.env.CRON_SECRET;
@@ -41,6 +42,14 @@ export async function POST(request) {
     console.error("Booking emails failed", error);
   }
 
+  // 8 PM: "How did today go?" to each business with visits to mark.
+  let wrapups = { sent: 0 };
+  try {
+    wrapups = await runWrapups();
+  } catch (error) {
+    console.error("Wrap-up emails failed", error);
+  }
+
   if (!waitlistConfigured()) {
     return Response.json({ skipped: "Email isn't set up yet (see WAITLIST_SETUP.md)." });
   }
@@ -52,6 +61,7 @@ export async function POST(request) {
       planReminders: reminders.sent,
       standingHeld: bookingEmails.held,
       bookingEmails: bookingEmails.sent,
+      wrapups: wrapups.sent,
     });
   } catch (error) {
     console.error("Waitlist check failed", error);
