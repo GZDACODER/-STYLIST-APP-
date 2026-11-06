@@ -6,6 +6,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { runPlanReminders } from "@/lib/planReminders";
 import { runBookingEmails } from "@/lib/bookingEmails";
 import { runWrapups } from "@/lib/wrapupEmails";
+import { runWeeklySummaries } from "@/lib/weeklySummary";
 
 export async function POST(request) {
   const secret = process.env.CRON_SECRET;
@@ -50,6 +51,14 @@ export async function POST(request) {
     console.error("Wrap-up emails failed", error);
   }
 
+  // Mondays from 8 AM: last week's summary to each business.
+  let weekly = { sent: 0 };
+  try {
+    weekly = await runWeeklySummaries();
+  } catch (error) {
+    console.error("Weekly summaries failed", error);
+  }
+
   if (!waitlistConfigured()) {
     return Response.json({ skipped: "Email isn't set up yet (see WAITLIST_SETUP.md)." });
   }
@@ -62,6 +71,7 @@ export async function POST(request) {
       standingHeld: bookingEmails.held,
       bookingEmails: bookingEmails.sent,
       wrapups: wrapups.sent,
+      weeklySummaries: weekly.sent,
     });
   } catch (error) {
     console.error("Waitlist check failed", error);
