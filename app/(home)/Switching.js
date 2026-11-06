@@ -84,7 +84,7 @@ export default function Switching() {
         You built your clientele. Your booking app should <em>protect it.</em>
       </h2>
 
-      <h3 className="hm-switch-sub">Only on Clientele</h3>
+      <h3 className="hm-switch-sub">Built into Clientele</h3>
       <ul className="hm-only">
         {ONLY.map((f) => (
           <li key={f.title}>
