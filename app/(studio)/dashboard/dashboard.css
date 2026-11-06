@@ -1495,3 +1495,75 @@ body:has(.db) {
 .db .history-list li:last-child {
   border-bottom: none;
 }
+
+/* ---------- Wrap up visits ---------- */
+.db .outcome-choices {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 12px;
+}
+
+@media (min-width: 720px) {
+  .db .outcome-choices {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.db .outcome-choice {
+  min-height: 42px;
+  padding: 8px 10px;
+  border: 1px solid var(--border-strong);
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.82rem;
+  line-height: 1.25;
+  cursor: pointer;
+  text-align: center;
+}
+
+.db .outcome-choice:hover {
+  border-color: var(--ink);
+}
+
+.db .outcome-choice.checked {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--on-gold);
+}
+
+.db .outcome-choice.completed_owed.checked {
+  background: var(--warning);
+  border-color: var(--warning);
+}
+
+.db .outcome-choice.no_show.checked {
+  background: var(--error);
+  border-color: var(--error);
+}
+
+/* Today: visits to wrap up, balances owed. */
+.db .db-wrapup {
+  margin: 0 0 28px;
+  padding: 16px 20px;
+  border: 1px solid var(--hair);
+  border-left: 3px solid var(--gold);
+  background: var(--surface);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 20px;
+}
+
+.db .db-wrapup p {
+  margin: 0;
+}
+
+.db .history-flags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+}

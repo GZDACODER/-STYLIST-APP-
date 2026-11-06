@@ -25,17 +25,22 @@ export async function getClientHistory(clientId) {
   if (!user) return { error: "Please log in again." };
 
   // The database's security rules only return this business's own bookings.
-  const [{ data: stylist }, { data: bookings, error }] = await Promise.all([
-    supabase.from("stylists").select("timezone").eq("id", user.id).maybeSingle(),
+  const columns =
+    "id, booking_date, start_time, end_time, service_name, price_cents, status, deposit_cents, deposit_status";
+  const load = (cols) =>
     supabase
       .from("bookings")
-      .select("id, booking_date, start_time, end_time, service_name, price_cents, status, deposit_cents, deposit_status")
+      .select(cols)
       .eq("client_id", String(clientId))
       .in("status", ["confirmed", "cancelled"])
       .order("booking_date", { ascending: false })
       .order("start_time", { ascending: false })
-      .limit(300),
-  ]);
+      .limit(300);
+
+  const { data: stylist } = await supabase.from("stylists").select("timezone").eq("id", user.id).maybeSingle();
+  // With how each visit went (step 18 SQL); without it before that's run.
+  let { data: bookings, error } = await load(`${columns}, outcome`);
+  if (error) ({ data: bookings, error } = await load(columns));
   if (error) return { error: `Couldn't load their history: ${error.message}` };
 
   const now = nowLocal(stylist?.timezone || "America/Chicago");
@@ -44,7 +49,12 @@ export async function getClientHistory(clientId) {
   const past = [];
   const upcoming = [];
   let cancelled = 0;
+  let noShows = 0;
+  let replaced = 0;
+  let owed = 0;
   let spentCents = 0;
+  let visits = 0;
+  let lastVisit = null;
   let depositsKeptCents = 0;
   for (const b of bookings || []) {
     if (b.status === "cancelled") {
@@ -55,7 +65,15 @@ export async function getClientHistory(clientId) {
     }
     if (at(b, b.end_time) <= now) {
       past.push(b);
-      spentCents += b.price_cents || 0;
+      // A no-show, or a visit someone else took, isn't one of their visits.
+      if (b.outcome === "no_show") noShows += 1;
+      else if (b.outcome === "replaced") replaced += 1;
+      else {
+        visits += 1;
+        spentCents += b.price_cents || 0;
+        if (b.outcome === "completed_owed") owed += 1;
+        lastVisit ??= b;
+      }
     } else {
       upcoming.push(b);
     }
@@ -63,11 +81,14 @@ export async function getClientHistory(clientId) {
   upcoming.reverse();
 
   return {
-    visits: past.length,
+    visits,
     cancelled,
+    noShows,
+    replaced,
+    owed,
     spentCents,
     depositsKeptCents,
-    lastVisit: past[0] || null,
+    lastVisit,
     upcoming: upcoming.slice(0, 5),
     upcomingCount: upcoming.length,
     recent: past.slice(0, 8),

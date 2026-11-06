@@ -152,6 +152,30 @@ export default async function TodayPage() {
   ]);
   const standingIds = new Set((standingToday || []).map((r) => r.id));
 
+  // Wrap up visits: finished visits not marked yet (last 14 days) and
+  // balances owed. Read on their own, so the page still opens before the
+  // step 18 SQL is run.
+  const [ty, tm, td] = today.split("-").map(Number);
+  const wrapSince = new Date(Date.UTC(ty, tm - 1, td - 13)).toISOString().slice(0, 10);
+  const [{ data: unmarkedRows }, { count: owedCount }] = await Promise.all([
+    supabase
+      .from("bookings")
+      .select("booking_date, start_time")
+      .eq("status", "confirmed")
+      .is("outcome", null)
+      .gte("booking_date", wrapSince)
+      .lte("booking_date", today),
+    supabase
+      .from("bookings")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "confirmed")
+      .eq("outcome", "completed_owed"),
+  ]);
+  const toWrapUp = (unmarkedRows || []).filter(
+    (b) => b.booking_date < today || b.start_time.slice(0, 5) <= nowTime
+  ).length;
+
+
   // Today's openings that have already finished don't count.
   const openTimes = (weekOpenings.data || []).filter(
     (o) => o.opening_date > today || o.end_time.slice(0, 5) > nowTime
@@ -227,6 +251,28 @@ export default async function TodayPage() {
           </Link>
         ))}
       </section>
+
+      {(toWrapUp > 0 || owedCount > 0) && (
+        <section className="db-wrapup" aria-label="Wrap up visits">
+          <p>
+            {toWrapUp > 0 && (
+              <>
+                <strong>{toWrapUp === 1 ? "1 visit" : `${toWrapUp} visits`} to wrap up.</strong>{" "}
+                Mark each one completed, no-show or someone else came.
+              </>
+            )}
+            {toWrapUp > 0 && owedCount > 0 && " "}
+            {owedCount > 0 && (
+              <span className="muted">
+                {owedCount === 1 ? "1 balance owed." : `${owedCount} balances owed.`}
+              </span>
+            )}
+          </p>
+          <Link href={toWrapUp > 0 ? "/dashboard/wrapup" : "/dashboard/wrapup#owed"}>
+            {toWrapUp > 0 ? "Wrap up visits" : "See balances"}
+          </Link>
+        </section>
+      )}
 
       <StandingFlags flags={Array.isArray(standingFlags) ? standingFlags : []} />
 

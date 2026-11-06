@@ -6,6 +6,7 @@ import { useState, useTransition } from "react";
 import { getClientHistory } from "./historyActions";
 import { clockTime, parseDateString } from "@/lib/availability";
 import { formatPrice } from "@/lib/money";
+import { outcomeLabel } from "@/lib/outcomes";
 
 // "Tue, Nov 10" (the year only when it isn't this year).
 function shortDate(text) {
@@ -71,6 +72,25 @@ export default function ClientHistory({ clientId }) {
               <dd>{history.lastVisit ? ago(history.lastVisit.booking_date) : "Not yet"}</dd>
             </div>
           </dl>
+          {(history.noShows > 0 || history.owed > 0 || history.replaced > 0) && (
+            <p className="history-flags">
+              {history.noShows > 0 && (
+                <span className="badge blocked">
+                  {history.noShows === 1 ? "1 no-show" : `${history.noShows} no-shows`}
+                </span>
+              )}
+              {history.owed > 0 && (
+                <span className="badge unpaid">
+                  {history.owed === 1 ? "1 balance owed" : `${history.owed} balances owed`}
+                </span>
+              )}
+              {history.replaced > 0 && (
+                <span className="badge">
+                  {history.replaced === 1 ? "1 time someone else came" : `${history.replaced} times someone else came`}
+                </span>
+              )}
+            </p>
+          )}
           {history.depositsKeptCents > 0 && (
             <p className="muted small-text">
               {formatPrice(history.depositsKeptCents)} in deposits kept from cancelled visits.
@@ -104,6 +124,7 @@ export default function ClientHistory({ clientId }) {
                     <span>{shortDate(b.booking_date)}</span>
                     <span className="muted">
                       {b.service_name} · {formatPrice(b.price_cents)}
+                      {b.outcome && ` · ${outcomeLabel(b.outcome)}`}
                     </span>
                   </li>
                 ))}
@@ -127,7 +148,7 @@ export default function ClientHistory({ clientId }) {
             </>
           )}
 
-          {history.visits === 0 && history.upcoming.length === 0 && history.cancelled === 0 && (
+          {history.recent.length === 0 && history.upcoming.length === 0 && history.cancelled === 0 && (
             <p className="muted small-text">No bookings yet.</p>
           )}
         </div>
