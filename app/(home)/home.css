@@ -806,3 +806,281 @@ body:has(.hm) {
     padding: 36px 32px 48px;
   }
 }
+
+/* ---------- Switching from another app? ---------- */
+.hm .visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.hm-switch h2 {
+  max-width: 16em;
+}
+
+.hm-switch-sub {
+  margin-top: 64px !important;
+  font-family: var(--font-sans), sans-serif !important;
+  font-size: 0.72rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.2em !important;
+  text-transform: uppercase;
+  color: var(--gold) !important;
+}
+
+.hm-only {
+  list-style: none;
+  margin: 24px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  border-top: 1px solid var(--hair);
+}
+
+.hm-only li {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 22px 0;
+  border-bottom: 1px solid var(--hair);
+}
+
+.hm-only h4 {
+  margin: 0 0 4px;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.45rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.hm-only p {
+  color: var(--text-soft);
+  font-size: 0.95rem;
+}
+
+.hm-icon {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  margin-top: 4px;
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 1.3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+@media (min-width: 720px) {
+  .hm-only {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 48px;
+  }
+}
+
+@media (min-width: 1040px) {
+  .hm-only {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* The comparison table. */
+.hm-compare-wrap {
+  margin-top: 72px;
+  border: 1px solid var(--hair);
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--bg-2);
+}
+
+.hm-compare {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 0.92rem;
+}
+
+.hm-compare th,
+.hm-compare td {
+  padding: 16px 18px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--hair);
+  overflow-wrap: anywhere;
+}
+
+.hm-compare tbody tr:last-child th,
+.hm-compare tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.hm-compare thead th {
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.hm-compare thead th.is-us {
+  color: var(--gold);
+}
+
+.hm-compare tbody th {
+  font-weight: 500;
+  color: var(--text);
+}
+
+.hm-compare td {
+  color: var(--text-soft);
+}
+
+.hm-compare td.is-us {
+  color: var(--gold-light);
+  background: rgba(184, 151, 90, 0.06);
+}
+
+.hm-compare thead th.is-us {
+  background: rgba(184, 151, 90, 0.06);
+}
+
+/* Phones: each row becomes a small card. */
+@media (max-width: 640px) {
+  .hm-compare thead {
+    display: none;
+  }
+
+  .hm-compare,
+  .hm-compare tbody,
+  .hm-compare tr,
+  .hm-compare th,
+  .hm-compare td {
+    display: block;
+    width: 100%;
+  }
+
+  .hm-compare tr {
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--hair);
+  }
+
+  .hm-compare tbody tr:last-child {
+    border-bottom: none;
+  }
+
+  .hm-compare th,
+  .hm-compare td {
+    padding: 0;
+    border: none;
+    background: none !important;
+  }
+
+  .hm-compare tbody th {
+    margin-bottom: 8px;
+  }
+
+  .hm-compare td::before {
+    display: inline-block;
+    min-width: 9.5em;
+    margin-right: 8px;
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+
+  .hm-compare td.is-us::before {
+    content: "Clientele";
+    color: var(--gold);
+  }
+
+  .hm-compare td:not(.is-us)::before {
+    content: "Typical apps";
+  }
+
+  .hm-compare td + td {
+    margin-top: 4px;
+  }
+}
+
+.hm-compare-note {
+  margin-top: 14px !important;
+  max-width: 46em;
+}
+
+/* Switch in an afternoon. */
+.hm-move {
+  margin-top: 72px;
+  padding: 36px 28px;
+  border: 1px solid var(--gold);
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(184, 151, 90, 0.1), transparent 80%);
+  display: grid;
+  gap: 32px;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: center;
+}
+
+.hm-move h3 {
+  font-size: clamp(2rem, 5vw, 2.8rem);
+  font-weight: 400;
+}
+
+.hm-move-steps {
+  list-style: none;
+  margin: 20px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  color: var(--text-soft);
+  max-width: 40em;
+}
+
+.hm-move-steps li {
+  padding-left: 22px;
+  position: relative;
+}
+
+.hm-move-steps li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.65em;
+  width: 8px;
+  height: 1px;
+  background: var(--gold);
+}
+
+.hm-move-steps strong {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.hm-move-steps a {
+  color: var(--gold-light);
+}
+
+.hm-move-cta {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+@media (min-width: 900px) {
+  .hm-move {
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+    padding: 48px 48px;
+  }
+
+  .hm-move-cta {
+    align-items: center;
+    text-align: center;
+  }
+}

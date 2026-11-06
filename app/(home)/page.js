@@ -6,6 +6,7 @@ import { DEPOSIT_FEE_FIXED_CENTS, DEPOSIT_FEE_PERCENT, PLANS, TRIAL_DAYS } from 
 import { formatPrice } from "@/lib/money";
 import RegularStar from "@/components/RegularStar";
 import HeroObject from "./HeroObject";
+import Switching from "./Switching";
 
 const TITLE = `${BRAND_NAME}: Booking that puts your regulars first.`;
 const DESCRIPTION =
@@ -97,6 +98,9 @@ export default async function HomePage() {
         <nav className="hm-nav-links" aria-label="Main">
           <a href="#features" className="hm-hide-phone">
             Features
+          </a>
+          <a href="#switching" className="hm-hide-phone">
+            Switching
           </a>
           <a href="#pricing" className="hm-hide-phone">
             Pricing
@@ -227,6 +231,9 @@ export default async function HomePage() {
             </div>
           </div>
         </section>
+
+        {/* ---------- Switching from another app? ---------- */}
+        <Switching />
 
         {/* ---------- 4. Pricing ---------- */}
         <section id="pricing" className="hm-section">
