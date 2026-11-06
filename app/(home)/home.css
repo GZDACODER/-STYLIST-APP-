@@ -1084,3 +1084,168 @@ body:has(.hm) {
     text-align: center;
   }
 }
+
+/* ---------- Standing appointments ---------- */
+.hm-standing {
+  display: grid;
+  gap: 56px;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: center;
+}
+
+@media (min-width: 900px) {
+  .hm-standing {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    gap: 72px;
+  }
+}
+
+.hm-points {
+  list-style: none;
+  margin: 32px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  color: var(--text-soft);
+  max-width: 32em;
+}
+
+.hm-points li {
+  position: relative;
+  padding-left: 22px;
+}
+
+.hm-points li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.65em;
+  width: 8px;
+  height: 1px;
+  background: var(--gold);
+}
+
+/* The held series, drawn in code. */
+.hm-ledger {
+  justify-self: center;
+  width: min(100%, 420px);
+  padding: 26px 24px 20px;
+  border: 1px solid var(--hair-strong);
+  border-radius: 18px;
+  background: linear-gradient(180deg, #17150f, var(--bg));
+  box-shadow: 0 40px 90px -40px rgba(0, 0, 0, 0.9), 0 0 70px -30px rgba(184, 151, 90, 0.35);
+}
+
+.hm-ledger-head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--hair);
+}
+
+.hm-ledger-name {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.6rem;
+  color: var(--text);
+}
+
+.hm-ledger-repeat {
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.hm-ledger ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.hm-ledger li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--hair);
+  font-size: 0.95rem;
+  color: var(--text);
+}
+
+.hm-ledger-time {
+  color: var(--text-soft);
+  margin-left: auto;
+}
+
+.hm-ledger-tag {
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold-light);
+  border: 1px solid var(--gold);
+  background: rgba(184, 151, 90, 0.12);
+  padding: 3px 8px;
+}
+
+.hm-ledger-foot {
+  margin-top: 14px !important;
+  font-size: 0.78rem;
+  color: var(--text-faint);
+  text-align: center;
+}
+
+/* ---------- Runs your day for you ---------- */
+.hm-runs {
+  list-style: none;
+  margin: 56px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.hm-runs li {
+  padding: 26px 24px 28px;
+  border: 1px solid var(--hair);
+  border-radius: 16px;
+  background: linear-gradient(180deg, var(--bg-2), var(--bg));
+}
+
+.hm-runs .hm-icon {
+  margin: 0 0 14px;
+}
+
+.hm-runs h3 {
+  font-size: 1.55rem;
+  margin-bottom: 8px;
+}
+
+.hm-runs p {
+  color: var(--text-soft);
+  font-size: 0.95rem;
+}
+
+@media (min-width: 720px) {
+  .hm-runs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1040px) {
+  .hm-runs {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  /* Three on top, two wider underneath. */
+  .hm-runs li {
+    grid-column: span 2;
+  }
+
+  .hm-runs li:nth-child(4),
+  .hm-runs li:nth-child(5) {
+    grid-column: span 3;
+  }
+}

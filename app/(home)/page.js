@@ -7,6 +7,7 @@ import { formatPrice } from "@/lib/money";
 import RegularStar from "@/components/RegularStar";
 import HeroObject from "./HeroObject";
 import Switching from "./Switching";
+import Icon from "./Icon";
 
 const TITLE = `${BRAND_NAME}: Booking that puts your regulars first.`;
 const DESCRIPTION =
@@ -34,6 +35,51 @@ const EXAMPLES = [
   "Tutors",
   "Pet grooming",
   "Photographers",
+];
+
+// Standing appointments: the next few held visits, for the picture.
+const STANDING_DATES = [
+  ["Tue, Dec 1", "10:00 AM"],
+  ["Tue, Dec 29", "10:00 AM"],
+  ["Tue, Jan 26", "10:00 AM"],
+  ["Tue, Feb 23", "10:00 AM"],
+];
+
+const STANDING_POINTS = [
+  "Every 2 to 12 weeks, on their usual day and time.",
+  "The next 3 months are held, and it keeps rolling forward.",
+  "Held times never show as open to anyone else.",
+  "Skip or move one date without touching the rest.",
+  "No deposit, or a deposit each visit. Your choice for each regular.",
+];
+
+// Runs your day for you.
+const RUNS = [
+  {
+    icon: "bell",
+    title: "Confirmations and reminders",
+    text: "Every client gets a confirmation and a reminder 24 hours before, with a one-tap Cancel this visit. The time opens up again for your waitlist.",
+  },
+  {
+    icon: "wrapup",
+    title: "The 8 PM wrap-up",
+    text: "One email at the end of the day: mark each visit kept, no-show or someone else came. Balances owed get flagged until they're paid.",
+  },
+  {
+    icon: "chart",
+    title: "Your Monday summary",
+    text: "Last week's visits, what you booked, deposits, no-shows and waitlist fills, plus what's on this week.",
+  },
+  {
+    icon: "card",
+    title: "Client history",
+    text: "Every client card shows their visits, what they've spent, cancellations, no-shows and when they last came in.",
+  },
+  {
+    icon: "swap",
+    title: "Import and export",
+    text: "Bring your list over from another app with a CSV file, and download it again any time. Your clients stay yours.",
+  },
 ];
 
 const REGULARS = [
@@ -65,7 +111,7 @@ export default async function HomePage() {
       name: base.name,
       amount: price(base.monthlyCents),
       unit: "/mo",
-      text: "Your booking page, services, hours, openings, calendar, clients and deposits.",
+      text: "Your booking page, deposits, reminders, the end-of-day wrap-up, the Monday summary and client history.",
     },
     {
       name: regulars.name,
@@ -167,9 +213,46 @@ export default async function HomePage() {
           </ul>
         </section>
 
-        {/* ---------- 2. No more no-shows ---------- */}
+        {/* ---------- 2. Standing appointments ---------- */}
+        <section id="standing" className="hm-section hm-standing">
+          <div>
+            <p className="hm-kicker">02 · Standing appointments</p>
+            <h2>
+              Their usual time, <em>held for them.</em>
+            </h2>
+            <p className="hm-section-lede">
+              Your regulars come back every few weeks. Set it once on their client card, and their
+              visits are booked months ahead. Part of Regulars First.
+            </p>
+            <ul className="hm-points">
+              {STANDING_POINTS.map((point) => (
+                <li key={point}>{point}</li>
+              ))}
+            </ul>
+          </div>
+
+          {/* A held series, drawn in code. */}
+          <div className="hm-ledger" aria-hidden="true">
+            <div className="hm-ledger-head">
+              <span className="hm-ledger-name">Jasmine R.</span>
+              <span className="hm-ledger-repeat">Every 4 weeks · Tuesday</span>
+            </div>
+            <ul>
+              {STANDING_DATES.map(([date, time]) => (
+                <li key={date}>
+                  <span>{date}</span>
+                  <span className="hm-ledger-time">{time}</span>
+                  <span className="hm-ledger-tag">Standing</span>
+                </li>
+              ))}
+            </ul>
+            <p className="hm-ledger-foot">Held · rolls forward every week</p>
+          </div>
+        </section>
+
+        {/* ---------- 3. No more no-shows ---------- */}
         <section className="hm-section">
-          <p className="hm-kicker">02 · No more no-shows</p>
+          <p className="hm-kicker">03 · No more no-shows</p>
           <h2>Deposits up front. Cancellations filled for you.</h2>
           <div className="hm-split">
             <div className="hm-split-item">
@@ -197,10 +280,29 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* ---------- 3. Your brand ---------- */}
+        {/* ---------- 4. Runs your day ---------- */}
+        <section className="hm-section">
+          <p className="hm-kicker">04 · Runs your day for you</p>
+          <h2>The admin, handled.</h2>
+          <p className="hm-section-lede">
+            The reminders, the follow-up and the numbers happen on their own, so your time goes to
+            your clients.
+          </p>
+          <ul className="hm-runs">
+            {RUNS.map((r) => (
+              <li key={r.title}>
+                <Icon name={r.icon} />
+                <h3>{r.title}</h3>
+                <p>{r.text}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        {/* ---------- 5. Your brand ---------- */}
         <section className="hm-section hm-brand">
           <div className="hm-brand-copy">
-            <p className="hm-kicker">03 · Your brand, not ours</p>
+            <p className="hm-kicker">05 · Your brand, not ours</p>
             <h2>A booking page that looks like you.</h2>
             <p className="hm-section-lede">
               Your name in script over your own cover photo, with your Instagram and location one
@@ -235,9 +337,9 @@ export default async function HomePage() {
         {/* ---------- Switching from another app? ---------- */}
         <Switching />
 
-        {/* ---------- 4. Pricing ---------- */}
+        {/* ---------- 6. Pricing ---------- */}
         <section id="pricing" className="hm-section">
-          <p className="hm-kicker">04 · Pricing</p>
+          <p className="hm-kicker">06 · Pricing</p>
           <h2>Simple monthly pricing.</h2>
           <p className="hm-section-lede">
             Start with {base.name} and add what you need, or take everything with {bundle.name}.
@@ -267,7 +369,7 @@ export default async function HomePage() {
           </p>
         </section>
 
-        {/* ---------- 5. Final call ---------- */}
+        {/* ---------- Final call ---------- */}
         <section className="hm-final">
           <h2>
             Give your regulars <em>first pick.</em>
