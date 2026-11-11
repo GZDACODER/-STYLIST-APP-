@@ -14,6 +14,7 @@ export async function saveSettings(prevState, formData) {
   const timezone = String(formData.get("timezone") || "").trim();
   const tagline = String(formData.get("tagline") || "").trim();
   const firstName = String(formData.get("first_name") || "").trim();
+  const replyEmail = String(formData.get("reply_email") || "").trim().toLowerCase();
 
   if (!businessName) return { error: "Please enter your business name." };
   if (businessName.length > 100) return { error: "Business name is too long." };
@@ -26,6 +27,9 @@ export async function saveSettings(prevState, formData) {
   if (!isValidTimeZone(timezone)) return { error: "Please pick your time zone." };
   if (tagline.length > 120) return { error: "Please keep the tagline to 120 characters." };
   if (firstName.length > 50) return { error: "Please keep your first name to 50 characters." };
+  if (replyEmail && (replyEmail.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(replyEmail))) {
+    return { error: "That reply email doesn't look right. Leave it empty to use your login email." };
+  }
 
   const supabase = await createClient();
   const {
@@ -67,6 +71,20 @@ export async function saveSettings(prevState, formData) {
     return {
       error:
         "Your other settings were saved, but not your first name. Run supabase/migrations/0015_first_name.sql in Supabase first.",
+    };
+  }
+
+  // Saved on its own too, so the rest still saves before the reply email SQL is run.
+  const { error: replyError } = await supabase
+    .from("stylists")
+    .update({ reply_email: replyEmail })
+    .eq("id", user.id);
+  // (Before that SQL, an empty field is fine: replies use the login email.)
+  if (replyError && replyEmail) {
+    revalidatePath("/dashboard", "layout");
+    return {
+      error:
+        "Your other settings were saved, but not the email for client replies. Run supabase/migrations/0027_reply_email.sql in Supabase first.",
     };
   }
 

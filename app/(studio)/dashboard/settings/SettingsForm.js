@@ -6,7 +6,7 @@ import TimeZoneSelect from "@/components/TimeZoneSelect";
 import SubmitButton from "@/components/SubmitButton";
 import FormMessage from "@/components/FormMessage";
 
-export default function SettingsForm({ businessName, firstName, slug, timezone, tagline }) {
+export default function SettingsForm({ businessName, firstName, slug, timezone, tagline, replyEmail, loginEmail }) {
   const [state, formAction] = useActionState(saveSettings, null);
 
   return (
@@ -41,6 +41,21 @@ export default function SettingsForm({ businessName, firstName, slug, timezone, 
       <p className="muted small-text">
         A short line shown at the top of your booking page. Leave it empty to show &quot;Reserve
         your appointment&quot; instead.
+      </p>
+      <label>
+        Email for client replies (optional)
+        <input
+          name="reply_email"
+          type="email"
+          autoComplete="email"
+          maxLength={254}
+          defaultValue={replyEmail}
+          placeholder={loginEmail}
+        />
+      </label>
+      <p className="muted small-text">
+        Client emails come from hello@clientelesuite.com. When a client replies, it goes here.
+        Leave it empty to use your login email{loginEmail ? ` (${loginEmail})` : ""}.
       </p>
       <label>
         Booking link
