@@ -7,14 +7,10 @@ import { formatDate, todayInTimeZone } from "@/lib/availability";
 import WaitlistSettingsForm from "./WaitlistSettingsForm";
 import PausedNote from "@/components/PausedNote";
 import { getMyPlan } from "@/lib/plan";
-import RemoveEntryButton from "./RemoveEntryButton";
-import { displayPhone } from "@/lib/phone";
+import WaitingList from "./WaitingList";
 import { BRAND_NAME } from "@/lib/brand";
-import RegularStar from "@/components/RegularStar";
 
 export const metadata = { title: `Waitlist · ${BRAND_NAME}` };
-
-const STATUS_LABELS = { regular: "Regular", new: "New", blocked: "Blocked" };
 
 export default async function WaitlistPage() {
   const supabase = await createClient();
@@ -97,52 +93,31 @@ export default async function WaitlistPage() {
       <section className="card">
         <h2>Who&apos;s waiting</h2>
         {waiting.length === 0 && <p className="muted">Nobody is on your waitlist right now.</p>}
-        <ul className="client-list">
-          {waiting.map((e) => {
+        {waiting.length > 0 && (
+        <WaitingList
+          entries={waiting.map((e) => {
             const told = e.offers.filter((o) => o.notified_at);
             const lastTold = told.map((o) => o.notified_at).sort().pop();
             // Messages that couldn't be sent yet, and why (from Resend or Twilio).
             const stuck = e.offers.filter((o) => !o.notified_at && o.notify_attempts > 0);
-            return (
-              <li key={e.id} className="client-card">
-                <div className="client-top">
-                  <div className="client-name">{e.name}</div>
-                  {STATUS_LABELS[e.client_status] && (
-                    <span className={`badge ${e.client_status}`}>
-                      {e.client_status === "regular" && <><RegularStar label={null} /> </>}
-                      {STATUS_LABELS[e.client_status]}
-                    </span>
-                  )}
-                </div>
-                <div>
-                  <div>{e.service?.name}</div>
-                  <div className="muted">{describeWishes(e.days, e.times)}</div>
-                  <div className="muted small-text">
-                    Joined {whenText(e.created_at)}
-                    {lastTold
-                      ? ` · Told about ${told.length} ${told.length === 1 ? "time" : "times"}, last ${whenText(lastTold)}`
-                      : " · Not told about any times yet"}
-                  </div>
-                  {stuck.length > 0 && (
-                    <p className="message error small-text">
-                      Couldn&apos;t email {e.name} about {stuck.length}{" "}
-                      {stuck.length === 1 ? "time" : "times"} yet. Trying again every 15 minutes.
-                      {stuck[0].last_error && <> Reason: {stuck[0].last_error}</>}
-                    </p>
-                  )}
-                </div>
-                <div className="client-contact">
-                  <a href={`tel:${e.phone}`}>{displayPhone(e.phone)}</a>
-                  {e.email && <a href={`mailto:${e.email}`}>{e.email}</a>}
-                  {e.text_ok && <span className="muted small-text">Wants texts</span>}
-                </div>
-                <div className="client-delete">
-                  <RemoveEntryButton id={e.id} name={e.name} />
-                </div>
-              </li>
-            );
+            return {
+              id: e.id,
+              name: e.name,
+              phone: e.phone,
+              email: e.email,
+              textOk: e.text_ok,
+              status: e.client_status,
+              service: e.service?.name || "A service",
+              wishes: describeWishes(e.days, e.times),
+              joined: whenText(e.created_at),
+              toldCount: told.length,
+              lastTold: lastTold ? whenText(lastTold) : null,
+              stuckCount: stuck.length,
+              stuckError: stuck[0]?.last_error || null,
+            };
           })}
-        </ul>
+        />
+        )}
       </section>
 
       {booked.length > 0 && (
