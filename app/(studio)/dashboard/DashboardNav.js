@@ -36,6 +36,12 @@ const ICONS = {
       <path d="M8 3.5c0 4.2 8 4.6 8 8.5s-8 4.3-8 8.5M16 3.5c0 1.6-1.2 2.7-2.6 3.6M8 20.5c0-1.6 1.2-2.7 2.6-3.6" />
     </>
   ),
+  notes: (
+    <>
+      <path d="M6 3.5h9l3 3v14H6z" />
+      <path d="M15 3.5v3h3M9 11h6M9 14.5h6M9 18h3.5" />
+    </>
+  ),
   settings: (
     <>
       <path d="M4 6.5h9M17 6.5h3M4 12h3M11 12h9M4 17.5h11M19 17.5h1" />
@@ -54,6 +60,7 @@ const ITEMS = [
   { href: "/dashboard/clients", label: "Clients", icon: "clients" },
   { href: "/dashboard/openings", label: "Openings", icon: "openings" },
   { href: "/dashboard/waitlist", label: "Waitlist", icon: "waitlist" },
+  { href: "/dashboard/notes", label: "Notes", icon: "notes", also: ["/dashboard/wrapup"] },
   {
     href: "/dashboard/settings",
     label: "Settings",

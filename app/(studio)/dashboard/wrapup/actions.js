@@ -20,5 +20,6 @@ export async function setVisitOutcome(bookingId, outcome) {
   }
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/wrapup");
+  revalidatePath("/dashboard/notes");
   return { success: true };
 }

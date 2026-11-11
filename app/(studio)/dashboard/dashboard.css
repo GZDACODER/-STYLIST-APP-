@@ -280,7 +280,7 @@ body:has(.db) {
     gap: 5px;
     padding: 10px 2px 9px;
     font-size: 0.58rem;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.04em;
     text-align: center;
   }
 
@@ -2127,4 +2127,144 @@ body:has(dialog.client-sheet[open]) {
 .db .booking-facts dd {
   margin: 0;
   color: var(--ink);
+}
+
+/* A visit's note in a client's History */
+.db .history-list li {
+  flex-wrap: wrap;
+}
+
+.db .history-note {
+  flex-basis: 100%;
+  font-size: 0.85rem;
+  color: var(--ink);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* =========================================================
+   Notes tab, and visit notes on Wrap up visits
+   ========================================================= */
+.db .notes-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.db .notes-tools .search {
+  flex: 1 1 220px;
+  margin: 0;
+}
+
+.db .notes-mode {
+  flex: 0 0 auto;
+}
+
+.db .notes-mode .segment {
+  min-height: 44px;
+  padding: 0 16px;
+  white-space: nowrap;
+}
+
+.db .notes-client-row {
+  grid-template-columns: minmax(0, 1fr) auto 10px;
+  grid-template-areas: "main badges chev";
+}
+
+@media (max-width: 560px) {
+  .db .notes-client-row {
+    grid-template-columns: minmax(0, 1fr) 10px;
+    grid-template-areas:
+      "main chev"
+      "badges chev";
+  }
+
+  .db .notes-client-row .booking-row-badges {
+    justify-content: flex-start;
+  }
+
+  .db .notes-client-row .booking-row-badges:not(:has(.badge)) {
+    display: none;
+  }
+}
+
+.db .visit-note {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.db .visit-note-owed {
+  margin: 0;
+}
+
+.db .visit-note-text {
+  margin: 0;
+  padding: 8px 12px;
+  border-left: 2px solid var(--gold);
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 0.95rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.db .visit-note-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.db .note-visits {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--divider);
+}
+
+.db .note-visit {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--divider);
+}
+
+.db .note-visit .muted {
+  margin: 0;
+}
+
+.db .note-visit-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.1rem;
+}
+
+.db .note-visit-head .badge {
+  font-family: var(--font-sans), "Helvetica Neue", Arial, sans-serif;
+}
+
+.db .note-visit-outcome summary {
+  cursor: pointer;
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+}
+
+.db .note-visit-outcome[open] summary {
+  margin-bottom: 8px;
+}
+
+.db .wrapup-visit .visit-note {
+  margin-top: 4px;
 }
