@@ -34,7 +34,11 @@ function message(error) {
   const plan = planErrorMessage(error);
   if (plan) return plan.replace("this can't be turned on", "standing appointments can't be set up");
   const key = Object.keys(ERRORS).find((k) => text.includes(k));
-  return key ? ERRORS[key] : "Something went wrong. Please try again.";
+  if (key) return ERRORS[key];
+  // Anything else: keep the database's own words, so the cause can be
+  // found (and log everything to Vercel's logs).
+  console.error("Standing appointment error", error?.code, error?.message, error?.details, error?.hint);
+  return `Something went wrong. Please try again. (Details: ${text || error?.code || "no reason given"})`;
 }
 
 function refresh() {
