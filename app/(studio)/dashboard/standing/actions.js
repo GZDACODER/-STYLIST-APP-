@@ -10,6 +10,8 @@ import { planErrorMessage } from "@/lib/plan";
 
 const ERRORS = {
   not_regular: "Only Regulars can have a standing appointment.",
+  duplicate_series:
+    "They already have a standing appointment on that day and time. End that one first, or pick another time.",
   invalid_service: "Please pick a service.",
   invalid_interval: "Please pick how often: every 2 to 12 weeks.",
   invalid_time: "Please pick a day and time.",
