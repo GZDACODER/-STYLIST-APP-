@@ -12,10 +12,12 @@ import Sheet from "@/components/Sheet";
 import CancelBookingButton from "./CancelBookingButton";
 import StandingVisitControls from "../standing/StandingVisitControls";
 import { DepositBadge } from "./badges";
+import Link from "next/link";
+import { outcomeLabel } from "@/lib/outcomes";
 
 const STATUS_LABELS = { regular: "Regular", new: "New", blocked: "Blocked" };
 
-function BookingRow({ booking: b, standing, onOpen }) {
+export function BookingRow({ booking: b, standing, onOpen }) {
   const status = b.client?.status;
   return (
     <li>
@@ -49,7 +51,7 @@ function BookingRow({ booking: b, standing, onOpen }) {
   );
 }
 
-function BookingDetails({ booking: b, seriesId, today }) {
+export function BookingDetails({ booking: b, seriesId, today }) {
   const status = b.client?.status;
   return (
     <div className="client-card booking-details">
@@ -100,6 +102,18 @@ function BookingDetails({ booking: b, seriesId, today }) {
         {b.client_email && <a href={`mailto:${b.client_email}`}>{b.client_email}</a>}
       </div>
 
+      {b.past ? (
+        <div className="booking-past">
+          <p className="muted small-text">
+            {b.outcome ? `How it went: ${outcomeLabel(b.outcome)}` : "Not marked yet."}
+            {b.outcome === "completed_owed" && b.owed_cents != null && ` · ${formatPrice(b.owed_cents)} owed`}
+          </p>
+          {b.visit_note && <p className="visit-note-text">{b.visit_note}</p>}
+          <Link href="/dashboard/notes" className="link-button quiet-link">
+            {b.outcome ? "Notes" : "Mark it in Notes"}
+          </Link>
+        </div>
+      ) : (
       <div className="client-delete">
         {seriesId ? (
           <StandingVisitControls
@@ -119,6 +133,7 @@ function BookingDetails({ booking: b, seriesId, today }) {
           />
         )}
       </div>
+      )}
     </div>
   );
 }
