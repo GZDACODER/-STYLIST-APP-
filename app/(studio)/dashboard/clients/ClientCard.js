@@ -11,9 +11,12 @@ import ConfirmAction from "@/components/ConfirmAction";
 import { displayPhone } from "@/lib/phone";
 import StandingSection from "../standing/StandingSection";
 import ClientHistory from "./ClientHistory";
+import MergeClients from "./MergeClients";
 
+// The full card, shown in a panel when a row in the client list is tapped.
 // standing: what the standing appointment part needs (see ClientsPage).
-export default function ClientCard({ client, standing }) {
+// clients, upcomingCounts, mergeWith: for "Merge with another card".
+export default function ClientCard({ client, standing, clients, upcomingCounts, mergeWith }) {
   const [editing, setEditing] = useState(false);
   const [statusError, setStatusError] = useState(null);
   // Show the new status straight away while it saves in the background.
@@ -37,7 +40,7 @@ export default function ClientCard({ client, standing }) {
 
   if (editing) {
     return (
-      <li className="client-card">
+      <div className="client-card">
         <form action={editAction}>
           <input type="hidden" name="id" value={client.id} />
           <ClientFields values={client} />
@@ -49,12 +52,12 @@ export default function ClientCard({ client, standing }) {
           </div>
           <FormMessage state={editState?.error ? editState : null} />
         </form>
-      </li>
+      </div>
     );
   }
 
   return (
-    <li className="client-card">
+    <div className="client-card">
       <div className="client-top">
         <div className="client-name">
           {client.name}
@@ -106,6 +109,14 @@ export default function ClientCard({ client, standing }) {
         <StandingSection client={client} standing={standing} isRegular={status === "regular"} />
       )}
 
+      <MergeClients
+        client={client}
+        clients={clients || []}
+        standing={standing}
+        upcomingCounts={upcomingCounts}
+        initialOtherId={mergeWith}
+      />
+
       <div className="client-delete">
         <ConfirmAction
           label="Delete client"
@@ -118,6 +129,6 @@ export default function ClientCard({ client, standing }) {
           fields={{ id: client.id }}
         />
       </div>
-    </li>
+    </div>
   );
 }

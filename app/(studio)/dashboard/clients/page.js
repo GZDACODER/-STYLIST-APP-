@@ -9,6 +9,7 @@ import InviteList from "./InviteList";
 import ImportClients from "./ImportClients";
 import { BRAND_NAME } from "@/lib/brand";
 import { todayInTimeZone } from "@/lib/availability";
+import { nowLocal } from "@/lib/localTime";
 
 export const metadata = { title: `Clients · ${BRAND_NAME}` };
 
@@ -36,7 +37,9 @@ export default async function ClientsPage() {
   ] = await Promise.all([
     supabase
       .from("clients")
-      .select("id, name, phone, email, notes, status, auto_regular, completed_visits, invited_at")
+      .select(
+        "id, name, phone, email, notes, status, auto_regular, completed_visits, invited_at, created_at"
+      )
       .order("name", { ascending: true }),
     supabase
       .from("stylists")
@@ -65,12 +68,38 @@ export default async function ClientsPage() {
       .eq("id", user.id)
       .maybeSingle(),
   ]);
+  const timeZone = depositRow?.timezone || "America/Chicago";
+
+  // Each client's next appointment, for the slim rows in the list.
+  const today = todayInTimeZone(timeZone);
+  const { data: upcomingRows } = await supabase
+    .from("bookings")
+    .select("client_id, booking_date, start_time, service_name")
+    .eq("status", "confirmed")
+    .not("client_id", "is", null)
+    .gte("booking_date", today)
+    .order("booking_date", { ascending: true })
+    .order("start_time", { ascending: true })
+    .limit(2000);
+  const now = nowLocal(timeZone);
+  const nextVisits = {};
+  const upcomingCounts = {};
+  for (const b of upcomingRows || []) {
+    if (`${b.booking_date}T${String(b.start_time).slice(0, 5)}` < now) continue;
+    upcomingCounts[b.client_id] = (upcomingCounts[b.client_id] || 0) + 1;
+    nextVisits[b.client_id] ??= {
+      date: b.booking_date,
+      time: String(b.start_time).slice(0, 5),
+      service: b.service_name,
+    };
+  }
+
   const standing = {
     services: services || [],
     series: series || [],
     regularsOn: plan.has.regulars,
     depositsOn: Boolean(depositRow?.deposits_enabled && depositRow?.stripe_charges_enabled),
-    today: todayInTimeZone(depositRow?.timezone || "America/Chicago"),
+    today,
   };
   const invites = (inviteRows || []).filter(
     (i) => i.invite_state === "open" || i.invite_state === "used"
@@ -148,7 +177,12 @@ export default async function ClientsPage() {
             </a>
           )}
         </div>
-        <ClientList clients={clients} standing={standing} />
+        <ClientList
+          clients={clients}
+          standing={standing}
+          nextVisits={nextVisits}
+          upcomingCounts={upcomingCounts}
+        />
       </section>
     </>
   );

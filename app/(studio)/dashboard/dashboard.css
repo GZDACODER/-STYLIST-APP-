@@ -1576,3 +1576,442 @@ body:has(.db) {
 .db-solo .db-page {
   margin: 0 auto;
 }
+
+/* =========================================================
+   Clients: slim rows. Tapping one opens the full card in a panel
+   (full screen on a phone, centered on iPad and computer).
+   ========================================================= */
+.db .client-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--hair);
+}
+
+.db .client-rows li {
+  border-bottom: 1px solid var(--hair);
+}
+
+.db .client-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 10px;
+  grid-template-areas: "main next chev";
+  align-items: center;
+  gap: 4px 16px;
+  width: 100%;
+  min-height: 58px;
+  padding: 10px 8px 10px 12px;
+  background: transparent;
+  border: 0;
+  border-left: 2px solid transparent;
+  border-radius: 0;
+  text-align: left;
+  font: inherit;
+  color: var(--ink);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s var(--ease), border-color 0.15s var(--ease);
+}
+
+.db .client-row:active {
+  background: #fff;
+  border-left-color: var(--gold);
+}
+
+@media (hover: hover) {
+  .db .client-row:hover {
+    background: #fff;
+    border-left-color: var(--gold);
+  }
+}
+
+.db .client-row:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: -2px;
+}
+
+.db .client-row-main {
+  grid-area: main;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.db .client-row-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.12rem;
+  font-weight: 500;
+  line-height: 1.25;
+}
+
+.db .client-row-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.db .row-badge {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 6px;
+  font-family: var(--font-sans), "Helvetica Neue", Arial, sans-serif;
+  font-size: 0.56rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+}
+
+.db .client-row-phone {
+  font-size: 0.86rem;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.db .client-row-next {
+  grid-area: next;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: 0.86rem;
+  white-space: nowrap;
+}
+
+.db .client-row-next-label {
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold-dark);
+}
+
+.db .client-row-next.none {
+  font-size: 0.8rem;
+  color: var(--faint);
+}
+
+.db .client-row-chevron {
+  grid-area: chev;
+  color: var(--faint);
+}
+
+/* Phones: the next appointment goes under the phone number. */
+@media (max-width: 560px) {
+  .db .client-row {
+    grid-template-columns: minmax(0, 1fr) 10px;
+    grid-template-areas:
+      "main chev"
+      "next chev";
+    padding: 9px 6px 9px 10px;
+    min-height: 56px;
+  }
+
+  .db .client-row-next {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 6px;
+    font-size: 0.82rem;
+  }
+
+  .db .client-row-next.none {
+    display: none;
+  }
+}
+
+/* Possible duplicates */
+.db .dup-dot {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--gold);
+}
+
+.db .dup-notice {
+  margin: 0 0 16px;
+  padding: 10px 14px;
+  background: #fff;
+  border: 1px solid var(--hair);
+  border-left: 2px solid var(--gold);
+}
+
+.db .dup-notice summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 32px;
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.db .dup-notice[open] summary {
+  margin-bottom: 4px;
+}
+
+.db .dup-list {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+}
+
+.db .dup-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-top: 1px solid var(--divider);
+  overflow-wrap: anywhere;
+}
+
+.db .dup-list .button {
+  flex-shrink: 0;
+}
+
+/* The panel holding the full card */
+body:has(dialog.client-sheet[open]) {
+  overflow: hidden;
+}
+
+.db .client-sheet {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+  max-height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.db .client-sheet::backdrop {
+  background: rgba(14, 14, 14, 0.55);
+}
+
+.db .client-sheet-inner {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 16px calc(28px + env(safe-area-inset-bottom));
+}
+
+.db .client-sheet-bar {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  margin-bottom: 12px;
+  padding-top: env(safe-area-inset-top);
+  background: var(--bg);
+  border-bottom: 1px solid var(--hair);
+}
+
+.db .client-sheet-bar .link-button {
+  min-height: 44px;
+  font-weight: 500;
+}
+
+@media (min-width: 700px) {
+  .db .client-sheet {
+    margin: auto;
+    width: min(640px, calc(100vw - 48px));
+    height: fit-content;
+    max-height: calc(100dvh - 64px);
+    border: 1px solid var(--hair);
+    border-top: 2px solid var(--gold);
+    box-shadow: 0 24px 60px rgba(14, 14, 14, 0.22);
+  }
+
+  .db .client-sheet-inner {
+    padding: 0 24px 24px;
+  }
+}
+
+/* Merge two cards */
+.db .merge-entry {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.db .merge-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  background: #fff;
+  border: 1px solid var(--hair);
+  border-left: 2px solid var(--gold);
+}
+
+.db .merge-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.db .merge-head h3 {
+  margin: 0;
+  font-size: 1.3rem;
+  overflow-wrap: anywhere;
+}
+
+.db .merge-panel .search {
+  margin: 0;
+}
+
+.db .merge-candidates {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--divider);
+}
+
+.db .merge-candidates li {
+  border-bottom: 1px solid var(--divider);
+}
+
+.db .merge-candidate {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px 10px;
+  width: 100%;
+  min-height: 52px;
+  padding: 10px 4px;
+  background: none;
+  border: 0;
+  text-align: left;
+  font: inherit;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .db .merge-candidate:hover {
+    background: var(--bg);
+  }
+}
+
+.db .merge-candidate-name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.08rem;
+}
+
+.db .merge-candidate-meta {
+  grid-column: 1;
+  font-size: 0.82rem;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.db .merge-candidate .badge.dup {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  border-color: var(--gold);
+  color: var(--ink);
+  font-size: 0.56rem;
+  padding: 2px 6px;
+}
+
+.db .merge-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.db .merge-pair > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--divider);
+  overflow-wrap: anywhere;
+}
+
+.db .merge-label,
+.db .merge-choice legend {
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold-dark);
+}
+
+.db .merge-choice {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.db .merge-choice legend {
+  padding: 0;
+  margin-bottom: 6px;
+}
+
+.db .merge-option {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: left;
+  font-size: 1rem;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ink);
+  gap: 10px;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-strong);
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+
+.db .merge-option.checked {
+  border-color: var(--ink);
+  box-shadow: inset 3px 0 0 var(--gold);
+}
+
+.db .merge-option input {
+  width: auto;
+  margin: 0;
+  padding: 0;
+  flex-shrink: 0;
+  accent-color: var(--ink);
+}
+
+.db .merge-summary .merge-label {
+  margin: 0;
+}
+
+.db .merge-summary ul {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 6px 0 0;
+  padding-left: 18px;
+  font-size: 0.92rem;
+}

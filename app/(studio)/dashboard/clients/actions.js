@@ -93,3 +93,44 @@ export async function deleteClient(formData) {
 
   revalidatePath("/dashboard/clients");
 }
+
+const MERGE_ERRORS = {
+  not_logged_in: "Please log in again.",
+  same_client: "Pick two different cards to merge.",
+  client_not_found: "One of these cards is gone. Refresh the page and try again.",
+  invalid_name: "Please pick a name (up to 100 characters).",
+  invalid_phone: "That phone number is too long.",
+  invalid_email: "That email doesn't look right.",
+  standing_clash:
+    "Both cards have a standing appointment on the same day and time. End one of them first, then merge.",
+  notes_too_long:
+    "Together, their notes are over 1000 characters. Shorten the notes on one card first, then merge.",
+};
+
+// Moves everything from one card onto the other, then deletes the empty
+// card (see 0028_merge_clients.sql). Returns { error } or { success }.
+export async function mergeClients({ keepId, removeId, name, phone, email }) {
+  const { supabase, user } = await getUserAndClient();
+  if (!user) return { error: MERGE_ERRORS.not_logged_in };
+
+  const { error } = await supabase.rpc("merge_clients", {
+    p_keep: String(keepId || ""),
+    p_remove: String(removeId || ""),
+    p_name: String(name || "").trim(),
+    p_phone: String(phone || "").trim(),
+    p_email: String(email || "").trim().toLowerCase(),
+  });
+  if (error) {
+    const text = String(error.message || "");
+    const known = Object.keys(MERGE_ERRORS).find((code) => text.includes(code));
+    if (known) return { error: MERGE_ERRORS[known] };
+    if (error.code === "PGRST202" || text.includes("merge_clients")) {
+      return { error: "Merging isn't set up yet: run the step 23 SQL (0028_merge_clients.sql) in Supabase." };
+    }
+    console.error("Merging clients failed", error.code, error.message);
+    return { error: `Couldn't merge: ${text || "please try again."}` };
+  }
+
+  revalidatePath("/dashboard/clients");
+  return { success: true };
+}
