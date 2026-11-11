@@ -385,6 +385,8 @@ export default async function HomePage() {
         <span className="hm-logo hm-logo-small">{BRAND_NAME}</span>
         <nav aria-label="Footer">
           <Link href="/login">Log in</Link>
+          <Link href="/terms">Terms</Link>
+          <Link href="/privacy">Privacy</Link>
           <a href="mailto:hello@clientelesuite.com">Contact · hello@clientelesuite.com</a>
         </nav>
         <p>© {new Date().getFullYear()} {BRAND_NAME}</p>

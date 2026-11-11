@@ -1249,3 +1249,66 @@ body:has(.hm) {
     grid-column: span 3;
   }
 }
+
+/* ---------- Terms and Privacy ---------- */
+.hm-legal {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 56px var(--gutter) 96px;
+  color: var(--text-soft);
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+.hm-legal h1 {
+  font-size: clamp(2.6rem, 8vw, 4rem);
+  font-weight: 400;
+  line-height: 1.02;
+  margin-bottom: 28px;
+}
+
+.hm-legal h2 {
+  font-size: 1.6rem;
+  margin: 44px 0 12px;
+  color: var(--text);
+}
+
+.hm-legal p + p {
+  margin-top: 12px;
+}
+
+.hm-legal-lede {
+  font-size: 1.1rem;
+  color: var(--text);
+}
+
+.hm-legal ul {
+  margin: 8px 0 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hm-legal li::marker {
+  color: var(--gold);
+}
+
+.hm-legal ul + p {
+  margin-top: 14px;
+}
+
+.hm-legal strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.hm-legal a {
+  color: var(--gold-light);
+}
+
+@media (min-width: 900px) {
+  .hm-legal {
+    padding: 96px 32px 140px;
+  }
+}

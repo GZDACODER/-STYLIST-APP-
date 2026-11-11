@@ -15,6 +15,10 @@ export default function SignupPage() {
       <div className="card">
         <SignupForm />
       </div>
+      <p className="muted small-text">
+        By creating an account, you agree to the <Link href="/terms">Terms of Service</Link> and{" "}
+        <Link href="/privacy">Privacy Policy</Link>.
+      </p>
       <p>
         Already have an account? <Link href="/login">Log in</Link>
       </p>
