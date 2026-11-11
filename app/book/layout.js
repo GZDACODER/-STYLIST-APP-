@@ -1,4 +1,5 @@
 import { Cormorant_Garamond } from "next/font/google";
+import Link from "next/link";
 import { BRAND_NAME } from "@/lib/brand";
 import "./book.css";
 
@@ -24,6 +25,10 @@ export default function BookLayout({ children }) {
         <span className="bk-bar-label">Booking by</span>
         {/* The app's cursive wordmark, used as a signature. */}
         <span className="bk-signature">{BRAND_NAME}</span>
+        {/* Clients' details are stored by Clientele for the business. */}
+        <Link href="/privacy" className="bk-foot-privacy">
+          Privacy
+        </Link>
       </footer>
     </div>
   );

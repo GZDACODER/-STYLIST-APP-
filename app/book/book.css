@@ -1125,3 +1125,17 @@ body:has(.bk) {
   display: inline-flex;
   align-items: center;
 }
+
+/* "Privacy" at the far end of the booking page footer. */
+.bk-foot-privacy {
+  margin-left: auto;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint, #8f8a80);
+  text-decoration: none;
+}
+
+.bk-foot-privacy:hover {
+  text-decoration: underline;
+}
