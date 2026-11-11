@@ -2268,3 +2268,278 @@ body:has(dialog.client-sheet[open]) {
 .db .wrapup-visit .visit-note {
   margin-top: 4px;
 }
+
+/* =========================================================
+   Calendar: the full month view
+   ========================================================= */
+.db .mc-top {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 16px;
+}
+
+.db .mc-header {
+  display: grid;
+  grid-template-columns: 44px 1fr 44px;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  position: relative;
+}
+
+.db .mc-header h3 {
+  margin: 0;
+  text-align: center;
+  font-size: 1.5rem;
+}
+
+.db .mc-header .button {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+.db .mc-today {
+  grid-column: 1 / -1;
+  justify-self: center;
+  min-height: 32px;
+}
+
+.db .mc-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  border-top: 1px solid var(--hair);
+  border-left: 1px solid var(--hair);
+}
+
+.db .mc-weekday {
+  padding: 8px 4px;
+  text-align: center;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold-dark);
+  border-right: 1px solid var(--hair);
+  border-bottom: 1px solid var(--hair);
+  background: #fff;
+}
+
+.db .mc-cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 3px;
+  min-width: 0;
+  min-height: 104px;
+  padding: 6px 6px 8px;
+  border: 0;
+  border-right: 1px solid var(--hair);
+  border-bottom: 1px solid var(--hair);
+  border-radius: 0;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.db .mc-cell.blank {
+  background: var(--bg);
+  cursor: default;
+}
+
+.db .mc-cell.off {
+  background: #f3efe7;
+}
+
+.db .mc-cell.blocked {
+  background: repeating-linear-gradient(
+    135deg,
+    rgba(155, 52, 38, 0.04),
+    rgba(155, 52, 38, 0.04) 6px,
+    rgba(155, 52, 38, 0.1) 6px,
+    rgba(155, 52, 38, 0.1) 12px
+  );
+}
+
+.db .mc-cell.past .mc-num,
+.db .mc-cell.past .mc-item {
+  color: var(--faint);
+}
+
+@media (hover: hover) {
+  .db .mc-cell:not(.blank):hover {
+    box-shadow: inset 0 0 0 1px var(--border-strong);
+  }
+}
+
+.db .mc-cell.selected {
+  box-shadow: inset 0 0 0 2px var(--ink);
+}
+
+.db .mc-cell:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: -2px;
+}
+
+.db .mc-num {
+  align-self: flex-start;
+  min-width: 26px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.db .mc-cell.today .mc-num {
+  background: var(--gold);
+  color: #fff;
+  border-radius: 50%;
+}
+
+.db .mc-items {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.db .mc-item {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.72rem;
+  line-height: 1.3;
+  padding: 1px 4px;
+  border-left: 2px solid var(--gold);
+  background: var(--gold-soft);
+}
+
+.db .mc-item b {
+  font-weight: 600;
+}
+
+.db .mc-more,
+.db .mc-tag {
+  font-size: 0.66rem;
+  color: var(--muted);
+  padding-left: 4px;
+}
+
+.db .mc-cell.blocked .mc-tag {
+  color: var(--error);
+}
+
+/* Phones: a count instead of the names. */
+.db .mc-count {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .db .mc-cell {
+    min-height: 58px;
+    padding: 4px;
+    align-items: center;
+  }
+
+  .db .mc-num {
+    align-self: center;
+    font-size: 0.8rem;
+  }
+
+  .db .mc-items {
+    display: none;
+  }
+
+  .db .mc-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 18px;
+    padding: 0 5px;
+    font-size: 0.66rem;
+    font-weight: 600;
+    background: var(--ink);
+    color: var(--bg);
+  }
+
+  .db .mc-cell.past .mc-count {
+    background: var(--faint);
+  }
+
+  .db .mc-weekday {
+    letter-spacing: 0.06em;
+    padding: 6px 0;
+  }
+
+  .db .mc-header h3 {
+    font-size: 1.25rem;
+  }
+}
+
+.db .mc-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin: 10px 0 20px;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.db .mc-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.db .mc-swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 1px solid var(--hair);
+}
+
+.db .mc-swatch.today {
+  background: var(--gold);
+  border-color: var(--gold);
+  border-radius: 50%;
+}
+
+.db .mc-swatch.off {
+  background: #f3efe7;
+}
+
+.db .mc-swatch.blocked {
+  background: repeating-linear-gradient(135deg, rgba(155, 52, 38, 0.08), rgba(155, 52, 38, 0.08) 3px, rgba(155, 52, 38, 0.2) 3px, rgba(155, 52, 38, 0.2) 6px);
+}
+
+.db .mc-day .day-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.db .mc-day .client-rows {
+  border-top: 0;
+}
+
+.db .booking-past {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.db .booking-past p {
+  margin: 0;
+}
