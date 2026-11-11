@@ -29,6 +29,8 @@ function message(error) {
   if (/standing_/.test(text) && /does not exist|schema cache|Could not find/.test(text)) {
     return "Standing appointments need the SQL from step 16 (0021_standing_appointments.sql) run in Supabase first.";
   }
+  // The database rule against duplicates (step 21 SQL) said no.
+  if (text.includes("standing_series_one_per_slot")) return ERRORS.duplicate_series;
   const plan = planErrorMessage(error);
   if (plan) return plan.replace("this can't be turned on", "standing appointments can't be set up");
   const key = Object.keys(ERRORS).find((k) => text.includes(k));
