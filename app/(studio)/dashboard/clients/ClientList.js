@@ -3,12 +3,13 @@
 // "Your clients": search, filters, then one slim row per client (name,
 // phone, Regular/Invited, next appointment). Tapping a row opens the full
 // card in a panel: full screen on a phone, centered on iPad and computer.
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CLIENT_STATUSES, findDuplicateGroups } from "@/lib/clients";
 import { clockTime, parseDateString } from "@/lib/availability";
 import { displayPhone } from "@/lib/phone";
 import ClientCard from "./ClientCard";
 import RegularStar from "@/components/RegularStar";
+import Sheet from "@/components/Sheet";
 
 // Lowercase, and also keep just the digits so "555-1234" matches "5551234".
 function matches(client, search) {
@@ -76,37 +77,6 @@ function ClientRow({ client, next, today, duplicate, onOpen }) {
         </svg>
       </button>
     </li>
-  );
-}
-
-// The full card in a <dialog>: Esc, the close button or tapping outside closes it.
-function ClientSheet({ client, mergeWith, onClose, ...cardProps }) {
-  const ref = useRef(null);
-
-  useEffect(() => {
-    const dialog = ref.current;
-    if (dialog && !dialog.open) dialog.showModal();
-  }, []);
-
-  return (
-    <dialog
-      ref={ref}
-      className="client-sheet"
-      aria-label={client.name}
-      onClose={onClose}
-      onClick={(e) => {
-        if (e.target === ref.current) ref.current.close();
-      }}
-    >
-      <div className="client-sheet-inner">
-        <div className="client-sheet-bar">
-          <button type="button" className="link-button" onClick={() => ref.current?.close()}>
-            ‹ All clients
-          </button>
-        </div>
-        <ClientCard client={client} mergeWith={mergeWith} {...cardProps} />
-      </div>
-    </dialog>
   );
 }
 
@@ -230,15 +200,20 @@ export default function ClientList({ clients, standing, nextVisits = {}, upcomin
       </ul>
 
       {openClient && (
-        <ClientSheet
+        <Sheet
           key={`${open.id}|${open.mergeWith || ""}`}
-          client={openClient}
-          mergeWith={open.mergeWith}
+          label={openClient.name}
+          backLabel="All clients"
           onClose={() => setOpen(null)}
-          standing={standing}
-          clients={clients}
-          upcomingCounts={upcomingCounts}
-        />
+        >
+          <ClientCard
+            client={openClient}
+            mergeWith={open.mergeWith}
+            standing={standing}
+            clients={clients}
+            upcomingCounts={upcomingCounts}
+          />
+        </Sheet>
       )}
     </>
   );

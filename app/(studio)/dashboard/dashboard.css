@@ -2015,3 +2015,116 @@ body:has(dialog.client-sheet[open]) {
   padding-left: 18px;
   font-size: 0.92rem;
 }
+
+/* =========================================================
+   Calendar: slim booking rows (same look as the client rows).
+   ========================================================= */
+.db .booking-row {
+  grid-template-columns: 80px minmax(0, 1fr) auto 10px;
+  grid-template-areas: "time main badges chev";
+}
+
+.db .booking-row-time {
+  grid-area: time;
+  white-space: nowrap;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
+}
+
+.db .booking-row-time strong {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--ink);
+}
+
+.db .booking-row-time span {
+  font-size: 0.75rem;
+  color: var(--faint);
+}
+
+.db .booking-row-badges {
+  grid-area: badges;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 6px;
+}
+
+.db .row-badge-wrap:empty {
+  display: none;
+}
+
+.db .booking-row-badges .badge {
+  font-size: 0.56rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  padding: 1px 6px;
+}
+
+.db .day-group .client-rows {
+  border-top: 0;
+}
+
+/* Badges inside rows sit flush (no gap from the old card layout). */
+.db .row-badge,
+.db .booking-row-badges .badge {
+  margin: 0;
+}
+
+.db .day-group .day-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+@media (max-width: 560px) {
+  .db .booking-row {
+    grid-template-columns: 72px minmax(0, 1fr) 10px;
+    grid-template-areas:
+      "time main chev"
+      "time badges chev";
+  }
+
+  .db .booking-row-badges {
+    justify-content: flex-start;
+  }
+
+  .db .booking-row-time strong {
+    font-size: 0.88rem;
+  }
+
+  .db .booking-row-badges:not(:has(.badge)) {
+    display: none;
+  }
+}
+
+/* The details panel */
+.db .booking-facts {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.db .booking-facts > div {
+  display: grid;
+  grid-template-columns: 84px minmax(0, 1fr);
+  gap: 12px;
+  align-items: baseline;
+}
+
+.db .booking-facts dt {
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold-dark);
+}
+
+.db .booking-facts dd {
+  margin: 0;
+  color: var(--ink);
+}

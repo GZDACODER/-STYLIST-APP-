@@ -2,41 +2,12 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { clockTime, formatDate, timeZoneLabel, todayInTimeZone } from "@/lib/availability";
-import CancelBookingButton from "./CancelBookingButton";
-import { displayPhone } from "@/lib/phone";
 import { BRAND_NAME } from "@/lib/brand";
-import RegularStar from "@/components/RegularStar";
-import StandingVisitControls from "../standing/StandingVisitControls";
+import BookingList from "./BookingList";
+import { CancelledDepositBadge } from "./badges";
+import { formatPrice } from "@/lib/money";
 
 export const metadata = { title: `Bookings · ${BRAND_NAME}` };
-
-const STATUS_LABELS = { regular: "Regular", new: "New", blocked: "Blocked" };
-
-function formatPrice(cents) {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
-    cents / 100
-  );
-}
-
-// Deposit amount and whether it's paid.
-function DepositBadge({ booking }) {
-  const { deposit_cents: cents, deposit_status: status } = booking;
-  if (status === "none" || !cents) return <span className="badge">No deposit</span>;
-  if (status === "paid") return <span className="badge paid">{formatPrice(cents)} deposit paid</span>;
-  if (status === "refunded" || status === "refund_pending") {
-    return <span className="badge">{formatPrice(cents)} deposit refunded</span>;
-  }
-  return <span className="badge unpaid">{formatPrice(cents)} deposit unpaid</span>;
-}
-
-// Cancelled bookings: a paid deposit wasn't refunded automatically, so the
-// stylist still has it: "Deposit kept · $20.00" (neutral, not green).
-function CancelledDepositBadge({ booking }) {
-  if (booking.deposit_status === "paid" && booking.deposit_cents) {
-    return <span className="badge kept">Deposit kept · {formatPrice(booking.deposit_cents)}</span>;
-  }
-  return <DepositBadge booking={booking} />;
-}
 
 export default async function BookingsPage() {
   const supabase = await createClient();
@@ -117,71 +88,7 @@ export default async function BookingsPage() {
           </p>
         )}
 
-        <ul className="day-list">
-          {days.map((day) => (
-            <li key={day.date} className="day-group">
-              <div className="day-heading">
-                <strong>{day.date === today ? `Today · ${formatDate(day.date)}` : formatDate(day.date)}</strong>
-              </div>
-              <ul className="client-list">
-                {day.bookings.map((b) => {
-                  const clientStatus = b.client?.status;
-                  return (
-                    <li key={b.id} className="client-card">
-                      <div className="client-top">
-                        <span className="opening-time">
-                          {clockTime(b.start_time)} – {clockTime(b.end_time)}
-                        </span>
-                        <span className="badge-row">
-                          {clientStatus && (
-                            <span className={`badge ${clientStatus}`}>
-                              {clientStatus === "regular" && <><RegularStar label={null} /> </>}
-                              {STATUS_LABELS[clientStatus]}
-                            </span>
-                          )}
-                          {seriesOf.has(b.id) && <span className="badge standing">Standing</span>}
-                          {b.client?.invited_at && <span className="badge invited">Invited</span>}
-                          <DepositBadge booking={b} />
-                        </span>
-                      </div>
-                      <div>
-                        <div className="client-name">{b.client_name}</div>
-                        <div className="muted">
-                          {b.service_name} · {formatPrice(b.price_cents)}
-                        </div>
-                      </div>
-                      <div className="client-contact">
-                        <a href={`tel:${b.client_phone}`}>{displayPhone(b.client_phone)}</a>
-                        {b.client_email && (
-                          <a href={`mailto:${b.client_email}`}>{b.client_email}</a>
-                        )}
-                      </div>
-                      <div className="client-delete">
-                        {seriesOf.has(b.id) ? (
-                          <StandingVisitControls
-                            booking={b}
-                            seriesId={seriesOf.get(b.id)}
-                            today={today}
-                            depositPaid={b.deposit_status === "paid"}
-                          />
-                        ) : (
-                        <CancelBookingButton
-                          id={b.id}
-                          clientName={b.client_name}
-                          serviceName={b.service_name}
-                          date={b.booking_date}
-                          startTime={b.start_time}
-                          depositPaid={b.deposit_status === "paid"}
-                        />
-                        )}
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-            </li>
-          ))}
-        </ul>
+        <BookingList days={days} seriesOf={Object.fromEntries(seriesOf)} today={today} />
       </section>
 
       {awaitingPayment.length > 0 && (
