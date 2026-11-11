@@ -46,6 +46,11 @@ and hosted on **Netlify**.
   anything new (the database refuses it). Run `supabase/migrations/0017_plans.sql`.
   Stylists pick and pay for a plan in Settings (Stripe Checkout), and manage or
   cancel it on Stripe's billing page. See **[BILLING_SETUP.md](./BILLING_SETUP.md)**.
+- **Clients**: one slim row per client (name, phone, Regular/Invited, next
+  appointment); tap a row for the full card. **Merge** combines two cards for
+  the same person (visits, deposits, standing appointments, notes and Regular
+  status all move over), and cards sharing an email or phone are flagged as
+  possible duplicates. Run `supabase/migrations/0028_merge_clients.sql` first.
 - **Private emails on the booking page**: a client's email is shown shortened
   there ("tau…@gmail.com"). The dashboard always shows the full email.
 - **Deposits with Stripe**: each stylist connects their own Stripe account, turns
