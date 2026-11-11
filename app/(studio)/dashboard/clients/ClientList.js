@@ -4,7 +4,7 @@
 // phone, Regular/Invited, next appointment). Tapping a row opens the full
 // card in a panel: full screen on a phone, centered on iPad and computer.
 import { useEffect, useMemo, useRef, useState } from "react";
-import { CLIENT_STATUSES, findDuplicatePairs } from "@/lib/clients";
+import { CLIENT_STATUSES, findDuplicateGroups } from "@/lib/clients";
 import { clockTime, parseDateString } from "@/lib/availability";
 import { displayPhone } from "@/lib/phone";
 import ClientCard from "./ClientCard";
@@ -129,10 +129,10 @@ export default function ClientList({ clients, standing, nextVisits = {}, upcomin
   const query = search.trim().toLowerCase();
   const shown = clients.filter((c) => inFilter(c, filter) && (!query || matches(c, query)));
 
-  const duplicatePairs = useMemo(() => findDuplicatePairs(clients), [clients]);
+  const duplicateGroups = useMemo(() => findDuplicateGroups(clients), [clients]);
   const duplicateIds = useMemo(
-    () => new Set(duplicatePairs.flatMap((p) => [p.a.id, p.b.id])),
-    [duplicatePairs]
+    () => new Set(duplicateGroups.flatMap((g) => g.clients.map((c) => c.id))),
+    [duplicateGroups]
   );
 
   // The open card was deleted or merged away: close the panel.
@@ -171,28 +171,37 @@ export default function ClientList({ clients, standing, nextVisits = {}, upcomin
         ))}
       </div>
 
-      {duplicatePairs.length > 0 && (
+      {duplicateGroups.length > 0 && (
         <details className="dup-notice">
           <summary>
             <span className="dup-dot" aria-hidden="true" />
-            {duplicatePairs.length === 1
-              ? "1 possible duplicate"
-              : `${duplicatePairs.length} possible duplicates`}
+            {duplicateGroups.length === 1
+              ? "1 client may have more than one card"
+              : `${duplicateGroups.length} clients may have more than one card`}
           </summary>
           <p className="muted small-text">
             These cards share an email or phone number. If they&apos;re the same person, merge them.
+            Review merges two at a time; review again if there are more.
           </p>
           <ul className="dup-list">
-            {duplicatePairs.map(({ a, b, reason }) => (
-              <li key={`${a.id}|${b.id}`}>
+            {duplicateGroups.map(({ clients: group, reason }) => (
+              <li key={group.map((c) => c.id).join("|")}>
                 <span>
-                  <strong>{a.name}</strong> &amp; <strong>{b.name}</strong>
-                  <span className="muted small-text"> · {reason}</span>
+                  {group.map((c, i) => (
+                    <span key={c.id}>
+                      {i > 0 && (i === group.length - 1 ? " & " : ", ")}
+                      <strong>{c.name}</strong>
+                    </span>
+                  ))}
+                  <span className="muted small-text">
+                    {" "}
+                    · {group.length} cards · {reason}
+                  </span>
                 </span>
                 <button
                   type="button"
                   className="button small secondary"
-                  onClick={() => setOpen({ id: a.id, mergeWith: b.id })}
+                  onClick={() => setOpen({ id: group[0].id, mergeWith: group[1].id })}
                 >
                   Review
                 </button>
