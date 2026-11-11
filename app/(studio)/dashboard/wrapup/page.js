@@ -7,6 +7,7 @@ import { clockTime, formatDate, todayInTimeZone } from "@/lib/availability";
 import { formatPrice } from "@/lib/money";
 import { BRAND_NAME } from "@/lib/brand";
 import OutcomePicker from "./OutcomePicker";
+import VisitNoteForm from "../notes/VisitNoteForm";
 
 export const metadata = { title: `Wrap up visits · ${BRAND_NAME}` };
 
@@ -50,14 +51,24 @@ export default async function WrapupPage() {
   const today = todayInTimeZone(tz);
   const now = nowLocal(tz);
 
-  const { data: rows, error } = await supabase
-    .from("bookings")
-    .select("id, booking_date, start_time, end_time, client_name, service_name, price_cents, deposit_cents, deposit_status, outcome")
-    .eq("status", "confirmed")
-    .gte("booking_date", daysBefore(today, 13))
-    .lte("booking_date", today)
-    .order("booking_date", { ascending: false })
-    .order("start_time");
+  // With visit notes (step 24 SQL); without them until that's run.
+  const COLUMNS =
+    "id, booking_date, start_time, end_time, client_name, service_name, price_cents, deposit_cents, deposit_status, outcome";
+  let notesReady = true;
+  const loadRecent = (cols) =>
+    supabase
+      .from("bookings")
+      .select(cols)
+      .eq("status", "confirmed")
+      .gte("booking_date", daysBefore(today, 13))
+      .lte("booking_date", today)
+      .order("booking_date", { ascending: false })
+      .order("start_time");
+  let { data: rows, error } = await loadRecent(`${COLUMNS}, visit_note, owed_cents`);
+  if (error) {
+    notesReady = false;
+    ({ data: rows, error } = await loadRecent(COLUMNS));
+  }
 
   if (error) {
     return (
@@ -75,7 +86,7 @@ export default async function WrapupPage() {
   // Balances still owed, from any date (cleared by marking them paid in full).
   const { data: owedRows } = await supabase
     .from("bookings")
-    .select("id, booking_date, start_time, end_time, client_name, service_name, price_cents, deposit_cents, deposit_status, outcome")
+    .select(notesReady ? `${COLUMNS}, visit_note, owed_cents` : COLUMNS)
     .eq("status", "confirmed")
     .eq("outcome", "completed_owed")
     .order("booking_date", { ascending: false })
@@ -111,6 +122,14 @@ export default async function WrapupPage() {
         {deposit(b)}
       </div>
       <OutcomePicker bookingId={b.id} outcome={b.outcome} clientName={b.client_name} />
+      {notesReady && (
+        <VisitNoteForm
+          bookingId={b.id}
+          note={b.visit_note}
+          owedCents={b.owed_cents}
+          owed={b.outcome === "completed_owed"}
+        />
+      )}
     </li>
   );
 

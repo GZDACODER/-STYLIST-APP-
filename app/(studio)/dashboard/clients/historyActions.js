@@ -39,7 +39,9 @@ export async function getClientHistory(clientId) {
 
   const { data: stylist } = await supabase.from("stylists").select("timezone").eq("id", user.id).maybeSingle();
   // With how each visit went (step 18 SQL); without it before that's run.
-  let { data: bookings, error } = await load(`${columns}, outcome`);
+  // With visit notes (step 24 SQL) when that's run.
+  let { data: bookings, error } = await load(`${columns}, outcome, visit_note, owed_cents`);
+  if (error) ({ data: bookings, error } = await load(`${columns}, outcome`));
   if (error) ({ data: bookings, error } = await load(columns));
   if (error) return { error: `Couldn't load their history: ${error.message}` };
 

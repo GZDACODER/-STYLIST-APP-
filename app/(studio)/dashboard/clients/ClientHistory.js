@@ -125,7 +125,9 @@ export default function ClientHistory({ clientId }) {
                     <span className="muted">
                       {b.service_name} · {formatPrice(b.price_cents)}
                       {b.outcome && ` · ${outcomeLabel(b.outcome)}`}
+                      {b.outcome === "completed_owed" && b.owed_cents != null && ` (${formatPrice(b.owed_cents)})`}
                     </span>
+                    {b.visit_note && <span className="history-note">{b.visit_note}</span>}
                   </li>
                 ))}
               </ul>

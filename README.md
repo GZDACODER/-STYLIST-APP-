@@ -51,6 +51,10 @@ and hosted on **Netlify**.
   the same person (visits, deposits, standing appointments, notes and Regular
   status all move over), and cards sharing an email or phone are flagged as
   possible duplicates. Run `supabase/migrations/0028_merge_clients.sql` first.
+- **Notes**: a tab gathering what happened at each visit from the last 12
+  months, by client or by day: how it went, a note, no-shows and the amount
+  still owed. Notes can be written there or on Wrap up visits, and show in the
+  client's History. Run `supabase/migrations/0029_visit_notes.sql` first.
 - **Private emails on the booking page**: a client's email is shown shortened
   there ("tau…@gmail.com"). The dashboard always shows the full email.
 - **Deposits with Stripe**: each stylist connects their own Stripe account, turns
