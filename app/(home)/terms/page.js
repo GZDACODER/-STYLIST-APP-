@@ -32,9 +32,11 @@ export default function TermsPage() {
 
       <h2>1. Who these terms are for</h2>
       <p>
-        {BRAND_NAME} is booking software for businesses that take appointments: the business
-        owner who signs up (&quot;you&quot;) and their clients who book. These terms are mainly
-        for businesses. Clients who book through a business&apos;s booking page agree to the parts
+        {BRAND_NAME} is booking software for businesses that take appointments, such as
+        stylists. It has two kinds of users: the stylist or business owner who signs up and pays
+        a subscription (&quot;you&quot;), and their clients, who book through the business&apos;s
+        booking page for free. Clients never pay {BRAND_NAME} anything to book; any deposit or
+        price they pay goes to the business. These terms are mainly for businesses. Clients who book through a business&apos;s booking page agree to the parts
         that apply to them (sections 6, 9 and 10), and their appointment itself is between them
         and that business.
       </p>
@@ -94,9 +96,11 @@ export default function TermsPage() {
           deposit is paid.
         </li>
         <li>
-          You decide your deposit amounts and your cancellation policy, and you&apos;re
-          responsible for refunds, chargebacks and disputes with your clients. {BRAND_NAME}{" "}
-          doesn&apos;t refund deposits automatically.
+          You set and handle your own deposit, cancellation, no-show and refund policies, and
+          you&apos;re responsible for telling your clients about them and applying them. You&apos;re
+          also responsible for refunds, chargebacks and disputes with your clients. {BRAND_NAME}{" "}
+          doesn&apos;t refund deposits automatically and isn&apos;t responsible for disputes between
+          you and your clients.
         </li>
       </ul>
 
@@ -127,8 +131,9 @@ export default function TermsPage() {
       <p>
         {BRAND_NAME} provides the booking tools. We aren&apos;t part of the appointment, and
         we&apos;re not responsible for the services a business provides, whether an appointment
-        happens, or any dispute between a business and a client. Clients should contact the
-        business directly about their appointment.
+        happens, or any dispute between a business and a client. Each business sets its own
+        deposit, cancellation, no-show and refund policies, and is responsible for them. Clients
+        should contact the business directly about their appointment, deposit or refund.
       </p>
 
       <h2>7. Acceptable use</h2>
