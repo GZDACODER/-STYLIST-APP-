@@ -48,12 +48,6 @@ const ICONS = {
       <path d="M6.5 20.5v-6M11 20.5V9.5M15.5 20.5v-8M20 20.5V5" />
     </>
   ),
-  assistant: (
-    <>
-      <path d="M12 3.5l1.6 4.4 4.4 1.6-4.4 1.6L12 15.5l-1.6-4.4L6 9.5l4.4-1.6z" />
-      <path d="M18 15l.8 2.2 2.2.8-2.2.8L18 21l-.8-2.2-2.2-.8 2.2-.8z" />
-    </>
-  ),
   settings: (
     <>
       <path d="M4 6.5h9M17 6.5h3M4 12h3M11 12h9M4 17.5h11M19 17.5h1" />
@@ -75,7 +69,6 @@ const ITEMS = [
   { href: "/dashboard/notes", label: "Notes", icon: "notes", also: ["/dashboard/wrapup"] },
   // In the side menu only: the phone tab bar is full (Today links to it).
   { href: "/dashboard/reports", label: "Reports", icon: "reports", wide: true },
-  { href: "/dashboard/assistant", label: "Assistant", icon: "assistant", wide: true },
   {
     href: "/dashboard/settings",
     label: "Settings",

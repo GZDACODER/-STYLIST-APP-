@@ -1,6 +1,7 @@
 # Assistant setup
 
-The dashboard's **Assistant** lets a pro ask about their schedule and make
+The dashboard's **Assistant** is a chat that pops up from a round button in the
+bottom corner of every dashboard page. A pro asks about their schedule and makes
 changes in their own words ("block off Friday afternoon", "who's booked
 tomorrow?", "I'm on vacation Dec 22 to Jan 2"). It uses Claude (Anthropic's
 API, model `claude-opus-5-5`). Nothing changes until the pro taps **Confirm**.
@@ -16,8 +17,7 @@ API, model `claude-opus-5-5`). Nothing changes until the pro taps **Confirm**.
    want it there too).
 5. Redeploy (Deployments → the latest → Redeploy).
 
-Until the key is set, the Assistant page says it isn't switched on, and the
-"Ask the assistant" link on Today is hidden. Nothing else changes.
+Until the key is set, the chat button doesn't appear. Nothing else changes.
 
 ## What it can do
 

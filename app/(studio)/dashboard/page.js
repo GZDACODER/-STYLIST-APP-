@@ -287,12 +287,6 @@ export default async function TodayPage() {
 
       <p className="db-more-link">
         <Link href="/dashboard/reports">See reports →</Link>
-        {process.env.ANTHROPIC_API_KEY && (
-          <>
-            {" "}
-            · <Link href="/dashboard/assistant">Ask the assistant →</Link>
-          </>
-        )}
       </p>
 
       {(toWrapUp > 0 || owedCount > 0) && (
