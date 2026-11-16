@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { book, getIntake, getSlots, signOutBooking, submitIntake } from "../actions";
+import { book, getIntake, getMyDetails, getSlots, signOutBooking, submitIntake } from "../actions";
 import { clockTime, formatDate, parseDateString, timeZoneLabel } from "@/lib/availability";
-import { formatPhone } from "@/lib/phone";
+import { displayPhone, formatPhone } from "@/lib/phone";
 import VerifyClient from "./VerifyClient";
 import { maskEmail } from "@/lib/maskEmail";
 import WaitlistForm from "./WaitlistForm";
@@ -36,6 +37,7 @@ export default function BookingFlow({
   waitlistReady,
   textsAvailable,
   textCodes,
+  initialServiceId = null,
 }) {
   const router = useRouter();
   const {
@@ -64,7 +66,12 @@ export default function BookingFlow({
   const canWaitlist =
     waitlist_enabled && waitlistReady && (!regularsOnly || access === "regular");
 
-  const [serviceId, setServiceId] = useState(null);
+  // "Book again" from My Pros (?service=...): that service is picked, and
+  // the first day with open times is picked once they load.
+  const [serviceId, setServiceId] = useState(() =>
+    initialServiceId && !locked && services.some((s) => s.id === initialServiceId) ? initialServiceId : null
+  );
+  const pickFirstDate = useRef(Boolean(serviceId));
   const [slots, setSlots] = useState(null);
   const [slotsError, setSlotsError] = useState(null);
   const [date, setDate] = useState(null);
@@ -121,6 +128,29 @@ export default function BookingFlow({
       ignore = true;
     };
   }, [slug, serviceId, verified, viewer_email, viewer_phone]);
+
+  // Arrived from "Book again": pick the first day with open times.
+  useEffect(() => {
+    if (!pickFirstDate.current || !slots) return;
+    pickFirstDate.current = false;
+    if (slots.length && !date) setDate(slots[0].slot_date);
+    // Straight to the times, past the service list.
+    setTimeout(() => document.getElementById("bk-times")?.scrollIntoView({ behavior: "smooth", block: "start" }), 80);
+  }, [slots, date]);
+
+  // Returning clients: their name and phone from last time.
+  useEffect(() => {
+    if (!verified) return;
+    let ignore = false;
+    getMyDetails(slug).then((d) => {
+      if (ignore || !d) return;
+      if (d.name) setName((n) => n || d.name);
+      if (d.phone) setPhone((p) => p || displayPhone(d.phone));
+    });
+    return () => {
+      ignore = true;
+    };
+  }, [slug, verified, viewer_email, viewer_phone]);
 
   // If the chosen time disappeared after a reload, clear it.
   useEffect(() => {
@@ -224,6 +254,10 @@ export default function BookingFlow({
         <button type="button" className="button secondary" onClick={bookAnother}>
           Book another appointment
         </button>
+        <p className="muted small-text bk-mypros-note">
+          All your appointments, with every pro you book on Clientele, are in{" "}
+          <Link href="/my">My Pros</Link>. Add it to your home screen to book again in a couple of taps.
+        </p>
       </section>
     );
   }
@@ -291,7 +325,8 @@ export default function BookingFlow({
           times kept for Regulars, marked with the gold star.{" "}
           <button type="button" className="link-button" onClick={notMe} disabled={pending}>
             Not {viewerLabel}?
-          </button>
+          </button>{" "}
+          · <Link href="/my">My Pros</Link>
         </p>
       )}
       {(viewer_status === "new" || viewer_status === "unknown") && (
@@ -299,7 +334,8 @@ export default function BookingFlow({
           Booking as {viewerLabel}.{" "}
           <button type="button" className="link-button" onClick={notMe} disabled={pending}>
             Not you?
-          </button>
+          </button>{" "}
+          · <Link href="/my">My Pros</Link>
         </p>
       )}
       {verified && (
@@ -386,7 +422,7 @@ export default function BookingFlow({
 
       {/* ---------- 2. Time ---------- */}
       {service && !locked && (
-        <section className="card">
+        <section className="card" id="bk-times">
           <h2>
             <span className="bk-num">02</span>Date &amp; time
           </h2>

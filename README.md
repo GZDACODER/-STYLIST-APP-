@@ -89,6 +89,14 @@ and hosted on **Vercel**.
   appointments), seven steps, a message to copy and send clients, and common
   questions. Linked from the homepage's Switching section and footer. The
   homepage's Pricing also lists what's never extra. No SQL needed.
+- **My Pros** (`/my`, for clients): sign in with the same email code as the
+  booking pages and see every pro you've booked with on Clientele: the next
+  appointment (Reschedule or cancel), the last visit, and **Book again**, which
+  opens that pro's page with the service and the first open day picked. The
+  booking form fills in name and phone from last time. Can be added to a
+  phone's home screen (`app/my/app.webmanifest`). Linked from booking pages,
+  the "You're booked" screen and booking emails. Run
+  `supabase/migrations/0035_my_pros.sql`.
 - **Private emails on the booking page**: a client's email is shown shortened
   there ("tau…@gmail.com"). The dashboard always shows the full email.
 - **Deposits with Stripe**: each stylist connects their own Stripe account, turns
@@ -208,4 +216,3 @@ Open http://localhost:3000.
 ## Coming next
 
 - Refunding a deposit from the Bookings tab
-- "My Pros" page for clients: book with several pros, two-tap rebooking, add to home screen

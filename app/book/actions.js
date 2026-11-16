@@ -316,6 +316,15 @@ export async function getMyBookings(slug) {
   return { bookings: data };
 }
 
+// Name and phone from their last booking, to fill in the booking form.
+// Empty before the step 30 SQL is run.
+export async function getMyDetails(slug) {
+  const supabase = await createBookingClient();
+  const { data, error } = await supabase.rpc("get_my_details", { p_slug: String(slug) });
+  if (error || !data?.length) return {};
+  return { name: data[0].client_name || "", phone: data[0].client_phone || "" };
+}
+
 export async function cancelMyBooking(slug, bookingId) {
   const supabase = await createBookingClient();
   const { data, error } = await supabase.rpc("cancel_my_booking", {

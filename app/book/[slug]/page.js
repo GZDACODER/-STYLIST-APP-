@@ -65,6 +65,9 @@ export default async function BookingPage({ params, searchParams }) {
   const query = await searchParams;
   const { payment } = query;
   const invite = inviteFrom(query);
+  // "Book again" from My Pros: the service to pick for them.
+  const initialServiceId =
+    typeof query.service === "string" && /^[0-9a-f-]{36}$/i.test(query.service) ? query.service : null;
   const { data, error } = await loadPage(slug, invite);
 
   if (error) {
@@ -128,6 +131,7 @@ export default async function BookingPage({ params, searchParams }) {
           waitlistReady={waitlistConfigured()}
           textsAvailable={textsEnabled()}
           textCodes={textCodesEnabled()}
+          initialServiceId={initialServiceId}
         />
       </div>
     </div>
