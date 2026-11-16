@@ -9,15 +9,18 @@ import { formatPrice } from "@/lib/money";
 import SubmitButton from "@/components/SubmitButton";
 import FormMessage from "@/components/FormMessage";
 
-export default function ChoosePlanForm({ inTrial }) {
+export default function ChoosePlanForm({ inTrial, assistantAvailable = false }) {
   const [state, formAction] = useActionState(startCheckout, null);
   const [interval, setInterval] = useState("month");
   const [team, setTeam] = useState(0);
+  const [assistant, setAssistant] = useState(false);
 
   const yearly = interval === "year";
   const plan = yearly ? PLANS.allin.yearlyCents : PLANS.allin.monthlyCents;
   const seat = yearly ? PLANS.team.yearlyCents : PLANS.team.monthlyCents;
   const per = yearly ? "/yr" : "/mo";
+  const addOn = yearly ? PLANS.assistant.yearlyCents : PLANS.assistant.monthlyCents;
+  const total = plan + team * seat + (assistant ? addOn : 0);
 
   return (
     <form action={formAction} className="choose-plan">
@@ -64,15 +67,32 @@ export default function ChoosePlanForm({ inTrial }) {
         </select>
       </label>
 
+      {assistantAvailable && (
+        <label className="check-row">
+          <input
+            type="checkbox"
+            name="assistant"
+            checked={assistant}
+            onChange={(e) => setAssistant(e.target.checked)}
+          />
+          <span>
+            <strong>Add the Assistant</strong> ({formatPrice(addOn)}
+            {per}). Ask about your schedule and make changes in your own words.
+          </span>
+        </label>
+      )}
+
       <p className="plan-total">
         Total: <strong>
-          {formatPrice(plan + team * seat)}
+          {formatPrice(total)}
           {per}
         </strong>
-        {team > 0 && (
+        {(team > 0 || assistant) && (
           <span className="muted small-text">
             {" "}
-            ({formatPrice(plan)} + {team} × {formatPrice(seat)})
+            ({formatPrice(plan)}
+            {team > 0 && ` + ${team} × ${formatPrice(seat)}`}
+            {assistant && ` + ${formatPrice(addOn)} Assistant`})
           </span>
         )}
         {inTrial && (

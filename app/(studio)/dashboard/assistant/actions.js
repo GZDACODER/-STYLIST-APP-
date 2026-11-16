@@ -11,6 +11,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
 import { todayInTimeZone } from "@/lib/availability";
+import { getMyPlan } from "@/lib/plan";
 import { CHANGE_TOOLS, TOOLS, describeChange, runChangeTool, runReadTool } from "@/lib/assistant/tools";
 
 const MODEL = "claude-opus-5-5";
@@ -68,6 +69,11 @@ async function loadContext() {
     .eq("id", user.id)
     .maybeSingle();
   if (!stylist) return { error: "Please finish setting up your account first." };
+  // A paid add-on (free during the trial): checked on every request.
+  const plan = await getMyPlan(supabase, user.id);
+  if (!plan.has.assistant) {
+    return { error: "The Assistant isn't on your plan. Add it in Settings, under Plan & billing." };
+  }
   const { data: nameRow } = await supabase.from("stylists").select("first_name").eq("id", user.id).maybeSingle();
   stylist.first_name = nameRow?.first_name || "";
   const today = todayInTimeZone(stylist.timezone);

@@ -360,6 +360,13 @@ export default async function HomePage() {
               <strong>Add team members for {price(team.monthlyCents)}/mo each</strong> (
               {price(team.yearlyCents)}/year), half the price of the plan.
             </p>
+            {process.env.ANTHROPIC_API_KEY && (
+              <p className="hm-plan-team">
+                <strong>Optional: the Assistant for {price(PLANS.assistant.monthlyCents)}/mo</strong> (
+                {price(PLANS.assistant.yearlyCents)}/year). Ask about your schedule and make changes
+                in your own words. Included in the free trial.
+              </p>
+            )}
             <Link href="/signup" className="hm-button">
               Start {TRIAL_DAYS}-day free trial
             </Link>

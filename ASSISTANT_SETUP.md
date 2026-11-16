@@ -28,7 +28,25 @@ Until the key is set, the chat button doesn't appear. Nothing else changes.
   same server code as the dashboard's own buttons.
 - **Can't:** move bookings, take or refund payments, or message clients.
 
-## Cost
+## Price (a paid add-on)
+
+The Assistant is an optional add-on: **$15/month or $150/year** (`lib/plans.js`),
+billed on the pro's Clientele subscription.
+
+- **Free trial:** included. It turns off when the trial ends unless they add it.
+- **Choosing a plan:** a tickbox, **Add the Assistant**, in Settings → Plan & billing.
+- **Already paying:** **Add the Assistant** / **Remove the Assistant** in the same
+  place, prorated for the rest of the period.
+- **Founding (free) accounts:** they pay for it too, with their own small checkout
+  (monthly or yearly). Removing it stops it at the end of what they've paid for.
+- The chat button only shows, and requests are only answered, when it's on their
+  plan. Run `supabase/migrations/0038_assistant_addon.sql` (step 33) first.
+
+The add-on and the homepage line about it only appear once `ANTHROPIC_API_KEY` is
+set. Stripe makes the "Assistant" prices itself the first time someone adds it
+(or set `STRIPE_PRICE_ASSISTANT_MONTH` / `STRIPE_PRICE_ASSISTANT_YEAR` in Vercel).
+
+## Cost to Clientele
 
 Claude Opus 5.5 is $4 per million input tokens and $20 per million output
 tokens. A typical request (a question, or a change with a schedule lookup)

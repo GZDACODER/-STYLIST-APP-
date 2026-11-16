@@ -53,8 +53,9 @@ export default async function DashboardLayout({ children }) {
   }
 
   const plan = stylist ? await getMyPlan(supabase, user.id) : null;
-  // The pop-up Assistant, when switched on (ANTHROPIC_API_KEY in Vercel).
-  const assistantOn = Boolean(stylist && process.env.ANTHROPIC_API_KEY);
+  // The pop-up Assistant: switched on for the app (ANTHROPIC_API_KEY in
+  // Vercel) and on this account's plan (the add-on, or the free trial).
+  const assistantOn = Boolean(stylist && process.env.ANTHROPIC_API_KEY && plan?.has.assistant);
   let firstName = "";
   if (assistantOn) {
     const { data: nameRow } = await supabase.from("stylists").select("first_name").eq("id", user.id).maybeSingle();
