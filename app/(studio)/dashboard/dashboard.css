@@ -2866,3 +2866,95 @@ body:has(dialog.client-sheet[open]) {
     display: none;
   }
 }
+
+/* =========================================================
+   Portfolio photos (Settings -> Your business)
+   ========================================================= */
+.db .pf {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 8px 0 24px;
+}
+
+.db .pf .muted {
+  margin: 0;
+}
+
+.db .pf-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 14px;
+}
+
+.db .pf-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.db .pf-tile img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  background: #f3efe7;
+  border: 1px solid var(--hair);
+}
+
+.db .pf-caption {
+  display: flex;
+  gap: 6px;
+}
+
+.db .pf-caption input {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 10px;
+}
+
+.db .pf-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+}
+
+.db .pf-move {
+  min-width: 36px;
+  min-height: 36px;
+  padding: 0;
+  border: 1px solid var(--border-strong);
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+.db .pf-move:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.db .pf .row-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.db .pf-caption .button {
+  flex: 0 0 auto;
+  width: auto;
+  min-height: 0;
+  padding: 0 12px;
+}
+
+.db form.pf-caption {
+  flex-direction: row;
+  align-items: stretch;
+}

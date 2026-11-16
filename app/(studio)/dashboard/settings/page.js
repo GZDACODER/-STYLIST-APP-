@@ -6,6 +6,7 @@ import SettingsForm from "./SettingsForm";
 import DepositsForm from "./DepositsForm";
 import RegularsForm from "./RegularsForm";
 import RescheduleForm from "./RescheduleForm";
+import PortfolioForm from "./PortfolioForm";
 import CoverPhotoForm from "./CoverPhotoForm";
 import BusinessLinksForm from "./BusinessLinksForm";
 import PlanCard from "./PlanCard";
@@ -92,6 +93,13 @@ export default async function SettingsPage({ searchParams }) {
     supabase.from("stylists").select("reschedule_cutoff_hours").eq("id", user.id).maybeSingle(),
   ]);
 
+  // Portfolio photos (step 26 SQL). Before it's run, the form says to run it.
+  const { data: portfolioRows, error: portfolioError } = await supabase
+    .from("portfolio_photos")
+    .select("id, url, caption, position")
+    .order("position")
+    .order("created_at");
+
   const plan = await getMyPlan(supabase, user.id);
   const configured = paymentsConfigured();
   let stripe = { connected: false, enabled: false, detailsSubmitted: false };
@@ -129,6 +137,7 @@ export default async function SettingsPage({ searchParams }) {
       <section className="card">
         <h2>Your business</h2>
         <CoverPhotoForm userId={user.id} coverUrl={profileRow?.cover_photo_url || ""} />
+        <PortfolioForm photos={portfolioRows || []} ready={!portfolioError} />
         <BusinessLinksForm
           instagram={profileRow?.instagram || ""}
           location={profileRow?.location || ""}
