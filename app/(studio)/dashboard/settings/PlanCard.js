@@ -3,6 +3,7 @@ import { PLANS } from "@/lib/plans";
 import { formatPrice } from "@/lib/money";
 import ChoosePlanForm from "./ChoosePlanForm";
 import TeamMembersForm from "./TeamMembersForm";
+import AssistantAddOn from "./AssistantAddOn";
 
 const NOTICES = {
   success: { kind: "success", text: "Thanks! Your plan is being switched on. Refresh in a moment if it still says Paused." },
@@ -15,12 +16,14 @@ const day = (iso) =>
 
 const daysText = (n) => (n <= 1 ? "less than a day" : `${n} days`);
 
-export default function PlanCard({ plan, billingNotice, canPay }) {
+// assistantAvailable: the Assistant is switched on for this app (its API key is set).
+export default function PlanCard({ plan, billingNotice, canPay, assistantAvailable = false }) {
   const notice = NOTICES[billingNotice];
   const yearly = plan.interval === "year";
   const per = yearly ? "/yr" : "/mo";
   const planCents = yearly ? PLANS.allin.yearlyCents : PLANS.allin.monthlyCents;
   const seatCents = yearly ? PLANS.team.yearlyCents : PLANS.team.monthlyCents;
+  const assistantCents = yearly ? PLANS.assistant.yearlyCents : PLANS.assistant.monthlyCents;
   const on = plan.has.base;
 
   return (
@@ -40,7 +43,10 @@ export default function PlanCard({ plan, billingNotice, canPay }) {
       </div>
 
       {plan.comped ? (
-        <p className="muted">Founding account: everything is on, and you&apos;re never billed.</p>
+        <p className="muted">
+          Founding account: your plan is free and you&apos;re never billed for it.
+          {assistantAvailable && " The Assistant add-on is the one thing that's paid."}
+        </p>
       ) : plan.subscribed ? (
         <>
           <p className="muted">
@@ -67,10 +73,19 @@ export default function PlanCard({ plan, billingNotice, canPay }) {
                 {per}
               </dd>
             </div>
+            {plan.assistantPaid && (
+              <div>
+                <dt>{PLANS.assistant.name}</dt>
+                <dd>
+                  {formatPrice(assistantCents)}
+                  {per}
+                </dd>
+              </div>
+            )}
             <div className="plan-sum-total">
               <dt>Total</dt>
               <dd>
-                {formatPrice(planCents + plan.teamMembers * seatCents)}
+                {formatPrice(planCents + plan.teamMembers * seatCents + (plan.assistantPaid ? assistantCents : 0))}
                 {per}
               </dd>
             </div>
@@ -93,7 +108,9 @@ export default function PlanCard({ plan, billingNotice, canPay }) {
         </p>
       )}
 
-      {!plan.comped && plan.hasCustomer && (
+      {assistantAvailable && <AssistantAddOn plan={plan} canPay={canPay} />}
+
+      {plan.hasCustomer && (plan.subscribed || !plan.comped) && (
         <p>
           <a href="/dashboard/billing/portal" className="button secondary small">
             Manage billing
@@ -103,7 +120,7 @@ export default function PlanCard({ plan, billingNotice, canPay }) {
 
       {!plan.comped && !plan.subscribed &&
         (canPay ? (
-          <ChoosePlanForm inTrial={plan.inTrial} />
+          <ChoosePlanForm inTrial={plan.inTrial} assistantAvailable={assistantAvailable} />
         ) : (
           <p className="message warning">Paying isn&apos;t set up yet (the Stripe keys are missing in Vercel).</p>
         ))}

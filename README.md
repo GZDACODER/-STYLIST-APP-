@@ -109,8 +109,10 @@ and hosted on **Vercel**.
 - **Assistant** (a chat button in the bottom corner of every dashboard page):
   ask about your schedule or tell it what to change in your own words. It reads the schedule and proposes changes (add a
   calendar event, block days off, cancel a booking) that only happen when you
-  tap Confirm. Uses Claude; needs `ANTHROPIC_API_KEY` in Vercel. See
-  **[ASSISTANT_SETUP.md](./ASSISTANT_SETUP.md)**. No SQL needed.
+  tap Confirm. Uses Claude; needs `ANTHROPIC_API_KEY` in Vercel. A paid add-on
+  ($15/mo or $150/yr, included in the trial; Settings → Plan & billing). Run
+  `supabase/migrations/0038_assistant_addon.sql`. See
+  **[ASSISTANT_SETUP.md](./ASSISTANT_SETUP.md)**.
 - **Private emails on the booking page**: a client's email is shown shortened
   there ("tau…@gmail.com"). The dashboard always shows the full email.
 - **Deposits with Stripe**: each stylist connects their own Stripe account, turns

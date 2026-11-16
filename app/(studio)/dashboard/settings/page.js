@@ -131,7 +131,12 @@ export default async function SettingsPage({ searchParams }) {
       </section>
 
       {plan.ready && (
-        <PlanCard plan={plan} billingNotice={billing} canPay={paymentsConfigured()} />
+        <PlanCard
+          plan={plan}
+          billingNotice={billing}
+          canPay={paymentsConfigured()}
+          assistantAvailable={Boolean(process.env.ANTHROPIC_API_KEY)}
+        />
       )}
 
       <section className="card">

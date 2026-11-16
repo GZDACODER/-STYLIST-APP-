@@ -16,7 +16,7 @@ export const metadata = {
 const price = (cents) => formatPrice(cents).replace(/\.00$/, "");
 
 export default function TermsPage() {
-  const { allin, team } = PLANS;
+  const { allin, team, assistant } = PLANS;
   const us = LEGAL_ENTITY;
 
   return (
@@ -65,6 +65,14 @@ export default function TermsPage() {
           (prorated). If you subscribed to an earlier plan, you keep the price you signed up at
           and get every feature. Current prices are always on our{" "}
           <Link href="/#pricing">pricing section</Link>.
+        </li>
+        <li>
+          The optional {assistant.name} (an AI chat in your dashboard that answers questions about
+          your schedule and makes the changes you confirm) is an add-on, not part of{" "}
+          {allin.name}: {price(assistant.monthlyCents)}/month or {price(assistant.yearlyCents)}/year,
+          billed with your plan. It&apos;s included in the free trial. Adding or removing it
+          changes your bill for the rest of that period (prorated). Its answers can be wrong, so
+          check each change before you confirm it.
         </li>
         <li>
           Payments are handled by Stripe. Your plan renews automatically at the end of each
