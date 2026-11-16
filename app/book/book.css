@@ -1139,3 +1139,44 @@ body:has(.bk) {
 .bk-foot-privacy:hover {
   text-decoration: underline;
 }
+
+/* ---------- Rescheduling ---------- */
+.bk .my-booking-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 4px 16px;
+}
+
+.bk .reschedule {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+}
+
+.bk .reschedule-title {
+  margin: 0;
+  font-weight: 600;
+}
+
+.bk .reschedule-change {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 12px;
+  padding: 14px 16px;
+  background: rgba(200, 169, 106, 0.12);
+  border-left: 2px solid var(--accent);
+}
+
+.bk .reschedule-old {
+  color: var(--ink-soft);
+  text-decoration: line-through;
+}
+
+.bk .reschedule .date-grid,
+.bk .reschedule .time-grid {
+  margin: 0;
+}

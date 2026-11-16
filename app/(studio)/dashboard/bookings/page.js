@@ -56,6 +56,29 @@ export default async function BookingsPage() {
     .not("standing_series_id", "is", null);
   const seriesOf = new Map((standingRows || []).map((r) => [r.id, r.standing_series_id]));
 
+  // Bookings a client moved themselves (empty until the step 25 SQL is run):
+  // "Rescheduled by client" and the original time, in the business's time zone.
+  const { data: movedRows } = await supabase
+    .from("bookings")
+    .select("id, reschedule_count, original_start_at")
+    .gte("booking_date", daysBefore(today, 366))
+    .gt("reschedule_count", 0);
+  const movedText = new Map(
+    (movedRows || []).map((r) => {
+      const when = r.original_start_at
+        ? new Date(r.original_start_at).toLocaleString("en-US", {
+            timeZone: stylist.timezone,
+            weekday: "short",
+            month: "short",
+            day: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
+          })
+        : null;
+      return [r.id, { count: r.reschedule_count, originally: when }];
+    })
+  );
+
   const upcoming = bookings.filter((b) => b.status === "confirmed");
   const cancelled = bookings.filter((b) => b.status === "cancelled");
   // Clients on Stripe's payment page right now. Their time is held until then.
@@ -110,7 +133,11 @@ export default async function BookingsPage() {
       Object.assign(b, todayExtra.get(b.id) || {}, { past: true });
     }
   }
-  const calendarBookings = [...(pastRows || []).map((b) => ({ ...b, past: true })), ...upcoming];
+  for (const b of upcoming) if (movedText.has(b.id)) b.moved = movedText.get(b.id);
+  const calendarBookings = [
+    ...(pastRows || []).map((b) => ({ ...b, past: true, moved: movedText.get(b.id) })),
+    ...upcoming,
+  ];
 
   // Group by date.
   const days = [];
