@@ -150,7 +150,7 @@ export default async function ClientsPage() {
               <InviteForm slug={stylist.slug} businessName={stylist.business_name} />
             ) : (
               <PausedNote feature="regulars">
-                Invite links come with Regulars First, which isn&apos;t on your plan right now.
+                Your plan is paused, so new invite links can&apos;t be made.
               </PausedNote>
             )}
             {invites.length > 0 && (

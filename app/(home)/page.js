@@ -105,33 +105,15 @@ export default async function HomePage() {
   } = await supabase.auth.getUser();
   if (user) redirect("/dashboard");
 
-  const { base, regulars, waitlist, bundle } = PLANS;
-  const tiers = [
-    {
-      name: base.name,
-      amount: price(base.monthlyCents),
-      unit: "/mo",
-      text: "Your booking page, deposits, reminders, the end-of-day wrap-up, the Monday summary and client history.",
-    },
-    {
-      name: regulars.name,
-      amount: `+${price(regulars.monthlyCents)}`,
-      unit: "/mo",
-      text: "Regulars-only times, regulars-only mode, invite links and standing appointments.",
-    },
-    {
-      name: waitlist.name,
-      amount: `+${price(waitlist.monthlyCents)}`,
-      unit: "/mo",
-      text: "A waitlist that emails clients the moment a time opens. Regulars hear first.",
-    },
-    {
-      name: bundle.name,
-      amount: price(bundle.monthlyCents),
-      unit: "/mo",
-      text: "Everything above, for less than buying it separately.",
-      featured: true,
-    },
+  const { allin, team } = PLANS;
+  const included = [
+    "Your booking page, portfolio and deposits",
+    "Confirmation and reminder emails",
+    "Regulars-only times and invite links",
+    "Standing appointments for regulars",
+    "Smart waitlist, regulars first",
+    "Self-serve reschedule and cancel",
+    "End-of-day wrap-up, notes and reports",
   ];
 
   return (
@@ -222,7 +204,7 @@ export default async function HomePage() {
             </h2>
             <p className="hm-section-lede">
               Your regulars come back every few weeks. Set it once on their client card, and their
-              visits are booked months ahead. Part of Regulars First.
+              visits are booked months ahead.
             </p>
             <ul className="hm-points">
               {STANDING_POINTS.map((point) => (
@@ -340,24 +322,30 @@ export default async function HomePage() {
         {/* ---------- 6. Pricing ---------- */}
         <section id="pricing" className="hm-section">
           <p className="hm-kicker">06 · Pricing</p>
-          <h2>Simple monthly pricing.</h2>
+          <h2>One plan. Everything included.</h2>
           <p className="hm-section-lede">
-            Start with {base.name} and add what you need, or take everything with {bundle.name}.
-            Pay yearly and get 2 months free.
+            No add-ons to work out. Pay monthly, or yearly and get 2 months free.
           </p>
-          <ul className="hm-tiers">
-            {tiers.map((t) => (
-              <li key={t.name} className={t.featured ? "is-featured" : undefined}>
-                {t.featured && <span className="hm-tier-badge">Best value</span>}
-                <h3>{t.name}</h3>
-                <p className="hm-price">
-                  {t.amount}
-                  <span>{t.unit}</span>
-                </p>
-                <p>{t.text}</p>
-              </li>
-            ))}
-          </ul>
+          <div className="hm-plan">
+            <span className="hm-tier-badge">All-in</span>
+            <p className="hm-price">
+              {price(allin.monthlyCents)}
+              <span>/mo, everything included</span>
+            </p>
+            <p className="hm-plan-alt">or {price(allin.yearlyCents)}/year</p>
+            <ul className="hm-plan-list">
+              {included.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+            <p className="hm-plan-team">
+              <strong>Add team members for {price(team.monthlyCents)}/mo each</strong> (
+              {price(team.yearlyCents)}/year), half the price of the plan.
+            </p>
+            <Link href="/signup" className="hm-button">
+              Start {TRIAL_DAYS}-day free trial
+            </Link>
+          </div>
           <ul className="hm-promises">
             <li>{TRIAL_DAYS}-day free trial with everything on</li>
             <li>No card needed to start</li>

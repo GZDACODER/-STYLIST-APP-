@@ -15,7 +15,7 @@ export default function PlanBanner({ plan }) {
         ? "Your free trial ends today. Choose a plan to keep everything on."
         : `Your free trial ends in ${plan.daysLeft} days. Choose a plan to keep everything on.`;
   } else if (!plan.subscribed && !plan.inTrial) {
-    text = "Your free trial has ended. Choose a plan to switch your add-ons back on.";
+    text = "Your free trial has ended. Choose a plan to switch everything back on.";
   }
   if (!text) return null;
 

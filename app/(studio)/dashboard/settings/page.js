@@ -168,7 +168,7 @@ export default async function SettingsPage({ searchParams }) {
         </p>
         {!plan.has.regulars && (
           <PausedNote feature="regulars">
-            Regulars-only mode comes with Regulars First, which isn&apos;t on your plan right now.
+            Your plan is paused, so Regulars-only mode is off.
           </PausedNote>
         )}
         <RegularsForm

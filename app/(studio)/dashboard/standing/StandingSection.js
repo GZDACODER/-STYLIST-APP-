@@ -54,7 +54,7 @@ export default function StandingSection({ client, standing, isRegular }) {
               Paused:{" "}
               {regularsOn
                 ? `${client.name} isn't a Regular right now`
-                : "Regulars First isn't on your plan"}
+                : "your plan is paused"}
               , so no new visits are booked.
             </div>
           )}
@@ -81,7 +81,7 @@ export default function StandingSection({ client, standing, isRegular }) {
 
       {!regularsOn && isRegular && mine.length === 0 && (
         <PausedNote feature="regulars">
-          Standing appointments come with Regulars First, which isn&apos;t on your plan right now.
+          Your plan is paused, so new standing appointments can&apos;t be set up.
         </PausedNote>
       )}
 

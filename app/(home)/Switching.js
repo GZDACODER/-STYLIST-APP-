@@ -22,15 +22,15 @@ const ONLY = [
 
 export default function Switching() {
   const rows = [
-    ["Regulars-only times", "With Regulars First", "Varies by app"],
-    ["Standing appointments held for regulars", "With Regulars First", "Varies by app"],
-    ["Waitlist included", "With Waitlist or All-in", "Varies by app"],
+    ["Regulars-only times", "Included", "Varies by app"],
+    ["Standing appointments held for regulars", "Included", "Varies by app"],
+    ["Waitlist included", "Included", "Varies by app"],
     ["End-of-day wrap-up", "Every plan", "Varies by app"],
     ["Cut of new clients", "None", "Some marketplaces charge one"],
     ["Booking fees charged to clients", "None", "Some apps add one"],
     [
       "Price for one pro",
-      `${price(PLANS.base.monthlyCents)}/mo, or ${price(PLANS.bundle.monthlyCents)}/mo for everything`,
+      `${price(PLANS.allin.monthlyCents)}/mo, everything included`,
       "Varies by plan and add-ons",
     ],
   ];
@@ -82,9 +82,7 @@ export default function Switching() {
       </div>
       <p className="hm-fine hm-compare-note">
         Other apps differ by plan and change over time, so check what yours includes today.
-        Regulars First (+{price(PLANS.regulars.monthlyCents)}/mo) and Waitlist (+
-        {price(PLANS.waitlist.monthlyCents)}/mo) add on to the {price(PLANS.base.monthlyCents)} plan, or
-        come together in All-in.
+        One plan with every feature; team members are {price(PLANS.team.monthlyCents)}/mo each.
       </p>
 
       <div className="hm-move">
