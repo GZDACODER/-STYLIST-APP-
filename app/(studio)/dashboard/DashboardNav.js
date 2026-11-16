@@ -42,6 +42,12 @@ const ICONS = {
       <path d="M15 3.5v3h3M9 11h6M9 14.5h6M9 18h3.5" />
     </>
   ),
+  reports: (
+    <>
+      <path d="M4 20.5h16" />
+      <path d="M6.5 20.5v-6M11 20.5V9.5M15.5 20.5v-8M20 20.5V5" />
+    </>
+  ),
   settings: (
     <>
       <path d="M4 6.5h9M17 6.5h3M4 12h3M11 12h9M4 17.5h11M19 17.5h1" />
@@ -61,6 +67,8 @@ const ITEMS = [
   { href: "/dashboard/openings", label: "Openings", icon: "openings" },
   { href: "/dashboard/waitlist", label: "Waitlist", icon: "waitlist" },
   { href: "/dashboard/notes", label: "Notes", icon: "notes", also: ["/dashboard/wrapup"] },
+  // In the side menu only: the phone tab bar is full (Today links to it).
+  { href: "/dashboard/reports", label: "Reports", icon: "reports", wide: true },
   {
     href: "/dashboard/settings",
     label: "Settings",
@@ -85,7 +93,7 @@ export default function DashboardNav() {
           <Link
             key={item.href}
             href={item.href}
-            className={active ? "db-nav-item active" : "db-nav-item"}
+            className={["db-nav-item", active ? "active" : "", item.wide ? "wide-only" : ""].join(" ").trim()}
             aria-current={active ? "page" : undefined}
           >
             <svg

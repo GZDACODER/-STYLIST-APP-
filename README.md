@@ -61,6 +61,11 @@ and hosted on **Vercel**.
   2 moves, not inside the notice period set in Settings (24 hours to start).
   The deposit stays with the booking, the old time goes to the waitlist, and
   the client and business are emailed. Run `supabase/migrations/0030_reschedule.sql`.
+- **Reports**: revenue, visits, no-show rate and deposits for this month, last
+  month, the last 3 months or this year, compared with the period before;
+  revenue by week or month split Regulars / New; bookings (cancelled, moved,
+  not marked), deposits after Clientele's fee, and balances owed. In the side
+  menu, and linked from Today. No SQL needed (see `lib/reports.js`).
 - **Private emails on the booking page**: a client's email is shown shortened
   there ("tau…@gmail.com"). The dashboard always shows the full email.
 - **Deposits with Stripe**: each stylist connects their own Stripe account, turns

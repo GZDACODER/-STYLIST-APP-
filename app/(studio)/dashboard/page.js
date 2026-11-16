@@ -252,6 +252,10 @@ export default async function TodayPage() {
         ))}
       </section>
 
+      <p className="db-more-link">
+        <Link href="/dashboard/reports">See reports →</Link>
+      </p>
+
       {(toWrapUp > 0 || owedCount > 0) && (
         <section className="db-wrapup" aria-label="Wrap up visits">
           <p>
