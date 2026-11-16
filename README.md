@@ -88,6 +88,8 @@ and hosted on **Vercel**.
   held", and booked once the event is removed); visits already booked are
   flagged on Today to move, skip or keep. Run
   `supabase/migrations/0036_standing_skip_events.sql`.
+  The Today page shows today's holiday and events in the timeline with the
+  appointments, and (on wide screens) the rest of the week's events.
 - **Make the Switch** (`/switch`): the guide for pros moving from another app:
   why switch, what comes over (the client list) and what doesn't (booked
   appointments), seven steps, a message to copy and send clients, and common
@@ -226,5 +228,4 @@ Open http://localhost:3000.
 
 ## Coming next
 
-- Calendar events on the Today page
 - The intake form on waitlist "Claim this time" bookings

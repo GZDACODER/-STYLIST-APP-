@@ -12,6 +12,8 @@ import { formatPrice } from "@/lib/money";
 import { BRAND_NAME } from "@/lib/brand";
 import RegularStar from "@/components/RegularStar";
 import StandingFlags from "./standing/StandingFlags";
+import { eventsOn } from "@/lib/calendarEvents";
+import { holidaysOn } from "@/lib/holidays";
 
 export const metadata = { title: `Today · ${BRAND_NAME}` };
 
@@ -171,6 +173,25 @@ export default async function TodayPage() {
       .eq("status", "confirmed")
       .eq("outcome", "completed_owed"),
   ]);
+  // The stylist's own events and today's holiday (events are read on their
+  // own, so the page still opens before the step 29 SQL is run).
+  const { data: eventRows } = await supabase
+    .from("calendar_events")
+    .select("id, title, starts_on, start_time, end_time, repeats, repeat_until, skipped_dates, blocks_bookings, note")
+    .lte("starts_on", week.end)
+    .limit(2000);
+  const allEvents = eventRows || [];
+  const todaysEvents = eventsOn(allEvents, today);
+  const todaysHolidays = holidaysOn(today);
+  // The rest of this week (tomorrow to Sunday), for the side column.
+  const laterEvents = [];
+  for (let d = parseDateString(today), i = 0; i < 7; i++) {
+    d.setDate(d.getDate() + 1);
+    const date = toDateString(d);
+    if (date > week.end) break;
+    for (const e of eventsOn(allEvents, date)) laterEvents.push({ ...e, date });
+  }
+
   const toWrapUp = (unmarkedRows || []).filter(
     (b) => b.booking_date < today || b.start_time.slice(0, 5) <= nowTime
   ).length;
@@ -200,6 +221,18 @@ export default async function TodayPage() {
   const appointments = (todays.data || []).filter(
     (b) => b.status === "confirmed" || new Date(b.hold_expires_at).getTime() > now
   );
+  // Today's timeline: all-day events first, then appointments and timed
+  // events in time order.
+  const timeline = [
+    ...todaysEvents.filter((e) => !e.start_time).map((e) => ({ kind: "event", sort: "", item: e })),
+    ...[
+      ...appointments.map((b) => ({ kind: "booking", sort: b.start_time.slice(0, 5), item: b })),
+      ...todaysEvents
+        .filter((e) => e.start_time)
+        .map((e) => ({ kind: "event", sort: e.start_time.slice(0, 5), item: e })),
+    ].sort((a, b) => a.sort.localeCompare(b.sort)),
+  ];
+
   const dateLine = parseDateString(today).toLocaleDateString("en-US", {
     weekday: "long",
     month: "long",
@@ -287,12 +320,19 @@ export default async function TodayPage() {
           <span className="db-label">{timeZoneLabel(tz)} time</span>
         </div>
 
+        {todaysHolidays.length > 0 && (
+          <p className="db-holiday">
+            {todaysHolidays.map((h) => h.name).join(" · ")}
+            {todaysHolidays.some((h) => h.federal) && <span className="muted small-text"> · Federal holiday</span>}
+          </p>
+        )}
+
         {todays.error && (
           <p className="message error">Couldn&apos;t load today&apos;s bookings: {todays.error.message}</p>
         )}
 
         {!todays.error && appointments.length === 0 && (
-          <div className="db-empty">
+          <div className={todaysEvents.length ? "db-empty db-empty-short" : "db-empty"}>
             <p className="db-quiet">Nothing booked today.</p>
             <p>
               <Link href="/dashboard/openings">Open some times</Link> or{" "}
@@ -301,9 +341,39 @@ export default async function TodayPage() {
           </div>
         )}
 
-        {appointments.length > 0 && (
+        {timeline.length > 0 && (
           <ol className="db-timeline">
-            {appointments.map((b) => {
+            {timeline.map(({ kind, item }) => {
+              if (kind === "event") {
+                const e = item;
+                const isPast = e.end_time && e.end_time.slice(0, 5) <= nowTime;
+                return (
+                  <li key={`e-${e.id}`} className={`db-slot db-slot-event${isPast ? " past" : ""}`}>
+                    <div className="db-slot-time">
+                      {e.start_time ? (
+                        <>
+                          {clockTime(e.start_time)}
+                          <span>{clockTime(e.end_time)}</span>
+                        </>
+                      ) : (
+                        "All day"
+                      )}
+                    </div>
+                    <div className="db-slot-body">
+                      <div className="db-slot-name">{e.title}</div>
+                      {e.note && <div className="db-slot-meta">{e.note}</div>}
+                      <div className="db-slot-tags">
+                        {e.blocks_bookings ? (
+                          <span className="badge event-block">Bookings blocked</span>
+                        ) : (
+                          <span className="badge">Your event</span>
+                        )}
+                      </div>
+                    </div>
+                  </li>
+                );
+              }
+              const b = item;
               const isPast = b.end_time.slice(0, 5) <= nowTime;
               const isRegular = b.client?.status === "regular";
               return (
@@ -359,6 +429,29 @@ export default async function TodayPage() {
             <p className="db-quiet-small">Nothing booked yet.</p>
           )}
         </section>
+
+        {laterEvents.length > 0 && (
+          <section>
+            <div className="db-section-head">
+              <h2>Your events this week</h2>
+            </div>
+            <ul className="db-open-list">
+              {laterEvents.slice(0, 8).map((e) => (
+                <li key={`${e.id}-${e.date}`}>
+                  <span>{shortDay(e.date)}</span>
+                  <span className="db-event-side">
+                    {e.start_time ? `${clockTime(e.start_time)} ` : ""}
+                    {e.title}
+                    {e.blocks_bookings && <span className="db-event-dot" aria-label="Bookings blocked" />}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <p className="db-side-link">
+              <Link href="/dashboard/bookings">Open Calendar</Link>
+            </p>
+          </section>
+        )}
 
         <section>
           <div className="db-section-head">

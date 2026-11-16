@@ -3235,3 +3235,48 @@ body:has(dialog.client-sheet[open]) {
 .db .refund-row .confirm-step {
   margin-top: 4px;
 }
+
+/* ---------- Today: the stylist's own events and holidays ---------- */
+.db-holiday {
+  margin: 0 0 4px;
+  font-family: var(--font-display), Georgia, serif;
+  font-style: italic;
+  font-size: 1.05rem;
+  color: var(--ink);
+}
+
+.db-slot-event .db-slot-body::before {
+  background: transparent;
+  border: 1.5px solid var(--muted);
+  width: 8px;
+  height: 8px;
+  left: -5px;
+}
+
+.db-slot-event .db-slot-name {
+  font-size: 1.15rem;
+  font-style: italic;
+}
+
+.db-slot-event .db-slot-time {
+  color: var(--muted);
+}
+
+.db-empty-short {
+  padding: 16px 0 4px;
+}
+
+.db .db-event-side {
+  text-align: right;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.db .db-event-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50% !important;
+  background: var(--error);
+}
