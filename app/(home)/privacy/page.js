@@ -86,6 +86,11 @@ export default function PrivacyPage() {
           and billing notices, the end-of-day wrap-up and the Monday summary.
         </li>
         <li>To take payments for plans, and to pass client deposits to the business&apos;s Stripe account.</li>
+        <li>
+          If a business uses the Assistant in its dashboard: to answer its questions about its own
+          schedule and to prepare the changes it asks for. Nothing changes until the business
+          confirms each one.
+        </li>
         <li>To keep {BRAND_NAME} secure, fix problems, and answer your questions.</li>
       </ul>
       <p>We don&apos;t send marketing to clients, and we don&apos;t sell or rent anyone&apos;s information.</p>
@@ -97,6 +102,13 @@ export default function PrivacyPage() {
         <li><strong>Vercel</strong>: hosts the website and app.</li>
         <li><strong>Stripe</strong>: plan payments, and client deposits paid to businesses.</li>
         <li><strong>Resend</strong>: sends our emails.</li>
+        <li>
+          <strong>Anthropic</strong>: provides the AI (Claude) behind the optional Assistant in the
+          business dashboard. When a business uses it, the details needed to answer that request,
+          such as client names, services and appointment times from its own schedule, are sent to
+          Anthropic to process it. Nothing is sent unless the business uses the Assistant, and
+          clients never use it.
+        </li>
         <li>
           <strong>Twilio</strong>: would send text messages, if texts are turned on. They&apos;re
           currently off.
@@ -113,6 +125,12 @@ export default function PrivacyPage() {
         We only use the cookies needed to keep you logged in and to remember that a client has
         confirmed their email on a booking page. There are no advertising, analytics or tracking
         cookies.
+      </p>
+      <p>
+        If a business uses the Assistant, the conversation is kept in that browser tab (session
+        storage) so it isn&apos;t lost when moving between pages. It&apos;s cleared when the tab
+        is closed or the business starts a new chat. {BRAND_NAME} doesn&apos;t save Assistant
+        conversations on its servers.
       </p>
 
       <h2>7. How long we keep it</h2>
