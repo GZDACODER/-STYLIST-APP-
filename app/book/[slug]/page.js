@@ -5,6 +5,7 @@ import { waitlistConfigured } from "@/lib/waitlist";
 import { textsEnabled } from "@/lib/notify";
 import { textCodesEnabled } from "@/lib/phone";
 import BookingFlow from "./BookingFlow";
+import Portfolio from "./Portfolio";
 import { displayName } from "@/lib/bookingHeader";
 import { BRAND_NAME } from "@/lib/brand";
 
@@ -73,6 +74,15 @@ export default async function BookingPage({ params, searchParams }) {
 
   const look = stylistLook(data);
 
+  // Portfolio photos (step 26 SQL); none before it's run.
+  let portfolio = [];
+  try {
+    const { data: rows } = await (await createBookingClient()).rpc("get_portfolio", { p_slug: slug });
+    portfolio = (rows || []).filter((p) => /^https:\/\//.test(p.url || ""));
+  } catch {
+    portfolio = [];
+  }
+
   return (
     <div className="bk-layout" style={look.accent ? { "--accent": look.accent } : undefined}>
       {/* The stylist's name is shown once, as the cursive signature in the
@@ -110,6 +120,7 @@ export default async function BookingPage({ params, searchParams }) {
         </div>
       )}
       <div className="bk-flow">
+        <Portfolio photos={portfolio} name={look.name} />
         <BookingFlow
           page={data}
           invite={invite}

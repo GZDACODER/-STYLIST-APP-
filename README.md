@@ -66,6 +66,10 @@ and hosted on **Vercel**.
   revenue by week or month split Regulars / New; bookings (cancelled, moved,
   not marked), deposits after Clientele's fee, and balances owed. In the side
   menu, and linked from Today. No SQL needed (see `lib/reports.js`).
+- **Portfolio photos**: up to 12 photos of your work (Settings, Your business),
+  with captions and your own order, shown as a strip on the booking page;
+  clients tap one to see it full-size. Run `supabase/migrations/0031_portfolio.sql`
+  (it also creates the public "portfolio" storage bucket).
 - **Private emails on the booking page**: a client's email is shown shortened
   there ("tau…@gmail.com"). The dashboard always shows the full email.
 - **Deposits with Stripe**: each stylist connects their own Stripe account, turns
