@@ -12,6 +12,7 @@ import Sheet from "@/components/Sheet";
 import CancelBookingButton from "./CancelBookingButton";
 import StandingVisitControls from "../standing/StandingVisitControls";
 import { DepositBadge } from "./badges";
+import RefundDepositButton from "./RefundDepositButton";
 import Link from "next/link";
 import { outcomeLabel } from "@/lib/outcomes";
 
@@ -115,6 +116,16 @@ export function BookingDetails({ booking: b, seriesId, today }) {
           <dt>Deposit</dt>
           <dd>
             <DepositBadge booking={b} />
+            {b.deposit_status === "paid" && b.deposit_cents > 0 && (
+              <div className="refund-row">
+                <RefundDepositButton
+                  id={b.id}
+                  clientName={b.client_name}
+                  depositCents={b.deposit_cents}
+                  stillBooked
+                />
+              </div>
+            )}
           </dd>
         </div>
       </dl>

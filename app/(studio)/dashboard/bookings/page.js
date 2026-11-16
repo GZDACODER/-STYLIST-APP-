@@ -6,6 +6,7 @@ import { nowLocal } from "@/lib/localTime";
 import { BRAND_NAME } from "@/lib/brand";
 import CalendarView from "./CalendarView";
 import { CancelledDepositBadge } from "./badges";
+import RefundDepositButton from "./RefundDepositButton";
 import { formatPrice } from "@/lib/money";
 
 export const metadata = { title: `Calendar · ${BRAND_NAME}` };
@@ -229,10 +230,9 @@ export default async function BookingsPage() {
                   <div className="muted">
                     {formatDate(b.booking_date)} · {clockTime(b.start_time)} · {b.service_name}
                   </div>
-                  {b.deposit_status === "paid" && (
-                    <div className="muted small-text">
-                      {formatPrice(b.deposit_cents)} deposit was paid. To refund it, use Open
-                      Stripe on the Settings tab.
+                  {b.deposit_status === "paid" && b.deposit_cents > 0 && (
+                    <div className="refund-row">
+                      <RefundDepositButton id={b.id} clientName={b.client_name} depositCents={b.deposit_cents} />
                     </div>
                   )}
                 </div>
