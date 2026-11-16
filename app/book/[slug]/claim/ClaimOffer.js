@@ -2,11 +2,15 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
-import { claimOffer } from "../../actions";
+import { claimOffer, submitClaimIntake } from "../../actions";
+import IntakeFields from "../IntakeFields";
 import { clockTime, formatDate, timeZoneLabel } from "@/lib/availability";
 import { formatPrice } from "@/lib/money";
 
-export default function ClaimOffer({ offer, token, bookingLink, paymentCancelled }) {
+// intake: the intake form and waiver to fill in first, or null.
+export default function ClaimOffer({ offer, token, bookingLink, paymentCancelled, intake: initialIntake = null }) {
+  const [intake, setIntake] = useState(initialIntake);
+  const [intakeValue, setIntakeValue] = useState({ answers: {}, signedName: "", agreed: false });
   const [state, setState] = useState(offer.state);
   const [error, setError] = useState(null);
   const [agreed, setAgreed] = useState(false);
@@ -32,6 +36,14 @@ export default function ClaimOffer({ offer, token, bookingLink, paymentCancelled
     event.preventDefault();
     setError(null);
     startTransition(async () => {
+      if (intake) {
+        const saved = await submitClaimIntake(token, intakeValue.answers, intakeValue.signedName);
+        if (saved.error) {
+          setError(saved.error);
+          return;
+        }
+        setIntake(null);
+      }
       const result = await claimOffer(token);
       if (result.error) {
         if (result.code === "slot_unavailable") setState("taken");
@@ -107,6 +119,9 @@ export default function ClaimOffer({ offer, token, bookingLink, paymentCancelled
       <p className="muted">Booking for {offer.client_name}. The first person to claim it gets it.</p>
 
       <form onSubmit={claim}>
+        {intake && (
+          <IntakeFields intake={intake} businessName={offer.business_name} value={intakeValue} onChange={setIntakeValue} />
+        )}
         {policy && (
           <div className="policy">
             <h3>Cancellation policy</h3>

@@ -284,7 +284,42 @@ export async function joinWaitlist({ slug, serviceId, name, phone, email, days, 
 }
 
 // From the "Claim this time" link in a waitlist message.
+// Waitlist claims (step 32 SQL): does this claim need the intake form?
+// { needed, questions, waiver_text }. Before the SQL is run: not needed.
+export async function getClaimIntake(token) {
+  const supabase = await createBookingClient();
+  const { data, error } = await supabase.rpc("get_claim_intake", { p_token: String(token) });
+  if (error || !data) return { needed: false };
+  return data;
+}
+
+// Saves the intake form from a claim link, for the person on the waitlist.
+export async function submitClaimIntake(token, answers, signedName) {
+  const h = await headers();
+  const ip = (h.get("x-forwarded-for") || "").split(",")[0].trim() || h.get("x-real-ip") || null;
+  const clean = {};
+  for (const [key, value] of Object.entries(answers || {})) clean[String(key).slice(0, 20)] = String(value ?? "").slice(0, 2000);
+  const supabase = await createBookingClient();
+  const { error } = await supabase.rpc("submit_claim_intake", {
+    p_token: String(token),
+    p_answers: clean,
+    p_signed_name: String(signedName || ""),
+    p_ip: ip,
+    p_user_agent: h.get("user-agent"),
+  });
+  if (error) {
+    const code = Object.keys(INTAKE_ERRORS).find((c) => String(error.message).includes(c));
+    if (!code) console.error("Saving a claim intake form failed", error.code, error.message);
+    return { error: INTAKE_ERRORS[code] || "Your form couldn't be saved. Please try again." };
+  }
+  return { success: true };
+}
+
 export async function claimOffer(token) {
+  // A service that needs the intake form: it must be on file first.
+  const intake = await getClaimIntake(token);
+  if (intake.needed) return { error: BOOKING_ERRORS.intake_required, code: "intake_required" };
+
   const supabase = await createBookingClient();
   const { data, error } = await supabase.rpc("claim_waitlist_offer", { p_token: String(token) });
   if (error) {
