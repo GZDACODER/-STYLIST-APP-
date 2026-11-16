@@ -73,7 +73,7 @@ const ITEMS = [
     href: "/dashboard/settings",
     label: "Settings",
     icon: "settings",
-    also: ["/dashboard/services", "/dashboard/availability"],
+    also: ["/dashboard/services", "/dashboard/availability", "/dashboard/intake"],
   },
 ];
 

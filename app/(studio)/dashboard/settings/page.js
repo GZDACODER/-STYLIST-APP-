@@ -155,6 +155,12 @@ export default async function SettingsPage({ searchParams }) {
               <span className="db-more-note">Your week and blocked dates</span>
             </Link>
           </li>
+          <li>
+            <Link href="/dashboard/intake">
+              <span className="db-more-title">Intake form &amp; waiver</span>
+              <span className="db-more-note">Questions and a waiver for new clients</span>
+            </Link>
+          </li>
         </ul>
       </section>
 

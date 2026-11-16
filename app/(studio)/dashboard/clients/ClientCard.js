@@ -11,6 +11,7 @@ import ConfirmAction from "@/components/ConfirmAction";
 import { displayPhone } from "@/lib/phone";
 import StandingSection from "../standing/StandingSection";
 import ClientHistory from "./ClientHistory";
+import ClientIntake from "./ClientIntake";
 import MergeClients from "./MergeClients";
 
 // The full card, shown in a panel when a row in the client list is tapped.
@@ -103,6 +104,7 @@ export default function ClientCard({ client, standing, clients, upcomingCounts, 
       {statusError && <p className="message error">Couldn't change status: {statusError}</p>}
 
       <ClientHistory clientId={client.id} />
+      <ClientIntake clientId={client.id} />
 
       {/* Standing appointments are for Regulars only. */}
       {standing && (status !== "blocked" || standing.series.some((x) => x.client_id === client.id)) && (

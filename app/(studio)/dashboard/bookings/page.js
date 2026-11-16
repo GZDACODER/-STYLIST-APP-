@@ -134,6 +134,16 @@ export default async function BookingsPage() {
     }
   }
   for (const b of upcoming) if (movedText.has(b.id)) b.moved = movedText.get(b.id);
+
+  // Intake form on file for upcoming bookings of services that need it
+  // (empty until the step 28 SQL is run).
+  if (upcoming.length) {
+    const { data: intakeRows } = await supabase.rpc("bookings_intake", {
+      p_booking_ids: upcoming.map((b) => b.id),
+    });
+    const intakeOf = new Map((intakeRows || []).filter((r) => r.needed).map((r) => [r.booking_id, r.on_file]));
+    for (const b of upcoming) if (intakeOf.has(b.id)) b.intake = { onFile: intakeOf.get(b.id) };
+  }
   const calendarBookings = [
     ...(pastRows || []).map((b) => ({ ...b, past: true, moved: movedText.get(b.id) })),
     ...upcoming,

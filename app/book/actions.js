@@ -13,6 +13,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { normalizePhone, textCodesEnabled } from "@/lib/phone";
 import { emailStylistCancellation, runWaitlistSafely } from "@/lib/waitlist";
 import { emailReschedule } from "@/lib/bookingEmails";
+import { headers } from "next/headers";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -28,6 +29,7 @@ const BOOKING_ERRORS = {
   not_found: "That service isn't available any more. Please refresh the page.",
   already_claimed: "You've already claimed this time. You're booked!",
   waitlist_ended: "You're no longer on the waitlist for this, so this link has stopped working.",
+  intake_required: "Please fill in the form above and sign the waiver before booking.",
   invite_wrong_person:
     "This invite is for a different phone number. Please book with the phone number the business has for you.",
 };
@@ -187,7 +189,54 @@ async function depositCheckout(bookingId, options) {
   }
 }
 
+// ---------- Intake form and waiver (0033_intake.sql) ----------
+
+const INTAKE_ERRORS = {
+  not_verified: "Please confirm it's you with a code first.",
+  not_found: "That form isn't available any more. Please refresh the page.",
+  invalid_answers: "Something went wrong with your answers. Please try again.",
+  answer_too_long: "One of your answers is too long. Please shorten it.",
+  answer_required: "Please answer the questions marked as required.",
+  signature_required: "Please type your full name to sign the waiver.",
+};
+
+// The form for a service, if this client still needs to fill it in:
+// { needed, questions, waiver_text }. Before the SQL is run: not needed.
+export async function getIntake(slug, serviceId) {
+  const supabase = await createBookingClient();
+  const { data, error } = await supabase.rpc("get_intake", { p_slug: String(slug), p_service_id: String(serviceId) });
+  if (error || !data) return { needed: false };
+  return data;
+}
+
+// answers: { questionId: "answer" }. Saved with the IP and browser it came from.
+export async function submitIntake(slug, serviceId, answers, signedName) {
+  const h = await headers();
+  const ip = (h.get("x-forwarded-for") || "").split(",")[0].trim() || h.get("x-real-ip") || null;
+  const clean = {};
+  for (const [key, value] of Object.entries(answers || {})) clean[String(key).slice(0, 20)] = String(value ?? "").slice(0, 2000);
+  const supabase = await createBookingClient();
+  const { error } = await supabase.rpc("submit_intake", {
+    p_slug: String(slug),
+    p_service_id: String(serviceId),
+    p_answers: clean,
+    p_signed_name: String(signedName || ""),
+    p_ip: ip,
+    p_user_agent: h.get("user-agent"),
+  });
+  if (error) {
+    const code = Object.keys(INTAKE_ERRORS).find((c) => String(error.message).includes(c));
+    if (!code) console.error("Saving an intake form failed", error.code, error.message);
+    return { error: INTAKE_ERRORS[code] || "Your form couldn't be saved. Please try again." };
+  }
+  return { success: true };
+}
+
 export async function book({ slug, serviceId, date, time, name, phone, email, invite }) {
+  // A service that needs the intake form: it must be on file first.
+  const intake = await getIntake(slug, serviceId);
+  if (intake.needed) return { error: BOOKING_ERRORS.intake_required, code: "intake_required" };
+
   const supabase = await createBookingClient();
   const { data, error } = await supabase.rpc("create_booking", {
     p_slug: String(slug),
