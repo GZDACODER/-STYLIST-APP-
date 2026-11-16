@@ -4,7 +4,7 @@ A phone-friendly booking app where stylists can let their **regular clients
 book first**. Stylists only pay for the add-on features they switch on.
 
 Built with **Next.js** (the website), **Supabase** (logins and the database),
-and hosted on **Netlify**.
+and hosted on **Vercel**.
 
 ## What works so far
 
@@ -65,6 +65,10 @@ and hosted on **Netlify**.
 Each stylist only ever sees their own data. The database enforces this.
 
 ## Getting it running from an iPad
+
+> **Note:** the live site (clientelesuite.com) now runs on **Vercel**, which
+> rebuilds it on every push to `main`. The Netlify steps below are from the
+> original setup and are kept for reference.
 
 You can't run the code on an iPad itself, so we let **Netlify** build it for us.
 Every time new code is pushed to GitHub, Netlify rebuilds the site automatically.

@@ -563,8 +563,8 @@ export default function BookingFlow({
                     A {formatPrice(deposit)} deposit is due now to book.
                     {service.price_cents > deposit &&
                       ` The other ${formatPrice(service.price_cents - deposit)} is paid at your appointment.`}{" "}
-                    You&apos;ll pay securely on Stripe. If you don&apos;t pay, the time isn&apos;t
-                    booked.
+                    You&apos;ll pay securely on Stripe by card, or with Apple Pay or Google Pay
+                    on phones that have it. If you don&apos;t pay, the time isn&apos;t booked.
                   </p>
                   {policy && (
                     <label className="check-row">
