@@ -106,6 +106,11 @@ and hosted on **Vercel**.
   phone's home screen (`app/my/app.webmanifest`). Linked from booking pages,
   the "You're booked" screen and booking emails. Run
   `supabase/migrations/0035_my_pros.sql`.
+- **Assistant** (dashboard side menu): ask about your schedule or tell it what
+  to change in your own words. It reads the schedule and proposes changes (add a
+  calendar event, block days off, cancel a booking) that only happen when you
+  tap Confirm. Uses Claude; needs `ANTHROPIC_API_KEY` in Vercel. See
+  **[ASSISTANT_SETUP.md](./ASSISTANT_SETUP.md)**. No SQL needed.
 - **Private emails on the booking page**: a client's email is shown shortened
   there ("tau…@gmail.com"). The dashboard always shows the full email.
 - **Deposits with Stripe**: each stylist connects their own Stripe account, turns

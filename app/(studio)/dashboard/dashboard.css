@@ -3280,3 +3280,103 @@ body:has(dialog.client-sheet[open]) {
   border-radius: 50% !important;
   background: var(--error);
 }
+
+/* ---------- Assistant ---------- */
+.db .visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.db .assistant {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.db .assistant-log {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 160px;
+}
+
+.db .assistant-msg {
+  max-width: 85%;
+  padding: 10px 14px;
+  white-space: pre-wrap;
+  line-height: 1.5;
+  font-size: 0.95rem;
+}
+
+.db .assistant-msg.you {
+  align-self: flex-end;
+  background: var(--ink);
+  color: var(--bg);
+}
+
+.db .assistant-msg.assistant {
+  align-self: flex-start;
+  background: #f1eee8;
+  color: var(--ink);
+}
+
+.db .assistant-msg.thinking {
+  color: var(--muted);
+  font-style: italic;
+}
+
+.db .assistant-confirm {
+  align-self: stretch;
+  border: 1px solid var(--gold);
+  background: var(--gold-soft);
+  padding: 14px 16px;
+}
+
+.db .assistant-confirm p {
+  margin: 0 0 10px;
+}
+
+.db .assistant-confirm-label {
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.db .assistant-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.db .assistant-chip {
+  border: 1px solid var(--border-strong);
+  background: #fff;
+  color: var(--ink);
+  padding: 8px 12px;
+  font: inherit;
+  font-size: 0.88rem;
+  cursor: pointer;
+}
+
+.db .assistant-chip:hover {
+  border-color: var(--ink);
+}
+
+.db .assistant-input textarea {
+  width: 100%;
+  resize: vertical;
+}
+
+.db .assistant-input-row {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 16px;
+  margin-top: 8px;
+}
