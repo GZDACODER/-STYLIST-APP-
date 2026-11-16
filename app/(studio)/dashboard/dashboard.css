@@ -3280,3 +3280,401 @@ body:has(dialog.client-sheet[open]) {
   border-radius: 50% !important;
   background: var(--error);
 }
+
+/* ---------- Assistant: a chat that pops up from the bottom corner ---------- */
+.db .visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.aw {
+  --aw-ink: #0e0e0e;
+  --aw-paper: #faf7f2;
+  --aw-bot: #f0ece4;
+  --aw-gold: #b8975a;
+  --aw-muted: #6b655b;
+  --aw-line: #e8e2d6;
+  --aw-bottom: 24px;
+  font-family: var(--font-sans), "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Phones and iPad portrait: sit above the bottom tab bar. */
+@media (max-width: 899px) {
+  .aw {
+    --aw-bottom: calc(76px + env(safe-area-inset-bottom));
+  }
+}
+
+.aw-launcher {
+  position: fixed;
+  right: 24px;
+  bottom: var(--aw-bottom);
+  z-index: 40;
+  width: 56px;
+  height: 56px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--aw-ink);
+  color: var(--aw-gold);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(14, 14, 14, 0.28), 0 2px 6px rgba(14, 14, 14, 0.18);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.aw-launcher:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 34px rgba(14, 14, 14, 0.32), 0 3px 8px rgba(14, 14, 14, 0.2);
+}
+
+.aw-launcher:focus-visible {
+  outline: 2px solid var(--aw-gold);
+  outline-offset: 3px;
+}
+
+.aw-launcher.open {
+  color: #fff;
+}
+
+/* A change is waiting for Confirm: a gold dot on the button. */
+.aw-launcher.waiting::after {
+  content: "";
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--aw-gold);
+  border: 2px solid var(--aw-ink);
+}
+
+.aw-panel {
+  position: fixed;
+  right: 24px;
+  bottom: calc(var(--aw-bottom) + 68px);
+  z-index: 41;
+  width: 384px;
+  height: min(620px, calc(100vh - var(--aw-bottom) - 100px));
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(14, 14, 14, 0.24), 0 4px 14px rgba(14, 14, 14, 0.12);
+  animation: aw-in 0.2s ease-out;
+}
+
+@keyframes aw-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aw-panel {
+    animation: none;
+  }
+  .aw-launcher {
+    transition: none;
+  }
+}
+
+/* Phones: the chat fills the screen above the tab bar. */
+@media (max-width: 599px) {
+  .aw-panel {
+    inset: 0 0 var(--aw-bottom) 0;
+    width: auto;
+    height: auto;
+    border-radius: 0;
+  }
+  .aw-launcher.open {
+    display: none;
+  }
+}
+
+.aw-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 12px 14px 16px;
+  background: var(--aw-ink);
+  color: #fff;
+}
+
+.aw-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(184, 151, 90, 0.18);
+  color: var(--aw-gold);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+
+.aw-title {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  line-height: 1.25;
+}
+
+.aw-title strong {
+  font-weight: 600;
+  font-size: 0.98rem;
+}
+
+.aw-title span {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.aw-icon-btn {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.8);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.aw-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.aw-log {
+  flex: 1;
+  overflow-y: auto;
+  padding: 18px 14px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--aw-paper);
+  overscroll-behavior: contain;
+}
+
+.aw-bubble {
+  margin: 0;
+  max-width: 82%;
+  padding: 10px 14px;
+  border-radius: 18px;
+  font-size: 0.93rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.aw-bubble.you {
+  align-self: flex-end;
+  background: var(--aw-ink);
+  color: #fff;
+  border-bottom-right-radius: 6px;
+}
+
+.aw-bubble.bot {
+  align-self: flex-start;
+  background: #fff;
+  color: var(--aw-ink);
+  border: 1px solid var(--aw-line);
+  border-bottom-left-radius: 6px;
+}
+
+.aw-typing {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  padding: 14px 16px;
+}
+
+.aw-typing i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--aw-muted);
+  opacity: 0.4;
+  animation: aw-dot 1.2s infinite ease-in-out;
+}
+
+.aw-typing i:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.aw-typing i:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes aw-dot {
+  30% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
+.aw-welcome {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.aw-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.aw-chip {
+  border: 1px solid var(--aw-line);
+  background: #fff;
+  color: var(--aw-ink);
+  border-radius: 999px;
+  padding: 8px 14px;
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.aw-chip:hover {
+  border-color: var(--aw-gold);
+  background: rgba(184, 151, 90, 0.08);
+}
+
+.aw-confirm {
+  align-self: stretch;
+  margin-top: 4px;
+  padding: 14px;
+  border-radius: 16px;
+  background: #fff;
+  border: 1.5px solid var(--aw-gold);
+  box-shadow: 0 6px 18px rgba(184, 151, 90, 0.15);
+}
+
+.aw-confirm-label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--aw-gold);
+  margin-bottom: 6px;
+}
+
+.aw-confirm p {
+  margin: 0 0 12px;
+  font-size: 0.93rem;
+  line-height: 1.45;
+  color: var(--aw-ink);
+}
+
+.aw-confirm-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.aw-btn {
+  flex: 1;
+  border: 1px solid var(--aw-line);
+  background: #fff;
+  color: var(--aw-ink);
+  border-radius: 999px;
+  padding: 9px 14px;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.aw-btn.primary {
+  background: var(--aw-ink);
+  border-color: var(--aw-ink);
+  color: #fff;
+}
+
+.aw-btn:hover {
+  filter: brightness(0.96);
+}
+
+.aw-note {
+  margin: 2px 0 0;
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+}
+
+.aw-note.ok {
+  background: rgba(61, 107, 73, 0.1);
+  color: #2f5a3b;
+}
+
+.aw-note.err {
+  background: rgba(155, 52, 38, 0.08);
+  color: #9b3426;
+}
+
+.aw form.aw-input {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 10px 12px 12px;
+  border-top: 1px solid var(--aw-line);
+  background: #fff;
+}
+
+.aw .aw-input textarea {
+  flex: 1;
+  width: auto;
+  min-height: 42px;
+  max-height: 120px;
+  resize: none;
+  border: 1px solid var(--aw-line);
+  border-radius: 21px;
+  padding: 10px 16px;
+  font: inherit;
+  /* 16px stops iPhones zooming in when the box is tapped. */
+  font-size: 16px;
+  line-height: 1.4;
+  background: var(--aw-paper);
+  color: var(--aw-ink);
+  field-sizing: content;
+}
+
+.aw .aw-input textarea:focus {
+  box-shadow: 0 0 0 3px rgba(184, 151, 90, 0.15);
+  outline: none;
+  border-color: var(--aw-gold);
+  background: #fff;
+}
+
+.aw-send {
+  width: 42px;
+  height: 42px;
+  flex: none;
+  border: 0;
+  border-radius: 50%;
+  background: var(--aw-ink);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.aw-send:disabled {
+  background: #cfc6b4;
+  cursor: default;
+}

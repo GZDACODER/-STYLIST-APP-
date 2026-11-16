@@ -7,6 +7,7 @@ import PlanBanner from "./PlanBanner";
 import CreateStylistForm from "./CreateStylistForm";
 import { getMyPlan } from "@/lib/plan";
 import DashboardNav from "./DashboardNav";
+import AssistantWidget from "./assistant/AssistantWidget";
 import "./dashboard.css";
 
 // The same serif as the public booking page.
@@ -52,6 +53,13 @@ export default async function DashboardLayout({ children }) {
   }
 
   const plan = stylist ? await getMyPlan(supabase, user.id) : null;
+  // The pop-up Assistant, when switched on (ANTHROPIC_API_KEY in Vercel).
+  const assistantOn = Boolean(stylist && process.env.ANTHROPIC_API_KEY);
+  let firstName = "";
+  if (assistantOn) {
+    const { data: nameRow } = await supabase.from("stylists").select("first_name").eq("id", user.id).maybeSingle();
+    firstName = nameRow?.first_name || "";
+  }
 
   // Clients who verified on a booking page have a login too, but no stylist
   // profile. They don't belong in the dashboard.
@@ -114,6 +122,7 @@ export default async function DashboardLayout({ children }) {
           {children}
         </div>
       </main>
+      {assistantOn && <AssistantWidget firstName={firstName} />}
     </div>
   );
 }
