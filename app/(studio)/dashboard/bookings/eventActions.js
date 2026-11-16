@@ -17,6 +17,16 @@ function refresh() {
   revalidatePath("/dashboard");
 }
 
+// Standing appointments skip times blocked by events (step 31 SQL): check
+// them again now, so freed dates are booked and blocked ones are noted.
+// Does nothing before that SQL is run.
+async function refillStanding(supabase) {
+  const { error } = await supabase.rpc("standing_refill_mine");
+  if (error && !/standing_refill_mine/.test(error.message)) {
+    console.error("standing_refill_mine failed", error.message);
+  }
+}
+
 // Freed time (an event no longer blocking bookings): tell the waitlist.
 async function tellWaitlist(userId) {
   await runWaitlistSafely(userId, await siteOrigin());
@@ -97,6 +107,7 @@ export async function saveEvent(prevState, formData) {
 
   // An edit may have freed time that was blocked before.
   if (wasBlocking) await tellWaitlist(user.id);
+  if (wasBlocking || blocks) await refillStanding(supabase);
   refresh();
 
   // Bookings already at that time (they stay booked): warn the stylist.
@@ -146,6 +157,9 @@ export async function deleteEvent(formData) {
     await supabase.from("calendar_events").delete().eq("id", id);
   }
 
-  if (event.blocks_bookings) await tellWaitlist(user.id);
+  if (event.blocks_bookings) {
+    await tellWaitlist(user.id);
+    await refillStanding(supabase);
+  }
   refresh();
 }

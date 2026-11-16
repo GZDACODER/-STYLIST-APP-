@@ -84,6 +84,10 @@ and hosted on **Vercel**.
   **Block bookings** takes that time off the booking page (and the waitlist and
   reschedule); bookings already made stay, and the stylist is warned about any
   at that time. Run `supabase/migrations/0034_calendar_events.sql`.
+  Standing appointments skip times an event blocks (shown on Today as "Not
+  held", and booked once the event is removed); visits already booked are
+  flagged on Today to move, skip or keep. Run
+  `supabase/migrations/0036_standing_skip_events.sql`.
 - **Make the Switch** (`/switch`): the guide for pros moving from another app:
   why switch, what comes over (the client list) and what doesn't (booked
   appointments), seven steps, a message to copy and send clients, and common
@@ -222,6 +226,5 @@ Open http://localhost:3000.
 
 ## Coming next
 
-- Standing appointments that skip times blocked by Calendar events
 - Calendar events on the Today page
 - The intake form on waitlist "Claim this time" bookings

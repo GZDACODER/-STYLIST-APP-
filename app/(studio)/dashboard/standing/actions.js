@@ -86,7 +86,7 @@ export async function createStanding(prevState, formData) {
   const clashes = data?.clashes || 0;
   let success = held === 1 ? "Set. 1 visit is booked." : `Set. ${held} visits are booked for the next 3 months.`;
   if (clashes) {
-    success += ` ${clashes === 1 ? "1 date was" : `${clashes} dates were`} already taken, so ${
+    success += ` ${clashes === 1 ? "1 date was" : `${clashes} dates were`} already taken or blocked by a Calendar event, so ${
       clashes === 1 ? "it's" : "they're"
     } flagged on the Today page.`;
   }

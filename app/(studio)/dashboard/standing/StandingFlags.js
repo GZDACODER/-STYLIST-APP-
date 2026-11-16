@@ -11,6 +11,14 @@ const WHY = {
   day_off: "is on a day you blocked off",
   not_working: "is on a day you don't work",
   outside_hours: "is outside your working hours",
+  event: "is during one of your Calendar events that blocks bookings",
+};
+
+// Not held, with why.
+const NOT_HELD = {
+  clash: (when) => `${when} was already booked, so this visit isn't held. Move the other booking, or dismiss this date.`,
+  event_skipped: (when) =>
+    `${when} is blocked by one of your Calendar events, so this visit isn't held. It's booked automatically if you remove or change the event, or dismiss this date.`,
 };
 
 export default function StandingFlags({ flags }) {
@@ -31,22 +39,21 @@ export default function StandingFlags({ flags }) {
                 <span className={`badge ${f.kind === "deposit_unpaid" ? "unpaid" : "standing"}`}>
                   {f.kind === "deposit_unpaid"
                     ? "Deposit unpaid"
-                    : f.kind === "clash"
+                    : NOT_HELD[f.kind]
                       ? "Not held"
                       : "Check time"}
                 </span>{" "}
                 <strong>{f.client_name}</strong> · {f.service_name}
               </div>
               <p className="muted small-text">
-                {f.kind === "clash" &&
-                  `${when} was already booked, so this visit isn't held. Move the other booking, or dismiss this date.`}
+                {NOT_HELD[f.kind] && NOT_HELD[f.kind](when)}
                 {WHY[f.kind] && `Their standing visit on ${when} ${WHY[f.kind]}. Move or skip it on the Calendar, or keep it.`}
                 {f.kind === "deposit_unpaid" &&
                   `Their ${formatPrice(f.deposit_cents)} deposit for ${when} isn't paid yet. The visit stays booked.`}
               </p>
               <div className="db-flag-actions">
                 {f.booking_id && <Link href="/dashboard/bookings">Open Calendar</Link>}
-                {f.kind === "clash" && (
+                {NOT_HELD[f.kind] && (
                   <form action={dismissStandingFlag}>
                     <input type="hidden" name="series_id" value={f.series_id} />
                     <input type="hidden" name="date" value={f.booking_date} />
