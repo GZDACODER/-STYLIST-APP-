@@ -75,6 +75,15 @@ and hosted on **Vercel**.
   or "Ask again" on a client card asks again) and sign by ticking "I agree"
   and typing their name. Answers show on the client card; the Calendar shows
   whether it's on file. Run `supabase/migrations/0033_intake.sql`.
+- **Holidays & your own events** (Calendar): US federal holidays and busy
+  days for beauty pros (Mother's Day, Valentine's Day, Black Friday...) show on
+  the month view, worked out for every year in `lib/holidays.js`. Stylists add
+  their own events from any day ("+ Add event"): all day or a set time, one-off
+  or repeating every week, every 2 weeks, every month or every year, optionally
+  until a date, and a single date of a repeating event can be removed. Ticking
+  **Block bookings** takes that time off the booking page (and the waitlist and
+  reschedule); bookings already made stay, and the stylist is warned about any
+  at that time. Run `supabase/migrations/0034_calendar_events.sql`.
 - **Private emails on the booking page**: a client's email is shown shortened
   there ("tau…@gmail.com"). The dashboard always shows the full email.
 - **Deposits with Stripe**: each stylist connects their own Stripe account, turns
@@ -193,7 +202,6 @@ Open http://localhost:3000.
 
 ## Coming next
 
-- Emails to the client when a booking is made, and to the stylist for new bookings
-- Clients changing their own booking
 - Refunding a deposit from the Bookings tab
-- Add-on features stylists can switch on (and only pay for what they use)
+- "Make the Switch" page, and a "We don't charge extra for" section on the homepage
+- "My Pros" page for clients: book with several pros, two-tap rebooking, add to home screen

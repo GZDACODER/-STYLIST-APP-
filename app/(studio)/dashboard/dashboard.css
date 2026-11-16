@@ -3116,3 +3116,113 @@ body:has(dialog.client-sheet[open]) {
   font-size: 0.85rem;
   white-space: pre-wrap;
 }
+
+/* ---------- Calendar: holidays and the stylist's own events ---------- */
+.db .mc-holiday,
+.db .mc-event {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.68rem;
+  line-height: 1.3;
+  padding: 1px 4px;
+}
+
+.db .mc-holiday {
+  color: var(--muted);
+  font-style: italic;
+}
+
+.db .mc-holiday.federal {
+  color: var(--ink);
+}
+
+.db .mc-event {
+  border-left: 2px solid var(--muted);
+  background: #f1eee8;
+}
+
+.db .mc-event b {
+  font-weight: 600;
+}
+
+.db .mc-event.blocks {
+  border-left-color: var(--error);
+  background: var(--error-soft);
+}
+
+.db .mc-cell.past .mc-event,
+.db .mc-cell.past .mc-holiday {
+  color: var(--faint);
+}
+
+/* Dots: on phones they stand in for the holiday and event names. */
+.db .mc-dots {
+  display: none;
+  gap: 3px;
+  justify-content: center;
+}
+
+.db .mc-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50% !important;
+  background: var(--muted);
+}
+
+.db .mc-dot.holiday {
+  background: transparent;
+  border: 1.5px solid var(--gold);
+}
+
+.db .mc-dot.event.blocks {
+  background: var(--error);
+}
+
+@media (max-width: 640px) {
+  .db .mc-dots {
+    display: inline-flex;
+  }
+}
+
+.db .mc-day-holiday {
+  margin: 6px 0;
+  font-style: italic;
+}
+
+.db .event-rows {
+  margin-bottom: 4px;
+}
+
+.db .event-row .booking-row-time strong {
+  white-space: nowrap;
+}
+
+.db .badge.event-block {
+  color: var(--error);
+  border-color: var(--error);
+  background: var(--error-soft);
+}
+
+.db .mc-add-event {
+  margin-top: 12px;
+}
+
+.db .event-form {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.db .event-form h2 {
+  margin-top: 0;
+}
+
+.db .event-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 18px;
+  margin-top: 12px;
+}
