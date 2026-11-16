@@ -98,6 +98,19 @@ export function BookingDetails({ booking: b, seriesId, today }) {
             {b.service_name} · {formatPrice(b.price_cents)}
           </dd>
         </div>
+        {b.intake && (
+          <div>
+            <dt>Intake form</dt>
+            <dd>
+              {b.intake.onFile ? (
+                <span className="badge paid">On file</span>
+              ) : (
+                <span className="badge unpaid">Missing</span>
+              )}
+              {!b.intake.onFile && <span className="muted small-text"> They&apos;ll need to fill it in.</span>}
+            </dd>
+          </div>
+        )}
         <div>
           <dt>Deposit</dt>
           <dd>

@@ -70,6 +70,11 @@ and hosted on **Vercel**.
   with captions and your own order, shown as a strip on the booking page;
   clients tap one to see it full-size. Run `supabase/migrations/0031_portfolio.sql`
   (it also creates the public "portfolio" storage bucket).
+- **Intake form & waiver** (Settings): up to 20 questions and a waiver for the
+  services you pick. Clients fill it in while booking (once; editing the form
+  or "Ask again" on a client card asks again) and sign by ticking "I agree"
+  and typing their name. Answers show on the client card; the Calendar shows
+  whether it's on file. Run `supabase/migrations/0033_intake.sql`.
 - **Private emails on the booking page**: a client's email is shown shortened
   there ("tau…@gmail.com"). The dashboard always shows the full email.
 - **Deposits with Stripe**: each stylist connects their own Stripe account, turns

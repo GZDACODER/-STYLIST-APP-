@@ -1308,3 +1308,101 @@ body:has(.bk) {
 body:has(dialog.pf-viewer[open]) {
   overflow: hidden;
 }
+
+/* ---------- Intake form and waiver ---------- */
+.bk .intake {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 8px 0 4px;
+  padding: 18px 0 4px;
+  border-top: 1px solid var(--hair);
+}
+
+.bk .intake h3 {
+  margin: 0;
+}
+
+.bk .intake .muted {
+  margin: 0;
+}
+
+.bk .intake-yesno {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.bk .intake-yesno legend {
+  width: 100%;
+  margin-bottom: 8px;
+  padding: 0;
+}
+
+.bk .intake-pill {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid var(--hair);
+  cursor: pointer;
+}
+
+.bk .intake-pill.checked {
+  border-color: var(--ink);
+  box-shadow: inset 0 -2px 0 var(--accent);
+}
+
+.bk .intake-pill input {
+  width: auto;
+  margin: 0;
+  accent-color: var(--ink);
+}
+
+.bk .intake-waiver {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bk .intake-waiver-text {
+  max-height: 220px;
+  overflow-y: auto;
+  padding: 14px 16px;
+  border: 1px solid var(--hair);
+  background: rgba(255, 255, 255, 0.6);
+  white-space: pre-wrap;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.bk .intake-waiver-text:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Text boxes and lists in the intake form: the booking page's light look. */
+.bk .intake textarea,
+.bk .intake select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--hair);
+  border-bottom-color: var(--ink);
+  border-radius: 0;
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--ink);
+  box-shadow: none;
+  font-family: var(--font-sans), sans-serif;
+  font-size: 1.05rem;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.bk .intake select {
+  min-height: 48px;
+}

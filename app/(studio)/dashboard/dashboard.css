@@ -3016,3 +3016,103 @@ body:has(dialog.client-sheet[open]) {
   margin: 8px 0 12px;
   max-width: 360px;
 }
+
+/* =========================================================
+   Intake form: builder, and answers on a client card
+   ========================================================= */
+.db .intake-builder {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.db .ib-empty {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.db .ib-list {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.db .ib-question {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--hair);
+  background: #fff;
+}
+
+.db .ib-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.db .ib-row label:first-child {
+  flex: 1 1 180px;
+}
+
+.db .ib-required {
+  min-height: 44px;
+}
+
+.db .ib-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.db .ib-services {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px 16px;
+}
+
+.db .ib-save {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.db .intake-answers {
+  display: grid;
+  gap: 10px;
+  margin: 8px 0;
+}
+
+.db .intake-answers dt {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.db .intake-answers dd {
+  margin: 2px 0 0;
+  color: var(--ink);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.db .intake-signed summary {
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.db .intake-waiver-copy {
+  margin: 8px 0 0;
+  padding: 10px 12px;
+  border-left: 2px solid var(--gold);
+  background: var(--bg);
+  font-size: 0.85rem;
+  white-space: pre-wrap;
+}

@@ -2,12 +2,13 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { book, getSlots, signOutBooking } from "../actions";
+import { book, getIntake, getSlots, signOutBooking, submitIntake } from "../actions";
 import { clockTime, formatDate, parseDateString, timeZoneLabel } from "@/lib/availability";
 import { formatPhone } from "@/lib/phone";
 import VerifyClient from "./VerifyClient";
 import { maskEmail } from "@/lib/maskEmail";
 import WaitlistForm from "./WaitlistForm";
+import IntakeFields from "./IntakeFields";
 import MyBookings from "./MyBookings";
 import RegularStar from "@/components/RegularStar";
 
@@ -81,6 +82,9 @@ export default function BookingFlow({
   // Bumped to reload open times and "Your upcoming appointments".
   const [reloadKey, setReloadKey] = useState(0);
   const [pending, startTransition] = useTransition();
+  // The intake form for the chosen service, if this client still needs it.
+  const [intake, setIntake] = useState(null);
+  const [intakeValue, setIntakeValue] = useState({ answers: {}, signedName: "", agreed: false });
 
   const service = services.find((s) => s.id === serviceId);
   const deposit = service?.deposit_cents || 0;
@@ -101,6 +105,22 @@ export default function BookingFlow({
       ignore = true;
     };
   }, [slug, serviceId, invite, viewer_status, viewer_email, viewer_phone, reloadKey]);
+
+  // Does this service need the intake form (and does this client still need
+  // to fill it in)? Checked again after they confirm who they are.
+  useEffect(() => {
+    if (!serviceId || !verified) {
+      setIntake(null);
+      return;
+    }
+    let ignore = false;
+    getIntake(slug, serviceId).then((result) => {
+      if (!ignore) setIntake(result?.needed ? result : null);
+    });
+    return () => {
+      ignore = true;
+    };
+  }, [slug, serviceId, verified, viewer_email, viewer_phone]);
 
   // If the chosen time disappeared after a reload, clear it.
   useEffect(() => {
@@ -135,6 +155,14 @@ export default function BookingFlow({
     event.preventDefault();
     setBookError(null);
     startTransition(async () => {
+      if (intake?.needed) {
+        const saved = await submitIntake(slug, serviceId, intakeValue.answers, intakeValue.signedName);
+        if (saved.error) {
+          setBookError(saved.error);
+          return;
+        }
+        setIntake(null);
+      }
       const result = await book({
         slug,
         serviceId,
@@ -549,6 +577,10 @@ export default function BookingFlow({
                     {maskEmail(viewer_email)}
                   </p>
                 </>
+              )}
+
+              {intake?.needed && (
+                <IntakeFields intake={intake} businessName={business_name} value={intakeValue} onChange={setIntakeValue} />
               )}
 
               {policy && (
