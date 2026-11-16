@@ -84,6 +84,11 @@ and hosted on **Vercel**.
   **Block bookings** takes that time off the booking page (and the waitlist and
   reschedule); bookings already made stay, and the stylist is warned about any
   at that time. Run `supabase/migrations/0034_calendar_events.sql`.
+- **Make the Switch** (`/switch`): the guide for pros moving from another app:
+  why switch, what comes over (the client list) and what doesn't (booked
+  appointments), seven steps, a message to copy and send clients, and common
+  questions. Linked from the homepage's Switching section and footer. The
+  homepage's Pricing also lists what's never extra. No SQL needed.
 - **Private emails on the booking page**: a client's email is shown shortened
   there ("tau…@gmail.com"). The dashboard always shows the full email.
 - **Deposits with Stripe**: each stylist connects their own Stripe account, turns
@@ -203,5 +208,4 @@ Open http://localhost:3000.
 ## Coming next
 
 - Refunding a deposit from the Bookings tab
-- "Make the Switch" page, and a "We don't charge extra for" section on the homepage
 - "My Pros" page for clients: book with several pros, two-tap rebooking, add to home screen

@@ -109,6 +109,9 @@ export default function Switching() {
             Start your {TRIAL_DAYS}-day trial
           </Link>
           <p className="hm-fine">No card needed.</p>
+          <Link href="/switch" className="hm-switch-guide">
+            Read the switching guide →
+          </Link>
         </div>
       </div>
     </section>
