@@ -75,6 +75,9 @@ and hosted on **Vercel**.
   or "Ask again" on a client card asks again) and sign by ticking "I agree"
   and typing their name. Answers show on the client card; the Calendar shows
   whether it's on file. Run `supabase/migrations/0033_intake.sql`.
+  Waitlist "Claim this time" pages ask for it too (saved for the person on
+  the waitlist, so it counts for their later bookings). Run
+  `supabase/migrations/0037_claim_intake.sql`.
 - **Holidays & your own events** (Calendar): US federal holidays and busy
   days for beauty pros (Mother's Day, Valentine's Day, Black Friday...) show on
   the month view, worked out for every year in `lib/holidays.js`. Stylists add
@@ -228,4 +231,3 @@ Open http://localhost:3000.
 
 ## Coming next
 
-- The intake form on waitlist "Claim this time" bookings

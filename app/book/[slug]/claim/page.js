@@ -3,6 +3,7 @@ import Link from "next/link";
 import StylistShell from "../StylistShell";
 import { createBookingClient } from "@/lib/supabase/booking";
 import ClaimOffer from "./ClaimOffer";
+import { getClaimIntake } from "../../actions";
 
 export const metadata = { title: "Claim This Time" };
 
@@ -28,9 +29,13 @@ async function ClaimPageContent({ params, searchParams }) {
     );
   }
 
+  // The intake form, if this service needs it and it isn't on file yet.
+  const intake = offer.state === "open" ? await getClaimIntake(token) : { needed: false };
+
   return (
     <>
       <ClaimOffer
+        intake={intake?.needed ? intake : null}
         offer={offer}
         token={token}
         bookingLink={`/book/${offer.slug}`}
