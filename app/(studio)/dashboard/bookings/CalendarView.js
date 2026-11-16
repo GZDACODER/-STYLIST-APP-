@@ -4,11 +4,16 @@
 // upcoming bookings. The month view goes 12 months back and 12 ahead; each
 // day shows its bookings (time and first name on iPad and computer, a count
 // on phones), days off and blocked dates are shaded, and today is gold.
-// Tapping a day lists its bookings underneath; tapping one opens it.
+// Holidays and the stylist's own events (birthdays, practices...) show too.
+// Tapping a day lists its holidays, events and bookings underneath; tapping
+// one opens it, and "Add event" adds one on that day.
 import { useEffect, useMemo, useState } from "react";
 import { WEEKDAYS, clockTime, formatDate, parseDateString, shortTime, toDateString } from "@/lib/availability";
 import Sheet from "@/components/Sheet";
 import BookingList, { BookingDetails, BookingRow } from "./BookingList";
+import { EventDetails, EventForm } from "./CalendarEvents";
+import { eventOccursOn, eventsOn } from "@/lib/calendarEvents";
+import { holidaysOn } from "@/lib/holidays";
 
 const MONTHS_BACK = 12;
 const MONTHS_AHEAD = 12;
@@ -22,11 +27,16 @@ const monthIndex = (dateText) => {
 // bookings: confirmed bookings from 12 months back on, each with `past`.
 // days / seriesOf / today: as BookingList takes them.
 // hours: { weekday: { is_working, start_time, end_time } }; blocked: { "YYYY-MM-DD": reason }
-export default function CalendarView({ bookings, days, seriesOf, today, hours, blocked }) {
+// events: the stylist's calendar_events rows (null before the step 29 SQL is run).
+export default function CalendarView({ bookings, days, seriesOf, today, hours, blocked, events }) {
   const [view, setView] = useState("month");
   const [month, setMonth] = useState(() => monthIndex(today));
   const [selected, setSelected] = useState(today);
   const [openId, setOpenId] = useState(null);
+  // The event panel: { mode: "add" } or { mode: "view" | "edit", id }.
+  const [eventSheet, setEventSheet] = useState(null);
+  const eventList = events || [];
+  const openEvent = eventSheet?.id ? eventList.find((e) => e.id === eventSheet.id) : null;
 
   const byDate = useMemo(() => {
     const map = {};
@@ -38,6 +48,13 @@ export default function CalendarView({ bookings, days, seriesOf, today, hours, b
   useEffect(() => {
     if (openId && !openBooking) setOpenId(null);
   }, [openId, openBooking]);
+  // The open event was deleted (or just this date of it): close its panel.
+  const eventGone =
+    Boolean(eventSheet?.id) &&
+    (!openEvent || (eventSheet.mode === "view" && !eventOccursOn(openEvent, selected)));
+  useEffect(() => {
+    if (eventGone) setEventSheet(null);
+  }, [eventGone]);
 
   const thisMonth = monthIndex(today);
   const year = Math.floor(month / 12);
@@ -53,6 +70,10 @@ export default function CalendarView({ bookings, days, seriesOf, today, hours, b
     const h = hours[parseDateString(dateText).getDay()];
     if (hasHours && h && !h.is_working) return "off";
     return "";
+  }
+
+  function closeEventSheet() {
+    setEventSheet(null);
   }
 
   function goTo(newMonth) {
@@ -71,6 +92,8 @@ export default function CalendarView({ bookings, days, seriesOf, today, hours, b
   for (let d = 1; d <= daysInMonth; d++) {
     const dateText = toDateString(new Date(year, monthNum, d));
     const list = byDate[dateText] || [];
+    const dayEvents = eventsOn(eventList, dateText);
+    const holidays = holidaysOn(dateText);
     const kind = dayKind(dateText);
     const classes = ["mc-cell", kind];
     if (dateText < today) classes.push("past");
@@ -78,7 +101,9 @@ export default function CalendarView({ bookings, days, seriesOf, today, hours, b
     if (dateText === selected) classes.push("selected");
     const label = `${formatDate(dateText)}: ${
       list.length === 0 ? "no bookings" : list.length === 1 ? "1 booking" : `${list.length} bookings`
-    }${kind === "blocked" ? ", blocked" : kind === "off" ? ", day off" : ""}`;
+    }${kind === "blocked" ? ", blocked" : kind === "off" ? ", day off" : ""}${
+      holidays.length ? `, ${holidays.map((h) => h.name).join(", ")}` : ""
+    }${dayEvents.length ? `, ${dayEvents.length === 1 ? "1 event" : `${dayEvents.length} events`}` : ""}`;
     cells.push(
       <button
         key={dateText}
@@ -90,7 +115,24 @@ export default function CalendarView({ bookings, days, seriesOf, today, hours, b
       >
         <span className="mc-num">{d}</span>
         {list.length > 0 && <span className="mc-count">{list.length}</span>}
+        {(dayEvents.length > 0 || holidays.length > 0) && (
+          <span className="mc-dots" aria-hidden="true">
+            {holidays.length > 0 && <i className="mc-dot holiday" />}
+            {dayEvents.length > 0 && <i className={`mc-dot event${dayEvents.some((e) => e.blocks_bookings) ? " blocks" : ""}`} />}
+          </span>
+        )}
         <span className="mc-items">
+          {holidays.slice(0, 1).map((h) => (
+            <span key={h.name} className={`mc-holiday${h.federal ? " federal" : ""}`}>
+              {h.name}
+            </span>
+          ))}
+          {dayEvents.slice(0, 2).map((e) => (
+            <span key={e.id} className={`mc-event${e.blocks_bookings ? " blocks" : ""}`}>
+              {e.start_time && <b>{shortTime(String(e.start_time).slice(0, 5)).replace(/ /g, "")}</b>} {e.title}
+            </span>
+          ))}
+          {dayEvents.length > 2 && <span className="mc-more">+{dayEvents.length - 2} more</span>}
           {list.slice(0, 3).map((b) => (
             <span key={b.id} className="mc-item">
               <b>{shortTime(String(b.start_time).slice(0, 5)).replace(/ /g, "")}</b> {firstName(b.client_name)}
@@ -105,6 +147,8 @@ export default function CalendarView({ bookings, days, seriesOf, today, hours, b
   }
 
   const dayList = byDate[selected] || [];
+  const selEvents = eventsOn(eventList, selected);
+  const selHolidays = holidaysOn(selected);
   const selKind = dayKind(selected);
   const selHours = hours[parseDateString(selected).getDay()];
 
@@ -183,6 +227,15 @@ export default function CalendarView({ bookings, days, seriesOf, today, hours, b
             <span>
               <i className="mc-swatch blocked" /> Blocked
             </span>
+            <span>
+              <i className="mc-dot holiday" /> Holiday
+            </span>
+            <span>
+              <i className="mc-dot event" /> Your event
+            </span>
+            <span>
+              <i className="mc-dot event blocks" /> Bookings blocked
+            </span>
           </div>
 
           <div className="mc-day">
@@ -192,6 +245,46 @@ export default function CalendarView({ bookings, days, seriesOf, today, hours, b
                 {dayList.length === 1 ? "1 booking" : `${dayList.length} bookings`}
               </span>
             </div>
+            {selHolidays.map((h) => (
+              <p key={h.name} className="mc-day-holiday">
+                {h.name}
+                {h.federal && <span className="muted small-text"> · Federal holiday</span>}
+              </p>
+            ))}
+            {selEvents.length > 0 && (
+              <ul className="client-rows event-rows">
+                {selEvents.map((e) => (
+                  <li key={e.id}>
+                    <button
+                      type="button"
+                      className="client-row booking-row event-row"
+                      onClick={() => setEventSheet({ mode: "view", id: e.id })}
+                      aria-haspopup="dialog"
+                    >
+                      <span className="booking-row-time">
+                        <strong>{e.start_time ? clockTime(e.start_time) : "All day"}</strong>
+                        {e.start_time && <span>{clockTime(e.end_time)}</span>}
+                      </span>
+                      <span className="client-row-main">
+                        <span className="client-row-name">
+                          <span className="client-row-text">{e.title}</span>
+                        </span>
+                        <span className="client-row-phone">
+                          {e.repeats !== "none" ? "Repeats · " : ""}
+                          {e.blocks_bookings ? "Bookings blocked" : "Reminder"}
+                        </span>
+                      </span>
+                      <span className="booking-row-badges">
+                        {e.blocks_bookings && <span className="badge event-block row-badge">Blocked</span>}
+                      </span>
+                      <svg className="client-row-chevron" width="8" height="14" viewBox="0 0 8 14" aria-hidden="true">
+                        <path d="M1 1l6 6-6 6" fill="none" stroke="currentColor" strokeWidth="1.5" />
+                      </svg>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
             {selKind === "blocked" && (
               <p className="muted small-text">Blocked{blocked[selected] ? `: ${blocked[selected]}` : ""}</p>
             )}
@@ -216,6 +309,16 @@ export default function CalendarView({ bookings, days, seriesOf, today, hours, b
                 ))}
               </ul>
             )}
+            {events ? (
+              <button type="button" className="button small secondary mc-add-event" onClick={() => setEventSheet({ mode: "add" })}>
+                + Add event
+              </button>
+            ) : (
+              <p className="muted small-text">
+                To add your own events (birthdays, practices) here, run step 29 of the setup
+                (supabase/migrations/0034_calendar_events.sql) in Supabase.
+              </p>
+            )}
           </div>
         </>
       )}
@@ -223,6 +326,23 @@ export default function CalendarView({ bookings, days, seriesOf, today, hours, b
       {openBooking && (
         <Sheet key={openBooking.id} label={openBooking.client_name} backLabel="Calendar" onClose={() => setOpenId(null)}>
           <BookingDetails booking={openBooking} seriesId={seriesOf[openBooking.id]} today={today} />
+        </Sheet>
+      )}
+
+      {eventSheet && (eventSheet.mode === "add" || openEvent) && (
+        <Sheet
+          key={`${eventSheet.mode}-${eventSheet.id || selected}`}
+          label={openEvent ? openEvent.title : "Add event"}
+          backLabel="Calendar"
+          onClose={() => setEventSheet(null)}
+        >
+          {eventSheet.mode === "view" ? (
+            <EventDetails event={openEvent} date={selected} onEdit={() => setEventSheet({ mode: "edit", id: openEvent.id })} />
+          ) : (
+            <div className="client-card">
+              <EventForm event={eventSheet.mode === "edit" ? openEvent : null} date={selected} onSaved={closeEventSheet} />
+            </div>
+          )}
         </Sheet>
       )}
     </>

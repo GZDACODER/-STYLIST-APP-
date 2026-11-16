@@ -126,6 +126,14 @@ export default async function BookingsPage() {
   ]);
   const blocked = Object.fromEntries((blockedRows || []).map((r) => [r.blocked_on, r.reason || ""]));
 
+  // The stylist's own events (null until the step 29 SQL is run).
+  const { data: eventRows, error: eventsError } = await supabase
+    .from("calendar_events")
+    .select("id, title, starts_on, start_time, end_time, repeats, repeat_until, skipped_dates, blocks_bookings, note")
+    .order("starts_on")
+    .limit(2000);
+  const events = eventsError ? null : eventRows || [];
+
   const nowText = nowLocal(stylist.timezone);
   const startedAt = (b) => `${b.booking_date}T${String(b.start_time).slice(0, 5)}`;
   for (const b of upcoming) {
@@ -180,6 +188,7 @@ export default async function BookingsPage() {
           today={today}
           hours={hoursByWeekday(hourRows)}
           blocked={blocked}
+          events={events}
         />
       </section>
 
