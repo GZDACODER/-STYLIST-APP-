@@ -108,7 +108,7 @@ export default async function OpeningsPage() {
         </p>
         {!plan.has.regulars && (
           <PausedNote feature="regulars">
-            Regulars First isn&apos;t on your plan right now, so new openings are for everyone.
+            Your plan is paused, so new openings are for everyone.
           </PausedNote>
         )}
         <PostOpeningsForm today={today} daysOff={daysOff} regularsAllowed={plan.has.regulars} />

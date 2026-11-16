@@ -1,5 +1,7 @@
 "use client";
 
+// Choose the plan: All-in, monthly or yearly, plus any team members, then
+// pay on Stripe. Team members can also be added later.
 import { useActionState, useState } from "react";
 import { startCheckout } from "./billingActions";
 import { PLANS } from "@/lib/plans";
@@ -7,22 +9,15 @@ import { formatPrice } from "@/lib/money";
 import SubmitButton from "@/components/SubmitButton";
 import FormMessage from "@/components/FormMessage";
 
-// Pick Clientele or All-in, any add-ons, monthly or yearly, then pay on Stripe.
 export default function ChoosePlanForm({ inTrial }) {
   const [state, formAction] = useActionState(startCheckout, null);
   const [interval, setInterval] = useState("month");
-  const [plan, setPlan] = useState("base");
-  const [addOns, setAddOns] = useState({ regulars: false, waitlist: false });
+  const [team, setTeam] = useState(0);
 
-  const price = (key) =>
-    interval === "year" ? PLANS[key].yearlyCents : PLANS[key].monthlyCents;
-  const per = interval === "year" ? "/yr" : "/mo";
-  const total =
-    plan === "bundle"
-      ? price("bundle")
-      : price("base") +
-        (addOns.regulars ? price("regulars") : 0) +
-        (addOns.waitlist ? price("waitlist") : 0);
+  const yearly = interval === "year";
+  const plan = yearly ? PLANS.allin.yearlyCents : PLANS.allin.monthlyCents;
+  const seat = yearly ? PLANS.team.yearlyCents : PLANS.team.monthlyCents;
+  const per = yearly ? "/yr" : "/mo";
 
   return (
     <form action={formAction} className="choose-plan">
@@ -47,55 +42,39 @@ export default function ChoosePlanForm({ inTrial }) {
         <input type="hidden" name="interval" value={interval} />
       </fieldset>
 
-      <fieldset className="field">
-        <legend>Plan</legend>
-        {["base", "bundle"].map((key) => (
-          <label key={key} className="check-row">
-            <input
-              type="radio"
-              name="plan"
-              value={key}
-              checked={plan === key}
-              onChange={() => setPlan(key)}
-            />
-            <span>
-              <strong>
-                {PLANS[key].name} · {formatPrice(price(key))}
-                {per}
-              </strong>
-              <br />
-              <span className="muted small-text">{PLANS[key].description}</span>
-            </span>
-          </label>
-        ))}
-      </fieldset>
+      <div className="plan-line">
+        <div>
+          <strong>
+            {PLANS.allin.name} · {formatPrice(plan)}
+            {per}
+          </strong>
+          <p className="muted small-text">{PLANS.allin.description}</p>
+        </div>
+      </div>
 
-      {plan === "base" && (
-        <fieldset className="field">
-          <legend>Add-ons</legend>
-          {["regulars", "waitlist"].map((key) => (
-            <label key={key} className="check-row">
-              <input
-                type="checkbox"
-                name={key}
-                checked={addOns[key]}
-                onChange={(e) => setAddOns({ ...addOns, [key]: e.target.checked })}
-              />
-              <span>
-                <strong>
-                  {PLANS[key].name} · +{formatPrice(price(key))}
-                  {per}
-                </strong>
-                <br />
-                <span className="muted small-text">{PLANS[key].description}</span>
-              </span>
-            </label>
+      <label className="plan-team">
+        Team members ({formatPrice(seat)}
+        {per} each)
+        <select name="team_members" value={team} onChange={(e) => setTeam(Number(e.target.value))}>
+          {Array.from({ length: 11 }, (_, n) => (
+            <option key={n} value={n}>
+              {n === 0 ? "None (just me)" : `${n} team ${n === 1 ? "member" : "members"}`}
+            </option>
           ))}
-        </fieldset>
-      )}
+        </select>
+      </label>
 
       <p className="plan-total">
-        Total: <strong>{formatPrice(total)}{per}</strong>
+        Total: <strong>
+          {formatPrice(plan + team * seat)}
+          {per}
+        </strong>
+        {team > 0 && (
+          <span className="muted small-text">
+            {" "}
+            ({formatPrice(plan)} + {team} × {formatPrice(seat)})
+          </span>
+        )}
         {inTrial && (
           <span className="muted small-text">
             {" "}

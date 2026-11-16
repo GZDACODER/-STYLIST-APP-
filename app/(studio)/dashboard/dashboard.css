@@ -2958,3 +2958,61 @@ body:has(dialog.client-sheet[open]) {
   flex-direction: row;
   align-items: stretch;
 }
+
+/* =========================================================
+   Plan & billing (one plan + team members)
+   ========================================================= */
+.db .plan-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 0;
+  border-top: 1px solid var(--divider);
+  border-bottom: 1px solid var(--divider);
+  margin-bottom: 12px;
+}
+
+.db .plan-line strong {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.3rem;
+  font-weight: 500;
+}
+
+.db .plan-line p {
+  margin: 4px 0 0;
+}
+
+.db .plan-sum {
+  display: grid;
+  gap: 6px;
+  margin: 8px 0 12px;
+  max-width: 360px;
+  font-variant-numeric: tabular-nums;
+}
+
+.db .plan-sum > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.db .plan-sum dt,
+.db .plan-sum dd {
+  margin: 0;
+}
+
+.db .plan-sum-total {
+  padding-top: 6px;
+  border-top: 1px solid var(--divider);
+  font-weight: 600;
+}
+
+.db .plan-team select {
+  max-width: 260px;
+}
+
+.db .team-form {
+  margin: 8px 0 12px;
+  max-width: 360px;
+}

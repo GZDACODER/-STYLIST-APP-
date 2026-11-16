@@ -79,8 +79,8 @@ export default async function WaitlistPage() {
         </p>
         {!plan.has.waitlist && (
           <PausedNote feature="waitlist">
-            The Waitlist add-on isn&apos;t on your plan right now, so clients can&apos;t join and
-            nobody is emailed. Everyone already on it is kept.
+            Your plan is paused, so clients can&apos;t join and nobody is emailed. Everyone already
+            on the waitlist is kept.
           </PausedNote>
         )}
         <WaitlistSettingsForm

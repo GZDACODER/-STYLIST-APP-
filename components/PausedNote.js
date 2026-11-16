@@ -1,14 +1,14 @@
 import Link from "next/link";
-import { PLANS } from "@/lib/plans";
 
-// Shown where a paused add-on's controls are: "Regulars First isn't on your
-// plan right now. Add Regulars First". feature: "regulars" or "waitlist".
+// Shown where a feature's controls are when the account has no plan (the
+// trial ended and nothing is paid): "Your plan is paused... Choose a plan".
+// feature is kept for the callers; every feature comes with the one plan.
+// eslint-disable-next-line no-unused-vars
 export default function PausedNote({ feature, children }) {
-  const plan = PLANS[feature];
   return (
     <p className="message paused-note">
-      {children || <>{plan.name} isn&apos;t on your plan right now, so this is switched off.</>}{" "}
-      <Link href="/dashboard/settings#plan">Add {plan.name}</Link>
+      {children || <>Your plan is paused, so this is switched off.</>}{" "}
+      <Link href="/dashboard/settings#plan">Choose a plan</Link>
     </p>
   );
 }

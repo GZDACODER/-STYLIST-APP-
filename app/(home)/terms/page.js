@@ -16,7 +16,7 @@ export const metadata = {
 const price = (cents) => formatPrice(cents).replace(/\.00$/, "");
 
 export default function TermsPage() {
-  const { base, regulars, waitlist, bundle } = PLANS;
+  const { allin, team } = PLANS;
   const us = LEGAL_ENTITY;
 
   return (
@@ -57,11 +57,14 @@ export default function TermsPage() {
           paused until you do. Your bookings and clients are kept.
         </li>
         <li>
-          Plans are billed monthly or yearly, in US dollars: {base.name} {price(base.monthlyCents)}
-          /month, with add-ons {regulars.name} +{price(regulars.monthlyCents)}/month and{" "}
-          {waitlist.name} +{price(waitlist.monthlyCents)}/month, or {bundle.name}{" "}
-          {price(bundle.monthlyCents)}/month. Yearly plans cost 10 times the monthly price. Current
-          prices are always on our <Link href="/#pricing">pricing section</Link>.
+          {BRAND_NAME} has one plan, {allin.name}, with every feature included:{" "}
+          {price(allin.monthlyCents)}/month or {price(allin.yearlyCents)}/year (10 times the
+          monthly price), in US dollars. Each team member you add costs{" "}
+          {price(team.monthlyCents)}/month or {price(team.yearlyCents)}/year, billed on the same
+          plan; adding or removing one changes your bill for the rest of that period
+          (prorated). If you subscribed to an earlier plan, you keep the price you signed up at
+          and get every feature. Current prices are always on our{" "}
+          <Link href="/#pricing">pricing section</Link>.
         </li>
         <li>
           Payments are handled by Stripe. Your plan renews automatically at the end of each

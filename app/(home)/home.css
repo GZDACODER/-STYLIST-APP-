@@ -1312,3 +1312,56 @@ body:has(.hm) {
     padding: 96px 32px 140px;
   }
 }
+
+/* ---------- Pricing: the one plan ---------- */
+.hm-plan {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  max-width: 560px;
+  margin: 48px 0 0;
+  padding: 32px 28px;
+  border: 1px solid var(--gold);
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(184, 151, 90, 0.14), var(--bg-2) 70%);
+}
+
+.hm-plan .hm-tier-badge {
+  position: static;
+}
+
+.hm-plan .hm-price {
+  margin: 4px 0 0;
+  color: var(--gold-light);
+}
+
+.hm-plan-alt {
+  margin: 0;
+  color: var(--text-soft);
+}
+
+.hm-plan-list {
+  list-style: none;
+  margin: 8px 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+  color: var(--text);
+}
+
+.hm-plan-list li::before {
+  content: "✓";
+  margin-right: 10px;
+  color: var(--gold);
+}
+
+.hm-plan-team {
+  margin: 4px 0 8px;
+  color: var(--text-soft);
+}
+
+.hm-plan-team strong {
+  color: var(--text);
+  font-weight: 500;
+}
