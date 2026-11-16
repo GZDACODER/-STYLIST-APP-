@@ -5,6 +5,7 @@ import { getStripe, paymentsConfigured } from "@/lib/stripe";
 import SettingsForm from "./SettingsForm";
 import DepositsForm from "./DepositsForm";
 import RegularsForm from "./RegularsForm";
+import RescheduleForm from "./RescheduleForm";
 import CoverPhotoForm from "./CoverPhotoForm";
 import BusinessLinksForm from "./BusinessLinksForm";
 import PlanCard from "./PlanCard";
@@ -77,7 +78,7 @@ export default async function SettingsPage({ searchParams }) {
   // Read on their own, so Settings still opens before the tagline SQL (0013)
   // and the cover photo and links SQL (0014) are run.
   // Same for the first name (0015).
-  const [{ data: taglineRow }, { data: profileRow }, { data: firstNameRow }, { data: replyRow }] = await Promise.all([
+  const [{ data: taglineRow }, { data: profileRow }, { data: firstNameRow }, { data: replyRow }, { data: rescheduleRow }] = await Promise.all([
     supabase.from("stylists").select("tagline").eq("id", user.id).maybeSingle(),
     supabase
       .from("stylists")
@@ -87,6 +88,8 @@ export default async function SettingsPage({ searchParams }) {
     supabase.from("stylists").select("first_name").eq("id", user.id).maybeSingle(),
     // Before the step 22 SQL (0027) this is empty, and the field shows blank.
     supabase.from("stylists").select("reply_email").eq("id", user.id).maybeSingle(),
+    // Before the step 25 SQL (0030) this is empty, and 24 hours shows.
+    supabase.from("stylists").select("reschedule_cutoff_hours").eq("id", user.id).maybeSingle(),
   ]);
 
   const plan = await getMyPlan(supabase, user.id);
@@ -164,6 +167,15 @@ export default async function SettingsPage({ searchParams }) {
           regularsOnly={stylist.regulars_only}
           regularsOnlyAllowed={plan.has.regulars}
         />
+      </section>
+
+      <section className="card">
+        <h2>Rescheduling</h2>
+        <p className="muted">
+          Clients can move their own appointment to another open time, from your booking page or
+          the Reschedule link in their emails.
+        </p>
+        <RescheduleForm cutoffHours={rescheduleRow?.reschedule_cutoff_hours ?? 24} />
       </section>
 
       <section className="card">

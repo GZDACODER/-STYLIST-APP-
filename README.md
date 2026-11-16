@@ -55,6 +55,12 @@ and hosted on **Vercel**.
   months, by client or by day: how it went, a note, no-shows and the amount
   still owed. Notes can be written there or on Wrap up visits, and show in the
   client's History. Run `supabase/migrations/0029_visit_notes.sql` first.
+- **Reschedule**: clients move their own booking to another open time (same
+  service) from "Your upcoming appointments" or the Reschedule link in their
+  emails. Same rules as booking (Regulars-only times only for Regulars), up to
+  2 moves, not inside the notice period set in Settings (24 hours to start).
+  The deposit stays with the booking, the old time goes to the waitlist, and
+  the client and business are emailed. Run `supabase/migrations/0030_reschedule.sql`.
 - **Private emails on the booking page**: a client's email is shown shortened
   there ("tau…@gmail.com"). The dashboard always shows the full email.
 - **Deposits with Stripe**: each stylist connects their own Stripe account, turns

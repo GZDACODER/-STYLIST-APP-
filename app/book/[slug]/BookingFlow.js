@@ -279,6 +279,7 @@ export default function BookingFlow({
           slug={slug}
           businessName={business_name}
           policy={policy}
+          zoneNote={zoneNote}
           refreshKey={`${viewer_status}-${viewerLabel}-${reloadKey}`}
           onCancelled={() => setReloadKey((k) => k + 1)}
         />

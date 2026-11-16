@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { cancelMyBooking, getMyBookings } from "../actions";
+import { cancelMyBooking, getMyBookings, getMyRescheduleSlots, rescheduleMyBooking } from "../actions";
+import ReschedulePicker from "./ReschedulePicker";
 import { clockTime, formatDate } from "@/lib/availability";
 import { formatPrice } from "@/lib/money";
 
@@ -17,15 +18,20 @@ function shortDate(text) {
   });
 }
 
-// A confirmed client's upcoming appointments here, with a Cancel link.
+// A confirmed client's upcoming appointments here, with Reschedule and
+// Cancel. Reschedule opens a time picker for the same service; when a
+// booking can't be moved online (too close to the time, or moved twice
+// already) it says to contact the business instead.
 // Cancel asks first ("Keep appointment" / "Yes, cancel"); the cancelling
 // itself and the deposit rules are unchanged.
 // refreshKey: changes when the list should be loaded again.
-export default function MyBookings({ slug, businessName, policy, refreshKey, onCancelled }) {
+export default function MyBookings({ slug, businessName, policy, zoneNote, refreshKey, onCancelled }) {
   const [bookings, setBookings] = useState([]);
   const [error, setError] = useState(null);
   // The booking whose "Cancel?" question is showing.
   const [confirmingId, setConfirmingId] = useState(null);
+  // The booking being moved to another time.
+  const [movingId, setMovingId] = useState(null);
   const [pending, startTransition] = useTransition();
 
   useEffect(() => {
@@ -65,7 +71,23 @@ export default function MyBookings({ slug, businessName, policy, refreshKey, onC
       <h2>Your upcoming appointments</h2>
       <ul className="service-list">
         {bookings.map((b) =>
-          b.id === confirmingId ? (
+          b.id === movingId ? (
+            <li key={b.id} className="confirming">
+              <ReschedulePicker
+                booking={b}
+                businessName={businessName}
+                zoneNote={zoneNote}
+                loadSlots={() => getMyRescheduleSlots(slug, b.id)}
+                move={(date, time) => rescheduleMyBooking(slug, b.id, date, time)}
+                onDone={() => onCancelled?.()}
+                onClose={async () => {
+                  setMovingId(null);
+                  const fresh = await getMyBookings(slug);
+                  setBookings(fresh.bookings || []);
+                }}
+              />
+            </li>
+          ) : b.id === confirmingId ? (
             <li key={b.id} className="confirming">
               <div className="cancel-confirm" role="group" aria-label="Cancel this appointment?">
                 <p>
@@ -106,7 +128,31 @@ export default function MyBookings({ slug, businessName, policy, refreshKey, onC
                 <div className="muted">
                   {formatDate(b.booking_date)} · {clockTime(b.start_time)} – {clockTime(b.end_time)}
                 </div>
+                {b.can_reschedule === false && (
+                  <div className="muted small-text">
+                    {b.reschedule_reason === "too_many"
+                      ? "Moved twice already. "
+                      : "Too close to the time to move online. "}
+                    Contact {businessName} to change this booking.
+                  </div>
+                )}
               </div>
+              <span className="my-booking-actions">
+              {b.can_reschedule === true && (
+                <button
+                  type="button"
+                  className="link-button cancel-link"
+                  onClick={() => {
+                    setError(null);
+                    setConfirmingId(null);
+                    setMovingId(b.id);
+                  }}
+                  disabled={pending}
+                  aria-label={`Reschedule ${b.service_name} on ${formatDate(b.booking_date)}`}
+                >
+                  Reschedule
+                </button>
+              )}
               <button
                 type="button"
                 className="link-button cancel-link"
@@ -116,6 +162,7 @@ export default function MyBookings({ slug, businessName, policy, refreshKey, onC
               >
                 Cancel
               </button>
+              </span>
             </li>
           )
         )}

@@ -194,6 +194,33 @@ export async function saveRegulars(prevState, formData) {
   return { success: ["Saved.", ...notes].join(" ") };
 }
 
+const RESCHEDULE_CHOICES = [0, 2, 12, 24, 48, 72, 168];
+
+export async function saveReschedule(prevState, formData) {
+  const hours = Number(formData.get("reschedule_cutoff_hours"));
+  if (!RESCHEDULE_CHOICES.includes(hours)) return { error: "Please pick an option." };
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Please log in again." };
+
+  const { error } = await supabase
+    .from("stylists")
+    .update({ reschedule_cutoff_hours: hours })
+    .eq("id", user.id);
+  if (error) {
+    if (error.code === "42703" || error.code === "PGRST204") {
+      return { error: "Run supabase/migrations/0030_reschedule.sql in Supabase first, then try again." };
+    }
+    return { error: error.message };
+  }
+
+  revalidatePath("/dashboard/settings");
+  return { success: "Saved." };
+}
+
 // ---------- Your business: cover photo, Instagram, location ----------
 
 // The message for a failed save. Before the step 10 SQL is run, the columns

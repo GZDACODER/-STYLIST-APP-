@@ -12,6 +12,7 @@ import {
 import { createAdminClient } from "@/lib/supabase/admin";
 import { normalizePhone, textCodesEnabled } from "@/lib/phone";
 import { emailStylistCancellation, runWaitlistSafely } from "@/lib/waitlist";
+import { emailReschedule } from "@/lib/bookingEmails";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -300,6 +301,86 @@ export async function cancelVisitByToken(token) {
   const origin = await siteOrigin();
   await Promise.all([emailStylistCancellation(data), runWaitlistSafely(data.stylist_id, origin)]);
   return { success: true };
+}
+
+// ---------- Rescheduling (moving a booking to another time) ----------
+
+const RESCHEDULE_ERRORS = {
+  not_found: "This appointment can't be moved here. It may have been cancelled or already passed.",
+  too_close: "It's too close to your appointment to move it online.",
+  too_many: "This appointment has already been moved twice.",
+  blocked: "Sorry, online booking isn't available for you. Please contact the business directly.",
+  slot_unavailable: "Sorry, that time was just taken. Please pick another time.",
+};
+
+function rescheduleError(error) {
+  const text = String(error?.message || "");
+  const code = Object.keys(RESCHEDULE_ERRORS).find((c) => text === c || text.includes(c));
+  if (!code) console.error("Reschedule failed", error?.code, text);
+  return {
+    error: RESCHEDULE_ERRORS[code] || "Something went wrong. Please try again.",
+    code: code || "error",
+  };
+}
+
+const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+const TIME_PATTERN = /^\d{2}:\d{2}(:\d{2})?$/;
+
+// After a move: emails to the client and the business, and the waitlist
+// hears about the time that opened up.
+async function afterReschedule(moved) {
+  const origin = await siteOrigin();
+  await Promise.all([emailReschedule(moved), runWaitlistSafely(moved.stylist_id, origin)]);
+}
+
+// From "Your upcoming appointments" (the client's own login).
+export async function getMyRescheduleSlots(slug, bookingId) {
+  const supabase = await createBookingClient();
+  const { data, error } = await supabase.rpc("get_my_reschedule_slots", {
+    p_slug: String(slug),
+    p_booking_id: String(bookingId),
+  });
+  if (error) return rescheduleError(error);
+  return { slots: data || [] };
+}
+
+export async function rescheduleMyBooking(slug, bookingId, date, time) {
+  if (!DATE_PATTERN.test(String(date)) || !TIME_PATTERN.test(String(time))) {
+    return { error: RESCHEDULE_ERRORS.slot_unavailable, code: "slot_unavailable" };
+  }
+  const supabase = await createBookingClient();
+  const { data, error } = await supabase.rpc("reschedule_my_booking", {
+    p_slug: String(slug),
+    p_booking_id: String(bookingId),
+    p_date: String(date),
+    p_time: String(time),
+  });
+  if (error) return rescheduleError(error);
+  await afterReschedule(data);
+  return { moved: data };
+}
+
+// From the "Reschedule" link in a booking email (the booking's secret token).
+export async function getRescheduleSlotsByToken(token) {
+  if (!TOKEN_PATTERN.test(String(token))) return { error: "This link doesn't work.", code: "not_found" };
+  const { data, error } = await createAdminClient().rpc("reschedule_slots_by_token", { p_token: String(token) });
+  if (error) return rescheduleError(error);
+  return { slots: data || [] };
+}
+
+export async function rescheduleByToken(token, date, time) {
+  if (!TOKEN_PATTERN.test(String(token))) return { error: "This link doesn't work.", code: "not_found" };
+  if (!DATE_PATTERN.test(String(date)) || !TIME_PATTERN.test(String(time))) {
+    return { error: RESCHEDULE_ERRORS.slot_unavailable, code: "slot_unavailable" };
+  }
+  const { data, error } = await createAdminClient().rpc("reschedule_booking_by_token", {
+    p_token: String(token),
+    p_date: String(date),
+    p_time: String(time),
+  });
+  if (error) return rescheduleError(error);
+  await afterReschedule(data);
+  return { moved: data };
 }
 
 // "Pay your deposit" on a standing visit: opens Stripe's payment page.

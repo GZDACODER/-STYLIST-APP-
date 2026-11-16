@@ -38,6 +38,7 @@ export function BookingRow({ booking: b, standing, onOpen }) {
         </span>
         <span className="booking-row-badges">
           {standing && <span className="badge standing row-badge">Standing</span>}
+          {b.moved && <span className="badge row-badge">Moved</span>}
           {b.client?.invited_at && <span className="badge invited row-badge">Invited</span>}
           <span className="row-badge-wrap">
             <DepositBadge booking={b} compact />
@@ -72,6 +73,14 @@ export function BookingDetails({ booking: b, seriesId, today }) {
           {b.client?.invited_at && <span className="badge invited">Invited</span>}
         </span>
       </div>
+
+      {b.moved && (
+        <p className="message info small-text">
+          Rescheduled by client
+          {b.moved.originally ? ` · originally ${b.moved.originally}` : ""}
+          {b.moved.count > 1 ? ` · moved ${b.moved.count} times` : ""}
+        </p>
+      )}
 
       <dl className="booking-facts">
         <div>
