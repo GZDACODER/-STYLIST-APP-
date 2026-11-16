@@ -103,6 +103,13 @@ and hosted on **Vercel**.
   deposits on, and sets a dollar amount or percent per service, plus a
   cancellation policy. Clients pay the deposit on Stripe before the booking is
   confirmed; if they don't pay, the time isn't held. See **[DEPOSITS_SETUP.md](./DEPOSITS_SETUP.md)**.
+- **Refund a deposit** (Calendar): "Refund deposit" on a cancelled booking, or in
+  any booking's details while its deposit is paid. The whole deposit goes back
+  to the client's card from the stylist's Stripe balance (Clientele's fee isn't
+  returned), the booking is marked refunded, and the client is emailed. If
+  Stripe refuses (for example, not enough in the stylist's balance), nothing
+  changes and the reason is shown. No SQL needed (see `refundDeposit` in
+  `lib/stripe.js`).
 
 Each stylist only ever sees their own data. The database enforces this.
 
@@ -215,4 +222,6 @@ Open http://localhost:3000.
 
 ## Coming next
 
-- Refunding a deposit from the Bookings tab
+- Standing appointments that skip times blocked by Calendar events
+- Calendar events on the Today page
+- The intake form on waitlist "Claim this time" bookings

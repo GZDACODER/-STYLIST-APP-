@@ -3226,3 +3226,12 @@ body:has(dialog.client-sheet[open]) {
   gap: 10px 18px;
   margin-top: 12px;
 }
+
+/* ---------- Refund deposit ---------- */
+.db .refund-row {
+  margin-top: 6px;
+}
+
+.db .refund-row .confirm-step {
+  margin-top: 4px;
+}

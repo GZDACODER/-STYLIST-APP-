@@ -32,7 +32,7 @@ export default function CancelBookingButton({
       note={
         `The time opens up again, and anyone on your waitlist who wants it is emailed. ${clientName} isn't told automatically, so let them know.` +
         (depositPaid
-          ? " Their deposit isn't refunded automatically. If your policy says to refund it, do that in Stripe."
+          ? " Their deposit isn't refunded automatically. If your policy says to refund it, use Refund deposit in the Cancelled list afterwards."
           : "")
       }
       keepLabel="Keep booking"

@@ -2,7 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { siteOrigin } from "@/lib/stripe";
+import { paymentsConfigured, refundDeposit, siteOrigin } from "@/lib/stripe";
+import { emailDepositRefunded } from "@/lib/bookingEmails";
+import { formatPrice } from "@/lib/money";
+import { emailConfigured } from "@/lib/notify";
 import { runWaitlistSafely } from "@/lib/waitlist";
 
 export async function cancelBooking(formData) {
@@ -27,4 +30,41 @@ export async function cancelBooking(formData) {
   revalidatePath("/dashboard/bookings");
   revalidatePath("/dashboard/openings");
   revalidatePath("/dashboard/waitlist");
+}
+
+// "Refund deposit" (Cancelled list, or a booking's details). The booking
+// itself isn't changed. Returns { success } or { error } for the button.
+export async function refundBookingDeposit(prevState, formData) {
+  const id = String(formData.get("id") || "");
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Please log in again." };
+  if (!paymentsConfigured()) return { error: "Deposits aren't set up on this site, so nothing can be refunded here." };
+
+  // Read with the stylist's own login, so it has to be their booking.
+  const { data: booking } = await supabase
+    .from("bookings")
+    .select(
+      "id, stylist_id, status, client_name, client_email, service_name, booking_date, start_time, deposit_cents, deposit_status, stylist:stylists(business_name)"
+    )
+    .eq("id", id)
+    .maybeSingle();
+  if (!booking) return { error: "That booking isn't there any more." };
+  if (booking.deposit_status !== "paid") return { error: "This deposit isn't paid, or it has already been refunded." };
+
+  const result = await refundDeposit(booking.id, user.id);
+  if (result.error) return { error: result.error };
+
+  await emailDepositRefunded({ ...booking, business_name: booking.stylist?.business_name || "" });
+
+  revalidatePath("/dashboard/bookings");
+  revalidatePath("/dashboard/reports");
+  revalidatePath("/dashboard");
+  return {
+    success: `${formatPrice(booking.deposit_cents)} refunded to ${booking.client_name}. It reaches their card in 5 to 10 business days${
+      booking.client_email && emailConfigured() ? ", and they've been emailed" : ""
+    }.`,
+  };
 }
