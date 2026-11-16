@@ -41,4 +41,4 @@ spend limit there.
 Each request sends the business's schedule details it needs (client names,
 services, times) to Anthropic to answer. Conversations aren't stored by
 Clientele: they live in the browser tab until "New chat" or the tab closes.
-Mention this in the Privacy Policy before switching it on for other pros.
+The Privacy Policy (sections 4, 5 and 6) says this.
