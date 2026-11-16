@@ -97,6 +97,24 @@ const REGULARS = [
   },
 ];
 
+// "We don't charge extra for": all included in the one plan.
+const NO_EXTRA = [
+  "Waitlist",
+  "Regulars-only times",
+  "Invite links",
+  "Standing appointments",
+  "Confirmation and reminder emails",
+  "Self-serve reschedule",
+  "Intake forms and waivers",
+  "Portfolio photos",
+  "Reports",
+  "Calendar events and holidays",
+  "Client import and export",
+  "Help switching from another app",
+];
+
+const NEVER = ["Booking fees charged to your clients", "A cut of new clients", "A marketplace listing next to other pros"];
+
 export default async function HomePage() {
   // Stylists who are logged in go straight to their dashboard.
   const supabase = await createClient();
@@ -346,14 +364,28 @@ export default async function HomePage() {
               Start {TRIAL_DAYS}-day free trial
             </Link>
           </div>
+          <div className="hm-noextra">
+            <h3>We don&apos;t charge extra for</h3>
+            <ul className="hm-noextra-list">
+              {NO_EXTRA.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+            <h3 className="hm-noextra-never">And never</h3>
+            <ul className="hm-noextra-list is-never">
+              {NEVER.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
           <ul className="hm-promises">
             <li>{TRIAL_DAYS}-day free trial with everything on</li>
             <li>No card needed to start</li>
-            <li>No marketplace cut on your clients</li>
+            <li>Cancel any time</li>
           </ul>
           <p className="hm-fine">
             Deposits: {DEPOSIT_FEE_PERCENT}% + {DEPOSIT_FEE_FIXED_CENTS}¢ per deposit, which covers
-            card processing. Cancel any time.
+            card processing.
           </p>
         </section>
 
@@ -372,6 +404,7 @@ export default async function HomePage() {
       <footer className="hm-footer">
         <span className="hm-logo hm-logo-small">{BRAND_NAME}</span>
         <nav aria-label="Footer">
+          <Link href="/switch">Switch to {BRAND_NAME}</Link>
           <Link href="/login">Log in</Link>
           <Link href="/terms">Terms</Link>
           <Link href="/privacy">Privacy</Link>
