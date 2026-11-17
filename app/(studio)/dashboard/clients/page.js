@@ -8,6 +8,9 @@ import { getMyPlan } from "@/lib/plan";
 import InviteList from "./InviteList";
 import ImportClients from "./ImportClients";
 import PageHeader from "@/components/dash/PageHeader";
+import { exampleData, examplesOn } from "@/lib/examples";
+import RowList from "@/components/dash/RowList";
+import { ExampleCard, ExampleTag } from "@/components/dash/Example";
 import { BRAND_NAME } from "@/lib/brand";
 import { todayInTimeZone } from "@/lib/availability";
 import { nowLocal } from "@/lib/localTime";
@@ -96,6 +99,13 @@ export default async function ClientsPage({ searchParams }) {
     };
   }
 
+  // Example clients for a new pro (shown until they have real ones).
+  const examples = clients.length === 0 && (await examplesOn(supabase, user.id)) ? exampleData(todayInTimeZone(timeZone)).clients : [];
+  for (const e of examples) {
+    const next = exampleData(todayInTimeZone(timeZone)).upcoming.find((b) => b.client_name === e.name);
+    if (next) nextVisits[e.id] = { date: next.booking_date, time: next.start_time.slice(0, 5), service: next.service_name };
+  }
+
   const standing = {
     services: services || [],
     series: series || [],
@@ -111,7 +121,7 @@ export default async function ClientsPage({ searchParams }) {
     return <p className="message error">Couldn't load your clients: {error.message}</p>;
   }
 
-  const addOpen = add === "client" || clients.length === 0;
+  const addOpen = add === "client" || (clients.length === 0 && examples.length === 0);
   const addClient = (
     <section className="card" id="add-client">
       {/* Open for a new stylist or from "+ Add client"; tucked away otherwise. */}
@@ -160,6 +170,7 @@ export default async function ClientsPage({ searchParams }) {
           clients={clients}
           standing={standing}
           nextVisits={nextVisits}
+          examples={examples}
           upcomingCounts={upcomingCounts}
         />
       </section>
@@ -193,6 +204,35 @@ export default async function ClientsPage({ searchParams }) {
               <PausedNote feature="regulars">
                 Your plan is paused, so new invite links can&apos;t be made.
               </PausedNote>
+            )}
+            {invites.length === 0 && examples.length > 0 && (
+              <>
+                <h3 className="list-title">Your invites</h3>
+                <RowList
+                  label="Clients"
+                  items={[
+                    {
+                      key: "example-invite-1",
+                      example: true,
+                      title: "Jordan Lee",
+                      sub: "(555) 010-0167 · Link not used yet · works for 30 days",
+                      badge: <ExampleTag />,
+                      fullPanel: (
+                        <ExampleCard
+                          title="Invite for Jordan Lee"
+                          facts={[
+                            ["Link", `/book/${stylist.slug}?invite=…`],
+                            ["Works for", "One booking from your Everyone times, within 30 days"],
+                            ["Status", "Sent, not used yet"],
+                          ]}
+                          addHref="/dashboard/clients?add=invite#invite"
+                          addLabel="Make a real invite link"
+                        />
+                      ),
+                    },
+                  ]}
+                />
+              </>
             )}
             {invites.length > 0 && (
               <>

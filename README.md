@@ -22,6 +22,18 @@ and hosted on **Vercel**.
   appointments you pick in Settings (3 to start with).
 - **Forgot password** (`/forgot-password`, linked from Log in): emails a link
   that logs the pro in and opens **Choose a new password** (`/reset-password`).
+- **Example data for new pros** (`lib/examples.js`, step 37 SQL
+  `0042_examples.sql`): new sign-ups see realistic examples in every tab
+  (services, clients incl. a Regular and an Invited client, an invite link,
+  bookings upcoming/completed/owed/no-show/cancelled/late cancel, a slot kept
+  for Regulars, openings incl. Regulars-only, waitlist, notes, wrap-up, events
+  incl. a repeating one that blocks bookings, an intake form and signed waiver),
+  each tagged **Example**. They're drawn by the dashboard only, never saved, so
+  they can't reach the booking page, invites, waitlist, emails, texts, Stripe,
+  stats or limits. Each tab's examples hide once it has real data; opening one
+  explains it and links to the blank form. Settings → Business has **Clear all
+  examples** / **Restore examples** (`stylists.show_examples`: on for new
+  accounts, off for existing ones).
 - **Home** (`/dashboard`, where log in lands, first in the menu): greeting,
   business name, View booking page and Copy link; cards for today's bookings,
   this week's revenue, deposits collected, new clients this month and the

@@ -12,6 +12,7 @@ import PageHeader from "@/components/dash/PageHeader";
 import EmptyState from "@/components/dash/EmptyState";
 import Collapsible from "@/components/dash/Collapsible";
 import RowList from "@/components/dash/RowList";
+import { exampleData, examplesOn } from "@/lib/examples";
 import { BRAND_NAME } from "@/lib/brand";
 
 export const metadata = { title: `Waitlist · ${BRAND_NAME}` };
@@ -65,6 +66,9 @@ export default async function WaitlistPage() {
     return day === today ? `today at ${time}` : `${formatDate(day)} at ${time}`;
   };
 
+  const exampleWaiting =
+    waiting.length === 0 && booked.length === 0 && (await examplesOn(supabase, user.id)) ? exampleData(today).waitlist : [];
+
   const waitingEntries = waiting.map((e) => {
       const told = e.offers.filter((o) => o.notified_at);
       const lastTold = told.map((o) => o.notified_at).sort().pop();
@@ -101,7 +105,13 @@ export default async function WaitlistPage() {
 
       <section className="card">
         <h2>Who&apos;s waiting</h2>
-        {waiting.length === 0 && (
+        {waiting.length === 0 && exampleWaiting.length > 0 && (
+          <>
+            <p className="examples-note">These are example waitlist entries. They go away once real clients join.</p>
+            <WaitingList entries={exampleWaiting} />
+          </>
+        )}
+        {waiting.length === 0 && exampleWaiting.length === 0 && (
           <EmptyState
             title="Nobody is waiting"
             text="When no times work, clients can join from your booking page. They're emailed when a time opens up."

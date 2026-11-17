@@ -15,6 +15,8 @@ import CopyLinkButton from "@/components/dash/CopyLinkButton";
 import { RowChevron } from "@/components/dash/RowList";
 import RegularStar from "@/components/RegularStar";
 import ShareLinkButton from "./ShareLinkButton";
+import { exampleData, examplesOn } from "@/lib/examples";
+import { ExampleTag } from "@/components/dash/Example";
 
 export const metadata = { title: `Home · ${BRAND_NAME}` };
 
@@ -213,6 +215,12 @@ export default async function HomePage() {
   ];
   const setupLeft = setup.filter((s) => !s.done).length;
 
+  // Example Up next rows for a new pro with nothing booked yet.
+  const upNext =
+    !nextUp.error && (nextUp.data || []).length === 0 && (anyBooking.count || 0) === 0 && (await examplesOn(supabase, user.id))
+      ? exampleData(today).upcoming
+      : nextUp.data || [];
+
   const name = String(nameRow?.first_name || "").trim();
   const dateLine = parseDateString(today).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
 
@@ -268,14 +276,14 @@ export default async function HomePage() {
               Today →
             </Link>
           </div>
-          {(nextUp.data || []).length === 0 ? (
+          {upNext.length === 0 ? (
             <div className="db-empty">
               <p className="db-empty-title">Nothing booked yet</p>
               <p className="muted small-text">Open some times and share your booking link.</p>
             </div>
           ) : (
             <ul className="client-rows">
-              {nextUp.data.map((b) => (
+              {upNext.map((b) => (
                 <li key={b.id}>
                   <Link href="/dashboard/bookings" className="client-row booking-row">
                     <span className="booking-row-time">
@@ -286,6 +294,7 @@ export default async function HomePage() {
                       <span className="client-row-name">
                         <span className="client-row-text">{b.client_name}</span>
                         {b.client?.status === "regular" && <RegularStar label="Regular" size={10} />}
+                        {b.example && <ExampleTag />}
                       </span>
                       <span className="client-row-phone">{b.service_name}</span>
                     </span>

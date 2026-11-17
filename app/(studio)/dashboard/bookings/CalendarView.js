@@ -7,6 +7,9 @@
 // Holidays and the stylist's own events (birthdays, practices...) show too.
 // Tapping a day lists its holidays, events and bookings underneath; tapping
 // one opens it, and "Add event" adds one on that day.
+import { ExampleCard, ExampleTag } from "@/components/dash/Example";
+import { outcomeLabel } from "@/lib/outcomes";
+import { formatPrice } from "@/lib/money";
 import { useEffect, useMemo, useState } from "react";
 import { WEEKDAYS, clockTime, formatDate, parseDateString, shortTime, toDateString } from "@/lib/availability";
 import Sheet from "@/components/Sheet";
@@ -302,6 +305,7 @@ export default function CalendarView({ bookings, days, seriesOf, today, hours, b
                       <span className="client-row-main">
                         <span className="client-row-name">
                           <span className="client-row-text">{e.title}</span>
+                          {e.example && <ExampleTag />}
                         </span>
                         <span className="client-row-phone">
                           {e.repeats !== "none" ? "Repeats · " : ""}
@@ -357,7 +361,24 @@ export default function CalendarView({ bookings, days, seriesOf, today, hours, b
         </>
       )}
 
-      {openBooking && (
+      {openBooking?.example && (
+        <Sheet key={openBooking.id} label={openBooking.client_name} backLabel="Calendar" onClose={() => setOpenId(null)}>
+          <ExampleCard
+            title={openBooking.client_name}
+            facts={[
+              ["What", `${openBooking.service_name} · ${formatPrice(openBooking.price_cents)}`],
+              ["When", `${formatDate(openBooking.booking_date)}, ${clockTime(openBooking.start_time)} – ${clockTime(openBooking.end_time)}`],
+              ["Status", openBooking.label],
+              ["Deposit", openBooking.deposit_cents ? `${formatPrice(openBooking.deposit_cents)} ${openBooking.deposit_status === "paid" ? "paid" : "due"}` : "None"],
+              ["How it went", openBooking.outcome ? outcomeLabel(openBooking.outcome) : null],
+              ["Note", openBooking.visit_note],
+            ]}
+            addHref="/dashboard/openings#add-opening"
+            addLabel="Open times so clients can book"
+          />
+        </Sheet>
+      )}
+      {openBooking && !openBooking.example && (
         <Sheet key={openBooking.id} label={openBooking.client_name} backLabel="Calendar" onClose={() => setOpenId(null)}>
           <BookingDetails booking={openBooking} seriesId={seriesOf[openBooking.id]} today={today} />
         </Sheet>
@@ -370,7 +391,19 @@ export default function CalendarView({ bookings, days, seriesOf, today, hours, b
           backLabel="Calendar"
           onClose={() => setEventSheet(null)}
         >
-          {eventSheet.mode === "view" ? (
+          {openEvent?.example ? (
+            <ExampleCard
+              title={openEvent.title}
+              facts={[
+                ["When", openEvent.start_time ? `${clockTime(openEvent.start_time)} – ${clockTime(openEvent.end_time)}` : "All day"],
+                ["Repeats", openEvent.repeats === "weekly" ? "Every week" : "Doesn't repeat"],
+                ["Bookings", openEvent.blocks_bookings ? "Blocked: clients can't book this time" : "Clients can still book"],
+                ["Note", openEvent.note],
+              ]}
+              addHref="/dashboard/bookings?add=event"
+              addLabel="+ Add your own event"
+            />
+          ) : eventSheet.mode === "view" ? (
             <EventDetails
               event={openEvent}
               date={selected}

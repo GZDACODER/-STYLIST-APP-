@@ -1,3 +1,5 @@
+import { exampleData, examplesOn } from "@/lib/examples";
+import { ExampleCard, ExampleTag } from "@/components/dash/Example";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
@@ -160,14 +162,20 @@ export default async function BookingsPage({ searchParams }) {
     const intakeOf = new Map((intakeRows || []).filter((r) => r.needed).map((r) => [r.booking_id, r.on_file]));
     for (const b of upcoming) if (intakeOf.has(b.id)) b.intake = { onFile: intakeOf.get(b.id) };
   }
-  const calendarBookings = [
+  // Examples for a new pro: bookings while they have none (past or
+  // upcoming), events while they have none, cancelled while none.
+  const showExamples = await examplesOn(supabase, user.id);
+  const ex = showExamples ? exampleData(today) : null;
+  const exampleBookings = ex && upcoming.length === 0 && (pastRows || []).length === 0;
+  if (ex && events && events.length === 0) events.push(...ex.events);
+  const calendarBookings = exampleBookings ? [...ex.past.map((b) => ({ ...b, past: true })), ...ex.upcoming] : [
     ...(pastRows || []).map((b) => ({ ...b, past: true, moved: movedText.get(b.id) })),
     ...upcoming,
   ];
 
   // Group by date.
   const days = [];
-  for (const b of upcoming) {
+  for (const b of exampleBookings ? ex.upcoming : upcoming) {
     const last = days[days.length - 1];
     if (last && last.date === b.booking_date) last.bookings.push(b);
     else days.push({ date: b.booking_date, bookings: [b] });
@@ -198,7 +206,12 @@ export default async function BookingsPage({ searchParams }) {
       />
       <section className="card">
 
-        {upcoming.length === 0 && (pastRows || []).length === 0 && (
+        {exampleBookings && (
+          <p className="examples-note">
+            These are example bookings and events. They go away once you have real ones.
+          </p>
+        )}
+        {upcoming.length === 0 && (pastRows || []).length === 0 && !exampleBookings && (
           <p className="muted">
             No bookings yet. <Link href="/dashboard/openings">Open some times</Link> and share
             your booking link.
@@ -244,6 +257,36 @@ export default async function BookingsPage({ searchParams }) {
         </section>
       )}
 
+      {cancelled.length === 0 && exampleBookings && (
+        <Collapsible title="Cancelled" count={ex.cancelled.length}>
+          <RowList
+            label="Calendar"
+            items={ex.cancelled.map((b) => ({
+              key: b.id,
+              example: true,
+              title: b.client_name,
+              sub: `${formatDate(b.booking_date)} · ${clockTime(b.start_time)} · ${b.service_name}`,
+              badge: <ExampleTag />,
+              fullPanel: (
+                <ExampleCard
+                  title={b.client_name}
+                  facts={[
+                    ["Was booked for", `${formatDate(b.booking_date)} at ${clockTime(b.start_time)}`],
+                    ["Service", b.service_name],
+                    ["What happened", b.label],
+                    [
+                      "Deposit",
+                      b.late
+                        ? `${formatPrice(b.deposit_cents)} kept (cancelled inside your policy window)`
+                        : "None",
+                    ],
+                  ]}
+                />
+              ),
+            }))}
+          />
+        </Collapsible>
+      )}
       {cancelled.length > 0 && (
         <Collapsible title="Cancelled" count={cancelled.length}>
           <RowList

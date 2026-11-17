@@ -3,6 +3,8 @@
 // "Upcoming bookings": one slim row per booking under each day (time, name,
 // service, price, small badges). Tapping a row opens the details in a
 // panel: contact, deposit, and Cancel (or the standing visit controls).
+import { ExampleCard, ExampleTag } from "@/components/dash/Example";
+import { outcomeLabel as exampleOutcome } from "@/lib/outcomes";
 import { useEffect, useState } from "react";
 import { clockTime, formatDate } from "@/lib/availability";
 import { displayPhone } from "@/lib/phone";
@@ -22,7 +24,7 @@ export function BookingRow({ booking: b, standing, onOpen }) {
   const status = b.client?.status;
   return (
     <li>
-      <button type="button" className="client-row booking-row" onClick={onOpen} aria-haspopup="dialog">
+      <button type="button" className={b.example ? "client-row booking-row is-example" : "client-row booking-row"} onClick={onOpen} aria-haspopup="dialog">
         <span className="booking-row-time">
           <strong>{clockTime(b.start_time)}</strong>
           <span>{clockTime(b.end_time)}</span>
@@ -32,6 +34,7 @@ export function BookingRow({ booking: b, standing, onOpen }) {
             <span className="client-row-text">{b.client_name}</span>
             {status === "regular" && <RegularStar label="Regular" size={10} />}
             {status === "blocked" && <span className="badge blocked row-badge">Blocked</span>}
+            {b.example && <ExampleTag />}
           </span>
           <span className="client-row-phone">
             {b.service_name} · {formatPrice(b.price_cents)}
@@ -54,6 +57,24 @@ export function BookingRow({ booking: b, standing, onOpen }) {
 }
 
 export function BookingDetails({ booking: b, seriesId, today }) {
+  // Example bookings (lib/examples.js): read-only, no Cancel or Refund.
+  if (b.example) {
+    return (
+      <ExampleCard
+        title={b.client_name}
+        facts={[
+          ["What", `${b.service_name} · ${formatPrice(b.price_cents)}`],
+          ["When", `${formatDate(b.booking_date)}, ${clockTime(b.start_time)} – ${clockTime(b.end_time)}`],
+          ["Status", b.label],
+          ["Deposit", b.deposit_cents ? `${formatPrice(b.deposit_cents)} ${b.deposit_status === "paid" ? "paid" : "due"}` : "None"],
+          ["How it went", b.outcome ? exampleOutcome(b.outcome) : null],
+          ["Note", b.visit_note],
+        ]}
+        addHref="/dashboard/openings#add-opening"
+        addLabel="Open times so clients can book"
+      />
+    );
+  }
   const status = b.client?.status;
   return (
     <div className="client-card booking-details">

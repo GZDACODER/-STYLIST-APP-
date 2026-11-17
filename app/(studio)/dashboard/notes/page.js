@@ -8,6 +8,7 @@ import { nowLocal } from "@/lib/localTime";
 import { BRAND_NAME } from "@/lib/brand";
 import NotesView from "./NotesView";
 import PageHeader from "@/components/dash/PageHeader";
+import { exampleData, examplesOn } from "@/lib/examples";
 
 export const metadata = { title: `Notes · ${BRAND_NAME}` };
 
@@ -85,6 +86,31 @@ export default async function NotesPage() {
   // The general notes from each client's card, shown at the top of their notes.
   const cardNotes = {};
   for (const c of clientRows || []) if (c.notes) cardNotes[c.id] = c.notes;
+
+  // Examples for a new pro with no finished visits yet.
+  if (visits.length === 0 && (await examplesOn(supabase, user.id))) {
+    const ex = exampleData(today);
+    for (const b of ex.past) {
+      const card = ex.clients.find((c) => c.name === b.client_name);
+      visits.push({
+        id: b.id,
+        example: true,
+        date: b.booking_date,
+        start: b.start_time.slice(0, 5),
+        end: b.end_time.slice(0, 5),
+        clientKey: card.id,
+        clientName: b.client_name,
+        status: card.status,
+        service: b.service_name,
+        priceCents: b.price_cents,
+        depositCents: b.deposit_status === "paid" ? b.deposit_cents : 0,
+        outcome: b.outcome,
+        note: b.visit_note,
+        owedCents: b.owed_cents,
+      });
+      if (card.notes) cardNotes[card.id] = card.notes;
+    }
+  }
 
   return (
     <>

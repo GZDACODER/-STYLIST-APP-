@@ -10,6 +10,8 @@ import RegularStar from "@/components/RegularStar";
 import Sheet from "@/components/Sheet";
 import RemoveEntryButton from "./RemoveEntryButton";
 import ShowMore from "@/components/dash/ShowMore";
+import { ExampleCard, ExampleTag } from "@/components/dash/Example";
+import { displayPhone as phoneText } from "@/lib/phone";
 
 const STATUS_LABELS = { regular: "Regular", new: "New", blocked: "Blocked" };
 
@@ -32,7 +34,7 @@ export default function WaitingList({ entries }) {
           <li key={e.id}>
             <button
               type="button"
-              className="client-row"
+              className={e.example ? "client-row is-example" : "client-row"}
               onClick={() => setOpenId(e.id)}
               aria-haspopup="dialog"
             >
@@ -42,6 +44,7 @@ export default function WaitingList({ entries }) {
                   {e.status === "regular" && <RegularStar label="Regular" size={10} />}
                   {e.status === "blocked" && <span className="badge blocked row-badge">Blocked</span>}
                   {e.stuckCount > 0 && <span className="badge blocked row-badge">Email problem</span>}
+                  {e.example && <ExampleTag />}
                 </span>
                 <span className="client-row-phone">
                   {e.service} · {e.wishes}
@@ -65,7 +68,27 @@ export default function WaitingList({ entries }) {
         ))}
       </ShowMore>
 
-      {open && (
+      {open?.example && (
+        <Sheet key={open.id} label={open.name} backLabel="Waitlist" onClose={() => setOpenId(null)}>
+          <ExampleCard
+            title={open.name}
+            facts={[
+              ["Service", open.service],
+              ["Would like", open.wishes],
+              ["Phone", phoneText(open.phone)],
+              ["Email", open.email],
+              ["Joined", open.joined],
+              ["Told about openings", open.toldCount ? `${open.toldCount} time${open.toldCount > 1 ? "s" : ""}` : "Not yet"],
+            ]}
+          >
+            <p className="muted small-text">
+              Clients join from your booking page when no times work. When a matching time opens, they&apos;re
+              emailed a &quot;Claim this time&quot; link; first to claim it gets it.
+            </p>
+          </ExampleCard>
+        </Sheet>
+      )}
+      {open && !open.example && (
         <Sheet key={open.id} label={open.name} backLabel="Waitlist" onClose={() => setOpenId(null)}>
           <div className="client-card">
             <div className="client-top">

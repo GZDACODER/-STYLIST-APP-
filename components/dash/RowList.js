@@ -4,8 +4,9 @@
 // optional badge and a chevron; tapping it opens the details in a panel
 // (slides in on iPad, full screen on phones). 20 rows, then Show more.
 //
-// items: [{ key, title, sub, badge, panel }] — panel is what the details
-// panel shows (any content, forms included); without one the row is plain.
+// items: [{ key, title, sub, badge, panel, fullPanel, example }] — panel is
+// what the details panel shows under the title (forms included); fullPanel
+// replaces the whole panel (examples). Without either the row is plain.
 // label: the panel's back link ("Calendar", "Services"...).
 import { useState } from "react";
 import Sheet from "@/components/Sheet";
@@ -41,8 +42,8 @@ export default function RowList({ items, label = "Back", noun = "more" }) {
       <ShowMore className="client-rows" noun={noun}>
         {items.map((item) => (
           <li key={item.key}>
-            {item.panel ? (
-              <button type="button" className="client-row" onClick={() => setOpenKey(item.key)} aria-haspopup="dialog">
+            {item.panel || item.fullPanel ? (
+              <button type="button" className={item.example ? "client-row is-example" : "client-row"} onClick={() => setOpenKey(item.key)} aria-haspopup="dialog">
                 <RowBody item={item} />
                 <RowChevron />
               </button>
@@ -54,6 +55,11 @@ export default function RowList({ items, label = "Back", noun = "more" }) {
           </li>
         ))}
       </ShowMore>
+      {open?.fullPanel && (
+        <Sheet key={open.key} label={String(open.title)} backLabel={label} onClose={() => setOpenKey(null)}>
+          {open.fullPanel}
+        </Sheet>
+      )}
       {open?.panel && (
         <Sheet key={open.key} label={String(open.title)} backLabel={label} onClose={() => setOpenKey(null)}>
           <div className="client-card">
