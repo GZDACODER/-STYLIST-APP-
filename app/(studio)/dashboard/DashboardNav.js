@@ -5,6 +5,12 @@ import { usePathname } from "next/navigation";
 
 // Thin line icons, drawn for this app (24 x 24, 1.4px strokes).
 const ICONS = {
+  home: (
+    <>
+      <path d="M3.5 11 12 4l8.5 7" />
+      <path d="M5.5 9.5v11h13v-11M10 20.5v-5.5h4v5.5" />
+    </>
+  ),
   today: (
     <>
       <circle cx="12" cy="12" r="4.2" />
@@ -61,13 +67,15 @@ const ICONS = {
 // "also": other pages that live under this item (Services and Working hours
 // are reached from Settings).
 const ITEMS = [
-  { href: "/dashboard", label: "Today", icon: "today", exact: true },
+  { href: "/dashboard", label: "Home", icon: "home", exact: true },
+  // In the side menu only: the phone tab bar is full (Home links to it).
+  { href: "/dashboard/today", label: "Today", icon: "today", wide: true },
   { href: "/dashboard/bookings", label: "Calendar", icon: "calendar" },
   { href: "/dashboard/clients", label: "Clients", icon: "clients" },
   { href: "/dashboard/openings", label: "Openings", icon: "openings" },
   { href: "/dashboard/waitlist", label: "Waitlist", icon: "waitlist" },
   { href: "/dashboard/notes", label: "Notes", icon: "notes", also: ["/dashboard/wrapup"] },
-  // In the side menu only: the phone tab bar is full (Today links to it).
+  // In the side menu only: the phone tab bar is full (Home links to it).
   { href: "/dashboard/reports", label: "Reports", icon: "reports", wide: true },
   {
     href: "/dashboard/settings",

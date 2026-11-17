@@ -44,6 +44,7 @@ function message(error) {
 
 function refresh() {
   revalidatePath("/dashboard");
+  revalidatePath("/dashboard/today");
   revalidatePath("/dashboard/bookings");
   revalidatePath("/dashboard/clients");
 }

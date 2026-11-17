@@ -39,6 +39,7 @@ export async function setVisitNote(bookingId, note, owed) {
   }
 
   revalidatePath("/dashboard");
+  revalidatePath("/dashboard/today");
   revalidatePath("/dashboard/notes");
   revalidatePath("/dashboard/wrapup");
   return { success: true };

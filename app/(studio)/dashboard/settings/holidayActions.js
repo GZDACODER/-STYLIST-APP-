@@ -43,6 +43,7 @@ export async function setHolidayClosed(prevState, formData) {
   revalidatePath("/dashboard/availability");
   revalidatePath("/dashboard/bookings");
   revalidatePath("/dashboard");
+  revalidatePath("/dashboard/today");
 
   if (!closed) return { success: `Open on ${holiday.name} again.`, key };
 
@@ -104,6 +105,7 @@ export async function setHolidayDateClosed(prevState, formData) {
   revalidatePath("/dashboard/bookings");
   revalidatePath("/dashboard/availability");
   revalidatePath("/dashboard");
+  revalidatePath("/dashboard/today");
   if (!closed) return { success: `Open on ${formatDate(date)} again.` };
 
   const { data: clashes } = await supabase
