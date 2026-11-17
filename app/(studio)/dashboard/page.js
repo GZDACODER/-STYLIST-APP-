@@ -15,6 +15,8 @@ import CopyLinkButton from "@/components/dash/CopyLinkButton";
 import { RowChevron } from "@/components/dash/RowList";
 import RegularStar from "@/components/RegularStar";
 import ShareLinkButton from "./ShareLinkButton";
+import FeedbackPrompt from "./FeedbackPrompt";
+import { isAdmin } from "@/lib/admin";
 import { exampleData, examplesOn } from "@/lib/examples";
 import { ExampleTag } from "@/components/dash/Example";
 
@@ -221,6 +223,16 @@ export default async function HomePage() {
       ? exampleData(today).upcoming
       : nextUp.data || [];
 
+  // Trial feedback: from day 3 of the free trial until they've sent some.
+  let askFeedback = false;
+  if (plan.inTrial && !plan.comped && !plan.subscribed && plan.daysLeft <= 11) {
+    const { count, error: fbError } = await supabase
+      .from("trial_feedback")
+      .select("id", { count: "exact", head: true })
+      .eq("stylist_id", user.id);
+    askFeedback = !fbError && !count;
+  }
+
   const name = String(nameRow?.first_name || "").trim();
   const dateLine = parseDateString(today).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
 
@@ -239,6 +251,8 @@ export default async function HomePage() {
           </>
         }
       />
+
+      {askFeedback && <FeedbackPrompt daysLeft={plan.daysLeft} />}
 
       {setupLeft > 0 && (
         <section className="card home-setup">
@@ -345,7 +359,14 @@ export default async function HomePage() {
         </div>
         <p className="muted small-text home-more-links">
           <Link href="/dashboard/today">Today</Link> · <Link href="/dashboard/reports">Reports</Link> ·{" "}
-          <Link href="/dashboard/wrapup">Wrap up visits</Link>
+          <Link href="/dashboard/wrapup">Wrap up visits</Link> ·{" "}
+          <Link href="/dashboard/feedback">Share feedback</Link>
+          {isAdmin(user) && (
+            <>
+              {" "}
+              · <Link href="/dashboard/admin/feedback">Trial feedback (admin)</Link>
+            </>
+          )}
         </p>
       </section>
     </>

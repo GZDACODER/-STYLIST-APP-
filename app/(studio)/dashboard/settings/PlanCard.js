@@ -145,6 +145,10 @@ export default function PlanCard({ plan, billingNotice, canPay, assistantAvailab
         ))}
 
       <p className="muted small-text">
+        <a href="/dashboard/feedback">Share feedback</a> about Clientele: what&apos;s working, what isn&apos;t, what
+        would help.
+      </p>
+      <p className="muted small-text">
         Team members are {formatPrice(PLANS.team.monthlyCents)}/mo ({formatPrice(PLANS.team.yearlyCents)}/yr)
         each, half the price of the plan.
       </p>
