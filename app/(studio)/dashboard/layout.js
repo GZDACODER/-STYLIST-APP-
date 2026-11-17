@@ -8,6 +8,8 @@ import CreateStylistForm from "./CreateStylistForm";
 import { getMyPlan } from "@/lib/plan";
 import DashboardNav from "./DashboardNav";
 import AssistantWidget from "./assistant/AssistantWidget";
+import { PLANS } from "@/lib/plans";
+import { formatPrice } from "@/lib/money";
 import "./dashboard.css";
 
 // The same serif as the public booking page.
@@ -53,9 +55,12 @@ export default async function DashboardLayout({ children }) {
   }
 
   const plan = stylist ? await getMyPlan(supabase, user.id) : null;
-  // The pop-up Assistant: switched on for the app (ANTHROPIC_API_KEY in
-  // Vercel) and on this account's plan (the add-on, or the free trial).
-  const assistantOn = Boolean(stylist && process.env.ANTHROPIC_API_KEY && plan?.has.assistant);
+  // The pop-up Assistant: its button shows for every pro once it's switched
+  // on for the app (ANTHROPIC_API_KEY in Vercel). Without it on their plan
+  // (the add-on, or the free trial) it opens an "Add the Assistant" card
+  // instead of the chat.
+  const assistantOn = Boolean(stylist && process.env.ANTHROPIC_API_KEY);
+  const assistantLocked = !plan?.has.assistant;
   let firstName = "";
   if (assistantOn) {
     const { data: nameRow } = await supabase.from("stylists").select("first_name").eq("id", user.id).maybeSingle();
@@ -123,7 +128,13 @@ export default async function DashboardLayout({ children }) {
           {children}
         </div>
       </main>
-      {assistantOn && <AssistantWidget firstName={firstName} />}
+      {assistantOn && (
+        <AssistantWidget
+          firstName={firstName}
+          locked={assistantLocked}
+          price={`${formatPrice(PLANS.assistant.monthlyCents).replace(/\.00$/, "")}/mo`}
+        />
+      )}
     </div>
   );
 }
