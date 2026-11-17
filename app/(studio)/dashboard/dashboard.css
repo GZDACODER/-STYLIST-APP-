@@ -4606,3 +4606,9 @@ body:has(dialog.client-sheet[open]) {
     white-space: normal;
   }
 }
+
+.aw-unlock {
+  display: inline-block;
+  margin-top: 4px;
+  text-decoration: none;
+}

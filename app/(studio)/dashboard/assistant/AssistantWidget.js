@@ -44,7 +44,10 @@ function Sparkle({ size = 22 }) {
   );
 }
 
-export default function AssistantWidget({ firstName = "" }) {
+// locked: the Assistant isn't on this account's plan (no add-on, trial over).
+// The button still shows; opening it explains the add-on and links to Plan &
+// billing instead of the chat (the server refuses chat requests anyway).
+export default function AssistantWidget({ firstName = "", locked = false, price = "$15/mo" }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([]);
@@ -160,6 +163,24 @@ export default function AssistantWidget({ firstName = "" }) {
             </button>
           </header>
 
+          {locked ? (
+            <div className="aw-log">
+              <div className="aw-welcome">
+                <p className="aw-bubble bot">
+                  Hi{hello ? ` ${hello}` : ""}! I can answer questions about your schedule and make changes in your
+                  own words, like &quot;block off Friday afternoon&quot; or &quot;who&apos;s booked tomorrow?&quot;. I
+                  always check with you before changing anything.
+                </p>
+                <p className="aw-note ok">
+                  The Assistant is an add-on for {price}. Add it in Plan &amp; billing to start chatting.
+                </p>
+                <a href="/dashboard/settings/plan" className="aw-btn primary aw-unlock">
+                  Add the Assistant
+                </a>
+              </div>
+            </div>
+          ) : (
+          <>
           <div className="aw-log" aria-live="polite">
             {shown.length === 0 && !busy && (
               <div className="aw-welcome">
@@ -239,6 +260,8 @@ export default function AssistantWidget({ firstName = "" }) {
               </svg>
             </button>
           </form>
+          </>
+          )}
         </section>
       )}
 
