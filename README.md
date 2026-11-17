@@ -96,8 +96,11 @@ and hosted on **Vercel**.
   Events have a colour, repeat every day, every week or every 2 weeks on chosen
   days, or monthly on a date or a weekday ("2nd Tuesday", "last Friday"), and a
   repeating event can be edited or deleted for this date, this and following, or
-  all dates. **Close on holidays** (Settings → Holidays) closes the business on
-  any federal holiday: no bookings, waitlist offers or standing visits that day.
+  all dates. **Close on holidays**: tap a federal holiday on the Calendar for
+  "Closed this holiday" (that date only, saved as a blocked date "Closed –
+  Thanksgiving") or "Close every year"; all of them are listed in Settings →
+  Working hours → Holidays. A closed holiday has no bookings, waitlist offers or
+  standing visits, and is shaded like a day off.
   The Openings page shows which parts of an opening are blocked. Run
   `supabase/migrations/0039_calendar_extras.sql`.
 - **Make the Switch** (`/switch`): the guide for pros moving from another app:

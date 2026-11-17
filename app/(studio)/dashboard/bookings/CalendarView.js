@@ -14,6 +14,7 @@ import BookingList, { BookingDetails, BookingRow } from "./BookingList";
 import { EventDetails, EventForm } from "./CalendarEvents";
 import { colorOf, eventOccursOn, eventsOn } from "@/lib/calendarEvents";
 import { holidaysOn } from "@/lib/holidays";
+import { HolidayDayControls } from "../settings/HolidaySettings";
 
 const MONTHS_BACK = 12;
 const MONTHS_AHEAD = 12;
@@ -31,7 +32,12 @@ const monthIndex = (dateText) => {
 // closedHolidays: keys of the federal holidays the business closes on.
 export default function CalendarView({ bookings, days, seriesOf, today, hours, blocked, events, closedHolidays = [] }) {
   const closedSet = new Set(closedHolidays);
-  const closedOn = (dateText) => holidaysOn(dateText).find((h) => h.key && closedSet.has(h.key));
+  // A federal holiday the business is closed on: every year (Settings), or
+  // just this date (a blocked date saved as "Closed – Thanksgiving").
+  const closedOn = (dateText) =>
+    holidaysOn(dateText).find(
+      (h) => h.key && (closedSet.has(h.key) || blocked[dateText] === `Closed – ${h.name}`)
+    );
   const [view, setView] = useState("month");
   const [month, setMonth] = useState(() => monthIndex(today));
   const [selected, setSelected] = useState(today);
@@ -69,7 +75,9 @@ export default function CalendarView({ bookings, days, seriesOf, today, hours, b
   const hasHours = Object.keys(hours).length > 0;
 
   function dayKind(dateText) {
-    if (blocked[dateText] !== undefined || closedOn(dateText)) return "blocked";
+    // Closed for a holiday: shaded like a day off.
+    if (closedOn(dateText)) return "off";
+    if (blocked[dateText] !== undefined) return "blocked";
     const h = hours[parseDateString(dateText).getDay()];
     if (hasHours && h && !h.is_working) return "off";
     return "";
@@ -130,12 +138,15 @@ export default function CalendarView({ bookings, days, seriesOf, today, hours, b
           </span>
         )}
         <span className="mc-items">
-          {holidays.slice(0, 1).map((h) => (
-            <span key={h.name} className={`mc-holiday${h.federal ? " federal" : ""}`}>
-              {h.name}
-              {h.key && closedSet.has(h.key) ? " · Closed" : ""}
-            </span>
-          ))}
+          {closedOn(dateText) ? (
+            <span className="mc-tag mc-closed">Closed – {closedOn(dateText).name}</span>
+          ) : (
+            holidays.slice(0, 1).map((h) => (
+              <span key={h.name} className={`mc-holiday${h.federal ? " federal" : ""}`}>
+                {h.name}
+              </span>
+            ))
+          )}
           {dayEvents.slice(0, 2).map((e) => (
             <span key={e.id} className={`mc-event${e.blocks_bookings ? " blocks" : ""}`} style={{ borderLeftColor: colorOf(e) }}>
               {e.start_time && <b>{shortTime(String(e.start_time).slice(0, 5)).replace(/ /g, "")}</b>} {e.title}
@@ -149,7 +160,7 @@ export default function CalendarView({ bookings, days, seriesOf, today, hours, b
           ))}
           {list.length > 3 && <span className="mc-more">+{list.length - 3} more</span>}
           {list.length === 0 && kind === "blocked" && <span className="mc-tag">Blocked</span>}
-          {list.length === 0 && kind === "off" && <span className="mc-tag">Off</span>}
+          {list.length === 0 && kind === "off" && !closedOn(dateText) && <span className="mc-tag">Off</span>}
         </span>
       </button>
     );
@@ -255,13 +266,22 @@ export default function CalendarView({ bookings, days, seriesOf, today, hours, b
               </span>
             </div>
             {selHolidays.map((h) => (
-              <p key={h.name} className="mc-day-holiday">
-                {h.name}
-                {h.federal && <span className="muted small-text"> · Federal holiday</span>}
-                {h.key && closedSet.has(h.key) && (
-                  <span className="muted small-text"> · You&apos;re closed: no bookings (Settings → Holidays)</span>
+              <div key={h.name}>
+                <p className="mc-day-holiday">
+                  {closedOn(selected)?.key === h.key ? `Closed – ${h.name}` : h.name}
+                  {h.federal && <span className="muted small-text"> · Federal holiday</span>}
+                  {closedOn(selected)?.key === h.key && <span className="muted small-text"> · no bookings this day</span>}
+                </p>
+                {h.key && events && (
+                  <HolidayDayControls
+                    key={`${selected}-${h.key}-${closedSet.has(h.key)}-${blocked[selected] || ""}`}
+                    holiday={h}
+                    date={selected}
+                    closedThisDate={blocked[selected] === `Closed – ${h.name}`}
+                    closedEveryYear={closedSet.has(h.key)}
+                  />
                 )}
-              </p>
+              </div>
             ))}
             {selEvents.length > 0 && (
               <ul className="client-rows event-rows">
@@ -301,7 +321,7 @@ export default function CalendarView({ bookings, days, seriesOf, today, hours, b
             {selKind === "blocked" && (
               <p className="muted small-text">Blocked{blocked[selected] ? `: ${blocked[selected]}` : ""}</p>
             )}
-            {selKind === "off" && <p className="muted small-text">Day off (from your working hours)</p>}
+            {selKind === "off" && !closedOn(selected) && <p className="muted small-text">Day off (from your working hours)</p>}
             {!selKind && hasHours && selHours?.is_working && dayList.length === 0 && (
               <p className="muted small-text">
                 Working {clockTime(selHours.start_time)} – {clockTime(selHours.end_time)}. No bookings.

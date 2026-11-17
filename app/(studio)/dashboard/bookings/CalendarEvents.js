@@ -101,8 +101,10 @@ export function EventForm({ event, date, scope = "all", onSaved }) {
           required
         />
       </label>
+      {/* Always sent, "on" or "off", so a timed event can never be saved as all day. */}
+      <input type="hidden" name="all_day" value={allDay ? "on" : "off"} />
       <label className="check-row">
-        <input type="checkbox" name="all_day" checked={allDay} onChange={(e) => setAllDay(e.target.checked)} />
+        <input type="checkbox" checked={allDay} onChange={(e) => setAllDay(e.target.checked)} />
         <span>All day</span>
       </label>
       {!allDay && (

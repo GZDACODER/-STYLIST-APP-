@@ -58,6 +58,8 @@ export async function saveEvent(prevState, formData) {
   const id = String(formData.get("id") || "");
   const title = String(formData.get("title") || "").trim();
   const startsOn = String(formData.get("starts_on") || "");
+  // All day only when asked for ("on"), never because times are missing
+  // from the form; a timed event needs both times (checked below).
   const allDay = formData.get("all_day") === "on";
   const start = String(formData.get("start_time") || "");
   const end = String(formData.get("end_time") || "");

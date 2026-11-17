@@ -3837,3 +3837,19 @@ body:has(dialog.client-sheet[open]) {
 .db .holiday-switch.on .holiday-switch-knob {
   background: var(--error);
 }
+
+/* Calendar: a holiday the business is closed on, and its two switches. */
+.db .mc-tag.mc-closed {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.db .holiday-day {
+  margin: 4px 0 12px;
+  border-top: 1px solid var(--hair);
+}
+
+.db .holiday-switch:disabled {
+  opacity: 0.6;
+  cursor: default;
+}

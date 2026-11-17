@@ -40,6 +40,7 @@ export async function setHolidayClosed(prevState, formData) {
   if (!closed) await runWaitlistSafely(user.id, await siteOrigin());
 
   revalidatePath("/dashboard/settings");
+  revalidatePath("/dashboard/availability");
   revalidatePath("/dashboard/bookings");
   revalidatePath("/dashboard");
 
@@ -64,4 +65,58 @@ export async function setHolidayClosed(prevState, formData) {
     }
   }
   return { success: `Closed on ${holiday.name}${next ? ` (next: ${formatDate(next)})` : ""}.`, warning, key };
+}
+
+// "Closed – Thanksgiving" (the label a one-off holiday closure is saved with).
+const closedLabel = (name) => `Closed – ${name}`;
+
+// Calendar: close (or reopen) on ONE date of a holiday, e.g. just this
+// Thanksgiving. Saved as a blocked date with the reason "Closed – <name>",
+// so it works like any day off and needs no extra SQL.
+export async function setHolidayDateClosed(prevState, formData) {
+  const key = String(formData.get("holiday_key") || "");
+  const date = String(formData.get("date") || "");
+  const closed = formData.get("closed") === "on";
+  const holiday = FEDERAL_HOLIDAYS.find((h) => h.key === key);
+  if (!holiday || nextHolidayDate(key, date) !== date) return { error: "That isn't the date of this holiday." };
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Please log in again." };
+
+  const reason = closedLabel(holiday.name);
+  if (closed) {
+    const { error } = await supabase
+      .from("blocked_dates")
+      .upsert({ stylist_id: user.id, blocked_on: date, reason }, { onConflict: "stylist_id,blocked_on", ignoreDuplicates: true });
+    if (error) return { error: error.message };
+  } else {
+    // Only the holiday closure: a day blocked for another reason stays blocked.
+    const { error } = await supabase.from("blocked_dates").delete().eq("blocked_on", date).eq("reason", reason);
+    if (error) return { error: error.message };
+    await runWaitlistSafely(user.id, await siteOrigin());
+  }
+  const { error: refillError } = await supabase.rpc("standing_refill_mine");
+  if (refillError && !/standing_refill_mine/.test(refillError.message)) console.error("standing_refill_mine failed", refillError.message);
+
+  revalidatePath("/dashboard/bookings");
+  revalidatePath("/dashboard/availability");
+  revalidatePath("/dashboard");
+  if (!closed) return { success: `Open on ${formatDate(date)} again.` };
+
+  const { data: clashes } = await supabase
+    .from("bookings")
+    .select("client_name, start_time")
+    .eq("status", "confirmed")
+    .eq("booking_date", date)
+    .order("start_time");
+  const warning = clashes?.length
+    ? `${clashes.length === 1 ? "A booking is" : `${clashes.length} bookings are`} already that day: ${clashes
+        .slice(0, 5)
+        .map((b) => `${b.client_name} at ${clockTime(b.start_time)}`)
+        .join("; ")}. ${clashes.length === 1 ? "It stays" : "They stay"} booked; move or cancel ${clashes.length === 1 ? "it" : "them"} if you need to.`
+    : null;
+  return { success: `Closed on ${formatDate(date)}.`, warning };
 }
