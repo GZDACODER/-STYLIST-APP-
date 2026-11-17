@@ -5,6 +5,8 @@ import { deleteOpening, setDayVisibility, setOpeningVisibility } from "./actions
 import { clockTime, formatDate } from "@/lib/availability";
 import VisibilitySwitch from "@/components/VisibilitySwitch";
 import ConfirmAction from "@/components/ConfirmAction";
+import EmptyState from "@/components/dash/EmptyState";
+import ShowMore from "@/components/dash/ShowMore";
 
 // Applies a visibility change to one opening ({ id }) or a whole day ({ date }).
 function applyChange(openings, change) {
@@ -31,7 +33,17 @@ export default function OpeningsList({ openings, bookingCounts, blockedBy = {}, 
   }
 
   if (shown.length === 0) {
-    return <p className="muted">No upcoming openings. Post some above so clients can book.</p>;
+    return (
+      <EmptyState
+        title="No upcoming openings"
+        text="Open some times so clients can book."
+        action={
+          <a href="#add-opening" className="button small">
+            + Add opening
+          </a>
+        }
+      />
+    );
   }
 
   // Group by date.
@@ -45,7 +57,7 @@ export default function OpeningsList({ openings, bookingCounts, blockedBy = {}, 
   return (
     <>
       {error && <p className="message error">Couldn't save: {error}</p>}
-      <ul className="day-list">
+      <ShowMore className="day-list" noun="more days">
         {days.map((day) => {
           const kinds = new Set(day.openings.map((o) => o.visibility));
           const dayValue = kinds.size === 1 ? [...kinds][0] : "mixed";
@@ -121,7 +133,7 @@ export default function OpeningsList({ openings, bookingCounts, blockedBy = {}, 
             </li>
           );
         })}
-      </ul>
+      </ShowMore>
     </>
   );
 }

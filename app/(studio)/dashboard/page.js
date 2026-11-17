@@ -1,3 +1,4 @@
+import PageHeader from "@/components/dash/PageHeader";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -271,10 +272,7 @@ export default async function TodayPage() {
 
   return (
     <>
-      <header className="db-greeting">
-        <p className="db-date">{dateLine}</p>
-        <h1>{greetingLine(tz, firstNameRow?.first_name)}</h1>
-      </header>
+      <PageHeader eyebrow={dateLine} title={greetingLine(tz, firstNameRow?.first_name)} />
 
       <section className="db-stats" aria-label="This week">
         {stats.map((s) => (

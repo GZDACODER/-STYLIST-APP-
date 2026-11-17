@@ -1,5 +1,6 @@
 // Wrap up visits: how did each finished visit go? Linked from the 8 PM
 // email and from the Today page. Shows the last 14 days.
+import PageHeader from "@/components/dash/PageHeader";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -135,13 +136,16 @@ export default async function WrapupPage() {
 
   return (
     <>
+      <PageHeader
+        title="Wrap up visits"
+        subtitle="How did each visit go? No-shows and balances owed show on the client's History and your Today page. Nothing is charged or refunded automatically."
+        actions={
+          <Link href="/dashboard/notes" className="button secondary small">
+            Notes
+          </Link>
+        }
+      />
       <section className="card">
-        <h2>Wrap up visits</h2>
-        <p className="muted small-text">
-          How did each visit go? No-shows and balances owed show on the client&apos;s History and
-          your Today page. Nothing is charged or refunded automatically. ·{" "}
-          <Link href="/dashboard">Back to Today</Link>
-        </p>
 
         {toMark.length === 0 && <p className="db-quiet">All caught up. Nothing to wrap up.</p>}
 

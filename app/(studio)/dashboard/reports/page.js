@@ -1,6 +1,7 @@
 // Reports: revenue, visits, no-shows, Regulars vs new clients, deposits and
 // balances owed, for a period (this month by default), compared with the
 // period before. Worked out from the bookings already stored; see lib/reports.js.
+import PageHeader from "@/components/dash/PageHeader";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { todayInTimeZone } from "@/lib/availability";
@@ -58,10 +59,10 @@ export default async function ReportsPage({ searchParams }) {
   }
   if (rows === null) {
     return (
-      <section className="card">
-        <h2>Reports</h2>
+      <>
+        <PageHeader title="Reports" />
         <p className="message error">Couldn&apos;t load your bookings: {loadError?.message}</p>
-      </section>
+      </>
     );
   }
 

@@ -9,6 +9,7 @@ import { displayPhone } from "@/lib/phone";
 import RegularStar from "@/components/RegularStar";
 import Sheet from "@/components/Sheet";
 import RemoveEntryButton from "./RemoveEntryButton";
+import ShowMore from "@/components/dash/ShowMore";
 
 const STATUS_LABELS = { regular: "Regular", new: "New", blocked: "Blocked" };
 
@@ -26,7 +27,7 @@ export default function WaitingList({ entries }) {
 
   return (
     <>
-      <ul className="client-rows">
+      <ShowMore className="client-rows" noun="more">
         {entries.map((e) => (
           <li key={e.id}>
             <button
@@ -62,7 +63,7 @@ export default function WaitingList({ entries }) {
             </button>
           </li>
         ))}
-      </ul>
+      </ShowMore>
 
       {open && (
         <Sheet key={open.id} label={open.name} backLabel="Waitlist" onClose={() => setOpenId(null)}>

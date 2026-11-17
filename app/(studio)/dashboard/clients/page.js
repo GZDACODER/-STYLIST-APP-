@@ -7,13 +7,15 @@ import PausedNote from "@/components/PausedNote";
 import { getMyPlan } from "@/lib/plan";
 import InviteList from "./InviteList";
 import ImportClients from "./ImportClients";
+import PageHeader from "@/components/dash/PageHeader";
 import { BRAND_NAME } from "@/lib/brand";
 import { todayInTimeZone } from "@/lib/availability";
 import { nowLocal } from "@/lib/localTime";
 
 export const metadata = { title: `Clients · ${BRAND_NAME}` };
 
-export default async function ClientsPage() {
+export default async function ClientsPage({ searchParams }) {
+  const { add } = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -109,21 +111,60 @@ export default async function ClientsPage() {
     return <p className="message error">Couldn't load your clients: {error.message}</p>;
   }
 
+  const addOpen = add === "client" || clients.length === 0;
+  const addClient = (
+    <section className="card" id="add-client">
+      {/* Open for a new stylist or from "+ Add client"; tucked away otherwise. */}
+      <details className="add-client" open={addOpen}>
+        <summary>
+          <h2>Add a client</h2>
+        </summary>
+        <p className="muted">
+          Regulars will get first pick of your openings. Blocked clients won't be able to book.
+          Add their mobile number so the booking page recognizes them.
+        </p>
+        <AddClientForm />
+      </details>
+    </section>
+  );
+
   return (
     <>
+      <PageHeader
+        title="Clients"
+        subtitle={`${clients.length} ${clients.length === 1 ? "client" : "clients"}`}
+        actions={
+          <>
+            {clients.length > 0 && (
+              // A plain link: the browser downloads the CSV file.
+              <a href="/dashboard/clients/export" className="button secondary small" download>
+                Export
+              </a>
+            )}
+            {stylist && (
+              <a href="/dashboard/clients?add=invite#invite" className="button secondary small">
+                Invite
+              </a>
+            )}
+            <a href="/dashboard/clients?add=client#add-client" className="button small">
+              + Add client
+            </a>
+          </>
+        }
+      />
+
+      {addOpen && addClient}
+
       <section className="card">
-        {/* Starts open for a new stylist; tucked away once they have clients. */}
-        <details className="add-client" open={clients.length === 0}>
-          <summary>
-            <h2>Add a client</h2>
-          </summary>
-          <p className="muted">
-            Regulars will get first pick of your openings. Blocked clients won't be able to book.
-            Add their mobile number so the booking page recognizes them.
-          </p>
-          <AddClientForm />
-        </details>
+        <ClientList
+          clients={clients}
+          standing={standing}
+          nextVisits={nextVisits}
+          upcomingCounts={upcomingCounts}
+        />
       </section>
+
+      {!addOpen && addClient}
 
       <section className="card">
         <details className="add-client">
@@ -135,8 +176,8 @@ export default async function ClientsPage() {
       </section>
 
       {stylist && (
-        <section className="card">
-          <details className="add-client" open={stylist.regulars_only}>
+        <section className="card" id="invite">
+          <details className="add-client" open={add === "invite" || stylist.regulars_only}>
             <summary>
               <h2>Invite a new client</h2>
             </summary>
@@ -166,24 +207,6 @@ export default async function ClientsPage() {
           </details>
         </section>
       )}
-
-      <section className="card">
-        <div className="clients-head">
-          <h2>Your clients</h2>
-          {clients.length > 0 && (
-            // A plain link: the browser downloads the CSV file.
-            <a href="/dashboard/clients/export" className="button secondary small" download>
-              Export clients
-            </a>
-          )}
-        </div>
-        <ClientList
-          clients={clients}
-          standing={standing}
-          nextVisits={nextVisits}
-          upcomingCounts={upcomingCounts}
-        />
-      </section>
     </>
   );
 }

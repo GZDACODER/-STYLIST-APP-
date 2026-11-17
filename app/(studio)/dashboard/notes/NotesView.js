@@ -11,6 +11,8 @@ import RegularStar from "@/components/RegularStar";
 import Sheet from "@/components/Sheet";
 import OutcomePicker from "../wrapup/OutcomePicker";
 import VisitNoteForm from "./VisitNoteForm";
+import EmptyState from "@/components/dash/EmptyState";
+import ShowMore from "@/components/dash/ShowMore";
 
 const OUTCOME_CLASS = { completed_paid: "paid", completed_owed: "unpaid", no_show: "blocked", replaced: "" };
 
@@ -155,10 +157,15 @@ export default function NotesView({ visits, cardNotes, today }) {
 
   if (visits.length === 0) {
     return (
-      <p className="muted">
-        No finished visits yet. After a visit, mark how it went on Wrap up visits and add a note; it
-        shows here.
-      </p>
+      <EmptyState
+        title="No visit notes yet"
+        text="After a visit, mark how it went on Wrap up visits and add a note; it shows here."
+        action={
+          <a href="/dashboard/wrapup" className="button small">
+            Wrap up visits
+          </a>
+        }
+      />
     );
   }
 
@@ -207,9 +214,9 @@ export default function NotesView({ visits, cardNotes, today }) {
 
       {mode === "client" ? (
         shownClients.length === 0 ? (
-          <p className="muted">No clients match. Try a different search or filter.</p>
+          <EmptyState title="No clients match" text="Try a different search or filter." />
         ) : (
-          <ul className="client-rows">
+          <ShowMore className="client-rows" noun="more clients" key={`c|${filter}|${search}`}>
             {shownClients.map((c) => (
               <li key={c.key}>
                 <button
@@ -241,12 +248,12 @@ export default function NotesView({ visits, cardNotes, today }) {
                 </button>
               </li>
             ))}
-          </ul>
+          </ShowMore>
         )
       ) : days.length === 0 ? (
-        <p className="muted">No visits match. Try a different search or filter.</p>
+        <EmptyState title="No visits match" text="Try a different search or filter." />
       ) : (
-        <ul className="day-list">
+        <ShowMore className="day-list" noun="more days" key={`d|${filter}|${search}`}>
           {days.map((day) => (
             <li key={day.date} className="day-group">
               <div className="day-heading">
@@ -289,7 +296,7 @@ export default function NotesView({ visits, cardNotes, today }) {
               </ul>
             </li>
           ))}
-        </ul>
+        </ShowMore>
       )}
 
       {openClient && (

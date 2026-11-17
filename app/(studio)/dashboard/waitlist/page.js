@@ -8,6 +8,9 @@ import WaitlistSettingsForm from "./WaitlistSettingsForm";
 import PausedNote from "@/components/PausedNote";
 import { getMyPlan } from "@/lib/plan";
 import WaitingList from "./WaitingList";
+import PageHeader from "@/components/dash/PageHeader";
+import EmptyState from "@/components/dash/EmptyState";
+import Collapsible from "@/components/dash/Collapsible";
 import { BRAND_NAME } from "@/lib/brand";
 
 export const metadata = { title: `Waitlist · ${BRAND_NAME}` };
@@ -61,10 +64,52 @@ export default async function WaitlistPage() {
     return day === today ? `today at ${time}` : `${formatDate(day)} at ${time}`;
   };
 
+  const waitingEntries = waiting.map((e) => {
+      const told = e.offers.filter((o) => o.notified_at);
+      const lastTold = told.map((o) => o.notified_at).sort().pop();
+      // Messages that couldn't be sent yet, and why (from Resend or Twilio).
+      const stuck = e.offers.filter((o) => !o.notified_at && o.notify_attempts > 0);
+      return {
+        id: e.id,
+        name: e.name,
+        phone: e.phone,
+        email: e.email,
+        textOk: e.text_ok,
+        status: e.client_status,
+        service: e.service?.name || "A service",
+        wishes: describeWishes(e.days, e.times),
+        joined: whenText(e.created_at),
+        toldCount: told.length,
+        lastTold: lastTold ? whenText(lastTold) : null,
+        stuckCount: stuck.length,
+        stuckError: stuck[0]?.last_error || null,
+      };
+    });
+
   return (
     <>
+      <PageHeader
+        title="Waitlist"
+        subtitle={waiting.length === 1 ? "1 client waiting" : `${waiting.length} clients waiting`}
+        actions={
+          <a href="#waitlist-settings" className="button secondary small">
+            Waitlist settings
+          </a>
+        }
+      />
+
       <section className="card">
-        <h2>Waitlist</h2>
+        <h2>Who&apos;s waiting</h2>
+        {waiting.length === 0 && (
+          <EmptyState
+            title="Nobody is waiting"
+            text="When no times work, clients can join from your booking page. They're emailed when a time opens up."
+          />
+        )}
+        {waiting.length > 0 && <WaitingList entries={waitingEntries} />}
+      </section>
+
+      <Collapsible title="Waitlist settings" id="waitlist-settings" open={!stylist.waitlist_enabled}>
         {!ready && (
           <p className="message warning">
             Email isn&apos;t set up for the app yet, so clients can&apos;t join the waitlist. Add
@@ -88,41 +133,11 @@ export default async function WaitlistPage() {
           regularsMinutes={stylist.waitlist_regulars_minutes}
           allowed={plan.has.waitlist}
         />
-      </section>
+      </Collapsible>
 
-      <section className="card">
-        <h2>Who&apos;s waiting</h2>
-        {waiting.length === 0 && <p className="muted">Nobody is on your waitlist right now.</p>}
-        {waiting.length > 0 && (
-        <WaitingList
-          entries={waiting.map((e) => {
-            const told = e.offers.filter((o) => o.notified_at);
-            const lastTold = told.map((o) => o.notified_at).sort().pop();
-            // Messages that couldn't be sent yet, and why (from Resend or Twilio).
-            const stuck = e.offers.filter((o) => !o.notified_at && o.notify_attempts > 0);
-            return {
-              id: e.id,
-              name: e.name,
-              phone: e.phone,
-              email: e.email,
-              textOk: e.text_ok,
-              status: e.client_status,
-              service: e.service?.name || "A service",
-              wishes: describeWishes(e.days, e.times),
-              joined: whenText(e.created_at),
-              toldCount: told.length,
-              lastTold: lastTold ? whenText(lastTold) : null,
-              stuckCount: stuck.length,
-              stuckError: stuck[0]?.last_error || null,
-            };
-          })}
-        />
-        )}
-      </section>
 
       {booked.length > 0 && (
-        <section className="card">
-          <h2>Booked since joining</h2>
+        <Collapsible title="Booked since joining" count={booked.length}>
           <p className="muted small-text">
             Waitlisted clients who got a time in the last 30 days.
           </p>
@@ -139,7 +154,7 @@ export default async function WaitlistPage() {
               </li>
             ))}
           </ul>
-        </section>
+        </Collapsible>
       )}
     </>
   );

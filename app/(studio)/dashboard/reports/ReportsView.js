@@ -4,6 +4,7 @@ import { formatDate } from "@/lib/availability";
 import { formatPrice } from "@/lib/money";
 import { PERIODS } from "@/lib/reports";
 import RevenueChart from "./RevenueChart";
+import PageHeader from "@/components/dash/PageHeader";
 
 const money = (cents) => formatPrice(cents).replace(/\.00$/, "");
 const pct = (x) => `${Math.round(x * 100)}%`;
@@ -40,9 +41,17 @@ export default function ReportsView({ period, range, today, s: thisPeriod, befor
 
   return (
     <>
+      <PageHeader
+        title="Reports"
+        subtitle={
+          <>
+            {label}: {formatDate(range.from)} – {formatDate(range.to)}
+            {through}. Revenue is the service price of visits that went ahead (not no-shows).
+          </>
+        }
+      />
       <section className="card">
         <div className="rp-head">
-          <h2>Reports</h2>
           <nav className="filter-chips rp-periods" aria-label="Period">
             {PERIODS.map((p) => (
               <Link
@@ -57,11 +66,6 @@ export default function ReportsView({ period, range, today, s: thisPeriod, befor
             ))}
           </nav>
         </div>
-        <p className="muted small-text">
-          {label}: {formatDate(range.from)} – {formatDate(range.to)}
-          {through}. Revenue is the service price of visits that went ahead (not no-shows).
-        </p>
-
         <div className="rp-tiles">
           {tiles.map((t) => (
             <div key={t.label} className="rp-tile">
