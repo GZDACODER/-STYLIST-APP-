@@ -73,10 +73,13 @@ export default async function OpeningsPage() {
 
   // What blocks bookings inside each opening: "Block bookings" events and
   // closed holidays (both empty before the step 29 / 34 SQL is run).
-  const [{ data: eventRows }, { data: holidayRows }] = await Promise.all([
+  const [{ data: eventRows }, { data: holidayRows }, { data: closedDateRows }] = await Promise.all([
     supabase.from("calendar_events").select("*").eq("blocks_bookings", true).limit(2000),
     supabase.from("stylist_holiday_settings").select("holiday_key").eq("closed", true),
+    // Holidays closed for one date only ("Closed this holiday" on the Calendar).
+    supabase.from("blocked_dates").select("blocked_on, reason").gte("blocked_on", today).like("reason", "Closed – %"),
   ]);
+  const closedDates = new Map((closedDateRows || []).map((r) => [r.blocked_on, r.reason]));
   const closedKeys = new Set((holidayRows || []).map((r) => r.holiday_key));
   const hhmm = (t) => String(t).slice(0, 5);
   // "4–5 PM", "9:30 AM–12 PM": short enough for one row.
@@ -92,6 +95,10 @@ export default async function OpeningsPage() {
     const notes = [];
     const closed = holidaysOn(o.opening_date).find((h) => h.key && closedKeys.has(h.key));
     if (closed) notes.push({ short: `Closed – ${closed.name}`, full: `Closed for ${closed.name}: none of this can be booked` });
+    else if (closedDates.has(o.opening_date)) {
+      const reason = closedDates.get(o.opening_date);
+      notes.push({ short: reason, full: `${reason}: none of this can be booked` });
+    }
     for (const e of eventsOn(eventRows || [], o.opening_date)) {
       if (!e.start_time) notes.push({ short: "All day blocked", full: `${e.title} (all day): none of this can be booked` });
       else if (hhmm(e.start_time) < hhmm(o.end_time) && hhmm(e.end_time) > hhmm(o.start_time)) {
