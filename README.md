@@ -152,7 +152,7 @@ and hosted on **Vercel**.
   ask about your schedule or tell it what to change in your own words. It reads the schedule and proposes changes (add a
   calendar event, block days off, cancel a booking) that only happen when you
   tap Confirm. Uses Claude; needs `ANTHROPIC_API_KEY` in Vercel. A paid add-on
-  ($15/mo or $150/yr, included in the trial; Settings → Plan & billing). Run
+  ($10/mo or $100/yr, included in the trial; Settings → Plan & billing). Run
   `supabase/migrations/0038_assistant_addon.sql`. See
   **[ASSISTANT_SETUP.md](./ASSISTANT_SETUP.md)**.
 - **Private emails on the booking page**: a client's email is shown shortened
