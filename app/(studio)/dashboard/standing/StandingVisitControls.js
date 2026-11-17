@@ -61,7 +61,7 @@ export default function StandingVisitControls({ booking, seriesId, today, deposi
         label="Skip this date"
         question={`Skip ${booking.client_name}'s visit on ${when}?`}
         note={
-          `Only this date is skipped; the rest of the series stays. The time isn't offered to anyone else (post an opening if you want it booked). ${booking.client_name} isn't told automatically, so let them know.` +
+          `Only this date is skipped; the rest of the series stays. ${booking.client_name} is emailed that this date is cancelled (if they gave an email). The time isn't offered to anyone else (post an opening if you want it booked).` +
           (depositPaid ? " Their deposit isn't refunded automatically." : "")
         }
         keepLabel="Keep visit"

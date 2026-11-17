@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { isValidDateString } from "@/lib/availability";
 import { planErrorMessage } from "@/lib/plan";
+import { emailBookingCancelled } from "@/lib/bookingEmails";
 
 const ERRORS = {
   not_regular: "Only Regulars can have a standing appointment.",
@@ -94,12 +95,26 @@ export async function createStanding(prevState, formData) {
 }
 
 // Skip one visit (Calendar). Returns { error } or nothing.
+// Skip one visit (Calendar). The client is emailed that this date is
+// cancelled (the rest of the series stays).
 export async function skipStandingVisit(formData) {
+  const id = String(formData.get("id") || "");
   const supabase = await createClient();
-  const { error } = await supabase.rpc("standing_skip", {
-    p_booking_id: String(formData.get("id") || ""),
-  });
+  const { data: visit } = await supabase
+    .from("bookings")
+    .select(
+      "id, stylist_id, status, client_name, client_email, service_name, booking_date, start_time, deposit_cents, deposit_status, stylist:stylists(business_name, slug)"
+    )
+    .eq("id", id)
+    .maybeSingle();
+  const { error } = await supabase.rpc("standing_skip", { p_booking_id: id });
   if (error) console.error("Skipping a standing visit failed", error.message);
+  else if (visit?.status === "confirmed") {
+    await emailBookingCancelled(
+      { ...visit, business_name: visit.stylist?.business_name, slug: visit.stylist?.slug },
+      { standing: true }
+    );
+  }
   refresh();
 }
 
