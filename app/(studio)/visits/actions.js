@@ -39,6 +39,7 @@ export async function setVisitOutcomeWithPass(pass, bookingId, outcome) {
 
   revalidatePath("/visits");
   revalidatePath("/dashboard");
+  revalidatePath("/dashboard/today");
   revalidatePath("/dashboard/wrapup");
   return { success: true };
 }

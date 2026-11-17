@@ -15,6 +15,7 @@ const NOT_SET_UP =
 function refresh() {
   revalidatePath("/dashboard/bookings");
   revalidatePath("/dashboard");
+  revalidatePath("/dashboard/today");
 }
 
 // Standing appointments skip times blocked by events (step 31 SQL): check

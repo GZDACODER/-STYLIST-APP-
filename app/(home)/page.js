@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { BRAND_NAME } from "@/lib/brand";
 import { DEPOSIT_FEE_FIXED_CENTS, DEPOSIT_FEE_PERCENT, PLANS, TRIAL_DAYS } from "@/lib/plans";
@@ -116,12 +115,15 @@ const NO_EXTRA = [
 const NEVER = ["Booking fees charged to your clients", "A cut of new clients", "A marketplace listing next to other pros"];
 
 export default async function HomePage() {
-  // Stylists who are logged in go straight to their dashboard.
+  // The homepage stays the homepage when logged in; the top button says
+  // "View dashboard" instead of "Log in".
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (user) redirect("/dashboard");
+  const account = user
+    ? { href: "/dashboard", label: "View dashboard" }
+    : { href: "/login", label: "Log in" };
 
   const { allin, team } = PLANS;
   const included = [
@@ -151,10 +153,18 @@ export default async function HomePage() {
           <a href="#pricing" className="hm-hide-phone">
             Pricing
           </a>
-          <Link href="/login">Log in</Link>
-          <Link href="/signup" className="hm-button hm-button-small">
-            Start free trial
-          </Link>
+          {user ? (
+            <Link href={account.href} className="hm-button hm-button-small">
+              {account.label}
+            </Link>
+          ) : (
+            <>
+              <Link href="/login">Log in</Link>
+              <Link href="/signup" className="hm-button hm-button-small">
+                Start free trial
+              </Link>
+            </>
+          )}
         </nav>
         </div>
       </header>
@@ -412,7 +422,7 @@ export default async function HomePage() {
         <span className="hm-logo hm-logo-small">{BRAND_NAME}</span>
         <nav aria-label="Footer">
           <Link href="/switch">Switch to {BRAND_NAME}</Link>
-          <Link href="/login">Log in</Link>
+          <Link href={account.href}>{account.label}</Link>
           <Link href="/terms">Terms</Link>
           <Link href="/privacy">Privacy</Link>
           <a href="mailto:hello@clientelesuite.com">Contact · hello@clientelesuite.com</a>

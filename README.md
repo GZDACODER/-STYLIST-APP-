@@ -22,6 +22,15 @@ and hosted on **Vercel**.
   appointments you pick in Settings (3 to start with).
 - **Forgot password** (`/forgot-password`, linked from Log in): emails a link
   that logs the pro in and opens **Choose a new password** (`/reset-password`).
+- **Home** (`/dashboard`, where log in lands, first in the menu): greeting,
+  business name, View booking page and Copy link; cards for today's bookings,
+  this week's revenue, deposits collected, new clients this month and the
+  waitlist; **Up next** (next 3 bookings); **Needs attention** (visits to wrap
+  up, balances owed, standing visits to check, waitlist email problems, missing
+  intake forms, Stripe not connected, plan ending/paused); quick actions; and a
+  setup checklist for new accounts that hides once done. The day view is
+  **Today** (`/dashboard/today`). The homepage stays the homepage when logged
+  in, with **View dashboard** in place of Log in.
 - **Settings** is split into sections (Business, Booking page, Services, Hours &
   days off, Holidays, Regulars, Deposits, Forms, Plan & billing, Email): on iPad
   the list is on the left and the section on the right; on phones the list is

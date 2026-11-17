@@ -19,6 +19,7 @@ export async function setVisitOutcome(bookingId, outcome) {
     return { error: "That couldn't be saved. Please refresh and try again." };
   }
   revalidatePath("/dashboard");
+  revalidatePath("/dashboard/today");
   revalidatePath("/dashboard/wrapup");
   revalidatePath("/dashboard/notes");
   return { success: true };

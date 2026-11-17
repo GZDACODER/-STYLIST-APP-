@@ -73,6 +73,7 @@ export async function refundBookingDeposit(prevState, formData) {
   revalidatePath("/dashboard/bookings");
   revalidatePath("/dashboard/reports");
   revalidatePath("/dashboard");
+  revalidatePath("/dashboard/today");
   return {
     success: `${formatPrice(booking.deposit_cents)} refunded to ${booking.client_name}. It reaches their card in 5 to 10 business days${
       booking.client_email && emailConfigured() ? ", and they've been emailed" : ""

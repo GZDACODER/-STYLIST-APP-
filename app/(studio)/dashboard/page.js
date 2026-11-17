@@ -1,65 +1,52 @@
-import PageHeader from "@/components/dash/PageHeader";
+// Home: the dashboard's overview (what log in lands on). The greeting and
+// booking link, this week's numbers, the next few bookings, anything that
+// needs attention, quick actions, and a setup checklist for new accounts.
+// The detailed day view is Today (/dashboard/today).
 import Link from "next/link";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import {
-  clockTime,
-  parseDateString,
-  timeZoneLabel,
-  toDateString,
-  todayInTimeZone,
-} from "@/lib/availability";
-import { formatPrice } from "@/lib/money";
+import { clockTime, formatDate, parseDateString, toDateString, todayInTimeZone } from "@/lib/availability";
 import { BRAND_NAME } from "@/lib/brand";
+import { getMyPlan } from "@/lib/plan";
+import { publicSiteUrl } from "@/lib/siteUrl";
+import PageHeader from "@/components/dash/PageHeader";
+import CopyLinkButton from "@/components/dash/CopyLinkButton";
+import { RowChevron } from "@/components/dash/RowList";
 import RegularStar from "@/components/RegularStar";
-import StandingFlags from "./standing/StandingFlags";
-import { eventsOn } from "@/lib/calendarEvents";
-import { holidaysOn } from "@/lib/holidays";
+import ShareLinkButton from "./ShareLinkButton";
 
-export const metadata = { title: `Today · ${BRAND_NAME}` };
+export const metadata = { title: `Home · ${BRAND_NAME}` };
 
-// "Good morning" / "Good afternoon" / "Good evening", in the stylist's time zone.
 function greeting(timeZone) {
   const hour = Number(
-    new Intl.DateTimeFormat("en-US", { timeZone, hour: "numeric", hourCycle: "h23" }).format(
-      new Date()
-    )
+    new Intl.DateTimeFormat("en-US", { timeZone, hour: "numeric", hourCycle: "h23" }).format(new Date())
   );
   if (hour < 12) return "Good morning";
   if (hour < 17) return "Good afternoon";
   return "Good evening";
 }
 
-// "Good afternoon, Gabrielle" with the first name from Settings, or just
-// "Good afternoon" when there isn't one.
-function greetingLine(timeZone, firstName) {
-  const name = String(firstName || "").trim();
-  return name ? `${greeting(timeZone)}, ${name}` : greeting(timeZone);
-}
-
 // Monday to Sunday of the week that contains `today` ("YYYY-MM-DD").
 function weekRange(today) {
   const day = parseDateString(today);
-  const fromMonday = (day.getDay() + 6) % 7;
   const monday = new Date(day);
-  monday.setDate(day.getDate() - fromMonday);
+  monday.setDate(day.getDate() - ((day.getDay() + 6) % 7));
   const sunday = new Date(monday);
   sunday.setDate(monday.getDate() + 6);
   return { start: toDateString(monday), end: toDateString(sunday) };
 }
 
-// Deposit amount and whether it's paid (same wording as the Calendar tab).
-function DepositTag({ booking }) {
-  const { deposit_cents: cents, deposit_status: status } = booking;
-  if (status === "none" || !cents) return <span className="badge">No deposit</span>;
-  if (status === "paid") return <span className="badge paid">{formatPrice(cents)} deposit paid</span>;
-  if (status === "refunded" || status === "refund_pending") {
-    return <span className="badge">{formatPrice(cents)} deposit refunded</span>;
-  }
-  return <span className="badge unpaid">{formatPrice(cents)} deposit unpaid</span>;
-}
+const money = (cents) =>
+  new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: cents % 100 ? 2 : 0,
+  }).format((cents || 0) / 100);
 
-export default async function TodayPage() {
+const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+
+export default async function HomePage() {
   const supabase = await createClient();
   const {
     data: { user },
@@ -68,99 +55,70 @@ export default async function TodayPage() {
 
   const { data: stylist } = await supabase
     .from("stylists")
-    .select("business_name, timezone")
+    .select("business_name, slug, timezone, deposits_enabled, stripe_charges_enabled")
     .eq("id", user.id)
     .maybeSingle();
   if (!stylist) return null;
-
-  // Read on its own, so the dashboard still opens before the first name SQL (0015) is run.
-  const { data: firstNameRow } = await supabase
-    .from("stylists")
-    .select("first_name")
-    .eq("id", user.id)
-    .maybeSingle();
+  // Read on their own, so Home still opens before their SQL is run.
+  const [{ data: nameRow }, { data: coverRow }] = await Promise.all([
+    supabase.from("stylists").select("first_name").eq("id", user.id).maybeSingle(),
+    supabase.from("stylists").select("cover_photo_url").eq("id", user.id).maybeSingle(),
+  ]);
 
   const tz = stylist.timezone;
   const today = todayInTimeZone(tz);
   const week = weekRange(today);
-  // A little over a week back, then narrowed to this week in the stylist's time zone.
-  const paidSince = new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString();
+  const monthStart = `${today.slice(0, 8)}01`;
   const nowTime = new Intl.DateTimeFormat("en-GB", {
     timeZone: tz,
     hour: "2-digit",
     minute: "2-digit",
     hourCycle: "h23",
   }).format(new Date());
-
   const stillToCome = `booking_date.gt.${today},and(booking_date.eq.${today},start_time.gt.${nowTime})`;
+  const [ty, tm, td] = today.split("-").map(Number);
+  const wrapSince = new Date(Date.UTC(ty, tm - 1, td - 13)).toISOString().slice(0, 10);
+  const paidSince = new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString();
 
-  const [weekBookings, paidDeposits, waiting, todays, upcoming, nextUp, weekOpenings] =
-    await Promise.all([
+  const [
+    todays,
+    weekRows,
+    paidDeposits,
+    newClients,
+    waiting,
+    nextUp,
+    services,
+    hours,
+    anyBooking,
+    unmarked,
+    owed,
+    plan,
+    standingFlags,
+  ] = await Promise.all([
+    supabase.from("bookings").select("id", { count: "exact", head: true }).eq("status", "confirmed").eq("booking_date", today),
     supabase
       .from("bookings")
-      .select("id", { count: "exact", head: true })
+      .select("price_cents, outcome")
       .eq("status", "confirmed")
       .gte("booking_date", week.start)
       .lte("booking_date", week.end),
-    supabase
-      .from("bookings")
-      .select("deposit_cents, deposit_paid_at")
-      .eq("deposit_status", "paid")
-      .gte("deposit_paid_at", paidSince),
+    supabase.from("bookings").select("deposit_cents, deposit_paid_at").eq("deposit_status", "paid").gte("deposit_paid_at", paidSince),
+    supabase.from("clients").select("created_at").gte("created_at", new Date(Date.now() - 32 * 24 * 60 * 60 * 1000).toISOString()),
     supabase
       .from("waitlist_entries")
-      .select("id", { count: "exact", head: true })
+      .select("id, offers:waitlist_offers(notified_at, notify_attempts)")
       .eq("status", "waiting"),
     supabase
       .from("bookings")
-      .select(
-        "id, start_time, end_time, service_name, client_name, status, deposit_cents, deposit_status, hold_expires_at, client:clients(status)"
-      )
-      .eq("booking_date", today)
-      .in("status", ["confirmed", "pending_payment"])
-      .order("start_time"),
-    // Every confirmed appointment still to come: later days, plus later today.
-    supabase
-      .from("bookings")
-      .select("id", { count: "exact", head: true })
-      .eq("status", "confirmed")
-      .or(stillToCome),
-    // Wide screens: the next appointment, and the open times left this week.
-    supabase
-      .from("bookings")
-      .select("booking_date, start_time, end_time, service_name, client_name")
+      .select("id, booking_date, start_time, end_time, service_name, client_name, client:clients(status)")
       .eq("status", "confirmed")
       .or(stillToCome)
       .order("booking_date")
       .order("start_time")
-      .limit(1)
-      .maybeSingle(),
-    supabase
-      .from("openings")
-      .select("id, opening_date, start_time, end_time, visibility")
-      .gte("opening_date", today)
-      .lte("opening_date", week.end)
-      .order("opening_date")
-      .order("start_time"),
-  ]);
-  // Standing appointments (read on their own, so the page still opens
-  // before the step 16 SQL is run).
-  const [{ data: standingFlags }, { data: standingToday }] = await Promise.all([
-    supabase.rpc("standing_flags"),
-    supabase
-      .from("bookings")
-      .select("id")
-      .eq("booking_date", today)
-      .not("standing_series_id", "is", null),
-  ]);
-  const standingIds = new Set((standingToday || []).map((r) => r.id));
-
-  // Wrap up visits: finished visits not marked yet (last 14 days) and
-  // balances owed. Read on their own, so the page still opens before the
-  // step 18 SQL is run.
-  const [ty, tm, td] = today.split("-").map(Number);
-  const wrapSince = new Date(Date.UTC(ty, tm - 1, td - 13)).toISOString().slice(0, 10);
-  const [{ data: unmarkedRows }, { count: owedCount }] = await Promise.all([
+      .limit(3),
+    supabase.from("services").select("id", { count: "exact", head: true }),
+    supabase.from("working_hours").select("weekday", { count: "exact", head: true }),
+    supabase.from("bookings").select("id", { count: "exact", head: true }),
     supabase
       .from("bookings")
       .select("booking_date, start_time")
@@ -168,321 +126,219 @@ export default async function TodayPage() {
       .is("outcome", null)
       .gte("booking_date", wrapSince)
       .lte("booking_date", today),
-    supabase
-      .from("bookings")
-      .select("id", { count: "exact", head: true })
-      .eq("status", "confirmed")
-      .eq("outcome", "completed_owed"),
+    supabase.from("bookings").select("id", { count: "exact", head: true }).eq("status", "confirmed").eq("outcome", "completed_owed"),
+    getMyPlan(supabase, user.id),
+    supabase.rpc("standing_flags"),
   ]);
-  // The stylist's own events and today's holiday (events are read on their
-  // own, so the page still opens before the step 29 SQL is run).
-  const { data: eventRows } = await supabase
-    .from("calendar_events")
-    .select("*")
-    .lte("starts_on", week.end)
-    .limit(2000);
-  const allEvents = eventRows || [];
-  const todaysEvents = eventsOn(allEvents, today);
-  const todaysHolidays = holidaysOn(today);
-  // The rest of this week (tomorrow to Sunday), for the side column.
-  const laterEvents = [];
-  for (let d = parseDateString(today), i = 0; i < 7; i++) {
-    d.setDate(d.getDate() + 1);
-    const date = toDateString(d);
-    if (date > week.end) break;
-    for (const e of eventsOn(allEvents, date)) laterEvents.push({ ...e, date });
+
+  // Upcoming bookings of services that need an intake form, without one on file.
+  const { data: upcomingIds } = await supabase
+    .from("bookings")
+    .select("id")
+    .eq("status", "confirmed")
+    .or(stillToCome)
+    .limit(300);
+  let formsMissing = 0;
+  if (upcomingIds?.length) {
+    const { data: intakeRows } = await supabase.rpc("bookings_intake", { p_booking_ids: upcomingIds.map((r) => r.id) });
+    formsMissing = (intakeRows || []).filter((r) => r.needed && !r.on_file).length;
   }
 
-  const toWrapUp = (unmarkedRows || []).filter(
-    (b) => b.booking_date < today || b.start_time.slice(0, 5) <= nowTime
-  ).length;
-
-
-  // Today's openings that have already finished don't count.
-  const openTimes = (weekOpenings.data || []).filter(
-    (o) => o.opening_date > today || o.end_time.slice(0, 5) > nowTime
-  );
-  const shortDay = (date) =>
-    parseDateString(date).toLocaleDateString("en-US", {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-    });
-
   const dayOf = (iso) => new Intl.DateTimeFormat("en-CA", { timeZone: tz }).format(new Date(iso));
+  const weekRevenue = (weekRows.data || [])
+    .filter((b) => b.outcome !== "no_show")
+    .reduce((sum, b) => sum + (b.price_cents || 0), 0);
   const depositsThisWeek = (paidDeposits.data || [])
     .filter((b) => {
       const day = dayOf(b.deposit_paid_at);
       return day >= week.start && day <= week.end;
     })
     .reduce((sum, b) => sum + (b.deposit_cents || 0), 0);
+  const newThisMonth = (newClients.data || []).filter((c) => dayOf(c.created_at) >= monthStart).length;
+  const waitingCount = (waiting.data || []).length;
+  const emailProblems = (waiting.data || []).filter((e) =>
+    (e.offers || []).some((o) => !o.notified_at && o.notify_attempts > 0)
+  ).length;
+  const toWrapUp = (unmarked.data || []).filter(
+    (b) => b.booking_date < today || String(b.start_time).slice(0, 5) <= nowTime
+  ).length;
+  const owedCount = owed.count || 0;
+  const flagCount = (standingFlags.data || []).length;
 
-  // Confirmed ones, plus anyone paying their deposit right now.
-  const now = Date.now();
-  const appointments = (todays.data || []).filter(
-    (b) => b.status === "confirmed" || new Date(b.hold_expires_at).getTime() > now
-  );
-  // Today's timeline: all-day events first, then appointments and timed
-  // events in time order.
-  const timeline = [
-    ...todaysEvents.filter((e) => !e.start_time).map((e) => ({ kind: "event", sort: "", item: e })),
-    ...[
-      ...appointments.map((b) => ({ kind: "booking", sort: b.start_time.slice(0, 5), item: b })),
-      ...todaysEvents
-        .filter((e) => e.start_time)
-        .map((e) => ({ kind: "event", sort: e.start_time.slice(0, 5), item: e })),
-    ].sort((a, b) => a.sort.localeCompare(b.sort)),
+  const h = await headers();
+  const host = h.get("x-forwarded-host") || h.get("host");
+  const proto = h.get("x-forwarded-proto") || (host?.startsWith("localhost") ? "http" : "https");
+  const bookingLink = `${publicSiteUrl(`${proto}://${host}`)}/book/${stylist.slug}`;
+
+  const dash = (q, value) => (q.error ? "—" : value);
+  const cards = [
+    { label: "Today's bookings", value: dash(todays, todays.count ?? 0), href: "/dashboard/today" },
+    { label: "This week's revenue", value: dash(weekRows, money(weekRevenue)), note: "Booked Mon–Sun", href: "/dashboard/reports" },
+    { label: "Deposits collected", value: dash(paidDeposits, money(depositsThisWeek)), note: "This week", href: "/dashboard/reports" },
+    { label: "New clients", value: dash(newClients, newThisMonth), note: "This month", href: "/dashboard/clients" },
+    { label: "Waitlist", value: dash(waiting, waitingCount), note: "Waiting now", href: "/dashboard/waitlist" },
   ];
 
-  const dateLine = parseDateString(today).toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-  });
-  const money = (cents) =>
-    new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      maximumFractionDigits: cents % 100 ? 2 : 0,
-    }).format(cents / 100);
+  // Needs attention: only what's actually there.
+  const attention = [];
+  if (plan.subscribed && plan.cancelling) {
+    attention.push({ text: `Your plan ends on ${formatDate(String(plan.cancelAt).slice(0, 10))}`, href: "/dashboard/settings/plan", action: "Reactivate" });
+  } else if (plan.stripeStatus === "past_due") {
+    attention.push({ text: "Your last plan payment didn't go through", href: "/dashboard/settings/plan", action: "Fix payment" });
+  } else if (!plan.comped && !plan.subscribed && plan.inTrial && plan.daysLeft <= 3) {
+    attention.push({ text: `Your free trial ends in ${plural(plan.daysLeft, "day", "days")}`, href: "/dashboard/settings/plan", action: "Choose a plan" });
+  } else if (plan.ready && !plan.has.base) {
+    attention.push({ text: "Your plan is paused", href: "/dashboard/settings/plan", action: "Choose a plan" });
+  }
+  if (toWrapUp > 0) attention.push({ text: `${plural(toWrapUp, "visit", "visits")} to wrap up`, href: "/dashboard/wrapup", action: "Wrap up" });
+  if (owedCount > 0) attention.push({ text: `${plural(owedCount, "balance", "balances")} owed`, href: "/dashboard/wrapup#owed", action: "See" });
+  if (flagCount > 0) attention.push({ text: `${plural(flagCount, "standing visit", "standing visits")} to check`, href: "/dashboard/today", action: "Check" });
+  if (emailProblems > 0) {
+    attention.push({ text: `${plural(emailProblems, "waitlist email", "waitlist emails")} couldn't be sent`, href: "/dashboard/waitlist", action: "See" });
+  }
+  if (formsMissing > 0) {
+    attention.push({ text: `${plural(formsMissing, "upcoming booking is", "upcoming bookings are")} missing an intake form`, href: "/dashboard/bookings", action: "See" });
+  }
+  if (!stylist.stripe_charges_enabled) {
+    attention.push({ text: "Stripe isn't connected, so you can't take deposits", href: "/dashboard/settings/deposits", action: "Connect" });
+  }
 
-  const stats = [
-    {
-      number: weekBookings.error ? "—" : weekBookings.count ?? 0,
-      // Confirmed appointments taking place Monday to Sunday this week.
-      label: "Appointments this week",
-      href: "/dashboard/bookings",
-    },
-    {
-      number: paidDeposits.error ? "—" : money(depositsThisWeek),
-      label: "Deposits paid this week",
-      href: "/dashboard/bookings",
-    },
-    {
-      number: waiting.error ? "—" : waiting.count ?? 0,
-      label: "On the waitlist",
-      href: "/dashboard/waitlist",
-    },
-    {
-      number: upcoming.error ? "—" : upcoming.count ?? 0,
-      label: "Upcoming",
-      href: "/dashboard/bookings",
-    },
+  // Setup checklist for new accounts; hidden once everything is done.
+  const setup = [
+    { done: (services.count || 0) > 0, text: "Add your services", href: "/dashboard/services" },
+    { done: (hours.count || 0) > 0, text: "Set your working hours", href: "/dashboard/availability" },
+    { done: Boolean(stylist.stripe_charges_enabled), text: "Connect Stripe for deposits", href: "/dashboard/settings/deposits" },
+    { done: Boolean(coverRow?.cover_photo_url), text: "Add a cover photo", href: "/dashboard/settings/booking-page" },
+    { done: (anyBooking.count || 0) > 0, text: "Share your booking link (done after your first booking)", href: "/dashboard/openings" },
   ];
+  const setupLeft = setup.filter((s) => !s.done).length;
+
+  const name = String(nameRow?.first_name || "").trim();
+  const dateLine = parseDateString(today).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
 
   return (
     <>
-      <PageHeader eyebrow={dateLine} title={greetingLine(tz, firstNameRow?.first_name)} />
+      <PageHeader
+        eyebrow={dateLine}
+        title={name ? `${greeting(tz)}, ${name}` : greeting(tz)}
+        subtitle={stylist.business_name}
+        actions={
+          <>
+            <CopyLinkButton link={bookingLink} />
+            <a href={bookingLink} target="_blank" rel="noreferrer" className="button small">
+              View booking page
+            </a>
+          </>
+        }
+      />
 
-      <section className="db-stats" aria-label="This week">
-        {stats.map((s) => (
-          <Link key={s.label} href={s.href} className="db-stat">
-            <span className="db-stat-number">{s.number}</span>
-            <span className="db-label">{s.label}</span>
+      {setupLeft > 0 && (
+        <section className="card home-setup">
+          <h2>Get set up</h2>
+          <p className="muted small-text">
+            {setup.length - setupLeft} of {setup.length} done.
+          </p>
+          <ul className="home-checklist">
+            {setup.map((s) => (
+              <li key={s.text} className={s.done ? "done" : ""}>
+                <span className="home-check" aria-hidden="true" />
+                {s.done ? <span>{s.text}</span> : <Link href={s.href}>{s.text}</Link>}
+                <span className="visually-hidden">{s.done ? " (done)" : " (to do)"}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      <section className="home-cards" aria-label="At a glance">
+        {cards.map((c) => (
+          <Link key={c.label} href={c.href} className="home-card">
+            <span className="db-label">{c.label}</span>
+            <strong className="home-card-value">{c.value}</strong>
+            {c.note && <span className="muted small-text">{c.note}</span>}
           </Link>
         ))}
       </section>
 
-      <p className="db-more-link">
-        <Link href="/dashboard/reports">See reports →</Link>
-      </p>
-
-      {(toWrapUp > 0 || owedCount > 0) && (
-        <section className="db-wrapup" aria-label="Wrap up visits">
-          <p>
-            {toWrapUp > 0 && (
-              <>
-                <strong>{toWrapUp === 1 ? "1 visit" : `${toWrapUp} visits`} to wrap up.</strong>{" "}
-                Mark each one completed, no-show or someone else came.
-              </>
-            )}
-            {toWrapUp > 0 && owedCount > 0 && " "}
-            {owedCount > 0 && (
-              <span className="muted">
-                {owedCount === 1 ? "1 balance owed." : `${owedCount} balances owed.`}
-              </span>
-            )}
-          </p>
-          <Link href={toWrapUp > 0 ? "/dashboard/wrapup" : "/dashboard/wrapup#owed"}>
-            {toWrapUp > 0 ? "Wrap up visits" : "See balances"}
-          </Link>
-        </section>
-      )}
-
-      <StandingFlags flags={Array.isArray(standingFlags) ? standingFlags : []} />
-
-      <div className="db-today">
-      <section className="db-today-main">
-        <div className="db-section-head">
-          <h2>Today&apos;s appointments</h2>
-          <span className="db-label">{timeZoneLabel(tz)} time</span>
-        </div>
-
-        {todaysHolidays.length > 0 && (
-          <p className="db-holiday">
-            {todaysHolidays.map((h) => h.name).join(" · ")}
-            {todaysHolidays.some((h) => h.federal) && <span className="muted small-text"> · Federal holiday</span>}
-          </p>
-        )}
-
-        {todays.error && (
-          <p className="message error">Couldn&apos;t load today&apos;s bookings: {todays.error.message}</p>
-        )}
-
-        {!todays.error && appointments.length === 0 && (
-          <div className={todaysEvents.length ? "db-empty db-empty-short" : "db-empty"}>
-            <p className="db-quiet">Nothing booked today.</p>
-            <p>
-              <Link href="/dashboard/openings">Open some times</Link> or{" "}
-              <Link href="/dashboard/bookings">see what&apos;s coming up</Link>.
-            </p>
+      <div className="home-grid">
+        <section className="card">
+          <div className="home-section-head">
+            <h2>Up next</h2>
+            <Link href="/dashboard/today" className="small-text">
+              Today →
+            </Link>
           </div>
-        )}
-
-        {timeline.length > 0 && (
-          <ol className="db-timeline">
-            {timeline.map(({ kind, item }) => {
-              if (kind === "event") {
-                const e = item;
-                const isPast = e.end_time && e.end_time.slice(0, 5) <= nowTime;
-                return (
-                  <li key={`e-${e.id}`} className={`db-slot db-slot-event${isPast ? " past" : ""}`}>
-                    <div className="db-slot-time">
-                      {e.start_time ? (
-                        <>
-                          {clockTime(e.start_time)}
-                          <span>{clockTime(e.end_time)}</span>
-                        </>
-                      ) : (
-                        "All day"
-                      )}
-                    </div>
-                    <div className="db-slot-body">
-                      <div className="db-slot-name">{e.title}</div>
-                      {e.note && <div className="db-slot-meta">{e.note}</div>}
-                      <div className="db-slot-tags">
-                        {e.blocks_bookings ? (
-                          <span className="badge event-block">Bookings blocked</span>
-                        ) : (
-                          <span className="badge">Your event</span>
-                        )}
-                      </div>
-                    </div>
-                  </li>
-                );
-              }
-              const b = item;
-              const isPast = b.end_time.slice(0, 5) <= nowTime;
-              const isRegular = b.client?.status === "regular";
-              return (
-                <li key={b.id} className={isPast ? "db-slot past" : "db-slot"}>
-                  <div className="db-slot-time">
-                    {clockTime(b.start_time)}
-                    <span>{clockTime(b.end_time)}</span>
-                  </div>
-                  <div className="db-slot-body">
-                    <div className="db-slot-name">
-                      {b.client_name}
-                      {isRegular && (
-                        <span className="badge regular">
-                          <RegularStar label={null} size={9} /> Regular
-                        </span>
-                      )}
-                    </div>
-                    <div className="db-slot-meta">{b.service_name}</div>
-                    <div className="db-slot-tags">
-                      {standingIds.has(b.id) && <span className="badge standing">Standing</span>}
-                      {b.status === "pending_payment" ? (
-                        <span className="badge unpaid">Paying deposit now</span>
-                      ) : (
-                        <DepositTag booking={b} />
-                      )}
-                    </div>
-                  </div>
-                </li>
-              );
-            })}
-          </ol>
-        )}
-      </section>
-
-      {/* Wide screens only (1200px and up): a right-hand column. */}
-      <aside className="db-today-side" aria-label="Coming up">
-        <section>
-          <div className="db-section-head">
-            <h2>Next up</h2>
-          </div>
-          {nextUp.error ? (
-            <p className="muted small-text">Couldn&apos;t load your next appointment.</p>
-          ) : nextUp.data ? (
-            <div className="db-next">
-              <p className="db-next-when">
-                {nextUp.data.booking_date === today ? "Today" : shortDay(nextUp.data.booking_date)}{" "}
-                · {clockTime(nextUp.data.start_time)}
-              </p>
-              <p className="db-next-name">{nextUp.data.client_name}</p>
-              <p className="muted small-text">{nextUp.data.service_name}</p>
+          {(nextUp.data || []).length === 0 ? (
+            <div className="db-empty">
+              <p className="db-empty-title">Nothing booked yet</p>
+              <p className="muted small-text">Open some times and share your booking link.</p>
             </div>
           ) : (
-            <p className="db-quiet-small">Nothing booked yet.</p>
-          )}
-        </section>
-
-        {laterEvents.length > 0 && (
-          <section>
-            <div className="db-section-head">
-              <h2>Your events this week</h2>
-            </div>
-            <ul className="db-open-list">
-              {laterEvents.slice(0, 8).map((e) => (
-                <li key={`${e.id}-${e.date}`}>
-                  <span>{shortDay(e.date)}</span>
-                  <span className="db-event-side">
-                    {e.start_time ? `${clockTime(e.start_time)} ` : ""}
-                    {e.title}
-                    {e.blocks_bookings && <span className="db-event-dot" aria-label="Bookings blocked" />}
-                  </span>
-                </li>
-              ))}
-            </ul>
-            <p className="db-side-link">
-              <Link href="/dashboard/bookings">Open Calendar</Link>
-            </p>
-          </section>
-        )}
-
-        <section>
-          <div className="db-section-head">
-            <h2>Open times this week</h2>
-          </div>
-          {weekOpenings.error ? (
-            <p className="muted small-text">Couldn&apos;t load your open times.</p>
-          ) : openTimes.length === 0 ? (
-            <p className="db-quiet-small">No open times left this week.</p>
-          ) : (
-            <ul className="db-open-list">
-              {openTimes.map((o) => (
-                <li key={o.id}>
-                  <span>{shortDay(o.opening_date)}</span>
-                  <span>
-                    {clockTime(o.start_time)} – {clockTime(o.end_time)}
-                    {o.visibility === "regulars" && (
-                      <>
-                        {" "}
-                        <RegularStar size={10} />
-                      </>
-                    )}
-                  </span>
+            <ul className="client-rows">
+              {nextUp.data.map((b) => (
+                <li key={b.id}>
+                  <Link href="/dashboard/bookings" className="client-row booking-row">
+                    <span className="booking-row-time">
+                      <strong>{clockTime(b.start_time)}</strong>
+                      <span>{b.booking_date === today ? "Today" : formatDate(b.booking_date).replace(/, \d{4}$/, "")}</span>
+                    </span>
+                    <span className="client-row-main">
+                      <span className="client-row-name">
+                        <span className="client-row-text">{b.client_name}</span>
+                        {b.client?.status === "regular" && <RegularStar label="Regular" size={10} />}
+                      </span>
+                      <span className="client-row-phone">{b.service_name}</span>
+                    </span>
+                    <RowChevron />
+                  </Link>
                 </li>
               ))}
             </ul>
           )}
-          <p className="db-side-link">
-            <Link href="/dashboard/openings">Manage openings</Link>
-          </p>
         </section>
-      </aside>
+
+        <section className="card">
+          <h2>Needs attention</h2>
+          {attention.length === 0 ? (
+            <p className="muted">All clear. Nothing needs you right now.</p>
+          ) : (
+            <ul className="client-rows">
+              {attention.map((a) => (
+                <li key={a.text}>
+                  <Link href={a.href} className="client-row home-attention">
+                    <span className="home-attention-dot" aria-hidden="true" />
+                    <span className="client-row-main">
+                      <span className="client-row-text">{a.text}</span>
+                    </span>
+                    <span className="home-attention-action">{a.action}</span>
+                    <RowChevron />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
       </div>
+
+      <section className="card">
+        <h2>Quick actions</h2>
+        <div className="home-actions">
+          <Link href="/dashboard/openings#add-opening" className="button secondary small">
+            + Add opening
+          </Link>
+          <Link href="/dashboard/bookings?add=event" className="button secondary small">
+            + Add event
+          </Link>
+          <Link href="/dashboard/clients?add=client#add-client" className="button secondary small">
+            + Add client
+          </Link>
+          <ShareLinkButton link={bookingLink} businessName={stylist.business_name} />
+        </div>
+        <p className="muted small-text home-more-links">
+          <Link href="/dashboard/today">Today</Link> · <Link href="/dashboard/reports">Reports</Link> ·{" "}
+          <Link href="/dashboard/wrapup">Wrap up visits</Link>
+        </p>
+      </section>
     </>
   );
 }

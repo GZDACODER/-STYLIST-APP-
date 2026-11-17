@@ -28,7 +28,7 @@ function RowBody({ item }) {
         </span>
         {item.sub && <span className="client-row-phone">{item.sub}</span>}
       </span>
-      {item.badge && <span className="booking-row-badges">{item.badge}</span>}
+      {item.badge && <span className="client-row-next row-badges">{item.badge}</span>}
     </>
   );
 }
