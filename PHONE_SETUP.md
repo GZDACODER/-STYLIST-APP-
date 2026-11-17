@@ -105,9 +105,9 @@ you can add a pretend number and code, like `15555550123=123456`. Typing
 a real text. (No real text means the code won't pop up above the keyboard. Use
 your real number to test that.)
 
-## Part 4: Netlify
+## Part 4: Vercel
 
-Nothing to add. The Twilio keys live in Supabase, not in Netlify. Netlify rebuilds
+Nothing to add. The Twilio keys live in Supabase, not in Vercel. Vercel rebuilds
 the site by itself after the new code reaches GitHub.
 
 ## Part 5: Try it
