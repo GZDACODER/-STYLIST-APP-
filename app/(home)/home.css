@@ -1623,3 +1623,504 @@ body:has(.hm) {
   color: var(--text-soft);
   max-width: 40em;
 }
+
+/* =========================================================
+   Compact homepage (Nov 2026): switch line, feature tabs,
+   switching strip, pricing with a Monthly/Yearly switch.
+   ========================================================= */
+.hm-switch-line {
+  margin: 18px 0 0;
+  font-size: 0.92rem;
+  color: var(--text-soft);
+}
+
+.hm-switch-line a {
+  color: var(--gold-light);
+  text-underline-offset: 3px;
+}
+
+/* ---------- Feature tabs ---------- */
+.hm-fx {
+  margin-top: 32px;
+}
+
+.hm-fx-tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 4px;
+  margin: 0 calc(var(--gutter) * -1);
+  padding-left: var(--gutter);
+  padding-right: var(--gutter);
+}
+
+.hm-fx-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.hm-fx-tab {
+  flex: none;
+  padding: 10px 16px;
+  border: 1px solid var(--hair-strong);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-soft);
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.hm-fx-tab:hover {
+  color: var(--text);
+  border-color: var(--gold);
+}
+
+.hm-fx-tab.active {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #0b0a09;
+}
+
+.hm-fx-panel {
+  display: grid;
+  gap: 28px;
+  margin-top: 24px;
+  padding: 28px 22px;
+  border: 1px solid var(--hair);
+  background: var(--bg-2);
+  animation: hm-fx-in 0.35s ease-out;
+}
+
+@keyframes hm-fx-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hm-fx-panel {
+    animation: none;
+  }
+}
+
+@media (min-width: 860px) {
+  .hm-fx-panel {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    align-items: center;
+    padding: 40px;
+    min-height: 340px;
+  }
+}
+
+.hm-fx-copy h3 {
+  font-size: clamp(1.7rem, 4vw, 2.3rem);
+  line-height: 1.1;
+}
+
+.hm-fx-copy > p {
+  color: var(--text-soft);
+  margin: 12px 0 16px;
+}
+
+.hm-fx-visual {
+  display: flex;
+  justify-content: center;
+}
+
+.hm-fx-card {
+  width: 100%;
+  max-width: 340px;
+  padding: 20px;
+  border: 1px solid var(--hair-strong);
+  background: #0b0a09;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  animation: hm-float 6s ease-in-out infinite;
+}
+
+@keyframes hm-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hm-fx-card {
+    animation: none;
+  }
+}
+
+.hm-fx-label {
+  margin: 0 0 10px;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.hm-fx-big {
+  margin: 0 0 12px;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 2rem;
+  line-height: 1.1;
+}
+
+.hm-fx-paid {
+  margin: 0 0 12px;
+  color: #8fc29d;
+  font-size: 0.9rem;
+}
+
+.hm-fx-foot {
+  margin: 12px 0 0;
+  font-size: 0.78rem;
+  color: var(--text-faint);
+}
+
+.hm-fx-times {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.hm-fx-times span {
+  padding: 8px 4px;
+  border: 1px solid var(--hair-strong);
+  font-size: 0.78rem;
+  text-align: center;
+}
+
+.hm-fx-times .is-regular {
+  border-color: var(--gold);
+  color: var(--gold-light);
+}
+
+.hm-fx-times .is-picked {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #0b0a09;
+}
+
+.hm-fx-times .is-gone {
+  opacity: 0.35;
+  text-decoration: line-through;
+}
+
+.hm-fx-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.hm-fx-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--hair);
+  font-size: 0.85rem;
+}
+
+.hm-fx-list em {
+  font-style: normal;
+  color: var(--gold-light);
+  font-size: 0.78rem;
+}
+
+.hm-fx-list em.ok {
+  color: #8fc29d;
+}
+
+.hm-fx-list em.owed {
+  color: #e2b867;
+}
+
+.hm-fx-list em.no {
+  color: #e48b7c;
+}
+
+.hm-fx-button {
+  display: inline-block;
+  margin-top: 14px;
+  padding: 9px 16px;
+  background: var(--gold);
+  color: #0b0a09;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.hm-fx-ghost {
+  display: inline-block;
+  margin-top: 14px;
+  padding: 9px 16px;
+  border: 1px solid var(--hair-strong);
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.hm-fx-confirm {
+  display: flex;
+  gap: 8px;
+}
+
+.hm-fx-bubble {
+  max-width: 85%;
+  margin: 0 0 10px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.hm-fx-bubble.you {
+  margin-left: auto;
+  background: var(--gold);
+  color: #0b0a09;
+}
+
+.hm-fx-bubble.bot {
+  background: var(--bg-2);
+  border: 1px solid var(--hair-strong);
+}
+
+.hm-fx-cover {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: 120px;
+  margin: -20px -20px 14px;
+  padding: 16px;
+  background: linear-gradient(160deg, #3a2e1d, #0b0a09 70%);
+}
+
+.hm-fx-cover span {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.6rem;
+  font-style: italic;
+}
+
+.hm-fx-cover small {
+  color: var(--text-soft);
+  font-size: 0.75rem;
+}
+
+/* ---------- Switching strip ---------- */
+.hm-switch-strip > .hm-button {
+  margin-top: 28px;
+}
+
+.hm-steps3 {
+  list-style: none;
+  display: grid;
+  gap: 16px;
+  margin: 32px 0 0;
+  padding: 0;
+  counter-reset: step;
+}
+
+@media (min-width: 820px) {
+  .hm-steps3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.hm-steps3 li {
+  position: relative;
+  padding: 24px 22px;
+  border: 1px solid var(--hair);
+  background: var(--bg-2);
+  counter-increment: step;
+}
+
+.hm-steps3 li::before {
+  content: "0" counter(step);
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.6rem;
+  color: var(--gold);
+  opacity: 0.6;
+}
+
+.hm-steps3 h3 {
+  margin: 12px 0 6px;
+  font-size: 1.35rem;
+}
+
+.hm-steps3 p {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 0.92rem;
+}
+
+/* ---------- Pricing with a switch ---------- */
+.hm-toggle {
+  display: inline-flex;
+  margin: 28px 0 20px;
+  padding: 4px;
+  border: 1px solid var(--hair-strong);
+  border-radius: 999px;
+}
+
+.hm-toggle button {
+  padding: 9px 18px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-soft);
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.hm-toggle button.active {
+  background: var(--gold);
+  color: #0b0a09;
+}
+
+.hm-toggle-save {
+  margin-left: 6px;
+  font-size: 0.72rem;
+  opacity: 0.85;
+}
+
+.hm-price-grid {
+  display: grid;
+  gap: 16px;
+}
+
+@media (min-width: 900px) {
+  .hm-price-grid {
+    grid-template-columns: 1.4fr 1fr 1fr;
+    align-items: stretch;
+  }
+}
+
+.hm-price-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 26px 24px;
+  border: 1px solid var(--hair);
+  background: var(--bg-2);
+}
+
+.hm-price-card.is-main {
+  border-color: var(--gold);
+}
+
+.hm-price-card .hm-button {
+  align-self: flex-start;
+  margin-top: auto;
+}
+
+.hm-price.is-small {
+  font-size: 2.4rem;
+}
+
+.hm-tier-badge.is-quiet {
+  background: transparent;
+  border: 1px solid var(--hair-strong);
+  color: var(--text-soft);
+}
+
+.hm-included {
+  margin: 4px 0 14px;
+}
+
+.hm-included summary {
+  cursor: pointer;
+  color: var(--gold-light);
+  font-size: 0.9rem;
+}
+
+.hm-never {
+  margin-top: 28px;
+}
+
+.hm-never h3 {
+  font-size: 1.2rem;
+  margin-bottom: 8px;
+}
+
+.hm-cta-center {
+  justify-content: center;
+}
+
+/* ---------- Make the Switch: coming from, side by side ---------- */
+.hm-sw-from {
+  margin-top: 28px;
+}
+
+.hm-sw-from p {
+  margin: 0 0 10px;
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.hm-sw-from ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.hm-sw-from li {
+  padding: 6px 14px;
+  border: 1px solid var(--hair-strong);
+  border-radius: 999px;
+  font-size: 0.85rem;
+  color: var(--text-soft);
+}
+
+.hm-sw-timeline {
+  list-style: none;
+  margin: 28px 0 0;
+  padding: 0 0 0 22px;
+  border-left: 1px solid var(--gold);
+}
+
+.hm-sw-timeline li {
+  position: relative;
+  padding: 0 0 22px;
+}
+
+.hm-sw-timeline li::before {
+  content: "";
+  position: absolute;
+  left: -27px;
+  top: 6px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--gold);
+}
+
+.hm-sw-timeline strong {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.3rem;
+  font-weight: 500;
+}
+
+.hm-sw-timeline p {
+  margin: 4px 0 0;
+  color: var(--text-soft);
+}

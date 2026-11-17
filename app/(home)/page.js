@@ -3,9 +3,9 @@ import { createClient } from "@/lib/supabase/server";
 import { BRAND_NAME } from "@/lib/brand";
 import { DEPOSIT_FEE_FIXED_CENTS, DEPOSIT_FEE_PERCENT, PLANS, TRIAL_DAYS } from "@/lib/plans";
 import { formatPrice } from "@/lib/money";
-import RegularStar from "@/components/RegularStar";
 import HeroObject from "./HeroObject";
-import Switching from "./Switching";
+import FeatureTabs from "./FeatureTabs";
+import PricingToggle from "./PricingToggle";
 import Icon from "./Icon";
 
 const TITLE = `${BRAND_NAME}: Booking that puts your regulars first.`;
@@ -34,66 +34,6 @@ const EXAMPLES = [
   "Tutors",
   "Pet grooming",
   "Photographers",
-];
-
-// Standing appointments: the next few held visits, for the picture.
-const STANDING_DATES = [
-  ["Tue, Dec 1", "10:00 AM"],
-  ["Tue, Dec 29", "10:00 AM"],
-  ["Tue, Jan 26", "10:00 AM"],
-  ["Tue, Feb 23", "10:00 AM"],
-];
-
-const STANDING_POINTS = [
-  "Every 2 to 12 weeks, on their usual day and time.",
-  "The next 3 months are held, and it keeps rolling forward.",
-  "Held times never show as open to anyone else.",
-  "Skip or move one date without touching the rest.",
-  "No deposit, or a deposit each visit. Your choice for each regular.",
-];
-
-// Runs your day for you.
-const RUNS = [
-  {
-    icon: "bell",
-    title: "Confirmations and reminders",
-    text: "Every client gets a confirmation and a reminder 24 hours before, with a one-tap Cancel this visit. The time opens up again for your waitlist.",
-  },
-  {
-    icon: "wrapup",
-    title: "The 8 PM wrap-up",
-    text: "One email at the end of the day: mark each visit kept, no-show or someone else came. Balances owed get flagged until they're paid.",
-  },
-  {
-    icon: "chart",
-    title: "Your Monday summary",
-    text: "Last week's visits, what you booked, deposits, no-shows and waitlist fills, plus what's on this week.",
-  },
-  {
-    icon: "card",
-    title: "Client history",
-    text: "Every client card shows their visits, what they've spent, cancellations, no-shows and when they last came in.",
-  },
-  {
-    icon: "swap",
-    title: "Import and export",
-    text: "Bring your list over from another app with a CSV file, and download it again any time. Your clients stay yours.",
-  },
-];
-
-const REGULARS = [
-  {
-    title: "Regulars-only times",
-    text: "Mark any opening “Regulars only”. Everyone else never sees it, so your best clients always have somewhere to land.",
-  },
-  {
-    title: "Early access",
-    text: "New openings go to your regulars first. When the book is full, switch the whole page to regulars-only with one tap.",
-  },
-  {
-    title: "Invite links",
-    text: "Taking on someone new? Send a private link that lets just that person book once, even when you’re regulars-only.",
-  },
 ];
 
 // "We don't charge extra for": all included in the one plan.
@@ -125,7 +65,7 @@ export default async function HomePage() {
     ? { href: "/dashboard", label: "View dashboard" }
     : { href: "/login", label: "Log in" };
 
-  const { allin, team } = PLANS;
+  const { allin, team, assistant } = PLANS;
   const included = [
     "Your booking page, portfolio and deposits",
     "Confirmation and reminder emails",
@@ -189,6 +129,10 @@ export default async function HomePage() {
               </a>
             </div>
             <p className="hm-fine">{TRIAL_DAYS} days free. No card needed.</p>
+            <p className="hm-switch-line">
+              Coming from Booksy, GlossGenius, Acuity, Square or Vagaro?{" "}
+              <Link href="/switch">See how switching works →</Link>
+            </p>
           </div>
           <div className="hm-hero-visual">
             <HeroObject />
@@ -204,205 +148,76 @@ export default async function HomePage() {
           </ul>
         </section>
 
-        {/* ---------- 1. Regulars First ---------- */}
+        {/* ---------- Features (one tab at a time) ---------- */}
         <section id="features" className="hm-section">
-          <p className="hm-kicker">01 · Regulars First</p>
-          <h2>Your best clients never fight for a spot.</h2>
+          <p className="hm-kicker">What you get</p>
+          <h2>
+            Built for a book full of <em>regulars.</em>
+          </h2>
           <p className="hm-section-lede">
-            The clients who keep your book full get first pick of your time. Everyone else books
-            what&apos;s left.
+            Everything a busy pro needs in one plan: tap through what makes Clientele different.
           </p>
-          <ul className="hm-cards">
-            {REGULARS.map((f) => (
-              <li key={f.title}>
-                <RegularStar label={null} size={14} />
-                <h3>{f.title}</h3>
-                <p>{f.text}</p>
-              </li>
-            ))}
-          </ul>
+          <FeatureTabs />
         </section>
 
-        {/* ---------- 2. Standing appointments ---------- */}
-        <section id="standing" className="hm-section hm-standing">
+        {/* ---------- Switching ---------- */}
+        <section id="switching" className="hm-section hm-switch-strip">
           <div>
-            <p className="hm-kicker">02 · Standing appointments</p>
-            <h2>
-              Their usual time, <em>held for them.</em>
-            </h2>
+            <p className="hm-kicker">Make the switch</p>
+            <h2>Moving over takes an afternoon.</h2>
             <p className="hm-section-lede">
-              Your regulars come back every few weeks. Set it once on their client card, and their
-              visits are booked months ahead.
-            </p>
-            <ul className="hm-points">
-              {STANDING_POINTS.map((point) => (
-                <li key={point}>{point}</li>
-              ))}
-            </ul>
-          </div>
-
-          {/* A held series, drawn in code. */}
-          <div className="hm-ledger" aria-hidden="true">
-            <div className="hm-ledger-head">
-              <span className="hm-ledger-name">Jasmine R.</span>
-              <span className="hm-ledger-repeat">Every 4 weeks · Tuesday</span>
-            </div>
-            <ul>
-              {STANDING_DATES.map(([date, time]) => (
-                <li key={date}>
-                  <span>{date}</span>
-                  <span className="hm-ledger-time">{time}</span>
-                  <span className="hm-ledger-tag">Standing</span>
-                </li>
-              ))}
-            </ul>
-            <p className="hm-ledger-foot">Held · rolls forward every week</p>
-          </div>
-        </section>
-
-        {/* ---------- 3. No more no-shows ---------- */}
-        <section className="hm-section">
-          <p className="hm-kicker">03 · No more no-shows</p>
-          <h2>Deposits up front. Cancellations filled for you.</h2>
-          <div className="hm-split">
-            <div className="hm-split-item">
-              <h3>Deposits, paid to you</h3>
-              <p>
-                Set a dollar amount or a percent for each service. Clients pay before the time is
-                theirs, and it goes straight to your own Stripe account.
-              </p>
-              <div className="hm-mini" aria-hidden="true">
-                <span>Signature session · Thu 10:30 AM</span>
-                <strong>$20 deposit paid</strong>
-              </div>
-            </div>
-            <div className="hm-split-item">
-              <h3>A waitlist that fills the gap</h3>
-              <p>
-                Clients choose the days and times they want. When someone cancels, the waitlist is
-                emailed straight away, and the first to claim the time gets it.
-              </p>
-              <div className="hm-mini" aria-hidden="true">
-                <span>A time just opened · Fri 2:00 PM</span>
-                <strong>Claim this time</strong>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ---------- 4. Runs your day ---------- */}
-        <section className="hm-section">
-          <p className="hm-kicker">04 · Runs your day for you</p>
-          <h2>The admin, handled.</h2>
-          <p className="hm-section-lede">
-            The reminders, the follow-up and the numbers happen on their own, so your time goes to
-            your clients.
-          </p>
-          <ul className="hm-runs">
-            {RUNS.map((r) => (
-              <li key={r.title}>
-                <Icon name={r.icon} />
-                <h3>{r.title}</h3>
-                <p>{r.text}</p>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        {/* ---------- 5. Your brand ---------- */}
-        <section className="hm-section hm-brand">
-          <div className="hm-brand-copy">
-            <p className="hm-kicker">05 · Your brand, not ours</p>
-            <h2>A booking page that looks like you.</h2>
-            <p className="hm-section-lede">
-              Your name in script over your own cover photo, with your Instagram and location one
-              tap away. No marketplace, no other businesses on the page, no app for clients to
-              download.
+              Coming from Booksy, GlossGenius, Acuity, Square, Vagaro or a paper book? Bring your clients, keep
+              your old app until you&apos;re ready, and let us help.
             </p>
           </div>
-
-          {/* A booking page, drawn in code (the "photo" is a gradient). */}
-          <div className="hm-phone" aria-hidden="true">
-            <div className="hm-phone-cover">
-              <span className="hm-phone-name">Royalty Studio</span>
-              <span className="hm-phone-rule" />
-              <span className="hm-phone-meta">Chicago · @royaltystudio</span>
-            </div>
-            <div className="hm-phone-body">
-              <p className="hm-phone-label">Signature session · 60 min · $80</p>
-              <p className="hm-phone-label hm-phone-day">Thursday, Nov 12</p>
-              <div className="hm-phone-times">
-                <span>9:00 AM</span>
-                <span className="is-regular">
-                  10:30 AM <RegularStar label={null} size={9} />
-                </span>
-                <span className="is-picked">1:00 PM</span>
-                <span>3:30 PM</span>
-              </div>
-              <span className="hm-phone-button">Book · $20 deposit</span>
-            </div>
-          </div>
+          <ol className="hm-steps3">
+            <li>
+              <Icon name="swap" />
+              <h3>Import your client list</h3>
+              <p>Export a CSV from your old app and import it in a few taps. Names, phones, emails and notes come over.</p>
+            </li>
+            <li>
+              <Icon name="link" />
+              <h3>We&apos;ll help you move</h3>
+              <p>Can&apos;t find the export, or want it done for you? Email us the file and we&apos;ll import it.</p>
+            </li>
+            <li>
+              <Icon name="repeat" />
+              <h3>Run both side by side</h3>
+              <p>Bookings already made stay in your old app. New ones come to Clientele. Cancel the old one when you&apos;re ready.</p>
+            </li>
+          </ol>
+          <Link href="/switch" className="hm-button hm-button-ghost">
+            Read the switching guide
+          </Link>
         </section>
 
-        {/* ---------- Switching from another app? ---------- */}
-        <Switching />
-
-        {/* ---------- 6. Pricing ---------- */}
+        {/* ---------- Pricing ---------- */}
         <section id="pricing" className="hm-section">
-          <p className="hm-kicker">06 · Pricing</p>
+          <p className="hm-kicker">Pricing</p>
           <h2>One plan. Everything included.</h2>
           <p className="hm-section-lede">
-            No add-ons to work out. Pay monthly, or yearly and get 2 months free.
+            {price(allin.monthlyCents)}/mo for everything, or yearly and get 2 months free. {TRIAL_DAYS}-day free
+            trial, no card needed, cancel any time.
           </p>
-          <div className="hm-plan">
-            <span className="hm-tier-badge">All-in</span>
-            <p className="hm-price">
-              {price(allin.monthlyCents)}
-              <span>/mo, everything included</span>
-            </p>
-            <p className="hm-plan-alt">or {price(allin.yearlyCents)}/year</p>
-            <ul className="hm-plan-list">
-              {included.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-            <p className="hm-plan-team">
-              <strong>Add team members for {price(team.monthlyCents)}/mo each</strong> (
-              {price(team.yearlyCents)}/year), half the price of the plan.
-            </p>
-            {process.env.ANTHROPIC_API_KEY && (
-              <p className="hm-plan-team">
-                <strong>Optional: the Assistant for {price(PLANS.assistant.monthlyCents)}/mo</strong> (
-                {price(PLANS.assistant.yearlyCents)}/year). Ask about your schedule and make changes
-                in your own words. Included in the free trial.
-              </p>
-            )}
-            <Link href="/signup" className="hm-button">
-              Start {TRIAL_DAYS}-day free trial
-            </Link>
-          </div>
-          <div className="hm-noextra">
-            <h3>We don&apos;t charge extra for</h3>
-            <ul className="hm-noextra-list">
-              {NO_EXTRA.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-            <h3 className="hm-noextra-never">And never</h3>
+          <PricingToggle
+            allin={allin}
+            team={team}
+            assistant={assistant}
+            trialDays={TRIAL_DAYS}
+            included={[...new Set([...included, ...NO_EXTRA])]}
+            assistantOn={Boolean(process.env.ANTHROPIC_API_KEY)}
+          />
+          <div className="hm-never">
+            <h3>And never</h3>
             <ul className="hm-noextra-list is-never">
               {NEVER.map((item) => (
                 <li key={item}>{item}</li>
               ))}
             </ul>
           </div>
-          <ul className="hm-promises">
-            <li>{TRIAL_DAYS}-day free trial with everything on</li>
-            <li>No card needed to start</li>
-            <li>Cancel any time</li>
-          </ul>
           <p className="hm-fine">
-            Deposits: {DEPOSIT_FEE_PERCENT}% + {DEPOSIT_FEE_FIXED_CENTS}¢ per deposit, which covers
-            card processing.
+            Deposits: {DEPOSIT_FEE_PERCENT}% + {DEPOSIT_FEE_FIXED_CENTS}¢ per deposit, which covers card processing.
           </p>
         </section>
 
@@ -412,9 +227,14 @@ export default async function HomePage() {
             Give your regulars <em>first pick.</em>
           </h2>
           <p>Set up in minutes. {TRIAL_DAYS} days free, no card.</p>
-          <Link href="/signup" className="hm-button">
-            Start free trial
-          </Link>
+          <div className="hm-cta-row hm-cta-center">
+            <Link href="/signup" className="hm-button">
+              Start free trial
+            </Link>
+            <Link href="/switch" className="hm-button hm-button-ghost">
+              Switching? Start here
+            </Link>
+          </div>
         </section>
       </main>
 
