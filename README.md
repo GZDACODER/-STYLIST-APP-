@@ -22,6 +22,13 @@ and hosted on **Vercel**.
   appointments you pick in Settings (3 to start with).
 - **Forgot password** (`/forgot-password`, linked from Log in): emails a link
   that logs the pro in and opens **Choose a new password** (`/reset-password`).
+- **Trial feedback** (step 38 SQL `0043_trial_feedback.sql`): from day 3 of the
+  free trial, Home asks "How's Clientele working for you?" (Not now hides it
+  for 3 days). `/dashboard/feedback` has five questions: overall 1–5, how likely
+  to keep using it, what needs updating, what would make life easier, and open
+  notes. Answers are saved in `trial_feedback`, emailed to `ADMIN_EMAILS`, and
+  listed at `/dashboard/admin/feedback` (only for logins in `ADMIN_EMAILS`).
+  Pros can send more any time (Plan & billing, Home).
 - **Example data for new pros** (`lib/examples.js`, step 37 SQL
   `0042_examples.sql`): new sign-ups see realistic examples in every tab
   (services, clients incl. a Regular and an Invited client, an invite link,

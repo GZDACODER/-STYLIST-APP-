@@ -4645,3 +4645,104 @@ body:has(dialog.client-sheet[open]) {
 .op-row.is-example {
   grid-template-columns: minmax(0, 1fr) auto auto;
 }
+
+/* ---------- Trial feedback ---------- */
+.db .feedback-prompt {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  border-left: 2px solid var(--gold);
+}
+
+.db .feedback-prompt h2 {
+  margin: 0 0 4px;
+  font-size: 1.35rem;
+}
+
+.feedback-prompt-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.feedback-form fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0 0 18px;
+}
+
+.feedback-form legend {
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.feedback-scale {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.feedback-options {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+@media (max-width: 599px) {
+  .feedback-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.db .feedback-choice {
+  position: relative;
+  display: block;
+  margin: 0;
+}
+
+.db .feedback-choice input {
+  position: absolute;
+  opacity: 0;
+}
+
+.db .feedback-choice span {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 4px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  font-size: 0.78rem;
+  text-align: center;
+  cursor: pointer;
+}
+
+.db .feedback-choice span strong {
+  font-size: 1.2rem;
+}
+
+.db .feedback-choice input:checked + span {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--bg);
+}
+
+.db .feedback-choice input:focus-visible + span {
+  outline: 2px solid var(--gold);
+}
+
+.feedback-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.feedback-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
