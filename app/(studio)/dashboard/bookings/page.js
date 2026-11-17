@@ -7,7 +7,7 @@ import { BRAND_NAME } from "@/lib/brand";
 import CalendarView from "./CalendarView";
 import PageHeader from "@/components/dash/PageHeader";
 import Collapsible from "@/components/dash/Collapsible";
-import ShowMore from "@/components/dash/ShowMore";
+import RowList from "@/components/dash/RowList";
 import { CancelledDepositBadge } from "./badges";
 import RefundDepositButton from "./RefundDepositButton";
 import { formatPrice } from "@/lib/money";
@@ -226,45 +226,57 @@ export default async function BookingsPage({ searchParams }) {
             These clients are paying their deposit now. If they don&apos;t pay by the time shown,
             the time opens up again.
           </p>
-          <ul className="service-list">
-            {awaitingPayment.map((b) => (
-              <li key={b.id}>
-                <div>
-                  <div className="service-name">{b.client_name}</div>
-                  <div className="muted">
-                    {formatDate(b.booking_date)} · {clockTime(b.start_time)} · {b.service_name}
-                  </div>
-                  <div className="muted small-text">
-                    {formatPrice(b.deposit_cents)} deposit · held until {holdUntil(b)}
-                  </div>
-                </div>
-                <span className="badge unpaid">Unpaid</span>
-              </li>
-            ))}
-          </ul>
+          <RowList
+            label="Calendar"
+            items={awaitingPayment.map((b) => ({
+              key: b.id,
+              title: b.client_name,
+              sub: `${formatDate(b.booking_date)} · ${clockTime(b.start_time)} · ${b.service_name}`,
+              badge: <span className="badge unpaid row-badge">Unpaid</span>,
+              panel: (
+                <p className="muted">
+                  {formatPrice(b.deposit_cents)} deposit · held until {holdUntil(b)}. If they don&apos;t pay by then,
+                  the time opens up again.
+                </p>
+              ),
+            }))}
+          />
         </section>
       )}
 
       {cancelled.length > 0 && (
         <Collapsible title="Cancelled" count={cancelled.length}>
-          <ShowMore className="service-list">
-            {cancelled.map((b) => (
-              <li key={b.id}>
-                <div>
-                  <div className="service-name">{b.client_name}</div>
-                  <div className="muted">
-                    {formatDate(b.booking_date)} · {clockTime(b.start_time)} · {b.service_name}
-                  </div>
+          <RowList
+            label="Calendar"
+            noun="more cancelled"
+            items={cancelled.map((b) => ({
+              key: b.id,
+              title: b.client_name,
+              sub: `${formatDate(b.booking_date)} · ${clockTime(b.start_time)} · ${b.service_name}`,
+              badge: <CancelledDepositBadge booking={b} />,
+              panel: (
+                <>
+                  <dl className="booking-facts">
+                    <div>
+                      <dt>Was booked for</dt>
+                      <dd>
+                        {formatDate(b.booking_date)} at {clockTime(b.start_time)}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Service</dt>
+                      <dd>{b.service_name}</dd>
+                    </div>
+                  </dl>
                   {b.deposit_status === "paid" && b.deposit_cents > 0 && (
                     <div className="refund-row">
                       <RefundDepositButton id={b.id} clientName={b.client_name} depositCents={b.deposit_cents} />
                     </div>
                   )}
-                </div>
-                <CancelledDepositBadge booking={b} />
-              </li>
-            ))}
-          </ShowMore>
+                </>
+              ),
+            }))}
+          />
         </Collapsible>
       )}
     </>

@@ -8,6 +8,7 @@ import BlockDatesForm from "./BlockDatesForm";
 import SubmitButton from "@/components/SubmitButton";
 import { BRAND_NAME } from "@/lib/brand";
 import SettingsShell from "@/components/dash/SettingsShell";
+import RowList from "@/components/dash/RowList";
 import Link from "next/link";
 
 export const metadata = { title: `Availability · ${BRAND_NAME}` };
@@ -78,22 +79,25 @@ export default async function AvailabilityPage() {
         {blocked.length > 0 && (
           <>
             <h3 className="list-title">Blocked dates</h3>
-            <ul className="service-list">
-              {blocked.map((b) => (
-                <li key={b.id}>
-                  <div>
-                    <div className="service-name">{formatDate(b.blocked_on)}</div>
-                    {b.reason && <div className="muted">{b.reason}</div>}
-                  </div>
-                  <form action={unblockDate}>
-                    <input type="hidden" name="id" value={b.id} />
-                    <SubmitButton className="button secondary small" pendingText="...">
-                      Remove
-                    </SubmitButton>
-                  </form>
-                </li>
-              ))}
-            </ul>
+            <RowList
+              label="Hours & days off"
+              items={blocked.map((b) => ({
+                key: b.id,
+                title: formatDate(b.blocked_on),
+                sub: b.reason || "Blocked",
+                panel: (
+                  <>
+                    <p className="muted">Clients can&apos;t book this day.{b.reason ? ` Reason: ${b.reason}.` : ""}</p>
+                    <form action={unblockDate}>
+                      <input type="hidden" name="id" value={b.id} />
+                      <SubmitButton className="button secondary small" pendingText="Removing...">
+                        Remove block
+                      </SubmitButton>
+                    </form>
+                  </>
+                ),
+              }))}
+            />
           </>
         )}
       </section>

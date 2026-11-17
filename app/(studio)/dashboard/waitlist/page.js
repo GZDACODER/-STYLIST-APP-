@@ -11,6 +11,7 @@ import WaitingList from "./WaitingList";
 import PageHeader from "@/components/dash/PageHeader";
 import EmptyState from "@/components/dash/EmptyState";
 import Collapsible from "@/components/dash/Collapsible";
+import RowList from "@/components/dash/RowList";
 import { BRAND_NAME } from "@/lib/brand";
 
 export const metadata = { title: `Waitlist · ${BRAND_NAME}` };
@@ -141,19 +142,14 @@ export default async function WaitlistPage() {
           <p className="muted small-text">
             Waitlisted clients who got a time in the last 30 days.
           </p>
-          <ul className="service-list">
-            {booked.map((e) => (
-              <li key={e.id}>
-                <div>
-                  <div className="service-name">{e.name}</div>
-                  <div className="muted">
-                    {e.service?.name} · booked {whenText(e.ended_at)}
-                  </div>
-                </div>
-                <span className="badge paid">Booked</span>
-              </li>
-            ))}
-          </ul>
+          <RowList
+            items={booked.map((e) => ({
+              key: e.id,
+              title: e.name,
+              sub: `${e.service?.name || "A service"} · booked ${whenText(e.ended_at)}`,
+              badge: <span className="badge paid row-badge">Booked</span>,
+            }))}
+          />
         </Collapsible>
       )}
     </>

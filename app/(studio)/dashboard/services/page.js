@@ -6,6 +6,7 @@ import SubmitButton from "@/components/SubmitButton";
 import { BRAND_NAME } from "@/lib/brand";
 import SettingsShell from "@/components/dash/SettingsShell";
 import EmptyState from "@/components/dash/EmptyState";
+import RowList from "@/components/dash/RowList";
 
 export const metadata = { title: `Services · ${BRAND_NAME}` };
 
@@ -44,24 +45,37 @@ export default async function ServicesPage() {
           <EmptyState title="No services yet" text="Add your first one below so clients can book." />
         )}
         {!error && services.length > 0 && (
-          <ul className="service-list">
-            {services.map((service) => (
-              <li key={service.id}>
-                <div>
-                  <div className="service-name">{service.name}</div>
-                  <div className="muted">
-                    {formatPrice(service.price_cents)} · {formatDuration(service.duration_minutes)}
-                  </div>
-                </div>
-                <form action={deleteService}>
-                  <input type="hidden" name="id" value={service.id} />
-                  <SubmitButton className="button secondary small" pendingText="...">
-                    Delete
-                  </SubmitButton>
-                </form>
-              </li>
-            ))}
-          </ul>
+          <RowList
+            label="Services"
+            items={services.map((service) => ({
+              key: service.id,
+              title: service.name,
+              sub: `${formatPrice(service.price_cents)} · ${formatDuration(service.duration_minutes)}`,
+              panel: (
+                <>
+                  <dl className="booking-facts">
+                    <div>
+                      <dt>Price</dt>
+                      <dd>{formatPrice(service.price_cents)}</dd>
+                    </div>
+                    <div>
+                      <dt>Length</dt>
+                      <dd>{formatDuration(service.duration_minutes)}</dd>
+                    </div>
+                  </dl>
+                  <p className="muted small-text">
+                    Deposits for this service are set in <a href="/dashboard/settings/deposits">Deposits</a>.
+                  </p>
+                  <form action={deleteService}>
+                    <input type="hidden" name="id" value={service.id} />
+                    <SubmitButton className="button secondary small" pendingText="Deleting...">
+                      Delete service
+                    </SubmitButton>
+                  </form>
+                </>
+              ),
+            }))}
+          />
         )}
       </section>
 

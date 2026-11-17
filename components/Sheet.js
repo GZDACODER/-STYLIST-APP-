@@ -1,7 +1,7 @@
 "use client";
 
-// A panel that opens over the page: full screen on a phone, centered on
-// iPad and computer. Esc, the back link or tapping outside closes it.
+// A panel that opens over the page: full screen on a phone (with a back
+// link), sliding in on the right on iPad and computer. Esc, the back link or tapping outside closes it.
 // Used for a client's card (Clients) and a booking's details (Calendar).
 import { useEffect, useRef } from "react";
 
