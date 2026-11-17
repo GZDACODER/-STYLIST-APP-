@@ -123,7 +123,17 @@ async function run(ctx, messages) {
       }
       if (error instanceof Anthropic.APIError) {
         console.error("Assistant API error", error.status, error.message);
-        return { messages, error: "The assistant couldn't answer just now. Please try again." };
+        const detail = String(error.message || "");
+        // The Anthropic account has run out of credit (Console → Billing).
+        if (/credit balance|billing|purchase credits/i.test(detail)) {
+          return {
+            messages,
+            error: "The assistant is switched off for now: the Anthropic account needs credit (Console → Billing).",
+          };
+        }
+        // A short reason for the owner, without anything sensitive.
+        const reason = `${error.status || ""} ${error.error?.error?.type || ""}`.trim();
+        return { messages, error: `The assistant couldn't answer just now. Please try again.${reason ? ` (${reason})` : ""}` };
       }
       console.error("Assistant failed", error);
       return { messages, error: "The assistant couldn't answer just now. Please try again." };
