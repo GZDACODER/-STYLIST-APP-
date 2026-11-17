@@ -77,15 +77,26 @@ export default async function OpeningsPage() {
   ]);
   const closedKeys = new Set((holidayRows || []).map((r) => r.holiday_key));
   const hhmm = (t) => String(t).slice(0, 5);
+  // "4–5 PM", "9:30 AM–12 PM": short enough for one row.
+  const short = (t) => clockTime(t).replace(":00", "");
+  const compactRange = (a, b) => {
+    const [from, to] = [short(a), short(b)];
+    const [fromNum, fromHalf] = from.split(" ");
+    return fromHalf === to.split(" ")[1] ? `${fromNum}–${to}` : `${from}–${to}`;
+  };
+  // blockedBy: { openingId: [{ short: "4–5 PM blocked", full: "Maya's practice: ..." }] }
   const blockedBy = {};
   for (const o of openings || []) {
     const notes = [];
     const closed = holidaysOn(o.opening_date).find((h) => h.key && closedKeys.has(h.key));
-    if (closed) notes.push(`Closed for ${closed.name}: none of this can be booked`);
+    if (closed) notes.push({ short: `Closed – ${closed.name}`, full: `Closed for ${closed.name}: none of this can be booked` });
     for (const e of eventsOn(eventRows || [], o.opening_date)) {
-      if (!e.start_time) notes.push(`${e.title} (all day): none of this can be booked`);
+      if (!e.start_time) notes.push({ short: "All day blocked", full: `${e.title} (all day): none of this can be booked` });
       else if (hhmm(e.start_time) < hhmm(o.end_time) && hhmm(e.end_time) > hhmm(o.start_time)) {
-        notes.push(`${e.title}: ${clockTime(e.start_time)} – ${clockTime(e.end_time)} can't be booked`);
+        notes.push({
+          short: `${compactRange(e.start_time, e.end_time)} blocked`,
+          full: `${e.title}: ${clockTime(e.start_time)} – ${clockTime(e.end_time)} can't be booked`,
+        });
       }
     }
     if (notes.length) blockedBy[o.id] = notes;
@@ -142,12 +153,12 @@ export default async function OpeningsPage() {
       />
 
       <section className="card">
-        <h2>Upcoming openings</h2>
         <OpeningsList
           openings={openings}
           bookingCounts={bookingCounts}
           blockedBy={blockedBy}
           regularsAllowed={plan.has.regulars}
+          today={today}
         />
       </section>
 
