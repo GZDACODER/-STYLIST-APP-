@@ -3967,3 +3967,123 @@ body:has(dialog.client-sheet[open]) {
 .db-collapse-body {
   margin-top: 16px;
 }
+
+/* ---------- Settings: section list + section (components/dash/SettingsShell) ---------- */
+.settings-shell {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 36px;
+  align-items: start;
+}
+
+.db .settings-nav-title {
+  font-size: 2.1rem;
+  margin: 0 0 16px;
+}
+
+.settings-nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--hair);
+  position: sticky;
+  top: 24px;
+}
+
+.db .settings-nav-link {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  column-gap: 10px;
+  padding: 11px 10px 11px 12px;
+  border-bottom: 1px solid var(--hair);
+  border-left: 2px solid transparent;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.db .settings-nav-link:hover {
+  background: var(--surface);
+}
+
+.db .settings-nav-link.active {
+  border-left-color: var(--gold);
+  background: var(--surface);
+}
+
+.settings-nav-label {
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.settings-nav-note {
+  grid-column: 1;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.settings-nav-link .db-row-chevron {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+}
+
+.db-row-chevron {
+  width: 7px;
+  height: 7px;
+  border-right: 1.5px solid var(--faint);
+  border-bottom: 1.5px solid var(--faint);
+  transform: rotate(-45deg);
+}
+
+/* The chevrons only matter on phones (the list is its own screen). */
+@media (min-width: 700px) {
+  .settings-nav-link .db-row-chevron {
+    display: none;
+  }
+}
+
+.db .settings-back {
+  display: none;
+}
+
+/* The header in the content repeats "Settings" on the root screen. */
+.settings-content .db-pagehead h1 {
+  font-size: 2rem;
+}
+
+@media (max-width: 899px) and (min-width: 700px) {
+  .settings-shell {
+    grid-template-columns: 200px minmax(0, 1fr);
+    gap: 24px;
+  }
+}
+
+@media (max-width: 699px) {
+  .settings-shell {
+    display: block;
+  }
+  /* A section: no list, a back arrow instead. */
+  .settings-shell:not(.is-root) .settings-nav {
+    display: none;
+  }
+  .db .settings-shell:not(.is-root) .settings-back {
+    display: inline-block;
+    margin: 0 0 6px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.95rem;
+  }
+  /* The root: just the list. */
+  .settings-shell.is-root .settings-content {
+    display: none;
+  }
+  .settings-nav ul {
+    position: static;
+    background: var(--surface);
+    border: 1px solid var(--hair);
+  }
+  .db .settings-nav-link {
+    padding: 15px 16px;
+  }
+}

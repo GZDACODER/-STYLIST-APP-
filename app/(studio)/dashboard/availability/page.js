@@ -1,13 +1,14 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { formatDate, hoursByWeekday, todayInTimeZone } from "@/lib/availability";
+import { formatDate, hoursByWeekday } from "@/lib/availability";
 import { unblockDate } from "./actions";
 import AvailabilityCalendar from "./AvailabilityCalendar";
 import WeeklyHoursForm from "./WeeklyHoursForm";
 import BlockDatesForm from "./BlockDatesForm";
 import SubmitButton from "@/components/SubmitButton";
 import { BRAND_NAME } from "@/lib/brand";
-import HolidaySettings from "../settings/HolidaySettings";
+import SettingsShell from "@/components/dash/SettingsShell";
+import Link from "next/link";
 
 export const metadata = { title: `Availability · ${BRAND_NAME}` };
 
@@ -37,21 +38,24 @@ export default async function AvailabilityPage() {
   const loadError = hoursError || blockedError;
   if (loadError) {
     return (
-      <p className="message error">Couldn't load your availability: {loadError.message}</p>
+      <SettingsShell active="hours">
+        <p className="message error">Couldn't load your availability: {loadError.message}</p>
+      </SettingsShell>
     );
   }
 
   const hours = hoursByWeekday(hourRows);
 
-  // Holidays the business closes on every year (step 34 SQL); null before it's run.
-  const [{ data: stylist }, { data: holidayRows, error: holidayError }] = await Promise.all([
-    supabase.from("stylists").select("timezone").eq("id", user.id).maybeSingle(),
-    supabase.from("stylist_holiday_settings").select("holiday_key, closed"),
-  ]);
-  const closedHolidays = holidayError ? null : (holidayRows || []).filter((r) => r.closed).map((r) => r.holiday_key);
-
   return (
-    <>
+    <SettingsShell
+      active="hours"
+      subtitle={
+        <>
+          Your week, and dates you can&apos;t work. Federal holidays are under{" "}
+          <Link href="/dashboard/settings/holidays">Holidays</Link>.
+        </>
+      }
+    >
       <section className="card calendar-card">
         <h2>Your calendar</h2>
         <AvailabilityCalendar hours={hours} blocked={blocked} />
@@ -61,22 +65,6 @@ export default async function AvailabilityPage() {
         <h2>Weekly hours</h2>
         <p className="muted">Tick the days you work and set your hours.</p>
         <WeeklyHoursForm savedHours={hours} />
-      </section>
-
-      <section className="card" id="holidays">
-        <h2>Holidays</h2>
-        <p className="muted">
-          Close on a federal holiday every year, and clients can&apos;t book it, the waitlist
-          isn&apos;t offered it, and standing appointments skip it. Bookings already made stay.
-          All open to start with. To close just one year, tap the holiday on your Calendar.
-        </p>
-        {closedHolidays ? (
-          <HolidaySettings closed={closedHolidays} today={todayInTimeZone(stylist?.timezone || "America/Chicago")} />
-        ) : (
-          <p className="message info">
-            Run <code>supabase/migrations/0039_calendar_extras.sql</code> in Supabase to switch this on.
-          </p>
-        )}
       </section>
 
       <section className="card">
@@ -109,6 +97,6 @@ export default async function AvailabilityPage() {
           </>
         )}
       </section>
-    </>
+    </SettingsShell>
   );
 }

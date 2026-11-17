@@ -128,7 +128,7 @@ export default async function OpeningsPage() {
             <a href={`${origin}/book/${stylist.slug}`} target="_blank" rel="noreferrer">
               {`${origin.replace(/^https?:\/\//, "")}/book/${stylist.slug}`}
             </a>{" "}
-            · <Link href="/dashboard/settings">change it</Link>
+            · <Link href="/dashboard/settings/booking-page">change it</Link>
           </>
         }
         actions={

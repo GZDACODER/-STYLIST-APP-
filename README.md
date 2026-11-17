@@ -22,6 +22,11 @@ and hosted on **Vercel**.
   appointments you pick in Settings (3 to start with).
 - **Forgot password** (`/forgot-password`, linked from Log in): emails a link
   that logs the pro in and opens **Choose a new password** (`/reset-password`).
+- **Settings** is split into sections (Business, Booking page, Services, Hours &
+  days off, Holidays, Regulars, Deposits, Forms, Plan & billing, Email): on iPad
+  the list is on the left and the section on the right; on phones the list is
+  its own screen and each section has a back arrow (`components/dash/SettingsShell.js`,
+  `lib/settingsSections.js`).
 - **Bookings**: see upcoming bookings (with deposit paid or not) and cancel them.
   The client is emailed straight away that it's cancelled, with a Book another
   time link (replies go to the business).
@@ -103,7 +108,7 @@ and hosted on **Vercel**.
   all dates. **Close on holidays**: tap a federal holiday on the Calendar for
   "Closed this holiday" (that date only, saved as a blocked date "Closed –
   Thanksgiving") or "Close every year"; all of them are listed in Settings →
-  Working hours → Holidays. A closed holiday has no bookings, waitlist offers or
+  Holidays. A closed holiday has no bookings, waitlist offers or
   standing visits, and is shaded like a day off.
   The Openings page shows which parts of an opening are blocked. Run
   `supabase/migrations/0039_calendar_extras.sql`, then

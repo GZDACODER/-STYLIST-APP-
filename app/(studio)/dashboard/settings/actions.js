@@ -8,7 +8,10 @@ import { planErrorMessage } from "@/lib/plan";
 
 const SLUG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
+// Saves the profile fields that were sent (Settings shows them in parts:
+// Business, Booking page, Email); fields not sent are left as they are.
 export async function saveSettings(prevState, formData) {
+  const has = (name) => formData.has(name);
   const businessName = String(formData.get("business_name") || "").trim();
   const slug = String(formData.get("slug") || "").trim().toLowerCase();
   const timezone = String(formData.get("timezone") || "").trim();
@@ -16,15 +19,17 @@ export async function saveSettings(prevState, formData) {
   const firstName = String(formData.get("first_name") || "").trim();
   const replyEmail = String(formData.get("reply_email") || "").trim().toLowerCase();
 
-  if (!businessName) return { error: "Please enter your business name." };
-  if (businessName.length > 100) return { error: "Business name is too long." };
-  if (slug.length < 3 || slug.length > 40 || !SLUG_PATTERN.test(slug)) {
+  if (has("business_name")) {
+    if (!businessName) return { error: "Please enter your business name." };
+    if (businessName.length > 100) return { error: "Business name is too long." };
+  }
+  if (has("slug") && (slug.length < 3 || slug.length > 40 || !SLUG_PATTERN.test(slug))) {
     return {
       error:
         "Your link can use lowercase letters, numbers and single dashes (3 to 40 characters), like cuts-by-sam.",
     };
   }
-  if (!isValidTimeZone(timezone)) return { error: "Please pick your time zone." };
+  if (has("timezone") && !isValidTimeZone(timezone)) return { error: "Please pick your time zone." };
   if (tagline.length > 120) return { error: "Please keep the tagline to 120 characters." };
   if (firstName.length > 50) return { error: "Please keep your first name to 50 characters." };
   if (replyEmail && (replyEmail.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(replyEmail))) {
@@ -37,60 +42,40 @@ export async function saveSettings(prevState, formData) {
   } = await supabase.auth.getUser();
   if (!user) return { error: "Please log in again." };
 
-  const { error } = await supabase
-    .from("stylists")
-    .update({ business_name: businessName, slug, timezone })
-    .eq("id", user.id);
-
-  if (error) {
-    // 23505 = "unique violation": another stylist already has this link.
-    if (error.code === "23505") return { error: "That link is already taken. Try another." };
-    return { error: error.message };
+  const main = {};
+  if (has("business_name")) main.business_name = businessName;
+  if (has("slug")) main.slug = slug;
+  if (has("timezone")) main.timezone = timezone;
+  if (Object.keys(main).length) {
+    const { error } = await supabase.from("stylists").update(main).eq("id", user.id);
+    if (error) {
+      // 23505 = "unique violation": another stylist already has this link.
+      if (error.code === "23505") return { error: "That link is already taken. Try another." };
+      return { error: error.message };
+    }
   }
 
-  // Saved on its own, so the rest still saves before the tagline SQL is run.
-  const { error: taglineError } = await supabase
-    .from("stylists")
-    .update({ tagline })
-    .eq("id", user.id);
-  if (taglineError) {
-    revalidatePath("/dashboard", "layout");
-    return {
-      error:
-        "Your other settings were saved, but not the tagline. Run supabase/migrations/0013_tagline.sql in Supabase first.",
-    };
-  }
-
-  // Saved on its own too, so the rest still saves before the first name SQL is run.
-  const { error: firstNameError } = await supabase
-    .from("stylists")
-    .update({ first_name: firstName })
-    .eq("id", user.id);
-  if (firstNameError) {
-    revalidatePath("/dashboard", "layout");
-    return {
-      error:
-        "Your other settings were saved, but not your first name. Run supabase/migrations/0015_first_name.sql in Supabase first.",
-    };
-  }
-
-  // Saved on its own too, so the rest still saves before the reply email SQL is run.
-  const { error: replyError } = await supabase
-    .from("stylists")
-    .update({ reply_email: replyEmail })
-    .eq("id", user.id);
-  // (Before that SQL, an empty field is fine: replies use the login email.)
-  if (replyError && replyEmail) {
-    revalidatePath("/dashboard", "layout");
-    return {
-      error:
-        "Your other settings were saved, but not the email for client replies. Run supabase/migrations/0027_reply_email.sql in Supabase first.",
-    };
+  // Each saved on its own, so the rest still saves before its SQL is run.
+  const extras = [
+    ["tagline", { tagline }, "the tagline", "0013_tagline.sql"],
+    ["first_name", { first_name: firstName }, "your first name", "0015_first_name.sql"],
+    ["reply_email", { reply_email: replyEmail }, "the email for client replies", "0027_reply_email.sql"],
+  ];
+  for (const [field, update, label, file] of extras) {
+    if (!has(field)) continue;
+    const { error } = await supabase.from("stylists").update(update).eq("id", user.id);
+    // (Before the reply email SQL, an empty field is fine: replies use the login email.)
+    if (error && !(field === "reply_email" && !replyEmail)) {
+      revalidatePath("/dashboard", "layout");
+      return {
+        error: `Your other settings were saved, but not ${label}. Run supabase/migrations/${file} in Supabase first.`,
+      };
+    }
   }
 
   // Name, link and time zone show up across the whole dashboard.
   revalidatePath("/dashboard", "layout");
-  return { success: "Settings saved." };
+  return { success: "Saved." };
 }
 
 const DEPOSIT_TYPES = ["none", "fixed", "percent"];
@@ -153,7 +138,7 @@ export async function saveDeposits(prevState, formData) {
   const failed = results.find((r) => r.error);
   if (failed) return { error: failed.error.message };
 
-  revalidatePath("/dashboard/settings");
+  revalidatePath("/dashboard/settings", "layout");
   if (!enabled) return { success: "Saved. Deposits are off, so clients book without paying." };
   if (!updates.some((u) => u.deposit_type !== "none")) {
     return { success: "Saved. Deposits are on, but no service has a deposit yet." };
@@ -183,7 +168,7 @@ export async function saveRegulars(prevState, formData) {
   // Apply the new number straight away.
   const { data: promoted } = await supabase.rpc("refresh_my_regulars");
 
-  revalidatePath("/dashboard/settings");
+  revalidatePath("/dashboard/settings", "layout");
   revalidatePath("/dashboard/clients");
   const notes = [];
   if (regularsOnly) notes.push("Only Regulars (and invited clients) can book online.");
@@ -217,7 +202,7 @@ export async function saveReschedule(prevState, formData) {
     return { error: error.message };
   }
 
-  revalidatePath("/dashboard/settings");
+  revalidatePath("/dashboard/settings", "layout");
   return { success: "Saved." };
 }
 
@@ -312,7 +297,7 @@ export async function saveCoverPhoto(path) {
   }
 
   await removeOldCovers(supabase, user.id, filePath);
-  revalidatePath("/dashboard/settings");
+  revalidatePath("/dashboard/settings", "layout");
   revalidatePath("/book", "layout");
   return { success: "Cover photo saved. It's on your booking page now." };
 }
@@ -331,7 +316,7 @@ export async function removeCoverPhoto() {
   if (error) return { error: saveError(error) };
 
   await removeOldCovers(supabase, user.id, null);
-  revalidatePath("/dashboard/settings");
+  revalidatePath("/dashboard/settings", "layout");
   revalidatePath("/book", "layout");
   return { success: "Cover photo removed." };
 }
@@ -357,7 +342,7 @@ export async function saveBusinessLinks(prevState, formData) {
     .eq("id", user.id);
   if (error) return { error: saveError(error) };
 
-  revalidatePath("/dashboard/settings");
+  revalidatePath("/dashboard/settings", "layout");
   revalidatePath("/book", "layout");
   return { success: "Saved." };
 }

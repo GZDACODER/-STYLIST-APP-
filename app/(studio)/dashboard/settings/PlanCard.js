@@ -28,7 +28,6 @@ export default function PlanCard({ plan, billingNotice, canPay, assistantAvailab
 
   return (
     <section className="card" id="plan">
-      <h2>Plan &amp; billing</h2>
       {notice && <p className={`message ${notice.kind}`}>{notice.text}</p>}
 
       <div className="plan-line">
