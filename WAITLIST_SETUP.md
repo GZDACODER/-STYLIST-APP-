@@ -102,8 +102,7 @@ timing instead. It's included in Supabase's free plan.
 2. In Supabase go to **SQL Editor → New query** and paste it.
 3. Near the top, change the two values (keep the quote marks around them):
    - `https://YOUR-APP.vercel.app` → your Vercel address, like
-     `https://gz-stylist-app.vercel.app` (find it on your Vercel project's main
-     page, under **Domains**)
+     `https://www.clientelesuite.com`
    - `PASTE-YOUR-CRON-SECRET-HERE` → the password from Part 3, exactly as in Vercel
 4. Tap **Run**. You should see "Success".
 

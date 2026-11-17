@@ -141,12 +141,10 @@ Each stylist only ever sees their own data. The database enforces this.
 
 ## Getting it running from an iPad
 
-> **Note:** the live site (clientelesuite.com) now runs on **Vercel**, which
-> rebuilds it on every push to `main`. The Netlify steps below are from the
-> original setup and are kept for reference.
-
-You can't run the code on an iPad itself, so we let **Netlify** build it for us.
-Every time new code is pushed to GitHub, Netlify rebuilds the site automatically.
+You can't run the code on an iPad itself, so **Vercel** builds it for us. The
+live site is **https://www.clientelesuite.com** (Vercel project
+`stylist-app-uran`). Every push to `main` rebuilds it automatically; other
+branches get a private Preview copy.
 
 ### 1. Set up Supabase
 
@@ -158,36 +156,35 @@ and **[REGULARS_ONLY_SETUP.md](./REGULARS_ONLY_SETUP.md)** (Regulars only and in
 in number order. Keep the
 Project URL and the publishable key handy.
 
-### 2. Connect this repo to Netlify
+### 2. Connect this repo to Vercel
 
-1. Go to **app.netlify.com** and sign in with GitHub.
-2. Tap **Add new project → Import an existing project → GitHub**.
-3. Pick this repository. If your code is on a different branch than `main`,
-   choose that branch.
-4. Netlify detects Next.js on its own. Leave the build settings as they are.
+1. Go to **vercel.com** and sign in with GitHub.
+2. Tap **Add New → Project** and import this repository.
+3. Vercel detects Next.js on its own. Leave the build settings as they are.
 
-### 3. Add your keys to Netlify
+### 3. Add your keys to Vercel
 
-Before deploying (or right after, then redeploy), add two
-**environment variables**. In Netlify: **Project configuration → Environment variables → Add a variable**:
+In Vercel: **Project → Settings → Environment Variables**. Tick **Production**
+(and **Preview** if you want Preview copies to work too):
 
 | Key | Value |
 | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | your Project URL |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | your publishable (or anon) key |
+| `NEXT_PUBLIC_SITE_URL` | `https://www.clientelesuite.com` |
 
-Then go to **Deploys → Trigger deploy → Deploy project**.
+Then **Deployments → newest → ⋯ → Redeploy**. (Changed keys only take effect
+after a redeploy.)
 
-For deposits you'll add three more secret keys later (`STRIPE_SECRET_KEY`,
+For deposits and subscriptions you'll add more secret keys (`STRIPE_SECRET_KEY`,
 `STRIPE_WEBHOOK_SECRET`, `SUPABASE_SECRET_KEY`). **[DEPOSITS_SETUP.md](./DEPOSITS_SETUP.md)**
-walks you through it.
+walks you through it. The Assistant add-on needs `ANTHROPIC_API_KEY`.
 
-When it finishes, Netlify gives you an address like `https://your-site.netlify.app`.
-Now do **SUPABASE_SETUP.md steps 4 and 5** with that address.
+Now do **SUPABASE_SETUP.md steps 4 and 5** with your site address.
 
 ### 4. Try it
 
-Open your Netlify address → **Create a stylist account** → add a service.
+Open your site → **Create a stylist account** → add a service.
 
 ### 5. Deposits
 

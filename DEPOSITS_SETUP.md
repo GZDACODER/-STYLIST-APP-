@@ -3,15 +3,15 @@
 Everything here happens in Safari. Do the steps in order. It all runs in
 Stripe's **test mode** first, so no real money moves until you switch it to live.
 
-You'll collect **three secret keys** and put them in Netlify:
+You'll collect **three secret keys** and put them in Vercel:
 
-| Netlify key name | Where it comes from | Looks like |
+| Vercel key name | Where it comes from | Looks like |
 | --- | --- | --- |
 | `STRIPE_SECRET_KEY` | Stripe → Developers → API keys | `sk_test_...` |
 | `STRIPE_WEBHOOK_SECRET` | Stripe → Webhooks → your endpoint | `whsec_...` |
 | `SUPABASE_SECRET_KEY` | Supabase → Project Settings → API Keys | `sb_secret_...` |
 
-These three are **secret**. They only ever go in Netlify, never in the code and
+These three are **secret**. They only ever go in Vercel, never in the code and
 never in a key name that starts with `NEXT_PUBLIC_`.
 
 ## 1. Run the SQL
@@ -79,10 +79,10 @@ The app's server uses this to confirm bookings after Stripe says they're paid.
    (tap **Create new secret key** if there isn't one). Older projects might only
    show a **service_role** key instead. That works too.
 
-## 6. Add the keys to Netlify
+## 6. Add the keys to Vercel
 
-In Netlify: **Project configuration → Environment variables → Add a variable**.
-Add these (tick **Contains secret values** if Netlify offers it):
+In Vercel: **Project → Settings → Environment Variables (tick Production), then redeploy**.
+Add these (tick **Sensitive** if Vercel offers it):
 
 | Key | Value |
 | --- | --- |
@@ -108,11 +108,11 @@ a web address. This is what confirms the booking.
    (The last two only matter if a slow bank payment method is turned on.
    Adding them is safe either way.)
 4. Destination type: **Webhook endpoint**.
-5. Endpoint URL: `https://your-site.netlify.app/api/stripe/webhook`
-   (use your real Netlify address).
+5. Endpoint URL: `https://www.clientelesuite.com/api/stripe/webhook`
+   (your live site address).
 6. Create it. Then open it and **Reveal** the **Signing secret**. It starts with
    `whsec_`.
-7. In Netlify, add one more variable: `STRIPE_WEBHOOK_SECRET` = that `whsec_...`
+7. In Vercel, add one more variable: `STRIPE_WEBHOOK_SECRET` = that `whsec_...`
    value. Then **Trigger deploy** again.
 
 ## 8. Connect your stylist account to Stripe
@@ -184,7 +184,7 @@ Only when you're ready to take real payments:
 3. Switch Stripe out of test mode and copy the **live** secret key (`sk_live_...`).
 4. Make a new webhook in live mode (same URL, same two events) and copy its
    new signing secret.
-5. In Netlify, replace `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` with the
+5. In Vercel, replace `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` with the
    live values and redeploy.
 6. Stylists connect Stripe again with their real details (test-mode accounts
    don't carry over). To make this happen, clear each stylist's

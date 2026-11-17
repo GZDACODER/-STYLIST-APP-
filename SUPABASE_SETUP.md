@@ -35,20 +35,21 @@ To check it worked: open **Table Editor**. You should see `stylists` and `servic
    project only shows an **anon** `public` key, use that one instead. It works the same way.
 
 These two values are safe to use in the website. **Never** put the
-`secret` or `service_role` key in the code. The only place it goes is Netlify,
+`secret` or `service_role` key in the code. The only place it goes is Vercel,
 as `SUPABASE_SECRET_KEY`, when you set up deposits (DEPOSITS_SETUP.md).
 
-You'll paste them into Netlify (see README step 3).
+You'll paste them into Vercel (see README step 3).
 
 ## 4. Tell Supabase your website address
 
 This is needed so the "confirm your email" link opens your site.
 
 1. Go to **Authentication → URL Configuration**.
-2. **Site URL**: your Netlify address, e.g. `https://your-site.netlify.app`.
+2. **Site URL**: your site address, `https://www.clientelesuite.com`.
    (Don't have one yet? Come back after README step 3.)
 3. Under **Redirect URLs**, tap **Add URL** and add:
-   - `https://your-site.netlify.app/**`
+   - `https://www.clientelesuite.com/**`
+   - `https://clientelesuite.com/**`
    - `http://localhost:3000/**` (only needed if you ever run the app on a computer)
 4. Save.
 
