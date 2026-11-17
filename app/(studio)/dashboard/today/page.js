@@ -1,4 +1,6 @@
 import PageHeader from "@/components/dash/PageHeader";
+import { exampleData, examplesOn } from "@/lib/examples";
+import { ExampleTag } from "@/components/dash/Example";
 import EmptyState from "@/components/dash/EmptyState";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -167,6 +169,15 @@ export default async function TodayPage() {
   const appointments = (todays.data || []).filter(
     (b) => b.status === "confirmed" || new Date(b.hold_expires_at).getTime() > now
   );
+  // Examples for a new pro with nothing booked at all (today or later): an
+  // example appointment today and an example Next up.
+  let exampleNext = null;
+  if (!todays.error && appointments.length === 0 && !nextUp.data && (await examplesOn(supabase, user.id))) {
+    const ex = exampleData(today);
+    const maya = ex.upcoming[0];
+    appointments.push({ ...maya, id: "example-today", booking_date: today, start_time: "14:00:00", end_time: "15:30:00" });
+    exampleNext = ex.upcoming[0];
+  }
   // Today's timeline: all-day events first, then appointments and timed
   // events in time order.
   const timeline = [
@@ -296,6 +307,7 @@ export default async function TodayPage() {
                   <div className="db-slot-body">
                     <div className="db-slot-name">
                       {b.client_name}
+                      {b.example && <ExampleTag />}
                       {isRegular && (
                         <span className="badge regular">
                           <RegularStar label={null} size={9} /> Regular
@@ -335,6 +347,14 @@ export default async function TodayPage() {
               </p>
               <p className="db-next-name">{nextUp.data.client_name}</p>
               <p className="muted small-text">{nextUp.data.service_name}</p>
+            </div>
+          ) : exampleNext ? (
+            <div className="db-next is-example">
+              <p className="db-next-when">
+                {shortDay(exampleNext.booking_date)} · {clockTime(exampleNext.start_time)} <ExampleTag />
+              </p>
+              <p className="db-next-name">{exampleNext.client_name}</p>
+              <p className="muted small-text">{exampleNext.service_name}</p>
             </div>
           ) : (
             <p className="db-quiet-small">Nothing booked yet.</p>

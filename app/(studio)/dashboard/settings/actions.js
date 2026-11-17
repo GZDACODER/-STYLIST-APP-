@@ -346,3 +346,16 @@ export async function saveBusinessLinks(prevState, formData) {
   revalidatePath("/book", "layout");
   return { success: "Saved." };
 }
+
+// Settings → Business: "Clear all examples" (false) / "Restore examples" (true).
+export async function setShowExamples(formData) {
+  const on = formData.get("on") === "true";
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+  const { error } = await supabase.from("stylists").update({ show_examples: on }).eq("id", user.id);
+  if (error) console.error("Couldn't change examples", error.message);
+  revalidatePath("/dashboard", "layout");
+}

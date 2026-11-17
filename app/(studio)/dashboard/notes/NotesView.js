@@ -13,6 +13,7 @@ import OutcomePicker from "../wrapup/OutcomePicker";
 import VisitNoteForm from "./VisitNoteForm";
 import EmptyState from "@/components/dash/EmptyState";
 import ShowMore from "@/components/dash/ShowMore";
+import { ExampleTag } from "@/components/dash/Example";
 
 const OUTCOME_CLASS = { completed_paid: "paid", completed_owed: "unpaid", no_show: "blocked", replaced: "" };
 
@@ -84,12 +85,17 @@ function VisitBlock({ visit: v, today, showClient }) {
           {showClient ? v.clientName : shortDate(v.date, today)}
         </strong>
         <OutcomeBadge outcome={v.outcome} />
+        {v.example && <ExampleTag />}
       </div>
       <p className="muted small-text">
         {showClient ? `${shortDate(v.date, today)} · ` : ""}
         {clockTime(v.start)} · {v.service} · {formatPrice(v.priceCents)}
         {v.depositCents > 0 && ` · ${formatPrice(v.depositCents)} deposit paid`}
       </p>
+      {v.example ? (
+        <p className="visit-note-text">{v.note}</p>
+      ) : (
+      <>
       <VisitNoteForm
         bookingId={v.id}
         note={v.note}
@@ -100,6 +106,8 @@ function VisitBlock({ visit: v, today, showClient }) {
         <summary>{v.outcome ? "Change how it went" : "Mark how it went"}</summary>
         <OutcomePicker bookingId={v.id} outcome={v.outcome} clientName={v.clientName} />
       </details>
+      </>
+      )}
     </li>
   );
 }
@@ -229,6 +237,7 @@ export default function NotesView({ visits, cardNotes, today }) {
                     <span className="client-row-name">
                       <span className="client-row-text">{c.name}</span>
                       {c.status === "regular" && <RegularStar label="Regular" size={10} />}
+                      {c.visits[0]?.example && <ExampleTag />}
                     </span>
                     <span className="client-row-phone">
                       Last booked {shortDate(c.last, today)}
@@ -279,6 +288,7 @@ export default function NotesView({ visits, cardNotes, today }) {
                         <span className="client-row-name">
                           <span className="client-row-text">{v.clientName}</span>
                           {v.status === "regular" && <RegularStar label="Regular" size={10} />}
+                          {v.example && <ExampleTag />}
                         </span>
                         <span className="client-row-phone">{v.note ? v.note : v.service}</span>
                       </span>

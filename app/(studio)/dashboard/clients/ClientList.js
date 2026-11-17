@@ -12,6 +12,7 @@ import { displayPhone } from "@/lib/phone";
 import ClientCard from "./ClientCard";
 import RegularStar from "@/components/RegularStar";
 import Sheet from "@/components/Sheet";
+import { ExampleCard, ExampleTag } from "@/components/dash/Example";
 
 // Lowercase, and also keep just the digits so "555-1234" matches "5551234".
 function matches(client, search) {
@@ -45,7 +46,7 @@ function nextVisitText(visit, today) {
 function ClientRow({ client, next, today, duplicate, onOpen }) {
   return (
     <li>
-      <button type="button" className="client-row" onClick={onOpen} aria-haspopup="dialog">
+      <button type="button" className={client.example ? "client-row is-example" : "client-row"} onClick={onOpen} aria-haspopup="dialog">
         <span className="client-row-main">
           <span className="client-row-name">
             <span className="client-row-text">{client.name}</span>
@@ -56,6 +57,7 @@ function ClientRow({ client, next, today, duplicate, onOpen }) {
             )}
             {client.status === "blocked" && <span className="badge blocked row-badge">Blocked</span>}
             {client.invited_at && <span className="badge invited row-badge">Invited</span>}
+            {client.example && <ExampleTag />}
             {duplicate && (
               <span className="dup-dot" title="Possible duplicate" aria-label="Possible duplicate" />
             )}
@@ -82,7 +84,11 @@ function ClientRow({ client, next, today, duplicate, onOpen }) {
   );
 }
 
-export default function ClientList({ clients, standing, nextVisits = {}, upcomingCounts = {} }) {
+// examples: example clients (lib/examples.js), shown only while there are
+// no real ones.
+export default function ClientList({ clients: realClients, standing, nextVisits = {}, upcomingCounts = {}, examples = [] }) {
+  const exampleMode = realClients.length === 0 && examples.length > 0;
+  const clients = exampleMode ? examples : realClients;
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
   // The open card: { id, mergeWith } or null.
@@ -183,6 +189,11 @@ export default function ClientList({ clients, standing, nextVisits = {}, upcomin
         </details>
       )}
 
+      {exampleMode && (
+        <p className="examples-note">
+          These are example clients. Add your own (or take your first booking) and they&apos;ll go away.
+        </p>
+      )}
       {clients.length === 0 && (
         <EmptyState
           title="No clients yet"
@@ -211,7 +222,42 @@ export default function ClientList({ clients, standing, nextVisits = {}, upcomin
         ))}
       </ShowMore>
 
-      {openClient && (
+      {openClient?.example && (
+        <Sheet key={openClient.id} label={openClient.name} backLabel="All clients" onClose={() => setOpen(null)}>
+          <ExampleCard
+            title={openClient.name}
+            facts={[
+              ["Status", openClient.invited_at ? "Invited (private link sent)" : openClient.status === "regular" ? "Regular" : "New"],
+              ["Phone", displayPhone(openClient.phone)],
+              ["Email", openClient.email],
+              ["Visits", String(openClient.visits)],
+              ["Next visit", nextVisits[openClient.id] ? nextVisitText(nextVisits[openClient.id], standing?.today) : "None booked"],
+              ["Notes", openClient.notes],
+            ]}
+            addHref="/dashboard/clients?add=client#add-client"
+            addLabel="+ Add your own client"
+          >
+            {openClient.intake && (
+              <div className="example-intake">
+                <h3 className="list-title">Intake form</h3>
+                <dl className="booking-facts">
+                  {openClient.intake.answers.map(([q, a]) => (
+                    <div key={q}>
+                      <dt>{q}</dt>
+                      <dd>{a}</dd>
+                    </div>
+                  ))}
+                  <div>
+                    <dt>Waiver</dt>
+                    <dd>Signed by {openClient.intake.signed}</dd>
+                  </div>
+                </dl>
+              </div>
+            )}
+          </ExampleCard>
+        </Sheet>
+      )}
+      {openClient && !openClient.example && (
         <Sheet
           key={`${open.id}|${open.mergeWith || ""}`}
           label={openClient.name}

@@ -4,6 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { BRAND_NAME } from "@/lib/brand";
 import IntakeBuilder from "./IntakeBuilder";
 import SettingsShell from "@/components/dash/SettingsShell";
+import { exampleData, examplesOn } from "@/lib/examples";
+import { ExampleTag } from "@/components/dash/Example";
 
 export const metadata = { title: `Intake form & waiver · ${BRAND_NAME}` };
 
@@ -30,6 +32,11 @@ export default async function IntakePage() {
     );
   }
 
+  const example =
+    !(form?.questions || []).length && !form?.waiver_text && (await examplesOn(supabase, user.id))
+      ? exampleData(new Date().toISOString().slice(0, 10)).intake
+      : null;
+
   return (
     <SettingsShell
       active="forms"
@@ -37,6 +44,30 @@ export default async function IntakePage() {
         form ? ` Version ${form.version}.` : ""
       }`}
     >
+      {example && (
+        <section className="card is-example">
+          <h2>
+            Example form <ExampleTag />
+          </h2>
+          <p className="muted small-text">
+            What a new client fills in when they book. Write your own below; this example is never sent to anyone.
+          </p>
+          <ol className="example-questions">
+            {example.questions.map((q) => (
+              <li key={q.id}>
+                {q.label}
+                {q.required ? " (required)" : ""}
+              </li>
+            ))}
+          </ol>
+          <p className="muted small-text">
+            <strong>Waiver:</strong> {example.waiver} Client ticks &quot;I agree&quot; and types their name.
+          </p>
+          <p className="muted small-text">
+            Example answers show on Maya Jones&apos;s card in Clients.
+          </p>
+        </section>
+      )}
       <IntakeBuilder questions={form?.questions || []} waiverText={form?.waiver_text || ""} services={services || []} />
     </SettingsShell>
   );

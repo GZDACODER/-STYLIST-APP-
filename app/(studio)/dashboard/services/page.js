@@ -7,6 +7,8 @@ import { BRAND_NAME } from "@/lib/brand";
 import SettingsShell from "@/components/dash/SettingsShell";
 import EmptyState from "@/components/dash/EmptyState";
 import RowList from "@/components/dash/RowList";
+import { ExampleCard, ExampleTag } from "@/components/dash/Example";
+import { EXAMPLE_SERVICES, examplesOn } from "@/lib/examples";
 
 export const metadata = { title: `Services · ${BRAND_NAME}` };
 
@@ -35,14 +37,43 @@ export default async function ServicesPage() {
     .from("services")
     .select("id, name, price_cents, duration_minutes")
     .order("created_at", { ascending: true });
+  const showExamples = await examplesOn(supabase, user.id);
 
   return (
     <SettingsShell active="services" subtitle="What clients can book on your booking page.">
       <section className="card">
         <h2>Your services</h2>
         {error && <p className="message error">Couldn't load services: {error.message}</p>}
-        {!error && services.length === 0 && (
+        {!error && services.length === 0 && !showExamples && (
           <EmptyState title="No services yet" text="Add your first one below so clients can book." />
+        )}
+        {!error && services.length === 0 && showExamples && (
+          <>
+            <p className="examples-note">Here are some examples. Add your first service below and they&apos;ll go away.</p>
+            <RowList
+              label="Services"
+              items={EXAMPLE_SERVICES.map((s) => ({
+                key: s.id,
+                example: true,
+                title: s.name,
+                sub: `${s.price_cents ? formatPrice(s.price_cents) : "Free"} · ${formatDuration(s.duration_minutes)} · ${s.deposit}`,
+                badge: <ExampleTag />,
+                fullPanel: (
+                  <ExampleCard
+                    title={s.name}
+                    facts={[
+                      ["Price", s.price_cents ? formatPrice(s.price_cents) : "Free"],
+                      ["Length", formatDuration(s.duration_minutes)],
+                      ["Deposit", s.deposit],
+                      ["Description", s.description],
+                    ]}
+                    addHref="/dashboard/services#add-service"
+                    addLabel="+ Add your own service"
+                  />
+                ),
+              }))}
+            />
+          </>
         )}
         {!error && services.length > 0 && (
           <RowList

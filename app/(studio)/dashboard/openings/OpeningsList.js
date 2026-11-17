@@ -16,6 +16,7 @@ import Sheet from "@/components/Sheet";
 import TimeSelect from "@/components/TimeSelect";
 import SubmitButton from "@/components/SubmitButton";
 import FormMessage from "@/components/FormMessage";
+import { ExampleCard, ExampleTag } from "@/components/dash/Example";
 
 const DAY = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const DAYS_PLURAL = ["Sundays", "Mondays", "Tuesdays", "Wednesdays", "Thursdays", "Fridays", "Saturdays"];
@@ -52,8 +53,11 @@ function applyChange(openings, change) {
 }
 
 // blockedBy: { openingId: [{ short: "4–5 PM blocked", full: "Maya's practice: ..." }] }
-export default function OpeningsList({ openings, bookingCounts, blockedBy = {}, regularsAllowed = true, today }) {
-  const [shown, setOptimistic] = useOptimistic(openings, applyChange);
+// examples: example openings (lib/examples.js), shown only while there are
+// no real ones; they can be looked at but not changed.
+export default function OpeningsList({ openings, bookingCounts, blockedBy = {}, regularsAllowed = true, today, examples = [] }) {
+  const exampleMode = openings.length === 0 && examples.length > 0;
+  const [shown, setOptimistic] = useOptimistic(exampleMode ? examples : openings, applyChange);
   const [error, setError] = useState(null);
   const [audience, setAudience] = useState("all");
   const firstWeek = mondayOf(today);
@@ -137,6 +141,22 @@ export default function OpeningsList({ openings, bookingCounts, blockedBy = {}, 
     const count = bookingCounts[o.id] || 0;
     const blocked = blockedBy[o.id] || [];
     const regularsOnlyLocked = !regularsAllowed && o.visibility === "everyone";
+    if (o.example) {
+      return (
+        <li key={o.id} className="op-row is-example">
+          <button type="button" className="op-main op-example-open" onClick={() => setSheet({ mode: "example", id: o.id })}>
+            <span className="op-when">
+              <strong>{rowDate(o.opening_date)}</strong> · {range(o)}
+            </span>
+          </button>
+          <span className={`op-pill ${o.visibility}`}>
+            {o.visibility === "regulars" && <span aria-hidden="true">★ </span>}
+            {AUDIENCE[o.visibility]}
+          </span>
+          <ExampleTag />
+        </li>
+      );
+    }
     return (
       <li key={o.id} className={picked.has(o.id) ? "op-row picked" : "op-row"}>
         {selecting && (
@@ -218,6 +238,7 @@ export default function OpeningsList({ openings, bookingCounts, blockedBy = {}, 
             </button>
           ))}
         </div>
+        {!exampleMode && (
         <button
           type="button"
           className="button secondary small"
@@ -228,6 +249,7 @@ export default function OpeningsList({ openings, bookingCounts, blockedBy = {}, 
         >
           {selecting ? "Done" : "Select"}
         </button>
+        )}
       </div>
 
       {selecting && (
@@ -260,6 +282,11 @@ export default function OpeningsList({ openings, bookingCounts, blockedBy = {}, 
       )}
 
       {error && <p className="message error">Couldn&apos;t save: {error}</p>}
+      {exampleMode && (
+        <p className="examples-note">
+          These are example openings. Open your own times below and they&apos;ll go away.
+        </p>
+      )}
 
       <div className="op-week">
         <div className="op-week-head">
@@ -333,7 +360,20 @@ export default function OpeningsList({ openings, bookingCounts, blockedBy = {}, 
         </details>
       ))}
 
-      {sheetOpening && (
+      {sheetOpening?.example && (
+        <Sheet key={sheetOpening.id} label={rowDate(sheetOpening.opening_date)} backLabel="Openings" onClose={() => setSheet(null)}>
+          <ExampleCard
+            title={`${rowDate(sheetOpening.opening_date)} · ${range(sheetOpening)}`}
+            facts={[
+              ["Who can book", sheetOpening.visibility === "regulars" ? "Regulars only (hidden from everyone else)" : "Everyone"],
+              ["How it works", "Clients pick a time inside this opening on your booking page. Tap the tag on a real opening to switch who can book."],
+            ]}
+            addHref="/dashboard/openings#add-opening"
+            addLabel="+ Add your own opening"
+          />
+        </Sheet>
+      )}
+      {sheetOpening && !sheetOpening.example && (
         <Sheet
           key={`${sheet.mode}-${sheetOpening.id}`}
           label={`${rowDate(sheetOpening.opening_date)} ${range(sheetOpening)}`}

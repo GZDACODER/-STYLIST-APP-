@@ -1,6 +1,9 @@
 // Wrap up visits: how did each finished visit go? Linked from the 8 PM
 // email and from the Today page. Shows the last 14 days.
 import PageHeader from "@/components/dash/PageHeader";
+import { exampleData, examplesOn } from "@/lib/examples";
+import { ExampleTag } from "@/components/dash/Example";
+import { outcomeLabel } from "@/lib/outcomes";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -100,6 +103,10 @@ export default async function WrapupPage() {
   const toMark = started.filter((b) => !b.outcome);
   const marked = started.filter((b) => b.outcome && !owedIds.has(b.id));
 
+  // Examples for a new pro who has no visits to wrap up, owed or marked yet.
+  const examples =
+    started.length === 0 && owed.length === 0 && (await examplesOn(supabase, user.id)) ? exampleData(today).past : [];
+
   const byDay = (list) => {
     const days = [];
     for (const b of list) {
@@ -164,6 +171,39 @@ export default async function WrapupPage() {
           ))}
         </ul>
       </section>
+
+      {examples.length > 0 && (
+        <section className="card is-example">
+          <h2>
+            Examples <ExampleTag />
+          </h2>
+          <p className="muted small-text">
+            After each visit you mark how it went. Here&apos;s what that looks like; your own visits show here once
+            they&apos;ve happened.
+          </p>
+          <ul className="client-list">
+            {examples.map((b) => (
+              <li key={b.id} className="client-card wrapup-visit">
+                <div className="client-top">
+                  <span className="opening-time">
+                    {formatDate(b.booking_date)} · {clockTime(b.start_time)} – {clockTime(b.end_time)}
+                  </span>
+                  <ExampleTag />
+                </div>
+                <div className="client-name">{b.client_name}</div>
+                <div className="muted small-text">
+                  {b.service_name} · {formatPrice(b.price_cents)}
+                </div>
+                <p>
+                  <strong>{outcomeLabel(b.outcome)}</strong>
+                  {b.owed_cents ? ` · ${formatPrice(b.owed_cents)} owed` : ""}
+                </p>
+                {b.visit_note && <p className="visit-note-text">{b.visit_note}</p>}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {owed.length > 0 && (
         <section className="card" id="owed">

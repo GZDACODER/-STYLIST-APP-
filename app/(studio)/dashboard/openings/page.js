@@ -6,6 +6,8 @@ import SubmitButton from "@/components/SubmitButton";
 import { openHoldToEveryone } from "./actions";
 import PageHeader from "@/components/dash/PageHeader";
 import CopyLinkButton from "@/components/dash/CopyLinkButton";
+import { exampleData, examplesOn } from "@/lib/examples";
+import { ExampleTag } from "@/components/dash/Example";
 import Link from "next/link";
 import { publicSiteUrl } from "@/lib/siteUrl";
 import PostOpeningsForm from "./PostOpeningsForm";
@@ -118,6 +120,9 @@ export default async function OpeningsPage() {
     if (o) bookingCounts[o.id] = (bookingCounts[o.id] || 0) + 1;
   }
 
+  // Examples for a new pro (only while they have no openings of their own).
+  const examples = !(openings || []).length && (await examplesOn(supabase, user.id)) ? exampleData(today) : null;
+
   // Weekdays marked as days off on the Availability tab.
   const daysOff = (hourRows || []).filter((row) => !row.is_working).map((row) => row.weekday);
 
@@ -159,6 +164,7 @@ export default async function OpeningsPage() {
           blockedBy={blockedBy}
           regularsAllowed={plan.has.regulars}
           today={today}
+          examples={examples?.openings || []}
         />
       </section>
 
@@ -201,6 +207,31 @@ export default async function OpeningsPage() {
                     Open to everyone
                   </SubmitButton>
                 </form>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {holds.length === 0 && examples && (
+        <section className="card is-example">
+          <h2>
+            <RegularStar label={null} size={14} /> Kept for Regulars <ExampleTag />
+          </h2>
+          <p className="muted">
+            Example: when a Regular cancels, their time stays Regulars only (and only waitlisted Regulars hear
+            about it) until it&apos;s booked again or you open it to everyone.
+          </p>
+          <ul className="service-list">
+            {examples.holds.map((h) => (
+              <li key={h.id}>
+                <div>
+                  <div className="service-name">{formatDate(h.hold_date)}</div>
+                  <div className="muted">
+                    {clockTime(h.start_time)} – {clockTime(h.end_time)} · Maya Jones cancelled
+                  </div>
+                </div>
+                <span className="badge regular">Regulars only</span>
               </li>
             ))}
           </ul>
