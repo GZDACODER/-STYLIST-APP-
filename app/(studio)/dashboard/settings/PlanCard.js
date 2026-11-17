@@ -47,6 +47,19 @@ export default function PlanCard({ plan, billingNotice, canPay, assistantAvailab
           Founding account: your plan is free and you&apos;re never billed for it.
           {assistantAvailable && " The Assistant add-on is the one thing that's paid."}
         </p>
+      ) : plan.subscribed && plan.cancelling ? (
+        <>
+          <p className="message info">
+            <strong>Your plan ends on {day(plan.cancelAt)}.</strong> You won&apos;t be charged. Everything stays
+            on until then.
+          </p>
+          <p>
+            <a href="/dashboard/billing/portal" className="button small">
+              Reactivate
+            </a>
+          </p>
+          <p className="muted small-text">Reactivate opens Stripe&apos;s billing page, where you can renew your plan.</p>
+        </>
       ) : plan.subscribed ? (
         <>
           <p className="muted">
@@ -95,6 +108,13 @@ export default function PlanCard({ plan, billingNotice, canPay, assistantAvailab
           </p>
           {canPay && <TeamMembersForm key={plan.teamMembers} count={plan.teamMembers} yearly={yearly} />}
         </>
+      ) : plan.stripeStatus === "canceled" ? (
+        <p className="muted">
+          <strong>No active plan.</strong>{" "}
+          {plan.inTrial
+            ? `Your free trial keeps everything on until ${day(plan.trialEndsAt)}. Choose a plan below to keep it going after that.`
+            : "Choose a plan below to switch everything back on. Your bookings and clients are all still here."}
+        </p>
       ) : plan.inTrial ? (
         <p className="muted">
           <strong>Free trial: {daysText(plan.daysLeft)} left.</strong> Everything is on until{" "}
@@ -110,7 +130,7 @@ export default function PlanCard({ plan, billingNotice, canPay, assistantAvailab
 
       {assistantAvailable && <AssistantAddOn plan={plan} canPay={canPay} />}
 
-      {plan.hasCustomer && (plan.subscribed || !plan.comped) && (
+      {plan.hasCustomer && (plan.subscribed || !plan.comped) && !(plan.subscribed && plan.cancelling) && (
         <p>
           <a href="/dashboard/billing/portal" className="button secondary small">
             Manage billing

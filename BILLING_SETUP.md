@@ -81,7 +81,12 @@ picker. Test with a new stylist account:
    in its trial, Stripe shows the subscription as "trialing", and the first
    charge happens when the trial ends.
 5. Tap **Manage billing**. Stripe's page opens. Cancel there, and the
-   subscription runs until the end of the period.
+   subscription runs until the end of the period (or trial). Back in Settings,
+   Plan & billing says **"Your plan ends on [date]. You won't be charged."**
+   with a **Reactivate** button (it opens Stripe's page, where **Renew** undoes
+   the cancel). Needs `supabase/migrations/0041_plan_cancel_at.sql` (step 36).
+   Once the subscription has actually ended, it says **No active plan** with
+   the plan choices.
 
 To test a declined card, use `4000 0000 0000 0341`. To end a trial straight
 away, open the subscription in Stripe and use **⋯ → End trial now**.
