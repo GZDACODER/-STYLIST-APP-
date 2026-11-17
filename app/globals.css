@@ -1492,3 +1492,9 @@ select {
 .resend-confirmation {
   margin-top: 12px;
 }
+
+/* "Forgot password?" under the password box on Log in. */
+.forgot-link {
+  margin: -0.4rem 0 0.9rem;
+  text-align: right;
+}

@@ -128,6 +128,68 @@ export async function login(prevState, formData) {
   redirect("/dashboard");
 }
 
+// "Forgot password?": emails a link to choose a new password. Always says
+// the same thing whether or not the email has an account, so nobody can use
+// it to check who has one.
+export async function requestPasswordReset(prevState, formData) {
+  const email = String(formData.get("email") || "").trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { error: "Please enter your email." };
+
+  const origin = (await headers()).get("origin");
+  const supabase = await createClient();
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    // The link logs them in, then opens the "choose a new password" page.
+    redirectTo: `${origin}/auth/confirm?next=/reset-password`,
+  });
+  console.log("Password reset requested", {
+    email,
+    error: error ? `${error.status || ""} ${error.code || ""} ${error.message}` : null,
+  });
+
+  if (error) {
+    const text = `${error.code || ""} ${error.message || ""}`;
+    if (error.status === 429 || /rate limit|after \d+ seconds/i.test(text)) {
+      return { error: "Too many emails were sent just now. Please wait a minute and try again." };
+    }
+    if (/sending|smtp|mail/i.test(text)) {
+      return { error: "The email couldn't be sent just now. Please try again in a few minutes." };
+    }
+    // Anything else (e.g. no such account): same answer as success.
+  }
+  return {
+    success: `If ${email} has an account, we've emailed it a link to choose a new password. It can take a minute; check your spam folder too. Open the link on this device.`,
+  };
+}
+
+// "Choose a new password" (after the emailed link has logged them in).
+export async function updatePassword(prevState, formData) {
+  const password = String(formData.get("password") || "");
+  const confirm = String(formData.get("confirm") || "");
+  if (password.length < 8) return { error: "Password must be at least 8 characters." };
+  if (password !== confirm) return { error: "The two passwords don't match." };
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { error: "This reset link has expired. Please ask for a new one.", expired: true };
+  }
+
+  const { error } = await supabase.auth.updateUser({ password });
+  if (error) {
+    if (/different from the old|same.*password/i.test(error.message)) {
+      return { error: "Please choose a password you haven't used here before." };
+    }
+    if (/weak|pwned|leaked/i.test(error.message)) {
+      return { error: "That password is too easy to guess. Please choose another." };
+    }
+    return { error: error.message };
+  }
+
+  redirect("/dashboard");
+}
+
 export async function logout() {
   const supabase = await createClient();
   await supabase.auth.signOut();
