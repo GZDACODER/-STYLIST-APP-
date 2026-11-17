@@ -1825,15 +1825,34 @@ body:has(dialog.client-sheet[open]) {
   font-weight: 500;
 }
 
+/* iPad and wider: the panel slides in from the right, full height. */
+@keyframes db-sheet-in {
+  from {
+    transform: translateX(40px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
 @media (min-width: 700px) {
   .db .client-sheet {
-    margin: auto;
-    width: min(640px, calc(100vw - 48px));
-    height: fit-content;
-    max-height: calc(100dvh - 64px);
-    border: 1px solid var(--hair);
-    border-top: 2px solid var(--gold);
-    box-shadow: 0 24px 60px rgba(14, 14, 14, 0.22);
+    margin: 0 0 0 auto;
+    width: min(520px, calc(100vw - 48px));
+    height: 100dvh;
+    max-height: 100dvh;
+    border: 0;
+    border-left: 2px solid var(--gold);
+    box-shadow: -24px 0 60px rgba(14, 14, 14, 0.22);
+    animation: db-sheet-in 0.22s ease-out;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .db .client-sheet {
+      animation: none;
+    }
   }
 
   .db .client-sheet-inner {
@@ -4086,4 +4105,9 @@ body:has(dialog.client-sheet[open]) {
   .db .settings-nav-link {
     padding: 15px 16px;
   }
+}
+
+/* A slim row with nothing to open (RowList item without a panel). */
+.db .client-row.static-row {
+  cursor: default;
 }
