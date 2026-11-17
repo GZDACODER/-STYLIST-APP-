@@ -3,6 +3,8 @@
 // "Your clients": search, filters, then one slim row per client (name,
 // phone, Regular/Invited, next appointment). Tapping a row opens the full
 // card in a panel: full screen on a phone, centered on iPad and computer.
+import EmptyState from "@/components/dash/EmptyState";
+import ShowMore from "@/components/dash/ShowMore";
 import { useEffect, useMemo, useState } from "react";
 import { CLIENT_STATUSES, findDuplicateGroups } from "@/lib/clients";
 import { clockTime, parseDateString } from "@/lib/availability";
@@ -181,12 +183,22 @@ export default function ClientList({ clients, standing, nextVisits = {}, upcomin
         </details>
       )}
 
-      {clients.length === 0 && <p className="muted">No clients yet. Add your first one above.</p>}
+      {clients.length === 0 && (
+        <EmptyState
+          title="No clients yet"
+          text="Clients appear here when they book, or add them yourself."
+          action={
+            <a href="/dashboard/clients?add=client#add-client" className="button small">
+              + Add client
+            </a>
+          }
+        />
+      )}
       {clients.length > 0 && shown.length === 0 && (
-        <p className="muted">No clients match. Try a different search or filter.</p>
+        <EmptyState title="No clients match" text="Try a different search or filter." />
       )}
 
-      <ul className="client-rows">
+      <ShowMore className="client-rows" noun="more clients" key={`${filter}|${query}`}>
         {shown.map((client) => (
           <ClientRow
             key={client.id}
@@ -197,7 +209,7 @@ export default function ClientList({ clients, standing, nextVisits = {}, upcomin
             onOpen={() => setOpen({ id: client.id, mergeWith: null })}
           />
         ))}
-      </ul>
+      </ShowMore>
 
       {openClient && (
         <Sheet

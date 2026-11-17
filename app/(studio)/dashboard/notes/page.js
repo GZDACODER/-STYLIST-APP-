@@ -7,6 +7,7 @@ import { todayInTimeZone } from "@/lib/availability";
 import { nowLocal } from "@/lib/localTime";
 import { BRAND_NAME } from "@/lib/brand";
 import NotesView from "./NotesView";
+import PageHeader from "@/components/dash/PageHeader";
 
 export const metadata = { title: `Notes · ${BRAND_NAME}` };
 
@@ -47,14 +48,14 @@ export default async function NotesPage() {
 
   if (error) {
     return (
-      <section className="card">
-        <h2>Notes</h2>
+      <>
+        <PageHeader title="Notes" />
         <p className="message error">
           {/visit_note|owed_cents|outcome/.test(error.message)
             ? "Notes aren't set up yet: run the step 24 SQL (0029_visit_notes.sql) in Supabase, then refresh."
             : `Couldn't load your visits: ${error.message}`}
         </p>
-      </section>
+      </>
     );
   }
 
@@ -86,13 +87,19 @@ export default async function NotesPage() {
   for (const c of clientRows || []) if (c.notes) cardNotes[c.id] = c.notes;
 
   return (
-    <section className="card">
-      <h2>Notes</h2>
-      <p className="muted small-text">
-        How each visit went, your notes, no-shows and balances owed from the last 12 months. Write
-        notes here or on Wrap up visits.
-      </p>
-      <NotesView visits={visits} cardNotes={cardNotes} today={today} />
-    </section>
+    <>
+      <PageHeader
+        title="Notes"
+        subtitle="How each visit went, your notes, no-shows and balances owed from the last 12 months."
+        actions={
+          <a href="/dashboard/wrapup" className="button small">
+            Wrap up visits
+          </a>
+        }
+      />
+      <section className="card">
+        <NotesView visits={visits} cardNotes={cardNotes} today={today} />
+      </section>
+    </>
   );
 }

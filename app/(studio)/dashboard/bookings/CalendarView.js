@@ -30,7 +30,8 @@ const monthIndex = (dateText) => {
 // hours: { weekday: { is_working, start_time, end_time } }; blocked: { "YYYY-MM-DD": reason }
 // events: the stylist's calendar_events rows (null before the step 29 SQL is run).
 // closedHolidays: keys of the federal holidays the business closes on.
-export default function CalendarView({ bookings, days, seriesOf, today, hours, blocked, events, closedHolidays = [] }) {
+// openAdd: open "Add event" straight away (the page header's + Add event).
+export default function CalendarView({ bookings, days, seriesOf, today, hours, blocked, events, closedHolidays = [], openAdd = false }) {
   const closedSet = new Set(closedHolidays);
   // A federal holiday the business is closed on: every year (Settings), or
   // just this date (a blocked date saved as "Closed – Thanksgiving").
@@ -43,7 +44,7 @@ export default function CalendarView({ bookings, days, seriesOf, today, hours, b
   const [selected, setSelected] = useState(today);
   const [openId, setOpenId] = useState(null);
   // The event panel: { mode: "add" } or { mode: "view" | "edit", id }.
-  const [eventSheet, setEventSheet] = useState(null);
+  const [eventSheet, setEventSheet] = useState(() => (openAdd && events ? { mode: "add" } : null));
   const eventList = events || [];
   const openEvent = eventSheet?.id ? eventList.find((e) => e.id === eventSheet.id) : null;
 

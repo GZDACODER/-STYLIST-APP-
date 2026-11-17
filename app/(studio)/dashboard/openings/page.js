@@ -4,7 +4,9 @@ import { createClient } from "@/lib/supabase/server";
 import { clockTime, formatDate, timeZoneLabel, todayInTimeZone } from "@/lib/availability";
 import SubmitButton from "@/components/SubmitButton";
 import { openHoldToEveryone } from "./actions";
-import BookingLink from "./BookingLink";
+import PageHeader from "@/components/dash/PageHeader";
+import CopyLinkButton from "@/components/dash/CopyLinkButton";
+import Link from "next/link";
 import { publicSiteUrl } from "@/lib/siteUrl";
 import PostOpeningsForm from "./PostOpeningsForm";
 import OpeningsList from "./OpeningsList";
@@ -118,13 +120,38 @@ export default async function OpeningsPage() {
 
   return (
     <>
-      <section className="card">
-        <h2>Your booking link</h2>
-        <p className="muted">Share this with clients. No app or account needed.</p>
-        <BookingLink link={`${origin}/book/${stylist.slug}`} />
-      </section>
+      <PageHeader
+        title="Openings"
+        subtitle={
+          <>
+            Times are in {timeZoneLabel(stylist.timezone)} time. Your booking link:{" "}
+            <a href={`${origin}/book/${stylist.slug}`} target="_blank" rel="noreferrer">
+              {`${origin.replace(/^https?:\/\//, "")}/book/${stylist.slug}`}
+            </a>{" "}
+            · <Link href="/dashboard/settings">change it</Link>
+          </>
+        }
+        actions={
+          <>
+            <CopyLinkButton link={`${origin}/book/${stylist.slug}`} />
+            <a href="#add-opening" className="button small">
+              + Add opening
+            </a>
+          </>
+        }
+      />
 
       <section className="card">
+        <h2>Upcoming openings</h2>
+        <OpeningsList
+          openings={openings}
+          bookingCounts={bookingCounts}
+          blockedBy={blockedBy}
+          regularsAllowed={plan.has.regulars}
+        />
+      </section>
+
+      <section className="card" id="add-opening">
         <h2>Open times for booking</h2>
         <p className="muted">
           Clients can only book times you open here. &quot;Regulars only&quot; times are hidden from
@@ -169,16 +196,6 @@ export default async function OpeningsPage() {
         </section>
       )}
 
-      <section className="card">
-        <h2>Upcoming openings</h2>
-        <p className="muted small-text">Times are in {timeZoneLabel(stylist.timezone)} time.</p>
-        <OpeningsList
-          openings={openings}
-          bookingCounts={bookingCounts}
-          blockedBy={blockedBy}
-          regularsAllowed={plan.has.regulars}
-        />
-      </section>
     </>
   );
 }

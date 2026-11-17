@@ -5,6 +5,9 @@ import { clockTime, formatDate, hoursByWeekday, timeZoneLabel, todayInTimeZone }
 import { nowLocal } from "@/lib/localTime";
 import { BRAND_NAME } from "@/lib/brand";
 import CalendarView from "./CalendarView";
+import PageHeader from "@/components/dash/PageHeader";
+import Collapsible from "@/components/dash/Collapsible";
+import ShowMore from "@/components/dash/ShowMore";
 import { CancelledDepositBadge } from "./badges";
 import RefundDepositButton from "./RefundDepositButton";
 import { formatPrice } from "@/lib/money";
@@ -16,7 +19,8 @@ function daysBefore(date, n) {
   return new Date(Date.UTC(y, m - 1, d - n)).toISOString().slice(0, 10);
 }
 
-export default async function BookingsPage() {
+export default async function BookingsPage({ searchParams }) {
+  const { add } = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -171,12 +175,28 @@ export default async function BookingsPage() {
 
   return (
     <>
+      <PageHeader
+        title="Calendar"
+        subtitle={
+          <>
+            Times are in {timeZoneLabel(stylist.timezone)} time. ·{" "}
+            <Link href="/dashboard/availability">Working hours &amp; days off</Link>
+          </>
+        }
+        actions={
+          <>
+            <Link href="/dashboard/openings" className="button secondary small">
+              + Add opening
+            </Link>
+            {events && (
+              <Link href="/dashboard/bookings?add=event" className="button small">
+                + Add event
+              </Link>
+            )}
+          </>
+        }
+      />
       <section className="card">
-        <h2>Calendar</h2>
-        <p className="muted small-text">
-          Times are in {timeZoneLabel(stylist.timezone)} time. ·{" "}
-          <Link href="/dashboard/availability">Working hours &amp; days off</Link>
-        </p>
 
         {upcoming.length === 0 && (pastRows || []).length === 0 && (
           <p className="muted">
@@ -194,6 +214,8 @@ export default async function BookingsPage() {
           blocked={blocked}
           events={events}
           closedHolidays={closedHolidays}
+          openAdd={add === "event"}
+          key={add === "event" ? "add" : "cal"}
         />
       </section>
 
@@ -224,9 +246,8 @@ export default async function BookingsPage() {
       )}
 
       {cancelled.length > 0 && (
-        <section className="card">
-          <h2>Cancelled</h2>
-          <ul className="service-list">
+        <Collapsible title="Cancelled" count={cancelled.length}>
+          <ShowMore className="service-list">
             {cancelled.map((b) => (
               <li key={b.id}>
                 <div>
@@ -243,8 +264,8 @@ export default async function BookingsPage() {
                 <CancelledDepositBadge booking={b} />
               </li>
             ))}
-          </ul>
-        </section>
+          </ShowMore>
+        </Collapsible>
       )}
     </>
   );

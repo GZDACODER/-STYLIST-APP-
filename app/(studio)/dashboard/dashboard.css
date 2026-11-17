@@ -3853,3 +3853,117 @@ body:has(dialog.client-sheet[open]) {
   opacity: 0.6;
   cursor: default;
 }
+
+/* =========================================================
+   Shared page parts (every tab): header, empty state, Show more,
+   collapsed groups. components/dash/*.
+   ========================================================= */
+.db-pagehead {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px 24px;
+  flex-wrap: wrap;
+  margin: 0 0 28px;
+}
+
+.db .db-pagehead h1 {
+  margin: 8px 0 0;
+  font-size: clamp(2.1rem, 5vw, 2.9rem);
+}
+
+.db-pagehead-text {
+  min-width: 0;
+}
+
+.db .db-pagehead-sub {
+  margin: 6px 0 0;
+}
+
+.db-pagehead-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.db-pagehead-actions .button {
+  margin: 0;
+}
+
+@media (max-width: 599px) {
+  .db-pagehead {
+    margin-bottom: 20px;
+  }
+  .db-pagehead-actions {
+    width: 100%;
+  }
+}
+
+.db-empty {
+  border: 1px dashed var(--border-strong);
+  padding: 28px 20px;
+  text-align: center;
+}
+
+.db .db-empty-title {
+  margin: 0 0 4px;
+  font-family: var(--font-display), "Cormorant Garamond", Georgia, serif;
+  font-size: 1.35rem;
+  color: var(--ink);
+}
+
+.db .db-empty p {
+  margin-top: 0;
+}
+
+.db-empty-action {
+  margin-top: 14px;
+}
+
+.db .db-show-more {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+}
+
+.db .db-collapse > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.db .db-collapse > summary::-webkit-details-marker {
+  display: none;
+}
+
+.db .db-collapse > summary h2 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.db-collapse-count {
+  color: var(--muted);
+  font-size: 0.85em;
+}
+
+.db-chevron {
+  width: 9px;
+  height: 9px;
+  border-right: 1.5px solid var(--muted);
+  border-bottom: 1.5px solid var(--muted);
+  transform: rotate(45deg);
+  transition: transform 0.15s;
+  flex: none;
+}
+
+.db .db-collapse[open] .db-chevron {
+  transform: rotate(-135deg);
+}
+
+.db-collapse-body {
+  margin-top: 16px;
+}
