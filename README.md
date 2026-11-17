@@ -20,6 +20,8 @@ and hosted on **Vercel**.
   Regulars (matched by phone number) also see the "Regulars only" times.
 - **Automatic Regulars**: clients become Regulars after a number of completed
   appointments you pick in Settings (3 to start with).
+- **Forgot password** (`/forgot-password`, linked from Log in): emails a link
+  that logs the pro in and opens **Choose a new password** (`/reset-password`).
 - **Bookings**: see upcoming bookings (with deposit paid or not) and cancel them.
   The client is emailed straight away that it's cancelled, with a Book another
   time link (replies go to the business).

@@ -53,6 +53,14 @@ This is needed so the "confirm your email" link opens your site.
    - `http://localhost:3000/**` (only needed if you ever run the app on a computer)
 4. Save.
 
+## 4b. Password reset emails
+
+"Forgot password?" on Log in uses Supabase's **Reset Password** email
+(Authentication → Emails). The default template works as long as step 4's
+Redirect URLs include your site (`https://www.clientelesuite.com/**`). The link
+must be opened on the same device and browser that asked for it; otherwise the
+pro sees "That reset link has expired" and can ask again.
+
 ## 5. Email confirmation (choose one)
 
 Go to **Authentication → Sign In / Providers → Email**.

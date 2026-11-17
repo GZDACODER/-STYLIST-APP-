@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState } from "react";
 import { login } from "@/app/auth/actions";
 import SubmitButton from "@/components/SubmitButton";
@@ -20,6 +21,9 @@ export default function LoginForm() {
         Password
         <input name="password" type="password" autoComplete="current-password" required />
       </label>
+      <p className="small-text forgot-link">
+        <Link href="/forgot-password">Forgot password?</Link>
+      </p>
       <SubmitButton pendingText="Logging in...">Log in</SubmitButton>
       <FormMessage state={state} />
     </form>
