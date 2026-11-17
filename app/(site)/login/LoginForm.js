@@ -6,6 +6,7 @@ import { login } from "@/app/auth/actions";
 import SubmitButton from "@/components/SubmitButton";
 import FormMessage from "@/components/FormMessage";
 import ResendConfirmation from "@/components/ResendConfirmation";
+import ConfirmCodeForm from "@/components/ConfirmCodeForm";
 
 export default function LoginForm() {
   const [state, formAction] = useActionState(login, null);
@@ -27,6 +28,7 @@ export default function LoginForm() {
       <SubmitButton pendingText="Logging in...">Log in</SubmitButton>
       <FormMessage state={state} />
     </form>
+    {state?.unconfirmedEmail && <ConfirmCodeForm email={state.unconfirmedEmail} />}
     {state?.unconfirmedEmail && <ResendConfirmation email={state.unconfirmedEmail} />}
     </>
   );

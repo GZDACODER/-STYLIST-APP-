@@ -5,6 +5,7 @@ import { signup } from "@/app/auth/actions";
 import SubmitButton from "@/components/SubmitButton";
 import FormMessage from "@/components/FormMessage";
 import ResendConfirmation from "@/components/ResendConfirmation";
+import ConfirmCodeForm from "@/components/ConfirmCodeForm";
 import { BUSINESS_TYPES } from "@/lib/businessTypes";
 
 export default function SignupForm() {
@@ -50,6 +51,7 @@ export default function SignupForm() {
       <FormMessage state={state} />
     </form>
     {/* Didn't get the email (or the account already exists unconfirmed). */}
+    {state?.email && state?.success && <ConfirmCodeForm email={state.email} />}
     {state?.email && <ResendConfirmation email={state.email} />}
     </>
   );

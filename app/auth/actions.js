@@ -195,3 +195,23 @@ export async function logout() {
   await supabase.auth.signOut();
   redirect("/login");
 }
+
+// "Enter the code from your email": confirms a new account with the code in
+// the sign-up email (when Supabase's Confirm signup email sends a code
+// rather than, or as well as, a link), then logs them in.
+export async function confirmSignupCode(prevState, formData) {
+  const email = String(formData.get("email") || "").trim().toLowerCase();
+  const code = String(formData.get("code") || "").replace(/\D/g, "");
+  if (!email) return { error: "Please enter your email." };
+  if (code.length < 6) return { error: "Please enter the code from the email." };
+
+  const supabase = await createClient();
+  let { error } = await supabase.auth.verifyOtp({ email, token: code, type: "signup" });
+  // Some codes are issued as plain email codes.
+  if (error) ({ error } = await supabase.auth.verifyOtp({ email, token: code, type: "email" }));
+  if (error) {
+    console.log("Sign-up code failed", { email, error: `${error.status || ""} ${error.code || ""} ${error.message}` });
+    return { error: "That code didn't work or has expired. Check it, or tap Resend confirmation email for a new one." };
+  }
+  redirect("/dashboard");
+}
