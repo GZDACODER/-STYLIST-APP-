@@ -1,6 +1,7 @@
 // "Make the Switch": the guide for pros moving from another booking app.
 // Why switch, what comes over (and what doesn't), the steps in order, a
-// message to send clients, and common questions. No other app is named.
+// message to send clients, and common questions. Other apps are named only
+// as where pros are coming from; nothing is claimed about them.
 import Link from "next/link";
 import { BRAND_NAME } from "@/lib/brand";
 import { CONTACT_EMAIL } from "@/lib/legal";
@@ -8,10 +9,11 @@ import { DEPOSIT_FEE_FIXED_CENTS, DEPOSIT_FEE_PERCENT, PLANS, TRIAL_DAYS } from 
 import { formatPrice } from "@/lib/money";
 import Icon from "../Icon";
 import CopyMessage from "./CopyMessage";
+import { createClient } from "@/lib/supabase/server";
 
 const TITLE = `Make the switch to ${BRAND_NAME}`;
 const DESCRIPTION =
-  "Moving from another booking app? Bring your client list over in an afternoon, keep your old app until you're ready, and give your regulars first pick.";
+  "Moving from Booksy, GlossGenius, Acuity, Square or Vagaro? Bring your client list over in an afternoon, keep your old app until you're ready, and we'll help you move.";
 
 export const metadata = {
   title: TITLE,
@@ -51,6 +53,34 @@ const STAYS = [
   "Appointments already booked: finish those where they are",
   "Past visit history and cards on file",
   "Reviews, which live on the other app",
+];
+
+// Where pros are coming from (named only; no claims about them).
+const FROM = ["Booksy", "GlossGenius", "Acuity", "Square Appointments", "Vagaro", "Fresha", "Schedulicity", "A paper book or DMs"];
+
+const HELP = [
+  {
+    icon: "swap",
+    title: "Send us your export",
+    text: "Email us the client file from your old app and we'll import it for you, with Regulars marked the way you want.",
+  },
+  {
+    icon: "link",
+    title: "Can't find the export?",
+    text: "Tell us which app you use and we'll walk you through finding it. A spreadsheet or a list of names and numbers works too.",
+  },
+  {
+    icon: "bell",
+    title: "Set-up questions",
+    text: "Services, hours, deposits or openings: reply to any Clientele email or write to us, and a real person answers.",
+  },
+];
+
+const ALONGSIDE = [
+  ["Week 1", "Import your clients, add services and hours, and open times a few weeks out. Keep taking bookings in your old app."],
+  ["Week 2", "Share your Clientele link with regulars first. Block the times your old app already has booked, so nobody double-books."],
+  ["Weeks 3–4", "Put your link in your Instagram bio and send the message below to everyone. New bookings come to Clientele."],
+  ["When you're ready", "Once your old app's last appointments are done, cancel it. Your trial is 14 days; take as long as you need."],
 ];
 
 const STEPS = [
@@ -113,7 +143,7 @@ const FAQ = [
   },
   {
     q: "What does it cost?",
-    a: `${price(PLANS.allin.monthlyCents)}/mo, or ${price(PLANS.allin.yearlyCents)}/year, with every feature. Team members are ${price(PLANS.team.monthlyCents)}/mo each. Deposits carry ${DEPOSIT_FEE_PERCENT}% + ${DEPOSIT_FEE_FIXED_CENTS}¢ each to cover card processing. Cancel any time.`,
+    a: `${price(PLANS.allin.monthlyCents)}/mo, or ${price(PLANS.allin.yearlyCents)}/year (2 months free), with every feature. Team members are ${price(PLANS.team.monthlyCents)}/mo each (${price(PLANS.team.yearlyCents)}/year). The optional Assistant is ${price(PLANS.assistant.monthlyCents)}/mo (${price(PLANS.assistant.yearlyCents)}/year). The first ${TRIAL_DAYS} days are free with everything on, no card needed. Deposits carry ${DEPOSIT_FEE_PERCENT}% + ${DEPOSIT_FEE_FIXED_CENTS}¢ each to cover card processing. Cancel any time.`,
   },
   {
     q: "If I leave Clientele, can I take my clients with me?",
@@ -121,7 +151,13 @@ const FAQ = [
   },
 ];
 
-export default function SwitchPage() {
+export default async function SwitchPage() {
+  // Logged in: "View dashboard" instead of "Log in".
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const account = user ? { href: "/dashboard", label: "View dashboard" } : { href: "/login", label: "Log in" };
   return (
     <>
       <header className="hm-nav">
@@ -136,10 +172,18 @@ export default function SwitchPage() {
             <Link href="/#pricing" className="hm-hide-phone">
               Pricing
             </Link>
-            <Link href="/login">Log in</Link>
-            <Link href="/signup" className="hm-button hm-button-small">
-              Start free trial
-            </Link>
+            {user ? (
+              <Link href={account.href} className="hm-button hm-button-small">
+                {account.label}
+              </Link>
+            ) : (
+              <>
+                <Link href="/login">Log in</Link>
+                <Link href="/signup" className="hm-button hm-button-small">
+                  Start free trial
+                </Link>
+              </>
+            )}
           </nav>
         </div>
       </header>
@@ -164,6 +208,14 @@ export default function SwitchPage() {
             </a>
           </div>
           <p className="hm-fine">{TRIAL_DAYS} days free. No card needed.</p>
+          <div className="hm-sw-from">
+            <p>Coming from</p>
+            <ul>
+              {FROM.map((name) => (
+                <li key={name}>{name}</li>
+              ))}
+            </ul>
+          </div>
         </section>
 
         {/* ---------- Why ---------- */}
@@ -180,7 +232,7 @@ export default function SwitchPage() {
             ))}
           </ul>
           <p className="hm-fine hm-sw-more">
-            <Link href="/#switching">See how Clientele compares</Link>
+            <Link href="/#features">See every feature</Link>
           </p>
         </section>
 
@@ -206,6 +258,45 @@ export default function SwitchPage() {
               </ul>
             </div>
           </div>
+        </section>
+
+        {/* ---------- Help migrating ---------- */}
+        <section className="hm-section">
+          <p className="hm-kicker">Help migrating</p>
+          <h2>We&apos;ll help you move.</h2>
+          <p className="hm-section-lede">
+            Switching shouldn&apos;t cost you a weekend. Email{" "}
+            <a href={`mailto:${CONTACT_EMAIL}?subject=Help%20me%20switch`}>{CONTACT_EMAIL}</a> and we&apos;ll get your
+            list in.
+          </p>
+          <ul className="hm-cards hm-sw-why">
+            {HELP.map((h) => (
+              <li key={h.title}>
+                <Icon name={h.icon} />
+                <h3>{h.title}</h3>
+                <p>{h.text}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        {/* ---------- Side by side ---------- */}
+        <section className="hm-section">
+          <p className="hm-kicker">No big-bang switch</p>
+          <h2>
+            Run Clientele <em>alongside</em> your old app.
+          </h2>
+          <p className="hm-section-lede">
+            Keep both until you&apos;re comfortable. Here&apos;s how most pros do it.
+          </p>
+          <ol className="hm-sw-timeline">
+            {ALONGSIDE.map(([when, what]) => (
+              <li key={when}>
+                <strong>{when}</strong>
+                <p>{what}</p>
+              </li>
+            ))}
+          </ol>
         </section>
 
         {/* ---------- Steps ---------- */}
@@ -273,7 +364,7 @@ export default function SwitchPage() {
         <span className="hm-logo hm-logo-small">{BRAND_NAME}</span>
         <nav aria-label="Footer">
           <Link href="/">Home</Link>
-          <Link href="/login">Log in</Link>
+          <Link href={account.href}>{account.label}</Link>
           <Link href="/terms">Terms</Link>
           <Link href="/privacy">Privacy</Link>
           <a href={`mailto:${CONTACT_EMAIL}`}>Contact · {CONTACT_EMAIL}</a>
