@@ -4,6 +4,8 @@ import { deleteService } from "./actions";
 import AddServiceForm from "./AddServiceForm";
 import SubmitButton from "@/components/SubmitButton";
 import { BRAND_NAME } from "@/lib/brand";
+import SettingsShell from "@/components/dash/SettingsShell";
+import EmptyState from "@/components/dash/EmptyState";
 
 export const metadata = { title: `Services · ${BRAND_NAME}` };
 
@@ -34,17 +36,12 @@ export default async function ServicesPage() {
     .order("created_at", { ascending: true });
 
   return (
-    <>
-      <section className="card">
-        <h2>Add a service</h2>
-        <AddServiceForm />
-      </section>
-
+    <SettingsShell active="services" subtitle="What clients can book on your booking page.">
       <section className="card">
         <h2>Your services</h2>
         {error && <p className="message error">Couldn't load services: {error.message}</p>}
         {!error && services.length === 0 && (
-          <p className="muted">No services yet. Add your first one above.</p>
+          <EmptyState title="No services yet" text="Add your first one below so clients can book." />
         )}
         {!error && services.length > 0 && (
           <ul className="service-list">
@@ -67,6 +64,11 @@ export default async function ServicesPage() {
           </ul>
         )}
       </section>
-    </>
+
+      <section className="card" id="add-service">
+        <h2>Add a service</h2>
+        <AddServiceForm />
+      </section>
+    </SettingsShell>
   );
 }

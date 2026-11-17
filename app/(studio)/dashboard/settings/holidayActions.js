@@ -39,7 +39,7 @@ export async function setHolidayClosed(prevState, formData) {
   // Reopened: the time is free again, so tell the waitlist.
   if (!closed) await runWaitlistSafely(user.id, await siteOrigin());
 
-  revalidatePath("/dashboard/settings");
+  revalidatePath("/dashboard/settings", "layout");
   revalidatePath("/dashboard/availability");
   revalidatePath("/dashboard/bookings");
   revalidatePath("/dashboard");

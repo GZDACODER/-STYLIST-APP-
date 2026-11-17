@@ -23,7 +23,7 @@ export default function PlanBanner({ plan }) {
     plan.stripeStatus === "past_due" ? (
       <a href="/dashboard/billing/portal">Update card</a>
     ) : (
-      <Link href="/dashboard/settings#plan">Choose a plan</Link>
+      <Link href="/dashboard/settings/plan">Choose a plan</Link>
     );
 
   return (

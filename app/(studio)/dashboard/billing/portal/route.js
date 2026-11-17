@@ -7,7 +7,7 @@ import { publicSiteUrl } from "@/lib/siteUrl";
 
 export async function GET(request) {
   const site = publicSiteUrl(new URL(request.url).origin);
-  const back = `${site}/dashboard/settings`;
+  const back = `${site}/dashboard/settings/plan`;
   if (!paymentsConfigured()) return NextResponse.redirect(back);
 
   const supabase = await createClient();

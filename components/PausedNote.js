@@ -8,7 +8,7 @@ export default function PausedNote({ feature, children }) {
   return (
     <p className="message paused-note">
       {children || <>Your plan is paused, so this is switched off.</>}{" "}
-      <Link href="/dashboard/settings#plan">Choose a plan</Link>
+      <Link href="/dashboard/settings/plan">Choose a plan</Link>
     </p>
   );
 }

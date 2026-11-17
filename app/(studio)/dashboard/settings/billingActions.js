@@ -76,8 +76,8 @@ export async function startCheckout(prevState, formData) {
       },
       metadata: { stylist_id: user.id, kind: "subscription" },
       allow_promotion_codes: true,
-      success_url: `${site}/dashboard/settings?billing=success`,
-      cancel_url: `${site}/dashboard/settings?billing=cancelled`,
+      success_url: `${site}/dashboard/settings/plan?billing=success`,
+      cancel_url: `${site}/dashboard/settings/plan?billing=cancelled`,
     });
     url = session.url;
   } catch (error) {
@@ -106,7 +106,7 @@ export async function changeTeamMembers(prevState, formData) {
 
   try {
     const saved = await setTeamMembers(user.id, count);
-    revalidatePath("/dashboard/settings");
+    revalidatePath("/dashboard/settings", "layout");
     return {
       success:
         saved === 0
@@ -149,8 +149,8 @@ export async function startAssistantCheckout(prevState, formData) {
       subscription_data: { metadata: { stylist_id: user.id } },
       metadata: { stylist_id: user.id, kind: "subscription" },
       allow_promotion_codes: true,
-      success_url: `${site}/dashboard/settings?billing=success#plan`,
-      cancel_url: `${site}/dashboard/settings?billing=cancelled#plan`,
+      success_url: `${site}/dashboard/settings/plan?billing=success`,
+      cancel_url: `${site}/dashboard/settings/plan?billing=cancelled`,
     });
     url = session.url;
   } catch (error) {

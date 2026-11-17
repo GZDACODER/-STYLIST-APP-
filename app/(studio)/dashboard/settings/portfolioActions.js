@@ -21,7 +21,7 @@ async function me() {
 }
 
 function refresh() {
-  revalidatePath("/dashboard/settings");
+  revalidatePath("/dashboard/settings", "layout");
   revalidatePath("/book", "layout");
 }
 

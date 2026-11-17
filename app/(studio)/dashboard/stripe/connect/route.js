@@ -10,7 +10,7 @@ export async function GET(request) {
   const origin = new URL(request.url).origin;
   const settings = (status, reason = "") =>
     NextResponse.redirect(
-      `${origin}/dashboard/settings?stripe=${status}` +
+      `${origin}/dashboard/settings/deposits?stripe=${status}` +
         (reason ? `&reason=${encodeURIComponent(reason.slice(0, 300))}` : "")
     );
 
@@ -81,7 +81,7 @@ export async function GET(request) {
         type: "account_onboarding",
         account_onboarding: {
           refresh_url: `${origin}/dashboard/stripe/connect`,
-          return_url: `${origin}/dashboard/settings?stripe=return`,
+          return_url: `${origin}/dashboard/settings/deposits?stripe=return`,
         },
       },
     });
