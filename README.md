@@ -102,7 +102,9 @@ and hosted on **Vercel**.
   Working hours → Holidays. A closed holiday has no bookings, waitlist offers or
   standing visits, and is shaded like a day off.
   The Openings page shows which parts of an opening are blocked. Run
-  `supabase/migrations/0039_calendar_extras.sql`.
+  `supabase/migrations/0039_calendar_extras.sql`, then
+  `0040_standing_skip_closed_holidays.sql` (standing visits skip a holiday
+  closed for one date too).
 - **Make the Switch** (`/switch`): the guide for pros moving from another app:
   why switch, what comes over (the client list) and what doesn't (booked
   appointments), seven steps, a message to copy and send clients, and common
