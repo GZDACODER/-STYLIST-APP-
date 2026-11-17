@@ -127,13 +127,16 @@ export default async function BookingsPage() {
   ]);
   const blocked = Object.fromEntries((blockedRows || []).map((r) => [r.blocked_on, r.reason || ""]));
 
-  // The stylist's own events (null until the step 29 SQL is run).
-  const { data: eventRows, error: eventsError } = await supabase
-    .from("calendar_events")
-    .select("id, title, starts_on, start_time, end_time, repeats, repeat_until, skipped_dates, blocks_bookings, note")
-    .order("starts_on")
-    .limit(2000);
+  // The stylist's own events (null until the step 29 SQL is run; colours and
+  // repeat days from step 34).
+  const EVENT_COLUMNS = "id, title, starts_on, start_time, end_time, repeats, repeat_until, skipped_dates, blocks_bookings, note";
+  const loadEvents = (cols) => supabase.from("calendar_events").select(cols).order("starts_on").limit(2000);
+  let { data: eventRows, error: eventsError } = await loadEvents(`${EVENT_COLUMNS}, color, repeat_days, monthly_mode`);
+  if (eventsError) ({ data: eventRows, error: eventsError } = await loadEvents(EVENT_COLUMNS));
   const events = eventsError ? null : eventRows || [];
+  // Federal holidays the business closes on (empty before step 34).
+  const { data: holidayRows } = await supabase.from("stylist_holiday_settings").select("holiday_key").eq("closed", true);
+  const closedHolidays = (holidayRows || []).map((r) => r.holiday_key);
 
   const nowText = nowLocal(stylist.timezone);
   const startedAt = (b) => `${b.booking_date}T${String(b.start_time).slice(0, 5)}`;
@@ -190,6 +193,7 @@ export default async function BookingsPage() {
           hours={hoursByWeekday(hourRows)}
           blocked={blocked}
           events={events}
+          closedHolidays={closedHolidays}
         />
       </section>
 

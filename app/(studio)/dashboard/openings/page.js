@@ -12,6 +12,8 @@ import PausedNote from "@/components/PausedNote";
 import { getMyPlan } from "@/lib/plan";
 import { BRAND_NAME } from "@/lib/brand";
 import RegularStar from "@/components/RegularStar";
+import { eventsOn } from "@/lib/calendarEvents";
+import { holidaysOn } from "@/lib/holidays";
 
 export const metadata = { title: `Openings · ${BRAND_NAME}` };
 
@@ -64,6 +66,28 @@ export default async function OpeningsPage() {
         o.end_time > h.start_time
     )
   );
+
+  // What blocks bookings inside each opening: "Block bookings" events and
+  // closed holidays (both empty before the step 29 / 34 SQL is run).
+  const [{ data: eventRows }, { data: holidayRows }] = await Promise.all([
+    supabase.from("calendar_events").select("*").eq("blocks_bookings", true).limit(2000),
+    supabase.from("stylist_holiday_settings").select("holiday_key").eq("closed", true),
+  ]);
+  const closedKeys = new Set((holidayRows || []).map((r) => r.holiday_key));
+  const hhmm = (t) => String(t).slice(0, 5);
+  const blockedBy = {};
+  for (const o of openings || []) {
+    const notes = [];
+    const closed = holidaysOn(o.opening_date).find((h) => h.key && closedKeys.has(h.key));
+    if (closed) notes.push(`Closed for ${closed.name}: none of this can be booked`);
+    for (const e of eventsOn(eventRows || [], o.opening_date)) {
+      if (!e.start_time) notes.push(`${e.title} (all day): none of this can be booked`);
+      else if (hhmm(e.start_time) < hhmm(o.end_time) && hhmm(e.end_time) > hhmm(o.start_time)) {
+        notes.push(`${e.title}: ${clockTime(e.start_time)} – ${clockTime(e.end_time)} can't be booked`);
+      }
+    }
+    if (notes.length) blockedBy[o.id] = notes;
+  }
 
   if (error) {
     return <p className="message error">Couldn't load your openings: {error.message}</p>;
@@ -151,6 +175,7 @@ export default async function OpeningsPage() {
         <OpeningsList
           openings={openings}
           bookingCounts={bookingCounts}
+          blockedBy={blockedBy}
           regularsAllowed={plan.has.regulars}
         />
       </section>

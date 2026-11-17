@@ -4,25 +4,46 @@
 // panel (with Edit and Delete), both shown in a Sheet.
 import { useActionState, useEffect, useState } from "react";
 import { clockTime, formatDate } from "@/lib/availability";
-import { REPEATS, repeatLabel } from "@/lib/calendarEvents";
+import { COLORS, REPEATS, WEEKDAY_SHORT, colorOf, monthlyChoices, repeatLabel, weekdayOf } from "@/lib/calendarEvents";
 import ConfirmAction from "@/components/ConfirmAction";
 import SubmitButton from "@/components/SubmitButton";
 import TimeSelect from "@/components/TimeSelect";
 import { deleteEvent, saveEvent } from "./eventActions";
 
 const hhmm = (t) => (t ? String(t).slice(0, 5) : "");
+// Monday first, like the calendar.
+const WEEK = [1, 2, 3, 4, 5, 6, 0];
+const repeatOpts = (e) => ({ days: e?.repeat_days || [], mode: e?.monthly_mode || "date" });
+
+const SCOPE_TITLES = {
+  one: "Edit this date",
+  following: "Edit this and following dates",
+  all: "Edit event",
+};
 
 export function eventTimeText(e) {
   return e.start_time ? `${clockTime(e.start_time)} – ${clockTime(e.end_time)}` : "All day";
 }
 
 // event: an event to edit, or null to add one on `date`.
-// onSaved: called once it's saved and there's nothing to warn about.
-export function EventForm({ event, date, onSaved }) {
+// scope (editing a repeating event): "one" (just `date`), "following"
+// (`date` and later) or "all". onSaved: called once it's saved and there's
+// nothing to warn about.
+export function EventForm({ event, date, scope = "all", onSaved }) {
   const [state, formAction] = useActionState(saveEvent, null);
-  const [startsOn, setStartsOn] = useState(event?.starts_on || date);
+  const repeatingEvent = event && event.repeats !== "none";
+  const partOfSeries = repeatingEvent && scope !== "all";
+  const [startsOn, setStartsOn] = useState(partOfSeries ? date : event?.starts_on || date);
   const [allDay, setAllDay] = useState(event ? !event.start_time : false);
-  const [repeats, setRepeats] = useState(event?.repeats || "none");
+  const [repeats, setRepeats] = useState(scope === "one" ? "none" : event?.repeats || "none");
+  const [color, setColor] = useState(event?.color || "gray");
+  const [days, setDays] = useState(() =>
+    event?.repeat_days?.length ? event.repeat_days : [weekdayOf(event?.starts_on || date)]
+  );
+  const [monthlyMode, setMonthlyMode] = useState(event?.monthly_mode || "date");
+  const monthly = monthlyChoices(startsOn);
+  const modeValue = monthly.some(([m]) => m === monthlyMode) ? monthlyMode : "date";
+  const toggleDay = (d) => setDays((list) => (list.includes(d) ? list.filter((x) => x !== d) : [...list, d]));
 
   // Close straight away unless there's a clash to read.
   useEffect(() => {
@@ -43,8 +64,21 @@ export function EventForm({ event, date, onSaved }) {
 
   return (
     <form action={formAction} className="event-form">
-      <h2>{event ? "Edit event" : "Add event"}</h2>
+      <h2>{event ? (repeatingEvent ? SCOPE_TITLES[scope] : "Edit event") : "Add event"}</h2>
       {event && <input type="hidden" name="id" value={event.id} />}
+      {repeatingEvent && (
+        <>
+          <input type="hidden" name="scope" value={scope} />
+          <input type="hidden" name="occurrence" value={date} />
+        </>
+      )}
+      {partOfSeries && (
+        <p className="muted small-text">
+          {scope === "one"
+            ? `Changes only ${formatDate(date)}. The other dates stay as they are.`
+            : `Changes ${formatDate(date)} and every date after it. Earlier dates stay as they are.`}
+        </p>
+      )}
       <label>
         What
         <input
@@ -67,8 +101,10 @@ export function EventForm({ event, date, onSaved }) {
           required
         />
       </label>
+      {/* Always sent, "on" or "off", so a timed event can never be saved as all day. */}
+      <input type="hidden" name="all_day" value={allDay ? "on" : "off"} />
       <label className="check-row">
-        <input type="checkbox" name="all_day" checked={allDay} onChange={(e) => setAllDay(e.target.checked)} />
+        <input type="checkbox" checked={allDay} onChange={(e) => setAllDay(e.target.checked)} />
         <span>All day</span>
       </label>
       {!allDay && (
@@ -83,16 +119,47 @@ export function EventForm({ event, date, onSaved }) {
           </label>
         </div>
       )}
-      <label>
-        Repeats
-        <select name="repeats" value={repeats} onChange={(e) => setRepeats(e.target.value)}>
-          {REPEATS.map((r) => (
-            <option key={r} value={r}>
-              {repeatLabel(r, startsOn)}
-            </option>
-          ))}
-        </select>
-      </label>
+      {scope === "one" ? (
+        <input type="hidden" name="repeats" value="none" />
+      ) : (
+        <label>
+          Repeats
+          <select name="repeats" value={repeats} onChange={(e) => setRepeats(e.target.value)}>
+            {REPEATS.map((r) => (
+              <option key={r} value={r}>
+                {r === "weekly" ? "Every week" : r === "biweekly" ? "Every 2 weeks" : r === "monthly" ? "Every month" : repeatLabel(r, startsOn)}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
+      {(repeats === "weekly" || repeats === "biweekly") && (
+        <fieldset className="event-days">
+          <legend>On</legend>
+          <input type="hidden" name="repeat_days_shown" value="1" />
+          <div className="event-days-row">
+            {WEEK.map((d) => (
+              <label key={d} className={days.includes(d) ? "event-day checked" : "event-day"}>
+                <input type="checkbox" name="repeat_days" value={d} checked={days.includes(d)} onChange={() => toggleDay(d)} />
+                {WEEKDAY_SHORT[d]}
+              </label>
+            ))}
+          </div>
+          <p className="muted small-text">{repeatLabel(repeats, startsOn, { days })}</p>
+        </fieldset>
+      )}
+      {repeats === "monthly" && (
+        <label>
+          Each month
+          <select name="monthly_mode" value={modeValue} onChange={(e) => setMonthlyMode(e.target.value)}>
+            {monthly.map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
       {repeats !== "none" && (
         <label>
           Until (optional)
@@ -109,6 +176,18 @@ export function EventForm({ event, date, onSaved }) {
           </span>
         </span>
       </label>
+      <fieldset className="event-colors">
+        <legend>Colour</legend>
+        <div className="event-colors-row">
+          {Object.entries(COLORS).map(([key, [label, hex]]) => (
+            <label key={key} className={color === key ? "event-swatch checked" : "event-swatch"} title={label}>
+              <input type="radio" name="color" value={key} checked={color === key} onChange={() => setColor(key)} />
+              <span style={{ background: hex }} aria-hidden="true" />
+              <span className="visually-hidden">{label}</span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
       <label>
         Note (optional, only you see this)
         <input name="note" type="text" maxLength={300} defaultValue={event?.note || ""} />
@@ -119,13 +198,17 @@ export function EventForm({ event, date, onSaved }) {
   );
 }
 
-// date: the day it was opened from (for "Delete this date only").
+// date: the day it was opened from (for "this date" / "this and following").
+// onEdit(scope): "one", "following" or "all".
 export function EventDetails({ event: e, date, onEdit }) {
   const repeating = e.repeats !== "none";
+  const laterDate = repeating && date > e.starts_on;
   return (
     <div className="client-card event-details">
       <div className="client-top">
-        <div className="client-name">{e.title}</div>
+        <div className="client-name">
+          <span className="event-dot" style={{ background: colorOf(e) }} aria-hidden="true" /> {e.title}
+        </div>
         {e.blocks_bookings && <span className="badge event-block">Bookings blocked</span>}
       </div>
       <dl className="booking-facts">
@@ -140,7 +223,7 @@ export function EventDetails({ event: e, date, onEdit }) {
         <div>
           <dt>Repeats</dt>
           <dd>
-            {repeatLabel(e.repeats, e.starts_on)}
+            {repeatLabel(e.repeats, e.starts_on, repeatOpts(e))}
             {repeating && e.repeat_until && `, until ${formatDate(e.repeat_until)}`}
           </dd>
         </div>
@@ -157,9 +240,27 @@ export function EventDetails({ event: e, date, onEdit }) {
           : "Just a reminder for you. Clients can still book this time."}
       </p>
       <div className="event-actions">
-        <button type="button" className="button small secondary" onClick={onEdit}>
-          Edit{repeating ? " all dates" : ""}
-        </button>
+        {repeating ? (
+          <>
+            <button type="button" className="button small secondary" onClick={() => onEdit("one")}>
+              Edit this date
+            </button>
+            {laterDate && (
+              <button type="button" className="button small secondary" onClick={() => onEdit("following")}>
+                Edit this and following
+              </button>
+            )}
+            <button type="button" className="button small secondary" onClick={() => onEdit("all")}>
+              Edit all dates
+            </button>
+          </>
+        ) : (
+          <button type="button" className="button small secondary" onClick={() => onEdit("all")}>
+            Edit
+          </button>
+        )}
+      </div>
+      <div className="event-actions">
         {repeating && (
           <ConfirmAction
             label="Delete this date only"
@@ -170,6 +271,18 @@ export function EventDetails({ event: e, date, onEdit }) {
             pendingText="Removing..."
             action={deleteEvent}
             fields={{ id: e.id, scope: "one", date }}
+          />
+        )}
+        {laterDate && (
+          <ConfirmAction
+            label="Delete this and following"
+            question={`Remove ${e.title} from ${formatDate(date)} on?`}
+            note="Earlier dates stay."
+            keepLabel="Keep them"
+            confirmLabel="Yes, remove"
+            pendingText="Removing..."
+            action={deleteEvent}
+            fields={{ id: e.id, scope: "following", date }}
           />
         )}
         <ConfirmAction

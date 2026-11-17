@@ -93,6 +93,16 @@ and hosted on **Vercel**.
   `supabase/migrations/0036_standing_skip_events.sql`.
   The Today page shows today's holiday and events in the timeline with the
   appointments, and (on wide screens) the rest of the week's events.
+  Events have a colour, repeat every day, every week or every 2 weeks on chosen
+  days, or monthly on a date or a weekday ("2nd Tuesday", "last Friday"), and a
+  repeating event can be edited or deleted for this date, this and following, or
+  all dates. **Close on holidays**: tap a federal holiday on the Calendar for
+  "Closed this holiday" (that date only, saved as a blocked date "Closed –
+  Thanksgiving") or "Close every year"; all of them are listed in Settings →
+  Working hours → Holidays. A closed holiday has no bookings, waitlist offers or
+  standing visits, and is shaded like a day off.
+  The Openings page shows which parts of an opening are blocked. Run
+  `supabase/migrations/0039_calendar_extras.sql`.
 - **Make the Switch** (`/switch`): the guide for pros moving from another app:
   why switch, what comes over (the client list) and what doesn't (booked
   appointments), seven steps, a message to copy and send clients, and common

@@ -156,7 +156,7 @@ export default async function SettingsPage({ searchParams }) {
           </li>
           <li>
             <Link href="/dashboard/availability">
-              <span className="db-more-title">Working hours &amp; days off</span>
+              <span className="db-more-title">Working hours, days off &amp; holidays</span>
               <span className="db-more-note">Your week and blocked dates</span>
             </Link>
           </li>

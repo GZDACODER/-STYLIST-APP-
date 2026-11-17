@@ -15,7 +15,8 @@ function applyChange(openings, change) {
   );
 }
 
-export default function OpeningsList({ openings, bookingCounts, regularsAllowed = true }) {
+// blockedBy: { openingId: ["Maya's practice: 4:00 PM – 5:30 PM can't be booked", ...] }
+export default function OpeningsList({ openings, bookingCounts, blockedBy = {}, regularsAllowed = true }) {
   // Show changes straight away while they save in the background.
   const [shown, setOptimistic] = useOptimistic(openings, applyChange);
   const [error, setError] = useState(null);
@@ -98,6 +99,11 @@ export default function OpeningsList({ openings, bookingCounts, regularsAllowed 
                           fields={{ id: o.id }}
                         />
                       </div>
+                      {blockedBy[o.id]?.map((note) => (
+                        <p key={note} className="opening-blocked small-text">
+                          {note}
+                        </p>
+                      ))}
                       <VisibilitySwitch
                       regularsDisabled={!regularsAllowed}
                         value={o.visibility}

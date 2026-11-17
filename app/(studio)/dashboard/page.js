@@ -177,7 +177,7 @@ export default async function TodayPage() {
   // own, so the page still opens before the step 29 SQL is run).
   const { data: eventRows } = await supabase
     .from("calendar_events")
-    .select("id, title, starts_on, start_time, end_time, repeats, repeat_until, skipped_dates, blocks_bookings, note")
+    .select("*")
     .lte("starts_on", week.end)
     .limit(2000);
   const allEvents = eventRows || [];
