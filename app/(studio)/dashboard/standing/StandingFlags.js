@@ -11,14 +11,14 @@ const WHY = {
   day_off: "is on a day you blocked off",
   not_working: "is on a day you don't work",
   outside_hours: "is outside your working hours",
-  event: "is during one of your Calendar events that blocks bookings",
+  event: "is during a Calendar event that blocks bookings, or a holiday you're closed on",
 };
 
 // Not held, with why.
 const NOT_HELD = {
   clash: (when) => `${when} was already booked, so this visit isn't held. Move the other booking, or dismiss this date.`,
   event_skipped: (when) =>
-    `${when} is blocked by one of your Calendar events, so this visit isn't held. It's booked automatically if you remove or change the event, or dismiss this date.`,
+    `${when} is blocked by one of your Calendar events or a holiday you're closed on, so this visit isn't held. It's booked automatically if that changes, or dismiss this date.`,
 };
 
 export default function StandingFlags({ flags }) {

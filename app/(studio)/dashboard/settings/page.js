@@ -10,6 +10,8 @@ import PortfolioForm from "./PortfolioForm";
 import CoverPhotoForm from "./CoverPhotoForm";
 import BusinessLinksForm from "./BusinessLinksForm";
 import PlanCard from "./PlanCard";
+import HolidaySettings from "./HolidaySettings";
+import { todayInTimeZone } from "@/lib/availability";
 import PausedNote from "@/components/PausedNote";
 import { getMyPlan } from "@/lib/plan";
 import { BRAND_NAME } from "@/lib/brand";
@@ -100,6 +102,12 @@ export default async function SettingsPage({ searchParams }) {
     .order("position")
     .order("created_at");
 
+  // Holidays the business closes on (step 34 SQL). null before it's run.
+  const { data: holidayRows, error: holidayError } = await supabase
+    .from("stylist_holiday_settings")
+    .select("holiday_key, closed");
+  const closedHolidays = holidayError ? null : (holidayRows || []).filter((r) => r.closed).map((r) => r.holiday_key);
+
   const plan = await getMyPlan(supabase, user.id);
   const configured = paymentsConfigured();
   let stripe = { connected: false, enabled: false, detailsSubmitted: false };
@@ -187,6 +195,22 @@ export default async function SettingsPage({ searchParams }) {
           regularsOnly={stylist.regulars_only}
           regularsOnlyAllowed={plan.has.regulars}
         />
+      </section>
+
+      <section className="card" id="holidays">
+        <h2>Holidays</h2>
+        <p className="muted">
+          Close on any federal holiday and clients can&apos;t book that day, the waitlist isn&apos;t
+          offered it, and standing appointments skip it. Bookings already made stay. Off for every
+          holiday to start with.
+        </p>
+        {closedHolidays ? (
+          <HolidaySettings closed={closedHolidays} today={todayInTimeZone(stylist.timezone || "America/Chicago")} />
+        ) : (
+          <p className="message info">
+            Run <code>supabase/migrations/0039_calendar_extras.sql</code> in Supabase to switch this on.
+          </p>
+        )}
       </section>
 
       <section className="card">

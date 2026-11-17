@@ -3689,3 +3689,151 @@ body:has(dialog.client-sheet[open]) {
 .db .addon .segmented {
   margin-bottom: 10px;
 }
+
+/* ---------- Calendar extras: colours, repeat days, holidays ---------- */
+.db .event-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50% !important;
+  vertical-align: middle;
+  margin-right: 4px;
+}
+
+.db .event-days,
+.db .event-colors {
+  border: 0;
+  padding: 0;
+  margin: 4px 0 6px;
+}
+
+.db .event-days legend,
+.db .event-colors legend {
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.db .event-days-row,
+.db .event-colors-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.db .event-day {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  padding: 8px 6px;
+  border: 1px solid var(--border-strong);
+  background: #fff;
+  font-size: 0.82rem;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.db .event-day.checked {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+}
+
+.db .event-day input,
+.db .event-swatch input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.db .event-swatch {
+  position: relative;
+  display: inline-flex;
+  padding: 3px;
+  border: 2px solid transparent;
+  border-radius: 50% !important;
+  cursor: pointer;
+}
+
+.db .event-swatch span[aria-hidden] {
+  width: 26px;
+  height: 26px;
+  border-radius: 50% !important;
+  display: block;
+}
+
+.db .event-swatch.checked {
+  border-color: var(--ink);
+}
+
+.db .event-day:focus-within,
+.db .event-swatch:focus-within {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.db .opening-blocked {
+  margin: 6px 0 0;
+  padding: 4px 8px;
+  border-left: 2px solid var(--error);
+  background: var(--error-soft);
+  color: var(--error);
+}
+
+.db .holiday-list {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  border-top: 1px solid var(--hair);
+}
+
+.db .holiday-row {
+  border-bottom: 1px solid var(--hair);
+  padding: 10px 0;
+}
+
+.db form.holiday-form {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.db .holiday-name {
+  min-width: 0;
+}
+
+.db .holiday-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+  border: 1px solid var(--border-strong);
+  background: #fff;
+  padding: 4px 10px 4px 4px;
+  border-radius: 999px !important;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.db .holiday-switch-knob {
+  width: 20px;
+  height: 20px;
+  border-radius: 50% !important;
+  background: var(--border-strong);
+}
+
+.db .holiday-switch.on {
+  border-color: var(--error);
+  color: var(--error);
+}
+
+.db .holiday-switch.on .holiday-switch-knob {
+  background: var(--error);
+}
