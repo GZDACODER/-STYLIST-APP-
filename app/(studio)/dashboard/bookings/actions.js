@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { paymentsConfigured, refundDeposit, siteOrigin } from "@/lib/stripe";
-import { emailDepositRefunded } from "@/lib/bookingEmails";
+import { emailBookingCancelled, emailDepositRefunded } from "@/lib/bookingEmails";
 import { formatPrice } from "@/lib/money";
 import { emailConfigured } from "@/lib/notify";
 import { runWaitlistSafely } from "@/lib/waitlist";
@@ -22,10 +22,21 @@ export async function cancelBooking(formData) {
     .update({ status: "cancelled" })
     .eq("id", id)
     .eq("status", "confirmed")
-    .select("id");
+    .select(
+      "id, stylist_id, client_name, client_email, service_name, booking_date, start_time, deposit_cents, deposit_status"
+    );
 
-  // The time is free again: tell anyone on the waitlist who wants it.
-  if (cancelled?.length) await runWaitlistSafely(user.id, await siteOrigin());
+  if (cancelled?.length) {
+    // Tell the client straight away (if they gave an email).
+    const { data: stylist } = await supabase
+      .from("stylists")
+      .select("business_name, slug")
+      .eq("id", user.id)
+      .maybeSingle();
+    await emailBookingCancelled({ ...cancelled[0], business_name: stylist?.business_name, slug: stylist?.slug });
+    // The time is free again: tell anyone on the waitlist who wants it.
+    await runWaitlistSafely(user.id, await siteOrigin());
+  }
 
   revalidatePath("/dashboard/bookings");
   revalidatePath("/dashboard/openings");

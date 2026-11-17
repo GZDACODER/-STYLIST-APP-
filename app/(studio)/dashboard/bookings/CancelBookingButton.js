@@ -30,7 +30,7 @@ export default function CancelBookingButton({
       label="Cancel booking"
       question={`Cancel ${clientName}'s ${serviceName} on ${shortDate(date)} at ${clockTime(startTime)}?`}
       note={
-        `The time opens up again, and anyone on your waitlist who wants it is emailed. ${clientName} isn't told automatically, so let them know.` +
+        `${clientName} is emailed that it's cancelled (if they gave an email). The time opens up again, and anyone on your waitlist who wants it is emailed.` +
         (depositPaid
           ? " Their deposit isn't refunded automatically. If your policy says to refund it, use Refund deposit in the Cancelled list afterwards."
           : "")

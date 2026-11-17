@@ -21,6 +21,8 @@ and hosted on **Vercel**.
 - **Automatic Regulars**: clients become Regulars after a number of completed
   appointments you pick in Settings (3 to start with).
 - **Bookings**: see upcoming bookings (with deposit paid or not) and cancel them.
+  The client is emailed straight away that it's cancelled, with a Book another
+  time link (replies go to the business).
   Clients can also cancel their own bookings from the booking page.
 - **Waitlist**: when no times work, clients join a waitlist for a service and the
   days and times they'd like. When a time opens up, they're emailed a one-tap
