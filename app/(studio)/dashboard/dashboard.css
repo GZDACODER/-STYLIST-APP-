@@ -1103,8 +1103,13 @@ body:has(.db) {
 /* Today, 1200px and up: today's appointments on the left, and a right-hand
    column with "Next up" and "Open times this week". Narrower screens keep
    the single column, without the extra column. */
+/* Next up, events and open times: below the timeline on iPad and phones,
+   a right-hand column on wide screens. */
 .db-today-side {
-  display: none;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  margin-top: 40px;
 }
 
 @media (min-width: 1200px) {
@@ -1120,9 +1125,8 @@ body:has(.db) {
   }
 
   .db-today-side {
-    display: flex;
-    flex-direction: column;
     gap: 40px;
+    margin-top: 0;
   }
 }
 

@@ -1,4 +1,5 @@
 import PageHeader from "@/components/dash/PageHeader";
+import EmptyState from "@/components/dash/EmptyState";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -17,25 +18,6 @@ import { eventsOn } from "@/lib/calendarEvents";
 import { holidaysOn } from "@/lib/holidays";
 
 export const metadata = { title: `Today · ${BRAND_NAME}` };
-
-// "Good morning" / "Good afternoon" / "Good evening", in the stylist's time zone.
-function greeting(timeZone) {
-  const hour = Number(
-    new Intl.DateTimeFormat("en-US", { timeZone, hour: "numeric", hourCycle: "h23" }).format(
-      new Date()
-    )
-  );
-  if (hour < 12) return "Good morning";
-  if (hour < 17) return "Good afternoon";
-  return "Good evening";
-}
-
-// "Good afternoon, Gabrielle" with the first name from Settings, or just
-// "Good afternoon" when there isn't one.
-function greetingLine(timeZone, firstName) {
-  const name = String(firstName || "").trim();
-  return name ? `${greeting(timeZone)}, ${name}` : greeting(timeZone);
-}
 
 // Monday to Sunday of the week that contains `today` ("YYYY-MM-DD").
 function weekRange(today) {
@@ -73,18 +55,9 @@ export default async function TodayPage() {
     .maybeSingle();
   if (!stylist) return null;
 
-  // Read on its own, so the dashboard still opens before the first name SQL (0015) is run.
-  const { data: firstNameRow } = await supabase
-    .from("stylists")
-    .select("first_name")
-    .eq("id", user.id)
-    .maybeSingle();
-
   const tz = stylist.timezone;
   const today = todayInTimeZone(tz);
   const week = weekRange(today);
-  // A little over a week back, then narrowed to this week in the stylist's time zone.
-  const paidSince = new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString();
   const nowTime = new Intl.DateTimeFormat("en-GB", {
     timeZone: tz,
     hour: "2-digit",
@@ -94,23 +67,8 @@ export default async function TodayPage() {
 
   const stillToCome = `booking_date.gt.${today},and(booking_date.eq.${today},start_time.gt.${nowTime})`;
 
-  const [weekBookings, paidDeposits, waiting, todays, upcoming, nextUp, weekOpenings] =
+  const [todays, nextUp, weekOpenings] =
     await Promise.all([
-    supabase
-      .from("bookings")
-      .select("id", { count: "exact", head: true })
-      .eq("status", "confirmed")
-      .gte("booking_date", week.start)
-      .lte("booking_date", week.end),
-    supabase
-      .from("bookings")
-      .select("deposit_cents, deposit_paid_at")
-      .eq("deposit_status", "paid")
-      .gte("deposit_paid_at", paidSince),
-    supabase
-      .from("waitlist_entries")
-      .select("id", { count: "exact", head: true })
-      .eq("status", "waiting"),
     supabase
       .from("bookings")
       .select(
@@ -119,13 +77,7 @@ export default async function TodayPage() {
       .eq("booking_date", today)
       .in("status", ["confirmed", "pending_payment"])
       .order("start_time"),
-    // Every confirmed appointment still to come: later days, plus later today.
-    supabase
-      .from("bookings")
-      .select("id", { count: "exact", head: true })
-      .eq("status", "confirmed")
-      .or(stillToCome),
-    // Wide screens: the next appointment, and the open times left this week.
+    // The next appointment, and the open times left this week.
     supabase
       .from("bookings")
       .select("booking_date, start_time, end_time, service_name, client_name")
@@ -209,13 +161,6 @@ export default async function TodayPage() {
       day: "numeric",
     });
 
-  const dayOf = (iso) => new Intl.DateTimeFormat("en-CA", { timeZone: tz }).format(new Date(iso));
-  const depositsThisWeek = (paidDeposits.data || [])
-    .filter((b) => {
-      const day = dayOf(b.deposit_paid_at);
-      return day >= week.start && day <= week.end;
-    })
-    .reduce((sum, b) => sum + (b.deposit_cents || 0), 0);
 
   // Confirmed ones, plus anyone paying their deposit right now.
   const now = Date.now();
@@ -239,53 +184,19 @@ export default async function TodayPage() {
     month: "long",
     day: "numeric",
   });
-  const money = (cents) =>
-    new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      maximumFractionDigits: cents % 100 ? 2 : 0,
-    }).format(cents / 100);
 
-  const stats = [
-    {
-      number: weekBookings.error ? "—" : weekBookings.count ?? 0,
-      // Confirmed appointments taking place Monday to Sunday this week.
-      label: "Appointments this week",
-      href: "/dashboard/bookings",
-    },
-    {
-      number: paidDeposits.error ? "—" : money(depositsThisWeek),
-      label: "Deposits paid this week",
-      href: "/dashboard/bookings",
-    },
-    {
-      number: waiting.error ? "—" : waiting.count ?? 0,
-      label: "On the waitlist",
-      href: "/dashboard/waitlist",
-    },
-    {
-      number: upcoming.error ? "—" : upcoming.count ?? 0,
-      label: "Upcoming",
-      href: "/dashboard/bookings",
-    },
-  ];
 
   return (
     <>
-      <PageHeader eyebrow={dateLine} title={greetingLine(tz, firstNameRow?.first_name)} />
-
-      <section className="db-stats" aria-label="This week">
-        {stats.map((s) => (
-          <Link key={s.label} href={s.href} className="db-stat">
-            <span className="db-stat-number">{s.number}</span>
-            <span className="db-label">{s.label}</span>
+      <PageHeader
+        title="Today"
+        subtitle={dateLine}
+        actions={
+          <Link href="/dashboard/openings#add-opening" className="button small">
+            + Add opening
           </Link>
-        ))}
-      </section>
-
-      <p className="db-more-link">
-        <Link href="/dashboard/reports">See reports →</Link>
-      </p>
+        }
+      />
 
       {(toWrapUp > 0 || owedCount > 0) && (
         <section className="db-wrapup" aria-label="Wrap up visits">
@@ -330,13 +241,15 @@ export default async function TodayPage() {
         )}
 
         {!todays.error && appointments.length === 0 && (
-          <div className={todaysEvents.length ? "db-empty db-empty-short" : "db-empty"}>
-            <p className="db-quiet">Nothing booked today.</p>
-            <p>
-              <Link href="/dashboard/openings">Open some times</Link> or{" "}
-              <Link href="/dashboard/bookings">see what&apos;s coming up</Link>.
-            </p>
-          </div>
+          <EmptyState
+            title="Nothing booked today"
+            text={todaysEvents.length ? "Just your events below." : "Open some times so clients can book."}
+            action={
+              <Link href="/dashboard/openings#add-opening" className="button small">
+                Open some times
+              </Link>
+            }
+          />
         )}
 
         {timeline.length > 0 && (
@@ -406,7 +319,7 @@ export default async function TodayPage() {
         )}
       </section>
 
-      {/* Wide screens only (1200px and up): a right-hand column. */}
+      {/* Below the timeline; a right-hand column on wide screens (1200px and up). */}
       <aside className="db-today-side" aria-label="Coming up">
         <section>
           <div className="db-section-head">
