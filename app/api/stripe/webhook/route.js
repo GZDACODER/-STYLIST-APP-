@@ -13,19 +13,29 @@ const SUBSCRIPTION_EVENTS = [
 ];
 
 export async function POST(request) {
+  // The exact raw body Stripe signed: read as text, never parsed first.
   const body = await request.text();
   const signature = request.headers.get("stripe-signature");
+  // Trimmed, so a stray space or line break from pasting it into Vercel
+  // can't break every check.
+  const secret = String(process.env.STRIPE_WEBHOOK_SECRET || "").trim();
 
   // Check the message really came from Stripe.
   let event;
   try {
-    event = getStripe().webhooks.constructEvent(
-      body,
-      signature,
-      process.env.STRIPE_WEBHOOK_SECRET
-    );
+    if (!secret) throw new Error("STRIPE_WEBHOOK_SECRET is not set for this deployment.");
+    if (!signature) throw new Error("The request has no stripe-signature header.");
+    event = getStripe().webhooks.constructEvent(body, signature, secret);
   } catch (error) {
-    console.error("Stripe webhook signature check failed", error.message);
+    // Shows in Vercel's logs. Says what looks wrong without printing the secret.
+    console.error("Stripe webhook signature check failed:", error.message, {
+      secretSet: Boolean(secret),
+      secretLooksRight: secret.startsWith("whsec_"),
+      secretLength: secret.length,
+      hasSignatureHeader: Boolean(signature),
+      bodyLength: body.length,
+      testKey: String(process.env.STRIPE_SECRET_KEY || "").trim().startsWith("sk_test_"),
+    });
     return new Response("Invalid signature", { status: 400 });
   }
 
