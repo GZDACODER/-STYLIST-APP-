@@ -1,6 +1,6 @@
 "use client";
 
-// Settings → Plan & billing: the Assistant add-on ($15/mo or $150/yr).
+// Settings → Plan & billing: the Assistant add-on ($10/mo or $100/yr).
 //   - With a subscription: a switch to add or remove it (prorated).
 //   - Founding (free) accounts without one: their own small checkout.
 //   - In the trial, or choosing a plan: it's a tickbox in the plan form.

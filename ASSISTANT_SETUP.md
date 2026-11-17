@@ -30,7 +30,7 @@ Until the key is set, the chat button doesn't appear. Nothing else changes.
 
 ## Price (a paid add-on)
 
-The Assistant is an optional add-on: **$15/month or $150/year** (`lib/plans.js`),
+The Assistant is an optional add-on: **$10/month or $100/year** (`lib/plans.js`),
 billed on the pro's Clientele subscription.
 
 - **Free trial:** included. It turns off when the trial ends unless they add it.

@@ -47,7 +47,7 @@ function Sparkle({ size = 22 }) {
 // locked: the Assistant isn't on this account's plan (no add-on, trial over).
 // The button still shows; opening it explains the add-on and links to Plan &
 // billing instead of the chat (the server refuses chat requests anyway).
-export default function AssistantWidget({ firstName = "", locked = false, price = "$15/mo" }) {
+export default function AssistantWidget({ firstName = "", locked = false, price = "$10/mo" }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([]);
