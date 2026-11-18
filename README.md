@@ -22,6 +22,13 @@ and hosted on **Vercel**.
   appointments you pick in Settings (3 to start with).
 - **Forgot password** (`/forgot-password`, linked from Log in): emails a link
   that logs the pro in and opens **Choose a new password** (`/reset-password`).
+- **Dispute alerts** (step 39 SQL `0044_disputes.sql`, `lib/disputes.js`): when a
+  client disputes a deposit, the Stripe webhook (`charge.dispute.*`) saves it with
+  its booking and emails `ADMIN_EMAILS` the evidence (booking, client, the policy
+  they agreed to, how the visit went, deadline, Stripe link) and the pro (what
+  happened, reply with anything that helps, don't refund meanwhile). The pro's
+  Home shows it under Needs attention; `/dashboard/admin/disputes` lists them all.
+  Closed disputes email the result (lost: how to reverse the transfer).
 - **Trial feedback** (step 38 SQL `0043_trial_feedback.sql`): from day 3 of the
   free trial, Home asks "How's Clientele working for you?" (Not now hides it
   for 3 days). `/dashboard/feedback` has five questions: overall 1–5, how likely

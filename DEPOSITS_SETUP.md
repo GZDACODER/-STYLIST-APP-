@@ -99,13 +99,16 @@ a web address. This is what confirms the booking.
 1. In Stripe, go to **Developers → Webhooks** (or search "Webhooks") and tap
    **Add destination** (or **Add endpoint**).
 2. Events from: **Your account** (not "Connected accounts").
-3. Select these two events (search for them):
+3. Select these events (search for them):
    - `checkout.session.completed`
    - `checkout.session.expired`
    - `checkout.session.async_payment_succeeded`
    - `checkout.session.async_payment_failed`
+   - `charge.dispute.created`, `charge.dispute.updated`, `charge.dispute.closed`
+     (dispute alerts: you and the pro are emailed the evidence; step 39 SQL)
+   - plus the `customer.subscription.*` events from BILLING_SETUP.md
 
-   (The last two only matter if a slow bank payment method is turned on.
+   (The async ones only matter if a slow bank payment method is turned on.
    Adding them is safe either way.)
 4. Destination type: **Webhook endpoint**.
 5. Endpoint URL: `https://www.clientelesuite.com/api/stripe/webhook`

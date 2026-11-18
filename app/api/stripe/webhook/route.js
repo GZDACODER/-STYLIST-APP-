@@ -1,8 +1,10 @@
 // Stripe calls this address when a deposit is paid or a payment page times
 // out (see DEPOSITS_SETUP.md), and when a stylist's Clientele subscription
-// starts, changes or ends (see BILLING_SETUP.md).
+// starts, changes or ends (see BILLING_SETUP.md), and when a client disputes
+// a deposit (charge.dispute.*: lib/disputes.js).
 import { finalizeCheckoutSession, getStripe, releaseCheckoutSession } from "@/lib/stripe";
 import { syncSubscription } from "@/lib/billing";
+import { handleDispute } from "@/lib/disputes";
 
 const SUBSCRIPTION_EVENTS = [
   "customer.subscription.created",
@@ -41,7 +43,9 @@ export async function POST(request) {
 
   try {
     const object = event.data.object;
-    if (SUBSCRIPTION_EVENTS.includes(event.type)) {
+    if (event.type.startsWith("charge.dispute.")) {
+      await handleDispute(object, event.type);
+    } else if (SUBSCRIPTION_EVENTS.includes(event.type)) {
       await syncSubscription(object);
     } else if (event.type.startsWith("checkout.session.") && object.mode === "subscription") {
       // A stylist finished Clientele's payment page: switch their plan on now,
