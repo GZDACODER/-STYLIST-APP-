@@ -203,6 +203,18 @@ export default async function HomePage() {
   if (formsMissing > 0) {
     attention.push({ text: `${plural(formsMissing, "upcoming booking is", "upcoming bookings are")} missing an intake form`, href: "/dashboard/bookings", action: "See" });
   }
+  // Deposits a client has disputed with their bank (step 39 SQL).
+  const { data: disputeRows } = await supabase.from("deposit_disputes").select("id, status");
+  const openDisputes = (disputeRows || []).filter((d) =>
+    ["warning_needs_response", "needs_response", "under_review", "warning_under_review"].includes(d.status)
+  ).length;
+  if (openDisputes > 0) {
+    attention.unshift({
+      text: `${plural(openDisputes, "deposit is", "deposits are")} disputed by a client (check your email)`,
+      href: "/dashboard/bookings",
+      action: "See",
+    });
+  }
   if (!stylist.stripe_charges_enabled) {
     attention.push({ text: "Stripe isn't connected, so you can't take deposits", href: "/dashboard/settings/deposits", action: "Connect" });
   }
@@ -364,7 +376,8 @@ export default async function HomePage() {
           {isAdmin(user) && (
             <>
               {" "}
-              · <Link href="/dashboard/admin/feedback">Trial feedback (admin)</Link>
+              · <Link href="/dashboard/admin/feedback">Trial feedback (admin)</Link> ·{" "}
+              <Link href="/dashboard/admin/disputes">Disputes (admin)</Link>
             </>
           )}
         </p>
