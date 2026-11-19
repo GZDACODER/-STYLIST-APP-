@@ -260,7 +260,8 @@ export default function ClientHome({ code, home, upcoming, today, zoneNote, look
           zoneNote={zoneNote}
           title="Your upcoming visits"
           guide={false}
-          onCancelled={() => router.refresh()}
+          // The list updates itself and shows "Cancelled: ..."; reloading the
+          // page here would replace it before the client sees that.
           extra={(b) => (
             <div className="cl-visit-extra">
               <div className="cl-cal">
