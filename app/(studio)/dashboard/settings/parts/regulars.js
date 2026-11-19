@@ -1,6 +1,7 @@
 // Settings section: Regulars (server component).
 import { getMyPlan } from "@/lib/plan";
 import RegularsForm from "../RegularsForm";
+import PerksForm from "../PerksForm";
 import PausedNote from "@/components/PausedNote";
 import RegularStar from "@/components/RegularStar";
 import { me, optional } from "./common";
@@ -8,8 +9,12 @@ import { me, optional } from "./common";
 export async function RegularsSection() {
   const { supabase, user, row } = await me("auto_regular_after, regulars_only");
   if (!user) return null;
-  const plan = await getMyPlan(supabase, user.id);
+  const [plan, perks] = await Promise.all([
+    getMyPlan(supabase, user.id),
+    supabase.from("stylists").select("regular_perks, birthday_perk").eq("id", user.id).maybeSingle(),
+  ]);
   return (
+    <>
     <section className="card">
       <p className="muted">
         <RegularStar label={null} size={12} /> Regulars see your &quot;Regulars only&quot; openings. Clients are
@@ -24,6 +29,13 @@ export async function RegularsSection() {
         regularsOnlyAllowed={plan.has.regulars}
       />
     </section>
+    {!perks.error && (
+      <section className="card" id="perks">
+        <h2>Perks</h2>
+        <PerksForm regularPerks={perks.data?.regular_perks || ""} birthdayPerk={perks.data?.birthday_perk || ""} />
+      </section>
+    )}
+    </>
   );
 }
 

@@ -4939,3 +4939,80 @@ body:has(dialog.client-sheet[open]) {
   align-self: flex-start;
   margin-top: 4px;
 }
+
+/* Pro ID code */
+.pro-code {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  letter-spacing: 0.08em;
+  color: var(--text);
+}
+.pro-code-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: -6px 0 18px;
+}
+.pro-code-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+.pro-code-big {
+  font-size: 1.9rem;
+  letter-spacing: 0.12em;
+}
+
+/* Running late notices (Today) */
+.late-notices {
+  border-left: 3px solid #c8a96a;
+}
+.late-notice {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.late-notice + .late-notice {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--hair);
+}
+/* Wrap up: "Share their look" */
+.look-editor {
+  margin-top: 10px;
+  border-top: 1px dashed var(--hair);
+  padding-top: 8px;
+}
+.look-editor summary {
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+.look-thumb {
+  display: block;
+  width: 120px;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  border-radius: 8px;
+  margin: 8px 0;
+}
+.look-pick {
+  margin: 4px 8px 8px 0;
+}
+.aftercare-form {
+  margin: 12px 0;
+}
+/* Reports: client feedback */
+.rp-feedback li {
+  padding: 10px 0;
+  border-top: 1px solid var(--hair);
+  list-style: none;
+}
+.rp-feedback {
+  margin: 0;
+  padding: 0;
+}
+.rp-stars {
+  color: #c8a96a;
+  letter-spacing: 2px;
+}

@@ -9,6 +9,7 @@ import { runWrapups } from "@/lib/wrapupEmails";
 import { runWeeklySummaries } from "@/lib/weeklySummary";
 import { reportError } from "@/lib/errorAlerts";
 import { runOnboardingEmails } from "@/lib/onboardingEmails";
+import { runClientEmails } from "@/lib/clientEmails";
 
 export async function POST(request) {
   const secret = process.env.CRON_SECRET;
@@ -34,6 +35,14 @@ export async function POST(request) {
     reminders = await runPlanReminders();
   } catch (error) {
     await reportError("Every-minute job", error, { extra: "Plan reminders failed" });
+  }
+
+  // Clients: after-visit emails (aftercare + feedback) and birthday perks.
+  let clientEmails = { afterVisit: 0, birthdays: 0 };
+  try {
+    clientEmails = await runClientEmails();
+  } catch (error) {
+    await reportError("Every-minute job", error, { extra: "Client emails failed" });
   }
 
   // Getting-started tips for new pros during their trial.
@@ -79,6 +88,8 @@ export async function POST(request) {
       ...result,
       planReminders: reminders.sent,
       onboardingEmails: onboarding.sent,
+      afterVisitEmails: clientEmails.afterVisit,
+      birthdayEmails: clientEmails.birthdays,
       standingHeld: bookingEmails.held,
       bookingEmails: bookingEmails.sent,
       wrapups: wrapups.sent,

@@ -12,6 +12,7 @@ import { formatPrice } from "@/lib/money";
 import { BRAND_NAME } from "@/lib/brand";
 import OutcomePicker from "./OutcomePicker";
 import VisitNoteForm from "../notes/VisitNoteForm";
+import LookEditor from "./LookEditor";
 
 export const metadata = { title: `Wrap up visits · ${BRAND_NAME}` };
 
@@ -107,6 +108,23 @@ export default async function WrapupPage() {
   const examples =
     started.length === 0 && owed.length === 0 && (await examplesOn(supabase, user.id)) ? exampleData(today).past : [];
 
+  // "My look" for each visit (step 46 SQL): shared notes and the photo, shown
+  // to the pro through short-lived links.
+  const lookIds = [...started, ...owed].map((b) => b.id);
+  const looks = {};
+  if (lookIds.length) {
+    const { data: lookRows, error: lookError } = await supabase
+      .from("bookings")
+      .select("id, look_photo_path, shared_note")
+      .in("id", lookIds);
+    if (!lookError) {
+      const paths = (lookRows || []).map((r) => r.look_photo_path).filter(Boolean);
+      const signed = paths.length ? (await supabase.storage.from("client-looks").createSignedUrls(paths, 3600)).data || [] : [];
+      const urlOf = Object.fromEntries(signed.map((x) => [x.path, x.signedUrl]));
+      for (const r of lookRows || []) looks[r.id] = { note: r.shared_note || "", photo: urlOf[r.look_photo_path] || null, ready: true };
+    }
+  }
+
   const byDay = (list) => {
     const days = [];
     for (const b of list) {
@@ -138,6 +156,7 @@ export default async function WrapupPage() {
           owed={b.outcome === "completed_owed"}
         />
       )}
+      {looks[b.id]?.ready && <LookEditor bookingId={b.id} photoUrl={looks[b.id].photo} note={looks[b.id].note} />}
     </li>
   );
 
@@ -199,6 +218,7 @@ export default async function WrapupPage() {
                   {b.owed_cents ? ` · ${formatPrice(b.owed_cents)} owed` : ""}
                 </p>
                 {b.visit_note && <p className="visit-note-text">{b.visit_note}</p>}
+                {b.shared_note && <LookEditor bookingId={b.id} note={b.shared_note} example />}
               </li>
             ))}
           </ul>

@@ -8,6 +8,8 @@ import BookingFlow from "./BookingFlow";
 import Portfolio from "./Portfolio";
 import { displayName } from "@/lib/bookingHeader";
 import { BRAND_NAME } from "@/lib/brand";
+import { myProsEnabled } from "@/lib/myPros";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 // cache() means the title and the page share one database call.
 // invite: the secret from a private invite link (?invite=...), if any.
@@ -58,6 +60,16 @@ export async function generateMetadata({ params, searchParams }) {
     openGraph: { title, description, siteName: BRAND_NAME, type: "website", url: `/book/${slug}` },
     twitter: { card: "summary_large_image", title, description },
   };
+}
+
+// The pro's ID code for client sign-in (step 45 SQL; null before it's run).
+async function proCodeFor(slug) {
+  try {
+    const { data } = await createAdminClient().from("stylists").select("pro_code").eq("slug", slug).maybeSingle();
+    return data?.pro_code || null;
+  } catch {
+    return null;
+  }
 }
 
 export default async function BookingPage({ params, searchParams }) {
@@ -132,6 +144,8 @@ export default async function BookingPage({ params, searchParams }) {
           textsAvailable={textsEnabled()}
           textCodes={textCodesEnabled()}
           initialServiceId={initialServiceId}
+          myPros={myProsEnabled()}
+          proCode={await proCodeFor(slug)}
         />
       </div>
     </div>
