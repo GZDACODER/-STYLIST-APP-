@@ -4805,3 +4805,11 @@ body:has(dialog.client-sheet[open]) {
     opacity: 0;
   }
 }
+
+/* Settings → Calendar sync: one button per line on phones. */
+@media (max-width: 599px) {
+  .calendar-sync-buttons > .button {
+    flex: 1 1 100%;
+    text-align: center;
+  }
+}
