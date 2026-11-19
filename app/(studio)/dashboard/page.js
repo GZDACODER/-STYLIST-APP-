@@ -229,7 +229,7 @@ export default async function HomePage() {
     { done: (hours.count || 0) > 0, text: "Set your working hours", href: "/dashboard/availability" },
     { done: Boolean(stylist.stripe_charges_enabled), text: "Connect Stripe for deposits", href: "/dashboard/settings/deposits" },
     { done: Boolean(coverRow?.cover_photo_url), text: "Add a cover photo", href: "/dashboard/settings/booking-page" },
-    { done: (anyBooking.count || 0) > 0, text: "Share your booking link (done after your first booking)", href: "/dashboard/openings" },
+    { done: (anyBooking.count || 0) > 0, text: "Share your booking link (done after your first booking)", href: "/dashboard/share" },
   ];
   const setupLeft = setup.filter((s) => !s.done).length;
 
@@ -368,6 +368,9 @@ export default async function HomePage() {
             + Add client
           </Link>
           <ShareLinkButton link={bookingLink} businessName={stylist.business_name} />
+          <Link href="/dashboard/share" className="button secondary small">
+            Share kit (QR, story)
+          </Link>
         </div>
         <p className="muted small-text home-more-links">
           <Link href="/dashboard/today">Today</Link> · <Link href="/dashboard/reports">Reports</Link> ·{" "}
