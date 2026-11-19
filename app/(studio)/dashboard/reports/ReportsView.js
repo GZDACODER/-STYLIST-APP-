@@ -5,6 +5,7 @@ import { formatPrice } from "@/lib/money";
 import { PERIODS } from "@/lib/reports";
 import RevenueChart from "./RevenueChart";
 import PageHeader from "@/components/dash/PageHeader";
+import { ExampleTag } from "@/components/dash/Example";
 
 const money = (cents) => formatPrice(cents).replace(/\.00$/, "");
 const pct = (x) => `${Math.round(x * 100)}%`;
@@ -17,7 +18,7 @@ function change(now, before, compare) {
   return `${diff > 0 ? "+" : "\u2212"}${Math.round(Math.abs(diff) * 100)}% vs ${compare}`;
 }
 
-export default function ReportsView({ period, range, today, s: thisPeriod, before, series, owed }) {
+export default function ReportsView({ period, range, today, s: thisPeriod, before, series, owed, topRegulars = [], example = false }) {
   const s = thisPeriod;
   const regShare = s.revenueCents ? s.regular.cents / s.revenueCents : null;
   const avg = (g) => (g.visits ? money(Math.round(g.cents / g.visits)) : "—");
@@ -42,6 +43,7 @@ export default function ReportsView({ period, range, today, s: thisPeriod, befor
   return (
     <>
       <PageHeader
+        guide="reports"
         title="Reports"
         subtitle={
           <>
@@ -50,6 +52,12 @@ export default function ReportsView({ period, range, today, s: thisPeriod, befor
           </>
         }
       />
+      {example && (
+        <p className="examples-note">
+          <ExampleTag /> This is an example report from a sample month of bookings, so you can see what you&apos;ll
+          get. Your real numbers replace it after your first booking.
+        </p>
+      )}
       <section className="card">
         <div className="rp-head">
           <nav className="filter-chips rp-periods" aria-label="Period">
@@ -129,6 +137,24 @@ export default function ReportsView({ period, range, today, s: thisPeriod, befor
           </table>
         </div>
         <p className="muted small-text">Regulars are the clients who are Regulars now.</p>
+      </section>
+
+      <section className="card">
+        <h2>Top regulars</h2>
+        {topRegulars.length === 0 ? (
+          <p className="muted">No visits from Regulars in this period yet.</p>
+        ) : (
+          <ol className="rp-top">
+            {topRegulars.map((r, i) => (
+              <li key={`${r.name}-${i}`}>
+                <span className="rp-top-name">{r.name}</span>
+                <span className="muted small-text">
+                  {r.visits} {r.visits === 1 ? "visit" : "visits"} · {money(r.cents)}
+                </span>
+              </li>
+            ))}
+          </ol>
+        )}
       </section>
 
       <section className="card">

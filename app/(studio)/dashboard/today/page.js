@@ -169,14 +169,13 @@ export default async function TodayPage() {
   const appointments = (todays.data || []).filter(
     (b) => b.status === "confirmed" || new Date(b.hold_expires_at).getTime() > now
   );
-  // Examples for a new pro with nothing booked at all (today or later): an
-  // example appointment today and an example Next up.
+  // Examples for a new pro with nothing booked at all (today or later):
+  // example appointments today and an example Next up.
   let exampleNext = null;
   if (!todays.error && appointments.length === 0 && !nextUp.data && (await examplesOn(supabase, user.id))) {
     const ex = exampleData(today);
-    const maya = ex.upcoming[0];
-    appointments.push({ ...maya, id: "example-today", booking_date: today, start_time: "14:00:00", end_time: "15:30:00" });
-    exampleNext = ex.upcoming[0];
+    appointments.push(...ex.upcoming.filter((b) => b.booking_date === today));
+    exampleNext = ex.upcoming.find((b) => b.booking_date > today) || null;
   }
   // Today's timeline: all-day events first, then appointments and timed
   // events in time order.

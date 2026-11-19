@@ -17,7 +17,7 @@ import RegularStar from "@/components/RegularStar";
 import ShareLinkButton from "./ShareLinkButton";
 import FeedbackPrompt from "./FeedbackPrompt";
 import { isAdmin } from "@/lib/admin";
-import { exampleData, examplesOn } from "@/lib/examples";
+import { EXAMPLE_HOME_STATS, exampleData, examplesOn } from "@/lib/examples";
 import { ExampleTag } from "@/components/dash/Example";
 
 export const metadata = { title: `Home · ${BRAND_NAME}` };
@@ -180,7 +180,17 @@ export default async function HomePage() {
   const bookingLink = `${publicSiteUrl(`${proto}://${host}`)}/book/${stylist.slug}`;
 
   const dash = (q, value) => (q.error ? "—" : value);
-  const cards = [
+  // A new pro with nothing booked yet sees example numbers (tagged Example).
+  const exampleStats = showExamples && (anyBooking.count || 0) === 0 && !nextUp.error ? EXAMPLE_HOME_STATS : null;
+  const cards = exampleStats
+    ? [
+        { label: "Today's bookings", value: exampleStats.todays, href: "/dashboard/today", example: true },
+        { label: "This week's revenue", value: money(exampleStats.weekRevenueCents), note: "Booked Mon–Sun", href: "/dashboard/reports", example: true },
+        { label: "Deposits collected", value: money(exampleStats.depositsCents), note: "This week", href: "/dashboard/reports", example: true },
+        { label: "New clients", value: exampleStats.newClients, note: "This month", href: "/dashboard/clients", example: true },
+        { label: "Waitlist", value: exampleStats.waiting, note: "Waiting now", href: "/dashboard/waitlist", example: true },
+      ]
+    : [
     { label: "Today's bookings", value: dash(todays, todays.count ?? 0), href: "/dashboard/today" },
     { label: "This week's revenue", value: dash(weekRows, money(weekRevenue)), note: "Booked Mon–Sun", href: "/dashboard/reports" },
     { label: "Deposits collected", value: dash(paidDeposits, money(depositsThisWeek)), note: "This week", href: "/dashboard/reports" },
@@ -290,6 +300,7 @@ export default async function HomePage() {
             <span className="db-label">{c.label}</span>
             <strong className="home-card-value">{c.value}</strong>
             {c.note && <span className="muted small-text">{c.note}</span>}
+            {c.example && <ExampleTag />}
           </Link>
         ))}
       </section>

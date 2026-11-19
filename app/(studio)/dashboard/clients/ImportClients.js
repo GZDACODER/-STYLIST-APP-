@@ -6,8 +6,11 @@
 import { useState, useTransition } from "react";
 import { IMPORT_FIELDS, guessColumns, parseCsv, rowToClient } from "@/lib/csv";
 import { importClients } from "./importActions";
+import { EXAMPLE_IMPORT } from "@/lib/examples";
+import { ExampleTag } from "@/components/dash/Example";
 
-export default function ImportClients() {
+// example: show what an imported list looks like (a new pro, examples on).
+export default function ImportClients({ example = false }) {
   const [fileName, setFileName] = useState("");
   const [headers, setHeaders] = useState([]);
   const [rows, setRows] = useState([]);
@@ -95,6 +98,30 @@ export default function ImportClients() {
             Choose CSV file
             <input type="file" accept=".csv,.tsv,.txt,text/csv" onChange={pickFile} hidden />
           </label>
+          {example && (
+            <div className="import-preview import-example">
+              <p className="small-text">
+                <strong>{EXAMPLE_IMPORT.fileName}</strong> · {EXAMPLE_IMPORT.rows.length} rows <ExampleTag />
+              </p>
+              <p className="muted small-text">
+                This is what a list from Booksy looks like once it&apos;s read. Nothing here is saved.
+              </p>
+              <ul>
+                {EXAMPLE_IMPORT.rows.map((c) => (
+                  <li key={c.name}>
+                    <strong>{c.name}</strong>
+                    {c.phone && ` · ${c.phone}`}
+                    {c.email && ` · ${c.email}`}
+                    {" · "}
+                    <span className={c.status === "regular" ? "badge regular" : "badge"}>
+                      {c.status === "regular" ? "Regular" : "New"}
+                    </span>
+                    {c.note && <span className="muted small-text"> · {c.note}</span>}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </>
       )}
 

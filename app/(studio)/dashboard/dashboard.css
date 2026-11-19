@@ -4892,3 +4892,50 @@ body:has(dialog.client-sheet[open]) {
   opacity: 0.8;
   font-size: 0.95rem;
 }
+
+/* Reports → Top regulars */
+.rp-top {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: rp-top;
+}
+.rp-top li {
+  counter-increment: rp-top;
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--hair);
+}
+.rp-top li:first-child {
+  border-top: 0;
+}
+.rp-top li::before {
+  content: counter(rp-top);
+  font-family: var(--font-display), Georgia, serif;
+  color: #a88a4d;
+  width: 18px;
+}
+.rp-top-name {
+  flex: 1;
+}
+
+.example-toggle-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.example-toggle-head h2 {
+  margin: 0;
+}
+.import-example {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--hair);
+}
+.db .home-card .example-tag {
+  align-self: flex-start;
+  margin-top: 4px;
+}

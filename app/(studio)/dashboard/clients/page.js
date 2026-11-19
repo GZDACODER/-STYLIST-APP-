@@ -178,11 +178,11 @@ export default async function ClientsPage({ searchParams }) {
       {!addOpen && addClient}
 
       <section className="card">
-        <details className="add-client">
+        <details className="add-client" open={examples.length > 0 || undefined}>
           <summary>
             <h2>Import clients</h2>
           </summary>
-          <ImportClients />
+          <ImportClients example={examples.length > 0} />
         </details>
       </section>
 
