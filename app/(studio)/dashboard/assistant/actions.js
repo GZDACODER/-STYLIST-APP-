@@ -12,6 +12,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
 import { todayInTimeZone } from "@/lib/availability";
 import { getMyPlan } from "@/lib/plan";
+import { reportError } from "@/lib/errorAlerts";
 import { CHANGE_TOOLS, TOOLS, describeChange, runChangeTool, runReadTool } from "@/lib/assistant/tools";
 
 const MODEL = "claude-opus-5-5";
@@ -130,11 +131,11 @@ async function run(ctx, messages) {
         return { messages, error: "The assistant is busy right now. Please try again in a minute." };
       }
       if (error instanceof Anthropic.AuthenticationError) {
-        console.error("Assistant: Anthropic API key rejected");
+        await reportError("Assistant", new Error("The Anthropic API key was refused (check ANTHROPIC_API_KEY in Vercel)"));
         return { messages, error: "The assistant isn't set up correctly (the API key was refused)." };
       }
       if (error instanceof Anthropic.APIError) {
-        console.error("Assistant API error", error.status, error.message);
+        await reportError("Assistant", error, { extra: `Anthropic API status ${error.status || "?"}` });
         const detail = String(error.message || "");
         // The Anthropic account has run out of credit (Console → Billing).
         if (/credit balance|billing|purchase credits/i.test(detail)) {
@@ -147,7 +148,7 @@ async function run(ctx, messages) {
         const reason = `${error.status || ""} ${error.error?.error?.type || ""}`.trim();
         return { messages, error: `The assistant couldn't answer just now. Please try again.${reason ? ` (${reason})` : ""}` };
       }
-      console.error("Assistant failed", error);
+      await reportError("Assistant", error);
       return { messages, error: "The assistant couldn't answer just now. Please try again." };
     }
 
