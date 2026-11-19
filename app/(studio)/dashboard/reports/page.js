@@ -9,6 +9,7 @@ import { nowLocal } from "@/lib/localTime";
 import { BRAND_NAME } from "@/lib/brand";
 import { PERIODS, addDays, daysBetween, owedTotals, periodRange, revenueSeries, summarize } from "@/lib/reports";
 import ReportsView from "./ReportsView";
+import { exampleReportData, examplesOn } from "@/lib/examples";
 
 export const metadata = { title: `Reports · ${BRAND_NAME}` };
 
@@ -66,8 +67,8 @@ export default async function ReportsPage({ searchParams }) {
     );
   }
 
-  const [{ data: clientRows }, { data: owedRows }] = await Promise.all([
-    supabase.from("clients").select("id, status, created_at"),
+  let [{ data: clientRows }, { data: owedRows }] = await Promise.all([
+    supabase.from("clients").select("id, status, created_at, name"),
     supabase
       .from("bookings")
       .select("id, status, outcome, price_cents, deposit_cents, deposit_status")
@@ -75,6 +76,17 @@ export default async function ReportsPage({ searchParams }) {
       .eq("outcome", "completed_owed")
       .limit(2000),
   ]);
+
+  // A new pro with no bookings or clients yet: an example report, worked out
+  // by the same code from a sample book of visits (never saved).
+  let example = false;
+  if (!rows.length && !paidRows.length && !(clientRows || []).length && (await examplesOn(supabase, user.id))) {
+    const ex = exampleReportData(range.prevFrom, range.to, today);
+    rows = ex.bookings;
+    clientRows = ex.clients;
+    owedRows = ex.bookings.filter((b) => b.status === "confirmed" && b.outcome === "completed_owed");
+    example = true;
+  }
 
   const localDay = (iso) => (iso ? new Intl.DateTimeFormat("en-CA", { timeZone: tz }).format(new Date(iso)) : null);
   const merged = new Map();
@@ -96,6 +108,20 @@ export default async function ReportsPage({ searchParams }) {
   const owedFull = new Map(bookings.filter((b) => b.outcome === "completed_owed").map((b) => [b.id, b]));
   const owed = owedTotals((owedRows || []).map((b) => owedFull.get(b.id) || b));
 
+  // Top regulars this period: visits that went ahead, then what they spent.
+  const names = new Map((clientRows || []).map((c) => [c.id, c.name]));
+  const tally = new Map();
+  for (const b of bookings) {
+    if (b.booking_date < range.from || b.booking_date > range.to || b.status !== "confirmed") continue;
+    if (!regularIds.has(b.client_id) || b.outcome === "no_show") continue;
+    if (`${b.booking_date}T${String(b.start_time).slice(0, 5)}` > now) continue;
+    const t = tally.get(b.client_id) || { name: names.get(b.client_id) || "A regular", visits: 0, cents: 0 };
+    t.visits += 1;
+    t.cents += b.price_cents || 0;
+    tally.set(b.client_id, t);
+  }
+  const topRegulars = [...tally.values()].sort((a, b) => b.visits - a.visits || b.cents - a.cents).slice(0, 5);
+
   return (
     <ReportsView
       period={period}
@@ -105,6 +131,8 @@ export default async function ReportsPage({ searchParams }) {
       before={before}
       series={series}
       owed={owed}
+      topRegulars={topRegulars}
+      example={example}
     />
   );
 }
