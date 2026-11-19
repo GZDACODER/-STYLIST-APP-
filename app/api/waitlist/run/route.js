@@ -8,6 +8,7 @@ import { runBookingEmails } from "@/lib/bookingEmails";
 import { runWrapups } from "@/lib/wrapupEmails";
 import { runWeeklySummaries } from "@/lib/weeklySummary";
 import { reportError } from "@/lib/errorAlerts";
+import { runOnboardingEmails } from "@/lib/onboardingEmails";
 
 export async function POST(request) {
   const secret = process.env.CRON_SECRET;
@@ -33,6 +34,14 @@ export async function POST(request) {
     reminders = await runPlanReminders();
   } catch (error) {
     await reportError("Every-minute job", error, { extra: "Plan reminders failed" });
+  }
+
+  // Getting-started tips for new pros during their trial.
+  let onboarding = { sent: 0 };
+  try {
+    onboarding = await runOnboardingEmails();
+  } catch (error) {
+    await reportError("Every-minute job", error, { extra: "Getting-started emails failed" });
   }
 
   // Standing appointments roll forward, then confirmation and 24-hour
@@ -69,6 +78,7 @@ export async function POST(request) {
     return Response.json({
       ...result,
       planReminders: reminders.sent,
+      onboardingEmails: onboarding.sent,
       standingHeld: bookingEmails.held,
       bookingEmails: bookingEmails.sent,
       wrapups: wrapups.sent,
