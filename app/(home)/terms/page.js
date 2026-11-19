@@ -97,9 +97,9 @@ export default function TermsPage() {
       <h2>4. Client deposits</h2>
       <ul>
         <li>
-          If you take deposits, you connect your own Stripe account. Deposits are paid by your
-          clients straight to your Stripe account, under Stripe&apos;s own terms, which you agree
-          to with Stripe.
+          If you take deposits, you connect your own Stripe account. Your clients&apos; deposits
+          are processed by Stripe through {BRAND_NAME} and paid out to your Stripe account, under
+          Stripe&apos;s own terms, which you agree to with Stripe.
         </li>
         <li>
           {BRAND_NAME} keeps a fee of {DEPOSIT_FEE_PERCENT}% + {DEPOSIT_FEE_FIXED_CENTS}¢ of each
@@ -112,6 +112,17 @@ export default function TermsPage() {
           also responsible for refunds, chargebacks and disputes with your clients. {BRAND_NAME}{" "}
           doesn&apos;t refund deposits automatically and isn&apos;t responsible for disputes between
           you and your clients.
+        </li>
+        <li>
+          <strong>Disputes and chargebacks.</strong> If a client disputes a deposit with their bank,
+          Stripe may hold the disputed amount and its dispute fee from {BRAND_NAME} until the bank
+          decides. We&apos;ll tell you, and we may respond to the bank on your behalf using the
+          booking details, your cancellation policy and anything you send us, so please answer our
+          requests promptly. If the dispute is lost, you&apos;re responsible for the disputed amount
+          and Stripe&apos;s dispute fee, and you agree that we may recover them from your Stripe
+          account (for example by reversing the transfer of that deposit), from future deposits,
+          or by charging you. We may pause deposits for an account with frequent disputes or
+          suspected fraud.
         </li>
       </ul>
 
