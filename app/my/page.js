@@ -49,9 +49,20 @@ export default async function MyProsPage() {
     );
   }
 
-  const { data: pros, error } = await supabase.rpc("get_my_pros");
+  const [{ data: pros, error }, { data: extraRows }] = await Promise.all([
+    supabase.rpc("get_my_pros"),
+    // Deposits to pay, standing visits and waitlists (step 40 SQL; empty before it's run).
+    supabase.rpc("get_my_pro_extras"),
+  ]);
+  const extrasBySlug = {};
+  for (const x of extraRows || []) (extrasBySlug[x.slug] ||= []).push(x);
   const who = user.phone ? displayPhone(user.phone) : maskEmail(user.email);
   const list = pros || [];
+  // Pros they're only waitlisted with (no bookings yet) get a card too.
+  const listed = new Set(list.map((p) => p.slug));
+  const waitOnly = Object.entries(extrasBySlug)
+    .filter(([slug]) => !listed.has(slug))
+    .map(([slug, rows]) => ({ slug, business_name: rows[0].business_name, upcoming_count: 0, visits: 0 }));
 
   return (
     <div className="my-wrap">
@@ -67,7 +78,7 @@ export default async function MyProsPage() {
         <p className="message error">Your pros couldn&apos;t load right now. Please try again in a minute.</p>
       )}
 
-      {!error && list.length === 0 && (
+      {!error && list.length === 0 && waitOnly.length === 0 && (
         <section className="card">
           <h2>No appointments yet</h2>
           <p className="muted">
@@ -81,7 +92,15 @@ export default async function MyProsPage() {
       {list.length > 0 && (
         <ul className="my-pros">
           {list.map((pro) => (
-            <ProCard key={pro.slug} pro={pro} />
+            <ProCard key={pro.slug} pro={pro} extras={extrasBySlug[pro.slug]} />
+          ))}
+        </ul>
+      )}
+
+      {waitOnly.length > 0 && (
+        <ul className="my-pros">
+          {waitOnly.map((pro) => (
+            <ProCard key={pro.slug} pro={pro} extras={extrasBySlug[pro.slug]} />
           ))}
         </ul>
       )}

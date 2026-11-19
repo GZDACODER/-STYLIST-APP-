@@ -1,9 +1,12 @@
-// One pro on My Pros: their photo and name, the next appointment (with
-// Reschedule or cancel), the last visit, and Book again.
+// One pro on My Pros: their photo and name, a deposit still to pay, the
+// next appointment (with Reschedule or cancel), their standing visits, any
+// waitlist they're on, the last visit, and Book again.
 import Link from "next/link";
 import { clockTime } from "@/lib/availability";
 import { displayName } from "@/lib/bookingHeader";
 import RegularStar from "@/components/RegularStar";
+import { formatPrice } from "@/lib/money";
+import { describeWishes } from "@/lib/preferences";
 
 // "Tue, Nov 24" (the year only when it isn't this year).
 function shortDate(text) {
@@ -28,8 +31,14 @@ function monthDay(text) {
 
 const https = (url) => (typeof url === "string" && /^https:\/\//.test(url) ? url : null);
 
-export default function ProCard({ pro }) {
+// extras: this pro's rows from get_my_pro_extras (step 40 SQL): deposits to
+// pay, standing visits and waitlists. A pro they're only waitlisted with has
+// no next or last visit, just the waitlist and Book.
+export default function ProCard({ pro, extras = [] }) {
   const name = displayName(pro.business_name);
+  const deposits = extras.filter((x) => x.kind === "deposit");
+  const standing = extras.filter((x) => x.kind === "standing");
+  const waits = extras.filter((x) => x.kind === "waitlist");
   const photo = https(pro.cover_photo_url);
   const page = `/book/${pro.slug}`;
   const more = (pro.upcoming_count || 0) - 1;
@@ -53,6 +62,19 @@ export default function ProCard({ pro }) {
         </div>
       </div>
 
+      {deposits.map((d) => (
+        <div key={d.token} className="my-pro-due">
+          <span className="my-pro-label">Deposit due</span>
+          <p>
+            <strong>{formatPrice(d.amount_cents)}</strong> for {d.label} on {shortDate(d.item_date)} at{" "}
+            {clockTime(d.item_time)}
+          </p>
+          <Link href={`${page}/pay?t=${encodeURIComponent(d.token)}`} className="button small">
+            Pay {formatPrice(d.amount_cents)} deposit
+          </Link>
+        </div>
+      ))}
+
       {pro.next_date ? (
         <div className="my-pro-next">
           <span className="my-pro-label">Next</span>
@@ -69,6 +91,34 @@ export default function ProCard({ pro }) {
           </Link>
         </div>
       ) : null}
+
+      {standing.length > 0 && (
+        <div className="my-pro-standing">
+          <span className="my-pro-label">
+            Standing · every {standing[0].repeat_weeks} weeks · {standing[0].label}
+          </span>
+          <ul>
+            {standing.map((v) => (
+              <li key={`${v.item_date}-${v.item_time}`}>
+                {shortDate(v.item_date)} · {clockTime(v.item_time)}
+              </li>
+            ))}
+          </ul>
+          <p className="muted small-text">Held for you. To skip or move one, use Reschedule or cancel, or ask {name}.</p>
+        </div>
+      )}
+
+      {waits.map((w) => (
+        <div key={w.token} className="my-pro-wait">
+          <span className="my-pro-label">On the waitlist</span>
+          <p>
+            {w.label} · {describeWishes(w.days || [], w.times || [])}
+          </p>
+          <Link href={`${page}/waitlist?t=${encodeURIComponent(w.token)}`} className="my-pro-manage">
+            See or leave the waitlist
+          </Link>
+        </div>
+      ))}
 
       {pro.last_date && (
         <p className="my-pro-last muted small-text">

@@ -1553,3 +1553,43 @@ body:has(dialog.pf-viewer[open]) {
 .bk .bk-mypros-note {
   margin-top: 16px;
 }
+
+/* My Pros: deposit due, standing visits, waitlists (ProCard). */
+.bk .my-pro-due {
+  padding: 12px 14px;
+  border: 1px solid var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+.bk .my-pro-due p,
+.bk .my-pro-wait p {
+  margin: 2px 0 8px;
+}
+
+.bk .my-pro-due .button {
+  text-decoration: none;
+}
+
+.bk .my-pro-standing ul {
+  list-style: none;
+  margin: 6px 0 4px;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.bk .my-pro-standing li {
+  padding: 4px 10px;
+  border: 1px solid var(--hair, rgba(0, 0, 0, 0.12));
+  font-size: 0.85rem;
+}
+
+.bk .my-pro-standing p {
+  margin: 0;
+}
+
+.bk .my-pro-wait {
+  border-left: 2px solid var(--ink-faint);
+  padding: 2px 0 2px 14px;
+}
