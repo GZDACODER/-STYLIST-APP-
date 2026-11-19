@@ -250,7 +250,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <PageHeader
+      <PageHeader guide="home"
         eyebrow={dateLine}
         title={name ? `${greeting(tz)}, ${name}` : greeting(tz)}
         subtitle={stylist.business_name}

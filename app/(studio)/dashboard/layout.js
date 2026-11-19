@@ -10,6 +10,7 @@ import DashboardNav from "./DashboardNav";
 import AssistantWidget from "./assistant/AssistantWidget";
 import { PLANS } from "@/lib/plans";
 import { formatPrice } from "@/lib/money";
+import GuideProvider from "@/components/guide/GuideProvider";
 import "./dashboard.css";
 
 // The same serif as the public booking page.
@@ -54,7 +55,16 @@ export default async function DashboardLayout({ children }) {
       .maybeSingle());
   }
 
-  const plan = stylist ? await getMyPlan(supabase, user.id) : null;
+  // The plan, and which first-visit tips they've seen (null before the
+  // step 44 SQL is run: then only this phone remembers).
+  const [plan, guidesSeen] = stylist
+    ? await Promise.all([
+        getMyPlan(supabase, user.id),
+        Promise.resolve(supabase.from("onboarding_guides_seen").select("guide_key")).then(({ data, error }) =>
+          error ? null : (data || []).map((r) => r.guide_key)
+        ),
+      ])
+    : [null, null];
   // The pop-up Assistant: its button shows for every pro once it's switched
   // on for the app (ANTHROPIC_API_KEY in Vercel). Without it on their plan
   // (the add-on, or the free trial) it opens an "Add the Assistant" card
@@ -95,6 +105,7 @@ export default async function DashboardLayout({ children }) {
   }
 
   return (
+    <GuideProvider mode="pro" scope={user.id} initialSeen={guidesSeen}>
     <div className={`db ${display.variable}`}>
       <aside className="db-side">
         <div className="db-brand">
@@ -136,5 +147,6 @@ export default async function DashboardLayout({ children }) {
         />
       )}
     </div>
+    </GuideProvider>
   );
 }

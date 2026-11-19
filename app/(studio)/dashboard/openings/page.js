@@ -143,7 +143,7 @@ export default async function OpeningsPage() {
 
   return (
     <>
-      <PageHeader
+      <PageHeader guide="openings"
         title="Openings"
         subtitle={
           <>

@@ -3,6 +3,7 @@
 // section shows a back arrow to it instead of the list.
 import Link from "next/link";
 import { SETTINGS_SECTIONS, sectionByKey } from "@/lib/settingsSections";
+import { SETTINGS_GUIDES } from "@/lib/guides";
 import PageHeader from "./PageHeader";
 
 export default function SettingsShell({ active, root = false, subtitle, actions, children }) {
@@ -31,7 +32,7 @@ export default function SettingsShell({ active, root = false, subtitle, actions,
         <Link href="/dashboard/settings" className="settings-back">
           ‹ Settings
         </Link>
-        <PageHeader title={section?.label || "Settings"} subtitle={subtitle} actions={actions} />
+        <PageHeader title={section?.label || "Settings"} subtitle={subtitle} actions={actions} guide={SETTINGS_GUIDES[active]} />
         {children}
       </div>
     </div>

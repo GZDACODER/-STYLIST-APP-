@@ -93,7 +93,7 @@ export default async function WaitlistPage() {
 
   return (
     <>
-      <PageHeader
+      <PageHeader guide="waitlist"
         title="Waitlist"
         subtitle={waiting.length === 1 ? "1 client waiting" : `${waiting.length} clients waiting`}
         actions={

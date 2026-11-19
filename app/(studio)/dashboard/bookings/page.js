@@ -166,7 +166,7 @@ export default async function BookingsPage({ searchParams }) {
 
   return (
     <>
-      <PageHeader
+      <PageHeader guide="calendar"
         title="Calendar"
         subtitle={
           <>

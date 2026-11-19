@@ -140,7 +140,7 @@ export default async function ClientsPage({ searchParams }) {
 
   return (
     <>
-      <PageHeader
+      <PageHeader guide="clients"
         title="Clients"
         subtitle={`${clients.length} ${clients.length === 1 ? "client" : "clients"}`}
         actions={

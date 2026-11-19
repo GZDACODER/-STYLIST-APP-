@@ -7,6 +7,7 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { answerAssistant, sendToAssistant } from "./actions";
+import PageGuide from "@/components/guide/PageGuide";
 
 const STORE_KEY = "clientele-assistant-chat";
 // The welcome: what it can do, with examples to tap (they're sent as is).
@@ -177,6 +178,7 @@ export default function AssistantWidget({ firstName = "", locked = false, price 
               <strong>Assistant</strong>
               <span>Your schedule, in plain words</span>
             </div>
+            {!locked && <PageGuide guideKey="assistant" className="aw-icon-btn gd-help-aw" />}
             {messages.length > 0 && (
               <button type="button" className="aw-icon-btn" onClick={newChat} disabled={busy} title="New chat" aria-label="New chat">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
