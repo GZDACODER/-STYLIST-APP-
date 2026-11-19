@@ -7,6 +7,7 @@ import { runPlanReminders } from "@/lib/planReminders";
 import { runBookingEmails } from "@/lib/bookingEmails";
 import { runWrapups } from "@/lib/wrapupEmails";
 import { runWeeklySummaries } from "@/lib/weeklySummary";
+import { reportError } from "@/lib/errorAlerts";
 
 export async function POST(request) {
   const secret = process.env.CRON_SECRET;
@@ -19,11 +20,11 @@ export async function POST(request) {
     if (process.env.SUPABASE_SECRET_KEY) {
       const { error } = await createAdminClient().rpc("plan_apply_limits", {});
       if (error && !/plan_apply_limits/.test(error.message)) {
-        console.error("Couldn't apply plan limits", error.message);
+        await reportError("Every-minute job", new Error(`Couldn't apply plan limits: ${error.message}`));
       }
     }
   } catch (error) {
-    console.error("Couldn't apply plan limits", error);
+    await reportError("Every-minute job", error, { extra: "Couldn't apply plan limits" });
   }
 
   // Trial-ending and "plan paused" reminder emails to stylists.
@@ -31,7 +32,7 @@ export async function POST(request) {
   try {
     reminders = await runPlanReminders();
   } catch (error) {
-    console.error("Plan reminders failed", error);
+    await reportError("Every-minute job", error, { extra: "Plan reminders failed" });
   }
 
   // Standing appointments roll forward, then confirmation and 24-hour
@@ -40,7 +41,7 @@ export async function POST(request) {
   try {
     bookingEmails = await runBookingEmails();
   } catch (error) {
-    console.error("Booking emails failed", error);
+    await reportError("Every-minute job", error, { extra: "Booking emails failed" });
   }
 
   // 8 PM: "How did today go?" to each business with visits to mark.
@@ -48,7 +49,7 @@ export async function POST(request) {
   try {
     wrapups = await runWrapups();
   } catch (error) {
-    console.error("Wrap-up emails failed", error);
+    await reportError("Every-minute job", error, { extra: "Wrap-up emails failed" });
   }
 
   // Mondays from 8 AM: last week's summary to each business.
@@ -56,7 +57,7 @@ export async function POST(request) {
   try {
     weekly = await runWeeklySummaries();
   } catch (error) {
-    console.error("Weekly summaries failed", error);
+    await reportError("Every-minute job", error, { extra: "Weekly summaries failed" });
   }
 
   if (!waitlistConfigured()) {
@@ -74,7 +75,7 @@ export async function POST(request) {
       weeklySummaries: weekly.sent,
     });
   } catch (error) {
-    console.error("Waitlist check failed", error);
+    await reportError("Every-minute job", error, { extra: "Waitlist check failed" });
     return new Response("Waitlist check failed", { status: 500 });
   }
 }

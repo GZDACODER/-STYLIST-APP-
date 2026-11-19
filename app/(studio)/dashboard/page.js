@@ -377,7 +377,8 @@ export default async function HomePage() {
             <>
               {" "}
               · <Link href="/dashboard/admin/feedback">Trial feedback (admin)</Link> ·{" "}
-              <Link href="/dashboard/admin/disputes">Disputes (admin)</Link>
+              <Link href="/dashboard/admin/disputes">Disputes (admin)</Link> ·{" "}
+              <Link href="/dashboard/admin/errors">Errors (admin)</Link>
             </>
           )}
         </p>

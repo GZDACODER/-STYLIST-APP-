@@ -5,6 +5,7 @@
 import { finalizeCheckoutSession, getStripe, releaseCheckoutSession } from "@/lib/stripe";
 import { syncSubscription } from "@/lib/billing";
 import { handleDispute } from "@/lib/disputes";
+import { reportError } from "@/lib/errorAlerts";
 
 const SUBSCRIPTION_EVENTS = [
   "customer.subscription.created",
@@ -38,6 +39,9 @@ export async function POST(request) {
       bodyLength: body.length,
       testKey: String(process.env.STRIPE_SECRET_KEY || "").trim().startsWith("sk_test_"),
     });
+    // Only alert when it looks like Stripe (it sent a signature): then the
+    // secret in Vercel is probably wrong and payments aren't being recorded.
+    if (signature) await reportError("Stripe webhook signature", error);
     return new Response("Invalid signature", { status: 400 });
   }
 
@@ -60,7 +64,9 @@ export async function POST(request) {
       event.type === "checkout.session.async_payment_succeeded"
     ) {
       const outcome = await finalizeCheckoutSession(event.data.object);
-      if (outcome === "not_found") console.error("Paid deposit has no booking", event.data.object.id);
+      if (outcome === "not_found") {
+        await reportError("Stripe webhook", new Error("A paid deposit has no matching booking"), { extra: `Checkout session ${event.data.object.id}` });
+      }
     } else if (
       event.type === "checkout.session.expired" ||
       event.type === "checkout.session.async_payment_failed"
@@ -69,7 +75,7 @@ export async function POST(request) {
     }
   } catch (error) {
     // A 500 makes Stripe try again later.
-    console.error("Stripe webhook failed", error);
+    await reportError("Stripe webhook", error, { extra: `Event ${event.type} ${event.id}` });
     return new Response("Webhook failed", { status: 500 });
   }
 
