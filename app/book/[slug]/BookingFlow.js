@@ -9,6 +9,7 @@ import { displayPhone, formatPhone } from "@/lib/phone";
 import VerifyClient from "./VerifyClient";
 import { maskEmail } from "@/lib/maskEmail";
 import WaitlistForm from "./WaitlistForm";
+import { loadDetails, saveDetails } from "@/lib/clientDetails";
 import IntakeFields from "./IntakeFields";
 import MyBookings from "./MyBookings";
 import RegularStar from "@/components/RegularStar";
@@ -82,6 +83,14 @@ export default function BookingFlow({
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [agreed, setAgreed] = useState(false);
+  // Filled in from last time on this phone (lib/clientDetails).
+  const who = verified ? viewer_email || viewer_phone : null;
+  useEffect(() => {
+    const saved = loadDetails(who);
+    if (saved.name) setName((n) => n || saved.name);
+    if (saved.phone) setPhone((v) => v || saved.phone);
+    if (saved.email) setEmail((v) => v || saved.email);
+  }, [who]);
   const [redirecting, setRedirecting] = useState(false);
   const [bookError, setBookError] = useState(null);
   const [confirmation, setConfirmation] = useState(null);
@@ -214,11 +223,13 @@ export default function BookingFlow({
         return;
       }
       if (result.checkoutUrl) {
+        saveDetails(who, { name, phone, email });
         // Off to Stripe to pay the deposit. The time is held meanwhile.
         setRedirecting(true);
         window.location.assign(result.checkoutUrl);
         return;
       }
+      saveDetails(who, { name, phone, email });
       setConfirmation(result.booking);
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
