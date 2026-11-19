@@ -1586,7 +1586,7 @@ select {
   background: #c8a96a;
 }
 
-.gd-count {
+.gd-layer .gd-count {
   margin: 0 0 8px;
   font-size: 0.68rem;
   letter-spacing: 0.18em;
@@ -1594,29 +1594,29 @@ select {
   color: #c8a96a;
 }
 
-.gd-title {
+.gd-layer .gd-title {
   margin: 0 0 8px;
-  font-family: var(--font-display), var(--font-serif), Georgia, serif;
+  font-family: var(--font-display, var(--font-serif, Georgia)), Georgia, serif;
   font-weight: 500;
-  font-size: 1.45rem;
+  font-size: 1.55rem;
   line-height: 1.2;
   color: #f5f1ea;
 }
 
-.gd-text {
+.gd-layer .gd-text {
   margin: 0;
   font-size: 0.95rem;
   line-height: 1.5;
   color: rgba(245, 241, 234, 0.82);
 }
 
-.gd-dots {
+.gd-layer .gd-dots {
   display: flex;
   gap: 6px;
   margin: 16px 0 14px;
 }
 
-.gd-dots span {
+.gd-layer .gd-dots span {
   width: 6px;
   height: 6px;
   border-radius: 50%;
@@ -1624,13 +1624,13 @@ select {
   transition: background 0.2s ease, width 0.2s ease;
 }
 
-.gd-dots span.active {
+.gd-layer .gd-dots span.active {
   width: 18px;
   border-radius: 3px;
   background: #c8a96a;
 }
 
-.gd-actions {
+.gd-layer .gd-actions {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -1638,11 +1638,11 @@ select {
   border-top: 1px solid rgba(245, 241, 234, 0.12);
 }
 
-.gd-spacer {
+.gd-layer .gd-spacer {
   flex: 1;
 }
 
-.gd-actions button {
+.gd-layer .gd-actions button {
   font: inherit;
   font-size: 0.72rem;
   letter-spacing: 0.16em;
@@ -1653,36 +1653,36 @@ select {
   padding: 0 16px;
 }
 
-.gd-skip {
+.gd-layer .gd-skip {
   background: none;
   border: 0;
   color: rgba(245, 241, 234, 0.6);
   padding-left: 0 !important;
 }
 
-.gd-back {
+.gd-layer .gd-back {
   background: none;
   border: 1px solid rgba(245, 241, 234, 0.3);
   color: #f5f1ea;
 }
 
-.gd-next {
+.gd-layer .gd-next {
   background: #c8a96a;
   border: 1px solid #c8a96a;
   color: #0e0d0b;
 }
 
-.gd-actions button:focus-visible {
+.gd-layer .gd-actions button:focus-visible {
   outline: 2px solid #e6cd7e;
   outline-offset: 2px;
 }
 
-.gd-skip:hover {
+.gd-layer .gd-skip:hover {
   color: #f5f1ea;
 }
 
 /* The small "?" that replays a page's tips. */
-.gd-help {
+.gd-help.gd-help {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1701,8 +1701,8 @@ select {
   transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease;
 }
 
-.gd-help:hover,
-.gd-help:focus-visible {
+.gd-help.gd-help:hover,
+.gd-help.gd-help:focus-visible {
   opacity: 1;
   background: #c8a96a;
   border-color: #c8a96a;
@@ -1717,7 +1717,7 @@ select {
 
 /* Bigger target on phones. */
 @media (pointer: coarse) {
-  .gd-help {
+  .gd-help.gd-help {
     width: 28px;
     height: 28px;
   }
@@ -1737,7 +1737,7 @@ select {
   .gd-spot,
   .gd-shade,
   .gd-dim,
-  .gd-dots span {
+  .gd-layer .gd-dots span {
     transition: none;
     animation: none;
   }
