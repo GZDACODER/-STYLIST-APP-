@@ -40,6 +40,9 @@ export default function BookingFlow({
   textsAvailable,
   textCodes,
   initialServiceId = null,
+  // My Pros link (MY_PROS_ENABLED), or else the pro's ID for client sign-in.
+  myPros = false,
+  proCode = null,
 }) {
   const router = useRouter();
   const {
@@ -57,6 +60,15 @@ export default function BookingFlow({
     invite: inviteInfo,
   } = page;
   const verified = viewer_status !== "anonymous";
+  const accountLink = myPros ? (
+    <>
+      · <Link href="/my">My Pros</Link>
+    </>
+  ) : proCode ? (
+    <>
+      · <Link href={`/client?code=${proCode}`}>Your visits</Link>
+    </>
+  ) : null;
   // How they confirmed: their phone number (by text) or their email.
   const viewerLabel = viewer_phone ? formatPhone(viewer_phone) : maskEmail(viewer_email);
   // What clients confirm with a code: their phone (text codes on) or email.
@@ -266,10 +278,20 @@ export default function BookingFlow({
         <button type="button" className="button secondary" onClick={bookAnother}>
           Book another appointment
         </button>
-        <p className="muted small-text bk-mypros-note">
-          All your appointments, with every pro you book on Clientele, are in{" "}
-          <Link href="/my">My Pros</Link>. Add it to your home screen to book again in a couple of taps.
-        </p>
+        {myPros ? (
+          <p className="muted small-text bk-mypros-note">
+            All your appointments, with every pro you book on Clientele, are in{" "}
+            <Link href="/my">My Pros</Link>. Add it to your home screen to book again in a couple of taps.
+          </p>
+        ) : (
+          proCode && (
+            <p className="muted small-text bk-mypros-note">
+              {business_name}&apos;s ID is <strong>{proCode}</strong>. Sign in with it and your phone number at{" "}
+              <Link href={`/client?code=${proCode}`}>Your visits</Link> to rebook, move a visit or say you&apos;re
+              running late.
+            </p>
+          )
+        )}
       </section>
     );
   }
@@ -338,7 +360,7 @@ export default function BookingFlow({
           <button type="button" className="link-button" onClick={notMe} disabled={pending}>
             Not {viewerLabel}?
           </button>{" "}
-          · <Link href="/my">My Pros</Link>
+          {accountLink}
         </p>
       )}
       {(viewer_status === "new" || viewer_status === "unknown") && (
@@ -347,7 +369,7 @@ export default function BookingFlow({
           <button type="button" className="link-button" onClick={notMe} disabled={pending}>
             Not you?
           </button>{" "}
-          · <Link href="/my">My Pros</Link>
+          {accountLink}
         </p>
       )}
       {verified && (

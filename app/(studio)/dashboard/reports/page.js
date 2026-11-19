@@ -120,6 +120,30 @@ export default async function ReportsPage({ searchParams }) {
     t.cents += b.price_cents || 0;
     tally.set(b.client_id, t);
   }
+  // Client feedback this period (step 46 SQL): the average and recent ones.
+  let feedbackRows = [];
+  if (example) {
+    feedbackRows = [
+      { rating: 5, comment: "Best silk press I've had. It lasted all week!", created_at: `${range.from}T15:00:00Z`, booking: { client_name: "Leah Kim", service_name: "Silk Press" } },
+      { rating: 5, comment: "", created_at: `${range.from}T15:00:00Z`, booking: { client_name: "Maya Jones", service_name: "Silk Press" } },
+      { rating: 4, comment: "Loved it, ran a little behind.", created_at: `${range.from}T15:00:00Z`, booking: { client_name: "Ana Ruiz", service_name: "Trim & Style" } },
+    ];
+  } else {
+    const { data: fb, error: fbError } = await supabase
+      .from("visit_feedback")
+      .select("rating, comment, created_at, booking:bookings(client_name, service_name, booking_date)")
+      .gte("created_at", `${range.from}T00:00:00Z`)
+      .lte("created_at", `${range.to}T23:59:59Z`)
+      .order("created_at", { ascending: false })
+      .limit(200);
+    if (!fbError) feedbackRows = fb || [];
+  }
+  const feedback = {
+    count: feedbackRows.length,
+    average: feedbackRows.length ? feedbackRows.reduce((a, f) => a + f.rating, 0) / feedbackRows.length : null,
+    recent: feedbackRows.slice(0, 8),
+  };
+
   const topRegulars = [...tally.values()].sort((a, b) => b.visits - a.visits || b.cents - a.cents).slice(0, 5);
 
   return (
@@ -132,6 +156,7 @@ export default async function ReportsPage({ searchParams }) {
       series={series}
       owed={owed}
       topRegulars={topRegulars}
+      feedback={feedback}
       example={example}
     />
   );

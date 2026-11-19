@@ -19,6 +19,8 @@ export default async function ShareKitPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
   const { data: stylist } = await supabase.from("stylists").select("slug, business_name").eq("id", user.id).maybeSingle();
+  const { data: codeRow } = await supabase.from("stylists").select("pro_code").eq("id", user.id).maybeSingle();
+  const proCode = codeRow?.pro_code || null;
   if (!stylist) redirect("/dashboard");
 
   const host = (await headers()).get("host");
@@ -36,6 +38,14 @@ export default async function ShareKitPage() {
       title: "Text to your regulars",
       text: `Hi! I've moved my booking online. You can see my open times and book your next appointment here: ${link}`,
     },
+    ...(proCode
+      ? [
+          {
+            title: "How clients sign in",
+            text: `To see your visits, book your usual or tell me you're running late, sign in at ${site}/client with my ID ${proCode} and your phone number.`,
+          },
+        ]
+      : []),
     {
       title: "Reply to a DM about times",
       text: `Thanks for reaching out! You can see all my open times and book here: ${link}`,

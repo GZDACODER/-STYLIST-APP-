@@ -11,6 +11,8 @@ import MySignIn from "./MySignIn";
 import SignOut from "./SignOut";
 import AddToHome from "./AddToHome";
 import ProCard from "./ProCard";
+import { myProsEnabled } from "@/lib/myPros";
+import { notFound } from "next/navigation";
 
 export const metadata = {
   title: "My Pros",
@@ -21,6 +23,8 @@ export const metadata = {
 };
 
 export default async function MyProsPage() {
+  // Hidden unless MY_PROS_ENABLED=true (lib/myPros.js).
+  if (!myProsEnabled()) notFound();
   const supabase = await createBookingClient();
   const {
     data: { user },

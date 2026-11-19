@@ -18,6 +18,8 @@ import RegularStar from "@/components/RegularStar";
 import StandingFlags from "../standing/StandingFlags";
 import { eventsOn } from "@/lib/calendarEvents";
 import { holidaysOn } from "@/lib/holidays";
+import LateNotices from "./LateNotices";
+import { recentLateNotices } from "@/lib/lateNotices";
 
 export const metadata = { title: `Today · ${BRAND_NAME}` };
 
@@ -177,6 +179,13 @@ export default async function TodayPage() {
     appointments.push(...ex.upcoming.filter((b) => b.booking_date === today));
     exampleNext = ex.upcoming.find((b) => b.booking_date > today) || null;
   }
+  // Clients running late (step 46 SQL); an example one alongside example
+  // appointments.
+  let lateNotices = await recentLateNotices(supabase);
+  if (!lateNotices.length && exampleNext) {
+    lateNotices = [{ id: "example-late", minutes: 10, example: true, booking: { client_name: "Maya Jones", service_name: "Silk Press", start_time: "14:00:00" } }];
+  }
+
   // Today's timeline: all-day events first, then appointments and timed
   // events in time order.
   const timeline = [
@@ -207,6 +216,8 @@ export default async function TodayPage() {
           </Link>
         }
       />
+
+      <LateNotices notices={lateNotices} />
 
       {(toWrapUp > 0 || owedCount > 0) && (
         <section className="db-wrapup" aria-label="Wrap up visits">

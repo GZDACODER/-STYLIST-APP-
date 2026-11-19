@@ -1593,3 +1593,176 @@ body:has(dialog.pf-viewer[open]) {
   border-left: 2px solid var(--ink-faint);
   padding: 2px 0 2px 14px;
 }
+
+/* ---------- Client sign-in and home (/client) ---------- */
+.bk .cl-main {
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.bk .cl-head {
+  margin: 8px 0 22px;
+}
+
+.bk .cl-title {
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 500;
+  font-size: clamp(2.2rem, 8vw, 3rem);
+  line-height: 1.05;
+  margin: 6px 0 10px;
+}
+
+.bk .cl-signin .card,
+.bk .cl-home .card {
+  margin-bottom: 18px;
+}
+
+.bk .cl-code-input {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.bk .cl-forgot {
+  margin-top: 14px;
+}
+
+.bk .cl-help {
+  float: right;
+}
+
+.bk .cl-regular {
+  border-top: 2px solid var(--accent);
+}
+
+.bk .cl-regular.is-regular {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.bk .cl-regular.is-regular .cl-perks {
+  color: rgba(245, 241, 234, 0.85);
+}
+
+.bk .cl-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 10px;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.45rem;
+  color: var(--accent);
+}
+
+.bk .cl-badge.is-quiet {
+  color: var(--ink);
+  font-size: 1.25rem;
+}
+
+.bk .cl-perks {
+  margin: 0;
+  padding-left: 18px;
+  line-height: 1.6;
+}
+
+.bk .cl-progress {
+  height: 4px;
+  background: var(--hair);
+  border-radius: 2px;
+  margin: 0 0 12px;
+  overflow: hidden;
+}
+
+.bk .cl-progress span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+
+.bk .cl-stars {
+  display: flex;
+  gap: 6px;
+  margin: 12px 0;
+}
+
+.bk .cl-star {
+  font-size: 2rem;
+  line-height: 1;
+  background: none;
+  border: 0;
+  padding: 4px;
+  color: var(--hair);
+  cursor: pointer;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.bk .cl-star.on {
+  color: var(--accent);
+}
+
+.bk .cl-visit-extra {
+  margin-top: 8px;
+}
+
+.bk .cl-cal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+}
+
+.bk .cl-late {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.bk .cl-late .message {
+  flex-basis: 100%;
+  margin: 4px 0 0;
+}
+
+.bk .cl-look-photo {
+  width: 100%;
+  border-radius: 10px;
+  margin: 8px 0 12px;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+}
+
+.bk .cl-look-note {
+  white-space: pre-line;
+  margin: 0;
+  padding: 12px 14px;
+  border-left: 2px solid var(--accent);
+  background: rgba(200, 169, 106, 0.08);
+}
+
+.bk .cl-bday {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.bk .cl-bday select {
+  flex: 1 1 120px;
+}
+
+.bk .cl-foot {
+  text-align: center;
+  margin: 24px 0 8px;
+}
+
+.bk .cl-bday select {
+  flex: 1 1 120px;
+  min-height: 44px;
+  padding: 8px 12px;
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--hair);
+  border-radius: 6px;
+  font: inherit;
+}

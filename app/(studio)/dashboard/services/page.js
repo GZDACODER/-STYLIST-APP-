@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { deleteService } from "./actions";
 import AddServiceForm from "./AddServiceForm";
+import AftercareForm from "./AftercareForm";
 import SubmitButton from "@/components/SubmitButton";
 import { BRAND_NAME } from "@/lib/brand";
 import SettingsShell from "@/components/dash/SettingsShell";
@@ -38,6 +39,9 @@ export default async function ServicesPage() {
     .select("id, name, price_cents, duration_minutes")
     .order("created_at", { ascending: true });
   const showExamples = await examplesOn(supabase, user.id);
+  // Aftercare tips (step 46 SQL); the form shows once it's run.
+  const { data: aftercareRows, error: aftercareError } = await supabase.from("services").select("id, aftercare");
+  const aftercareOf = aftercareError ? null : Object.fromEntries((aftercareRows || []).map((r) => [r.id, r.aftercare || ""]));
 
   return (
     <SettingsShell active="services" subtitle="What clients can book on your booking page.">
@@ -66,6 +70,7 @@ export default async function ServicesPage() {
                       ["Length", formatDuration(s.duration_minutes)],
                       ["Deposit", s.deposit],
                       ["Description", s.description],
+                      ["Aftercare tips", s.aftercare],
                     ]}
                     addHref="/dashboard/services#add-service"
                     addLabel="+ Add your own service"
@@ -97,6 +102,7 @@ export default async function ServicesPage() {
                   <p className="muted small-text">
                     Deposits for this service are set in <a href="/dashboard/settings/deposits">Deposits</a>.
                   </p>
+                  {aftercareOf && <AftercareForm id={service.id} aftercare={aftercareOf[service.id] || ""} />}
                   <form action={deleteService}>
                     <input type="hidden" name="id" value={service.id} />
                     <SubmitButton className="button secondary small" pendingText="Deleting...">

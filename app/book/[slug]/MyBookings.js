@@ -26,7 +26,9 @@ function shortDate(text) {
 // Cancel asks first ("Keep appointment" / "Yes, cancel"); the cancelling
 // itself and the deposit rules are unchanged.
 // refreshKey: changes when the list should be loaded again.
-export default function MyBookings({ slug, businessName, policy, zoneNote, refreshKey, onCancelled }) {
+// extra(b): more under each booking (the client home's calendar and
+// running-late buttons). title: the heading.
+export default function MyBookings({ slug, businessName, policy, zoneNote, refreshKey, onCancelled, extra, title = "Your upcoming appointments", guide = true }) {
   const [bookings, setBookings] = useState([]);
   const [error, setError] = useState(null);
   // The booking whose "Cancel?" question is showing.
@@ -79,8 +81,8 @@ export default function MyBookings({ slug, businessName, policy, zoneNote, refre
 
   return (
     <section className="card" data-guide="my-bookings">
-      <PageGuide guideKey="my_bookings" button={false} />
-      <h2>Your upcoming appointments</h2>
+      {guide && <PageGuide guideKey="my_bookings" button={false} />}
+      <h2>{title}</h2>
       {notice && (
         <p className="message success" role="status">
           {notice}
@@ -153,6 +155,7 @@ export default function MyBookings({ slug, businessName, policy, zoneNote, refre
                     Contact {businessName} to change this booking.
                   </div>
                 )}
+                {extra?.(b)}
               </div>
               <span className="my-booking-actions">
               {b.can_reschedule === true && (

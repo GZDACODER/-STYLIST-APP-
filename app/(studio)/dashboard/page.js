@@ -19,6 +19,8 @@ import FeedbackPrompt from "./FeedbackPrompt";
 import { isAdmin } from "@/lib/admin";
 import { EXAMPLE_HOME_STATS, exampleData, examplesOn } from "@/lib/examples";
 import { ExampleTag } from "@/components/dash/Example";
+import ProCode from "@/components/dash/ProCode";
+import { lateText, recentLateNotices } from "@/lib/lateNotices";
 
 export const metadata = { title: `Home · ${BRAND_NAME}` };
 
@@ -59,7 +61,7 @@ export default async function HomePage() {
 
   // All at once (the extra columns are read on their own, so Home still
   // opens before their SQL is run).
-  const [{ data: stylist }, { data: nameRow }, { data: coverRow }, showExamples] = await Promise.all([
+  const [{ data: stylist }, { data: nameRow }, { data: coverRow }, showExamples, { data: codeRow }] = await Promise.all([
     supabase
       .from("stylists")
       .select("business_name, slug, timezone, deposits_enabled, stripe_charges_enabled")
@@ -68,6 +70,7 @@ export default async function HomePage() {
     supabase.from("stylists").select("first_name").eq("id", user.id).maybeSingle(),
     supabase.from("stylists").select("cover_photo_url").eq("id", user.id).maybeSingle(),
     examplesOn(supabase, user.id),
+    supabase.from("stylists").select("pro_code").eq("id", user.id).maybeSingle(),
   ]);
   if (!stylist) return null;
 
@@ -199,7 +202,14 @@ export default async function HomePage() {
   ];
 
   // Needs attention: only what's actually there.
+  const exampleStatsOn = showExamples && (anyBooking.count || 0) === 0;
   const attention = [];
+  // Clients running late (step 46 SQL), or an example one for a new pro.
+  const late = await recentLateNotices(supabase);
+  for (const n of late) attention.unshift({ text: lateText(n), href: "/dashboard/today", action: "See" });
+  if (!late.length && exampleStatsOn) {
+    attention.unshift({ text: "Maya Jones is running 10 min late (Example)", href: "/dashboard/today", action: "See" });
+  }
   if (plan.subscribed && plan.cancelling) {
     attention.push({ text: `Your plan ends on ${formatDate(String(plan.cancelAt).slice(0, 10))}`, href: "/dashboard/settings/plan", action: "Reactivate" });
   } else if (plan.stripeStatus === "past_due") {
@@ -274,6 +284,7 @@ export default async function HomePage() {
         }
       />
 
+      <ProCode code={codeRow?.pro_code} compact />
       {askFeedback && <FeedbackPrompt daysLeft={plan.daysLeft} />}
 
       {setupLeft > 0 && (
