@@ -62,7 +62,7 @@ export default function ProCard({ pro, extras = [] }) {
         </div>
       </div>
 
-      {deposits.map((d) => (
+      {deposits.slice(0, 1).map((d) => (
         <div key={d.token} className="my-pro-due">
           <span className="my-pro-label">Deposit due</span>
           <p>
@@ -72,6 +72,12 @@ export default function ProCard({ pro, extras = [] }) {
           <Link href={`${page}/pay?t=${encodeURIComponent(d.token)}`} className="button small">
             Pay {formatPrice(d.amount_cents)} deposit
           </Link>
+          {deposits.length > 1 && (
+            <p className="muted small-text">
+              {deposits.length - 1} more {deposits.length === 2 ? "deposit" : "deposits"} for later visits. Each one
+              shows here when it&apos;s next.
+            </p>
+          )}
         </div>
       ))}
 
