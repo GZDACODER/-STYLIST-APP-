@@ -70,6 +70,23 @@ export default function AssistantWidget({ firstName = "", locked = false, price 
   const [loaded, setLoaded] = useState(false);
   const endRef = useRef(null);
   const inputRef = useRef(null);
+  // On phones the button slides away while scrolling, so it doesn't sit on
+  // top of what's being read, and comes back when scrolling stops.
+  const [scrolling, setScrolling] = useState(false);
+  useEffect(() => {
+    if (!window.matchMedia?.("(max-width: 899px)").matches) return;
+    let timer;
+    const onScroll = () => {
+      setScrolling(true);
+      clearTimeout(timer);
+      timer = setTimeout(() => setScrolling(false), 700);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      clearTimeout(timer);
+    };
+  }, []);
 
   // Keep the chat if the page changes or reloads (this tab only). Saving
   // waits until the saved chat has been read, so it can't be overwritten.
@@ -301,7 +318,7 @@ export default function AssistantWidget({ firstName = "", locked = false, price 
 
       <button
         type="button"
-        className={`aw-launcher${open ? " open" : ""}${pending && !open ? " waiting" : ""}`}
+        className={`aw-launcher${open ? " open" : ""}${pending && !open ? " waiting" : ""}${scrolling && !open ? " tucked" : ""}`}
         onClick={() => setOpen((o) => !o)}
         aria-label={open ? "Close assistant" : "Open assistant"}
         aria-expanded={open}

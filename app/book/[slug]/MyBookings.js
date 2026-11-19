@@ -33,6 +33,9 @@ export default function MyBookings({ slug, businessName, policy, zoneNote, refre
   // The booking being moved to another time.
   const [movingId, setMovingId] = useState(null);
   const [pending, startTransition] = useTransition();
+  // "Cancelled: ..." after a cancel, so it's clear it worked (even when it
+  // was their only appointment and the list is now empty).
+  const [notice, setNotice] = useState(null);
 
   useEffect(() => {
     let ignore = false;
@@ -44,7 +47,13 @@ export default function MyBookings({ slug, businessName, policy, zoneNote, refre
     };
   }, [slug, refreshKey]);
 
-  if (bookings.length === 0) return null;
+  if (bookings.length === 0) {
+    return notice ? (
+      <p className="message success" role="status">
+        {notice}
+      </p>
+    ) : null;
+  }
 
   function askToCancel(booking) {
     setError(null);
@@ -60,6 +69,7 @@ export default function MyBookings({ slug, businessName, policy, zoneNote, refre
         return;
       }
       setConfirmingId(null);
+      setNotice(`Cancelled: your ${booking.service_name} on ${shortDate(booking.booking_date)} at ${clockTime(booking.start_time)}. ${businessName} has been told.`);
       const fresh = await getMyBookings(slug);
       setBookings(fresh.bookings || []);
       onCancelled?.();
@@ -69,6 +79,11 @@ export default function MyBookings({ slug, businessName, policy, zoneNote, refre
   return (
     <section className="card">
       <h2>Your upcoming appointments</h2>
+      {notice && (
+        <p className="message success" role="status">
+          {notice}
+        </p>
+      )}
       <ul className="service-list">
         {bookings.map((b) =>
           b.id === movingId ? (

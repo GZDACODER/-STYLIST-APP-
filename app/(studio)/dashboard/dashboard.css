@@ -4793,3 +4793,15 @@ body:has(dialog.client-sheet[open]) {
   padding: 7px 12px;
   font-size: 0.82rem;
 }
+
+/* Phones: the Assistant button slides off to the side while scrolling. */
+.aw-launcher.tucked {
+  transform: translateX(calc(100% + 32px));
+  box-shadow: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .aw-launcher.tucked {
+    transform: none;
+    opacity: 0;
+  }
+}

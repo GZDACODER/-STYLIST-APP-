@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
+import { loadDetails, saveDetails } from "@/lib/clientDetails";
 import { joinWaitlist } from "../actions";
 import { WEEKDAYS } from "@/lib/availability";
 import { PARTS_OF_DAY } from "@/lib/preferences";
@@ -30,6 +31,14 @@ export default function WaitlistForm({
   const [error, setError] = useState(null);
   const [joined, setJoined] = useState(null);
   const [pending, startTransition] = useTransition();
+  // Filled in from their last booking or waitlist on this phone.
+  const who = verified ? viewerEmail || viewerPhone : null;
+  useEffect(() => {
+    const saved = loadDetails(who);
+    if (saved.name) setName((n) => n || saved.name);
+    if (saved.phone) setPhone((v) => v || saved.phone);
+    if (saved.email) setEmail((v) => v || saved.email);
+  }, [who]);
 
   function toggle(list, setList, value) {
     setList(list.includes(value) ? list.filter((v) => v !== value) : [...list, value]);
@@ -51,7 +60,10 @@ export default function WaitlistForm({
         textOk: textsAvailable && textOk,
       });
       if (result.error) setError(result.error);
-      else setJoined(result.joined);
+      else {
+        saveDetails(who, { name, phone, email });
+        setJoined(result.joined);
+      }
     });
   }
 

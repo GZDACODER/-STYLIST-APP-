@@ -152,7 +152,7 @@ export default async function BookingsPage({ searchParams }) {
   // upcoming), events while they have none, cancelled while none.
   const showExamples = await pending.examples;
   const ex = showExamples ? exampleData(today) : null;
-  const exampleBookings = ex && upcoming.length === 0 && pastRows.length === 0 && !hasOlder;
+  const exampleBookings = ex && upcoming.length === 0 && cancelled.length === 0 && pastRows.length === 0 && !hasOlder;
   if (ex && events && events.length === 0) events.push(...ex.events);
   const calendarBookings = exampleBookings ? [...ex.past.map((b) => ({ ...b, past: true })), ...ex.upcoming] : [...pastRows, ...upcoming];
 
