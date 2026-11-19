@@ -13,6 +13,7 @@ import RowList from "@/components/dash/RowList";
 import { CancelledDepositBadge } from "./badges";
 import RefundDepositButton from "./RefundDepositButton";
 import { formatPrice } from "@/lib/money";
+import { calendarWindowStart, loadPastBookings, movedText } from "@/lib/calendarPast";
 
 export const metadata = { title: `Calendar · ${BRAND_NAME}` };
 
@@ -43,18 +44,9 @@ export default async function BookingsPage({ searchParams }) {
   // awaited where it's used. (Supabase queries only run once awaited, so
   // start() kicks them off.)
   const start = (query) => Promise.resolve(query);
-  const PAST_COLUMNS =
-    "id, booking_date, start_time, end_time, service_name, price_cents, client_name, client_email, client_phone, status, deposit_cents, deposit_status, client:clients(status, invited_at)";
-  const loadPast = (cols) =>
-    supabase
-      .from("bookings")
-      .select(cols)
-      .eq("status", "confirmed")
-      .gte("booking_date", daysBefore(today, 366))
-      .lt("booking_date", today)
-      .order("booking_date")
-      .order("start_time")
-      .limit(3000);
+  // Past visits: only this month and last month now. Older months load when
+  // the pro goes back to them (CalendarView), so a busy book stays quick.
+  const windowStart = calendarWindowStart(today);
   const EVENT_COLUMNS = "id, title, starts_on, start_time, end_time, repeats, repeat_until, skipped_dates, blocks_bookings, note";
   const loadEvents = (cols) => supabase.from("calendar_events").select(cols).order("starts_on").limit(2000);
   const pending = {
@@ -63,10 +55,14 @@ export default async function BookingsPage({ searchParams }) {
       supabase
         .from("bookings")
         .select("id, reschedule_count, original_start_at")
-        .gte("booking_date", daysBefore(today, 366))
+        .gte("booking_date", today)
         .gt("reschedule_count", 0)
     ),
-    past: start(loadPast(`${PAST_COLUMNS}, outcome, visit_note, owed_cents`)),
+    past: loadPastBookings(supabase, windowStart, today, stylist.timezone),
+    // Any visits before that (for the Calendar's back arrow and examples).
+    older: start(
+      supabase.from("bookings").select("id").eq("status", "confirmed").lt("booking_date", windowStart).limit(1)
+    ),
     today: start(supabase.from("bookings").select("id, outcome, visit_note, owed_cents").eq("booking_date", today).eq("status", "confirmed")),
     hours: start(supabase.from("working_hours").select("weekday, is_working, start_time, end_time")),
     blocked: start(supabase.from("blocked_dates").select("blocked_on, reason").gte("blocked_on", daysBefore(today, 400))),
@@ -96,21 +92,7 @@ export default async function BookingsPage({ searchParams }) {
   // Bookings a client moved themselves (empty until the step 25 SQL is run):
   // "Rescheduled by client" and the original time, in the business's time zone.
   const { data: movedRows } = await pending.moved;
-  const movedText = new Map(
-    (movedRows || []).map((r) => {
-      const when = r.original_start_at
-        ? new Date(r.original_start_at).toLocaleString("en-US", {
-            timeZone: stylist.timezone,
-            weekday: "short",
-            month: "short",
-            day: "numeric",
-            hour: "numeric",
-            minute: "2-digit",
-          })
-        : null;
-      return [r.id, { count: r.reschedule_count, originally: when }];
-    })
-  );
+  const moved = movedText(movedRows, stylist.timezone);
 
   const upcoming = bookings.filter((b) => b.status === "confirmed");
   const cancelled = bookings.filter((b) => b.status === "cancelled");
@@ -126,12 +108,11 @@ export default async function BookingsPage({ searchParams }) {
       minute: "2-digit",
     });
 
-  // For the month calendar: confirmed visits from the last 12 months, with
-  // how they went and their note (each read on its own, so the Calendar still
-  // opens before the step 18 and 24 SQL is run).
-  let { data: pastRows, error: pastError } = await pending.past;
-  if (pastError) ({ data: pastRows, error: pastError } = await loadPast(`${PAST_COLUMNS}, outcome`));
-  if (pastError) ({ data: pastRows } = await loadPast(PAST_COLUMNS));
+  // For the month calendar: confirmed visits since the start of last month,
+  // with how they went and their note.
+  const pastRows = await pending.past;
+  const { data: olderRows } = await pending.older;
+  const hasOlder = (olderRows || []).length > 0;
 
   // Today's visits that have started count as past too (no Cancel).
   const { data: todayRows } = await pending.today;
@@ -156,7 +137,7 @@ export default async function BookingsPage({ searchParams }) {
       Object.assign(b, todayExtra.get(b.id) || {}, { past: true });
     }
   }
-  for (const b of upcoming) if (movedText.has(b.id)) b.moved = movedText.get(b.id);
+  for (const b of upcoming) if (moved.has(b.id)) b.moved = moved.get(b.id);
 
   // Intake form on file for upcoming bookings of services that need it
   // (empty until the step 28 SQL is run).
@@ -171,12 +152,9 @@ export default async function BookingsPage({ searchParams }) {
   // upcoming), events while they have none, cancelled while none.
   const showExamples = await pending.examples;
   const ex = showExamples ? exampleData(today) : null;
-  const exampleBookings = ex && upcoming.length === 0 && (pastRows || []).length === 0;
+  const exampleBookings = ex && upcoming.length === 0 && pastRows.length === 0 && !hasOlder;
   if (ex && events && events.length === 0) events.push(...ex.events);
-  const calendarBookings = exampleBookings ? [...ex.past.map((b) => ({ ...b, past: true })), ...ex.upcoming] : [
-    ...(pastRows || []).map((b) => ({ ...b, past: true, moved: movedText.get(b.id) })),
-    ...upcoming,
-  ];
+  const calendarBookings = exampleBookings ? [...ex.past.map((b) => ({ ...b, past: true })), ...ex.upcoming] : [...pastRows, ...upcoming];
 
   // Group by date.
   const days = [];
@@ -216,7 +194,7 @@ export default async function BookingsPage({ searchParams }) {
             These are example bookings and events. They go away once you have real ones.
           </p>
         )}
-        {upcoming.length === 0 && (pastRows || []).length === 0 && !exampleBookings && (
+        {upcoming.length === 0 && pastRows.length === 0 && !hasOlder && !exampleBookings && (
           <p className="muted">
             No bookings yet. <Link href="/dashboard/openings">Open some times</Link> and share
             your booking link.
@@ -232,6 +210,8 @@ export default async function BookingsPage({ searchParams }) {
           blocked={blocked}
           events={events}
           closedHolidays={closedHolidays}
+          loadedFrom={exampleBookings ? null : windowStart}
+          hasOlder={!exampleBookings && hasOlder}
           openAdd={add === "event"}
           key={add === "event" ? "add" : "cal"}
         />
