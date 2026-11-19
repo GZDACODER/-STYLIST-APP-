@@ -51,14 +51,20 @@ export default function GuideProvider({ mode, scope, initialSeen = null, childre
   const [queue, setQueue] = useState([]);
   const [active, setActive] = useState(null); // { key, forced }
   const local = mode === "client" ? "client" : scope || "pro";
+  const serverKnown = initialSeen !== null;
   const seenRef = useRef(seen);
   seenRef.current = seen;
 
-  // What this phone remembers, plus (clients) what's saved on their login.
+  // Pros: the list saved on their login is the one that counts (so "Show
+  // tips again" on one device resets every device); the phone's own list is
+  // only used before the step 44 SQL is run. Clients: what this phone
+  // remembers, plus what's saved on their login once they've confirmed.
   useEffect(() => {
     let cancelled = false;
-    const fromPhone = readLocal(local);
-    setSeen((s) => new Set([...s, ...fromPhone]));
+    if (mode === "client" || !serverKnown) {
+      const fromPhone = readLocal(local);
+      setSeen((s) => new Set([...s, ...fromPhone]));
+    }
     if (mode === "client") {
       clientSeenGuides()
         .then((res) => {
@@ -73,7 +79,7 @@ export default function GuideProvider({ mode, scope, initialSeen = null, childre
     return () => {
       cancelled = true;
     };
-  }, [mode, local]);
+  }, [mode, local, serverKnown]);
 
   const request = useCallback((key) => {
     if (!GUIDES[key]) return;
