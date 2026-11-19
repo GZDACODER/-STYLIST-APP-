@@ -57,17 +57,19 @@ export default async function HomePage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { data: stylist } = await supabase
-    .from("stylists")
-    .select("business_name, slug, timezone, deposits_enabled, stripe_charges_enabled")
-    .eq("id", user.id)
-    .maybeSingle();
-  if (!stylist) return null;
-  // Read on their own, so Home still opens before their SQL is run.
-  const [{ data: nameRow }, { data: coverRow }] = await Promise.all([
+  // All at once (the extra columns are read on their own, so Home still
+  // opens before their SQL is run).
+  const [{ data: stylist }, { data: nameRow }, { data: coverRow }, showExamples] = await Promise.all([
+    supabase
+      .from("stylists")
+      .select("business_name, slug, timezone, deposits_enabled, stripe_charges_enabled")
+      .eq("id", user.id)
+      .maybeSingle(),
     supabase.from("stylists").select("first_name").eq("id", user.id).maybeSingle(),
     supabase.from("stylists").select("cover_photo_url").eq("id", user.id).maybeSingle(),
+    examplesOn(supabase, user.id),
   ]);
+  if (!stylist) return null;
 
   const tz = stylist.timezone;
   const today = todayInTimeZone(tz);
@@ -98,6 +100,9 @@ export default async function HomePage() {
     owed,
     plan,
     standingFlags,
+    { data: upcomingIds },
+    { data: disputeRows },
+    feedbackSent,
   ] = await Promise.all([
     supabase.from("bookings").select("id", { count: "exact", head: true }).eq("status", "confirmed").eq("booking_date", today),
     supabase
@@ -133,15 +138,15 @@ export default async function HomePage() {
     supabase.from("bookings").select("id", { count: "exact", head: true }).eq("status", "confirmed").eq("outcome", "completed_owed"),
     getMyPlan(supabase, user.id),
     supabase.rpc("standing_flags"),
+    // Upcoming bookings, to check for missing intake forms below.
+    supabase.from("bookings").select("id").eq("status", "confirmed").or(stillToCome).limit(300),
+    // Deposits a client has disputed (step 39 SQL).
+    supabase.from("deposit_disputes").select("id, status"),
+    // Trial feedback already sent (step 38 SQL).
+    supabase.from("trial_feedback").select("id", { count: "exact", head: true }).eq("stylist_id", user.id),
   ]);
 
   // Upcoming bookings of services that need an intake form, without one on file.
-  const { data: upcomingIds } = await supabase
-    .from("bookings")
-    .select("id")
-    .eq("status", "confirmed")
-    .or(stillToCome)
-    .limit(300);
   let formsMissing = 0;
   if (upcomingIds?.length) {
     const { data: intakeRows } = await supabase.rpc("bookings_intake", { p_booking_ids: upcomingIds.map((r) => r.id) });
@@ -204,7 +209,6 @@ export default async function HomePage() {
     attention.push({ text: `${plural(formsMissing, "upcoming booking is", "upcoming bookings are")} missing an intake form`, href: "/dashboard/bookings", action: "See" });
   }
   // Deposits a client has disputed with their bank (step 39 SQL).
-  const { data: disputeRows } = await supabase.from("deposit_disputes").select("id, status");
   const openDisputes = (disputeRows || []).filter((d) =>
     ["warning_needs_response", "needs_response", "under_review", "warning_under_review"].includes(d.status)
   ).length;
@@ -231,18 +235,14 @@ export default async function HomePage() {
 
   // Example Up next rows for a new pro with nothing booked yet.
   const upNext =
-    !nextUp.error && (nextUp.data || []).length === 0 && (anyBooking.count || 0) === 0 && (await examplesOn(supabase, user.id))
+    !nextUp.error && (nextUp.data || []).length === 0 && (anyBooking.count || 0) === 0 && showExamples
       ? exampleData(today).upcoming
       : nextUp.data || [];
 
   // Trial feedback: from day 3 of the free trial until they've sent some.
   let askFeedback = false;
   if (plan.inTrial && !plan.comped && !plan.subscribed && plan.daysLeft <= 11) {
-    const { count, error: fbError } = await supabase
-      .from("trial_feedback")
-      .select("id", { count: "exact", head: true })
-      .eq("stylist_id", user.id);
-    askFeedback = !fbError && !count;
+    askFeedback = !feedbackSent.error && !feedbackSent.count;
   }
 
   const name = String(nameRow?.first_name || "").trim();

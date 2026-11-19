@@ -29,17 +29,51 @@ export default async function BookingsPage({ searchParams }) {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { data: stylist } = await supabase
-    .from("stylists")
-    .select("timezone")
-    .eq("id", user.id)
-    .maybeSingle();
+  // The time zone, and (at the same time) clients who've had enough
+  // appointments become Regulars (see Settings).
+  const [{ data: stylist }] = await Promise.all([
+    supabase.from("stylists").select("timezone").eq("id", user.id).maybeSingle(),
+    supabase.rpc("refresh_my_regulars"),
+  ]);
   if (!stylist) redirect("/dashboard");
 
   const today = todayInTimeZone(stylist.timezone);
 
-  // Clients who've had enough appointments become Regulars (see Settings).
-  await supabase.rpc("refresh_my_regulars");
+  // Everything below is read at the same time: each query starts now and is
+  // awaited where it's used. (Supabase queries only run once awaited, so
+  // start() kicks them off.)
+  const start = (query) => Promise.resolve(query);
+  const PAST_COLUMNS =
+    "id, booking_date, start_time, end_time, service_name, price_cents, client_name, client_email, client_phone, status, deposit_cents, deposit_status, client:clients(status, invited_at)";
+  const loadPast = (cols) =>
+    supabase
+      .from("bookings")
+      .select(cols)
+      .eq("status", "confirmed")
+      .gte("booking_date", daysBefore(today, 366))
+      .lt("booking_date", today)
+      .order("booking_date")
+      .order("start_time")
+      .limit(3000);
+  const EVENT_COLUMNS = "id, title, starts_on, start_time, end_time, repeats, repeat_until, skipped_dates, blocks_bookings, note";
+  const loadEvents = (cols) => supabase.from("calendar_events").select(cols).order("starts_on").limit(2000);
+  const pending = {
+    standing: start(supabase.from("bookings").select("id, standing_series_id").gte("booking_date", today).not("standing_series_id", "is", null)),
+    moved: start(
+      supabase
+        .from("bookings")
+        .select("id, reschedule_count, original_start_at")
+        .gte("booking_date", daysBefore(today, 366))
+        .gt("reschedule_count", 0)
+    ),
+    past: start(loadPast(`${PAST_COLUMNS}, outcome, visit_note, owed_cents`)),
+    today: start(supabase.from("bookings").select("id, outcome, visit_note, owed_cents").eq("booking_date", today).eq("status", "confirmed")),
+    hours: start(supabase.from("working_hours").select("weekday, is_working, start_time, end_time")),
+    blocked: start(supabase.from("blocked_dates").select("blocked_on, reason").gte("blocked_on", daysBefore(today, 400))),
+    events: start(loadEvents(`${EVENT_COLUMNS}, color, repeat_days, monthly_mode`)),
+    holidays: start(supabase.from("stylist_holiday_settings").select("holiday_key").eq("closed", true)),
+    examples: examplesOn(supabase, user.id),
+  };
 
   const { data: bookings, error } = await supabase
     .from("bookings")
@@ -56,20 +90,12 @@ export default async function BookingsPage({ searchParams }) {
 
   // Which bookings are standing visits (read on its own, so the Calendar
   // still opens before the step 16 SQL is run).
-  const { data: standingRows } = await supabase
-    .from("bookings")
-    .select("id, standing_series_id")
-    .gte("booking_date", today)
-    .not("standing_series_id", "is", null);
+  const { data: standingRows } = await pending.standing;
   const seriesOf = new Map((standingRows || []).map((r) => [r.id, r.standing_series_id]));
 
   // Bookings a client moved themselves (empty until the step 25 SQL is run):
   // "Rescheduled by client" and the original time, in the business's time zone.
-  const { data: movedRows } = await supabase
-    .from("bookings")
-    .select("id, reschedule_count, original_start_at")
-    .gte("booking_date", daysBefore(today, 366))
-    .gt("reschedule_count", 0);
+  const { data: movedRows } = await pending.moved;
   const movedText = new Map(
     (movedRows || []).map((r) => {
       const when = r.original_start_at
@@ -103,45 +129,24 @@ export default async function BookingsPage({ searchParams }) {
   // For the month calendar: confirmed visits from the last 12 months, with
   // how they went and their note (each read on its own, so the Calendar still
   // opens before the step 18 and 24 SQL is run).
-  const PAST_COLUMNS =
-    "id, booking_date, start_time, end_time, service_name, price_cents, client_name, client_email, client_phone, status, deposit_cents, deposit_status, client:clients(status, invited_at)";
-  const loadPast = (cols) =>
-    supabase
-      .from("bookings")
-      .select(cols)
-      .eq("status", "confirmed")
-      .gte("booking_date", daysBefore(today, 366))
-      .lt("booking_date", today)
-      .order("booking_date")
-      .order("start_time")
-      .limit(3000);
-  let { data: pastRows, error: pastError } = await loadPast(`${PAST_COLUMNS}, outcome, visit_note, owed_cents`);
+  let { data: pastRows, error: pastError } = await pending.past;
   if (pastError) ({ data: pastRows, error: pastError } = await loadPast(`${PAST_COLUMNS}, outcome`));
   if (pastError) ({ data: pastRows } = await loadPast(PAST_COLUMNS));
 
   // Today's visits that have started count as past too (no Cancel).
-  const { data: todayRows } = await supabase
-    .from("bookings")
-    .select("id, outcome, visit_note, owed_cents")
-    .eq("booking_date", today)
-    .eq("status", "confirmed");
+  const { data: todayRows } = await pending.today;
   const todayExtra = new Map((todayRows || []).map((r) => [r.id, r]));
 
-  const [{ data: hourRows }, { data: blockedRows }] = await Promise.all([
-    supabase.from("working_hours").select("weekday, is_working, start_time, end_time"),
-    supabase.from("blocked_dates").select("blocked_on, reason").gte("blocked_on", daysBefore(today, 400)),
-  ]);
+  const [{ data: hourRows }, { data: blockedRows }] = await Promise.all([pending.hours, pending.blocked]);
   const blocked = Object.fromEntries((blockedRows || []).map((r) => [r.blocked_on, r.reason || ""]));
 
   // The stylist's own events (null until the step 29 SQL is run; colours and
   // repeat days from step 34).
-  const EVENT_COLUMNS = "id, title, starts_on, start_time, end_time, repeats, repeat_until, skipped_dates, blocks_bookings, note";
-  const loadEvents = (cols) => supabase.from("calendar_events").select(cols).order("starts_on").limit(2000);
-  let { data: eventRows, error: eventsError } = await loadEvents(`${EVENT_COLUMNS}, color, repeat_days, monthly_mode`);
+  let { data: eventRows, error: eventsError } = await pending.events;
   if (eventsError) ({ data: eventRows, error: eventsError } = await loadEvents(EVENT_COLUMNS));
   const events = eventsError ? null : eventRows || [];
   // Federal holidays the business closes on (empty before step 34).
-  const { data: holidayRows } = await supabase.from("stylist_holiday_settings").select("holiday_key").eq("closed", true);
+  const { data: holidayRows } = await pending.holidays;
   const closedHolidays = (holidayRows || []).map((r) => r.holiday_key);
 
   const nowText = nowLocal(stylist.timezone);
@@ -164,7 +169,7 @@ export default async function BookingsPage({ searchParams }) {
   }
   // Examples for a new pro: bookings while they have none (past or
   // upcoming), events while they have none, cancelled while none.
-  const showExamples = await examplesOn(supabase, user.id);
+  const showExamples = await pending.examples;
   const ex = showExamples ? exampleData(today) : null;
   const exampleBookings = ex && upcoming.length === 0 && (pastRows || []).length === 0;
   if (ex && events && events.length === 0) events.push(...ex.events);
