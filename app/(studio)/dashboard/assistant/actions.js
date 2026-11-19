@@ -33,6 +33,7 @@ export async function assistantReady() {
 const STABLE_PROMPT = `You are the scheduling assistant inside Clientele, a booking app for beauty pros (hair stylists, barbers, nail and lash techs). You help one pro with their own schedule: answering questions about it, and making changes they ask for.
 
 How to work:
+- The latest system message in the chat gives the business details, today's date, the time now and the upcoming dates. Always go by the newest one.
 - Use get_schedule (and find_client) to look things up before answering or proposing a change. Never guess what's booked.
 - To make a change, call the matching tool (add_calendar_event, block_days, cancel_booking). It isn't done yet: the pro sees a plain description and confirms or cancels it. Propose one change at a time.
 - "Block off" part of a day means add_calendar_event with blocks_bookings true. Whole days off (vacation) means block_days. A personal reminder that shouldn't stop bookings means add_calendar_event with blocks_bookings false.
@@ -90,11 +91,19 @@ const lastToolUse = (message) =>
 
 // Talks to Claude until it answers, or proposes a change to confirm.
 // Returns { messages, pending?: { toolUseId, summary }, error? }.
+//
+// The top-level system prompt never changes during a chat: Claude's thinking
+// blocks are tied to the exact conversation that produced them, and the API
+// rejects a replayed block once anything before it has changed. Today's date
+// and time go in as a system message after each new message instead
+// (see withContext), so the history only ever grows.
+const SYSTEM = [{ type: "text", text: STABLE_PROMPT, cache_control: { type: "ephemeral" } }];
+
+function withContext(ctx, messages) {
+  return [...messages, { role: "system", content: contextPrompt(ctx.stylist, ctx.today, ctx.nowTime) }];
+}
+
 async function run(ctx, messages) {
-  const system = [
-    { type: "text", text: STABLE_PROMPT, cache_control: { type: "ephemeral" } },
-    { type: "text", text: contextPrompt(ctx.stylist, ctx.today, ctx.nowTime) },
-  ];
 
   for (let step = 0; step < MAX_STEPS; step++) {
     let response;
@@ -104,11 +113,14 @@ async function run(ctx, messages) {
         max_tokens: 16000,
         // Thinking is always on with this model; effort sets how hard it thinks.
         output_config: { effort: "medium" },
+        // Safety net: a thinking block that no longer matches the chat (an old
+        // chat saved in the browser, say) is dropped instead of failing.
+        thinking: { type: "adaptive", block_binding: { prefix_mismatch_behavior: "drop_block" } },
         // If the model declines for safety reasons, the API retries on a
         // fallback model in the same call.
-        betas: ["server-side-fallback-2026-07-01"],
+        betas: ["server-side-fallback-2026-07-01", "thinking-binding-controls-2026-08-01"],
         fallbacks: "default",
-        system,
+        system: SYSTEM,
         tools: TOOLS,
         tool_choice: { type: "auto", disable_parallel_tool_use: true },
         messages,
@@ -138,6 +150,9 @@ async function run(ctx, messages) {
       console.error("Assistant failed", error);
       return { messages, error: "The assistant couldn't answer just now. Please try again." };
     }
+
+    const dropped = (response.input_transformations || []).filter((t) => t.type === "thinking_dropped");
+    if (dropped.length) console.warn("Assistant: thinking dropped", dropped.map((t) => `${t.path} ${t.reason}`).join(", "));
 
     // Claude's turn goes back exactly as it came (thinking blocks included).
     messages = [...messages, { role: "assistant", content: response.content }];
@@ -203,7 +218,7 @@ export async function sendToAssistant(messages, text) {
         { type: "text", text: clean },
       ]
     : clean;
-  return run(ctx, [...messages, { role: "user", content }]);
+  return run(ctx, withContext(ctx, [...messages, { role: "user", content }]));
 }
 
 // The stylist tapped Confirm (approve = true) or Cancel on a proposed change.
@@ -232,6 +247,6 @@ export async function answerAssistant(messages, toolUseId, approve) {
     ...messages,
     { role: "user", content: [{ type: "tool_result", tool_use_id: toolUse.id, content, ...(done?.error ? { is_error: true } : {}) }] },
   ];
-  const next = await run(ctx, withResult);
+  const next = await run(ctx, withContext(ctx, withResult));
   return { ...next, done };
 }
