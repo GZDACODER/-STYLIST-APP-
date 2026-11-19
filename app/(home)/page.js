@@ -7,6 +7,7 @@ import HeroObject from "./HeroObject";
 import FeatureTabs from "./FeatureTabs";
 import PricingToggle from "./PricingToggle";
 import Icon from "./Icon";
+import { AVAILABLE_TYPES, COMING_SOON_TYPES } from "@/lib/businessTypes";
 
 const TITLE = `${BRAND_NAME}: Booking that puts your regulars first.`;
 const DESCRIPTION =
@@ -23,18 +24,6 @@ export const metadata = {
 // Dollars without cents when they're whole ($15, not $15.00).
 const price = (cents) => formatPrice(cents).replace(/\.00$/, "");
 
-// Who it's for (shown under the hero).
-const EXAMPLES = [
-  "Hair",
-  "Barbers",
-  "Nails",
-  "Lashes",
-  "Tattoo",
-  "Trainers",
-  "Tutors",
-  "Pet grooming",
-  "Photographers",
-];
 
 // "We don't charge extra for": all included in the one plan.
 const NO_EXTRA = [
@@ -142,10 +131,13 @@ export default async function HomePage() {
         {/* ---------- Who it's for ---------- */}
         <section className="hm-for" aria-label="Who it's for">
           <ul>
-            {EXAMPLES.map((name) => (
-              <li key={name}>{name}</li>
+            {AVAILABLE_TYPES.map((t) => (
+              <li key={t.value}>{t.label}</li>
             ))}
           </ul>
+          <p className="hm-soon">
+            <span className="hm-soon-tag">Coming soon</span> {COMING_SOON_TYPES.map((t) => t.label).join(" · ")}
+          </p>
         </section>
 
         {/* ---------- Features (one tab at a time) ---------- */}
