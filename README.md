@@ -159,7 +159,10 @@ and hosted on **Vercel**.
   appointment (Reschedule or cancel), the last visit, and **Book again**, which
   opens that pro's page with the service and the first open day picked. The
   booking form fills in name and phone from last time. Can be added to a
-  phone's home screen (`app/my/app.webmanifest`). Linked from booking pages,
+  phone's home screen (`app/my/app.webmanifest`). Each card also shows a deposit still to pay
+  (Pay deposit), their standing visits (next 4, how often) and any waitlist they're
+  on (See or leave); pros they're only waitlisted with get a card too (step 40 SQL
+  `0045_my_pros_more.sql`, `get_my_pro_extras`). Linked from booking pages,
   the "You're booked" screen and booking emails. Run
   `supabase/migrations/0035_my_pros.sql`.
 - **Assistant** (a chat button in the bottom corner of every dashboard page):
