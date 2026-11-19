@@ -13,6 +13,7 @@ import { loadDetails, saveDetails } from "@/lib/clientDetails";
 import IntakeFields from "./IntakeFields";
 import MyBookings from "./MyBookings";
 import RegularStar from "@/components/RegularStar";
+import PageGuide from "@/components/guide/PageGuide";
 
 // How many dates to show before "More dates".
 const FIRST_DATES = 12;
@@ -406,8 +407,9 @@ export default function BookingFlow({
       {/* ---------- 1. Service ---------- */}
       {!locked && (
         <section className="card">
-          <h2>
+          <h2 className="bk-h2-help">
             <span className="bk-num">01</span>Service
+            <PageGuide guideKey="book" className="gd-help-title" />
           </h2>
           {services.length === 0 && <p className="muted">No services are listed yet.</p>}
           <div className="choice-list">
@@ -639,7 +641,8 @@ export default function BookingFlow({
 
               {deposit > 0 ? (
                 <>
-                  <p className="message info">
+                  <PageGuide guideKey="deposit" button={false} />
+                  <p className="message info" data-guide="deposit-note">
                     A {formatPrice(deposit)} deposit is due now to book.
                     {service.price_cents > deposit &&
                       ` The other ${formatPrice(service.price_cents - deposit)} is paid at your appointment.`}{" "}
@@ -657,7 +660,7 @@ export default function BookingFlow({
                       I&apos;ve read and agree to the cancellation policy
                     </label>
                   )}
-                  <button type="submit" className="button" disabled={pending || redirecting}>
+                  <button type="submit" className="button" disabled={pending || redirecting} data-guide="deposit-pay">
                     {pending || redirecting
                       ? "Opening payment..."
                       : `Pay ${formatPrice(deposit)} deposit`}

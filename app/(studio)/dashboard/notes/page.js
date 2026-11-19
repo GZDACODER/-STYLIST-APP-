@@ -50,7 +50,7 @@ export default async function NotesPage() {
   if (error) {
     return (
       <>
-        <PageHeader title="Notes" />
+        <PageHeader guide="notes" title="Notes" />
         <p className="message error">
           {/visit_note|owed_cents|outcome/.test(error.message)
             ? "Notes aren't set up yet: run the step 24 SQL (0029_visit_notes.sql) in Supabase, then refresh."
@@ -114,7 +114,7 @@ export default async function NotesPage() {
 
   return (
     <>
-      <PageHeader
+      <PageHeader guide="notes"
         title="Notes"
         subtitle="How each visit went, your notes, no-shows and balances owed from the last 12 months."
         actions={

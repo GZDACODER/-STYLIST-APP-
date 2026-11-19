@@ -1517,3 +1517,232 @@ select {
   max-height: 320px;
   overflow: auto;
 }
+
+/* ---------- First-visit tips (components/guide) ---------- */
+.gd-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+}
+
+.gd-catch {
+  position: fixed;
+  inset: 0;
+}
+
+.gd-dim {
+  background: rgba(10, 9, 8, 0.62);
+  animation: gd-fade 0.2s ease both;
+}
+
+/* The highlighted button or area: a soft ring, everything else dimmed. */
+.gd-spot {
+  position: fixed;
+  border-radius: 12px;
+  border: 1px solid #c8a96a;
+  box-shadow: 0 0 0 4px rgba(200, 169, 106, 0.18);
+  pointer-events: none;
+  animation: gd-fade 0.2s ease both;
+}
+
+.gd-shade {
+  position: fixed;
+  background: rgba(10, 9, 8, 0.62);
+  pointer-events: none;
+  animation: gd-fade 0.2s ease both;
+}
+
+.gd-card {
+  position: fixed;
+  width: min(340px, calc(100vw - 32px));
+  padding: 20px 20px 16px;
+  background: #0e0d0b;
+  color: #f5f1ea;
+  border: 1px solid rgba(200, 169, 106, 0.55);
+  border-radius: 14px;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.22s ease, transform 0.22s ease, top 0.25s ease, left 0.25s ease;
+}
+
+.gd-card.is-above {
+  transform: translateY(-8px);
+}
+
+.gd-card.is-shown {
+  opacity: 1;
+  transform: none;
+}
+
+.gd-card::before {
+  /* A thin gold line across the top, like the rest of the design. */
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 20px;
+  width: 48px;
+  height: 2px;
+  background: #c8a96a;
+}
+
+.gd-count {
+  margin: 0 0 8px;
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #c8a96a;
+}
+
+.gd-title {
+  margin: 0 0 8px;
+  font-family: var(--font-display), var(--font-serif), Georgia, serif;
+  font-weight: 500;
+  font-size: 1.45rem;
+  line-height: 1.2;
+  color: #f5f1ea;
+}
+
+.gd-text {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: rgba(245, 241, 234, 0.82);
+}
+
+.gd-dots {
+  display: flex;
+  gap: 6px;
+  margin: 16px 0 14px;
+}
+
+.gd-dots span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(245, 241, 234, 0.25);
+  transition: background 0.2s ease, width 0.2s ease;
+}
+
+.gd-dots span.active {
+  width: 18px;
+  border-radius: 3px;
+  background: #c8a96a;
+}
+
+.gd-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(245, 241, 234, 0.12);
+}
+
+.gd-spacer {
+  flex: 1;
+}
+
+.gd-actions button {
+  font: inherit;
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 999px;
+  min-height: 40px;
+  padding: 0 16px;
+}
+
+.gd-skip {
+  background: none;
+  border: 0;
+  color: rgba(245, 241, 234, 0.6);
+  padding-left: 0 !important;
+}
+
+.gd-back {
+  background: none;
+  border: 1px solid rgba(245, 241, 234, 0.3);
+  color: #f5f1ea;
+}
+
+.gd-next {
+  background: #c8a96a;
+  border: 1px solid #c8a96a;
+  color: #0e0d0b;
+}
+
+.gd-actions button:focus-visible {
+  outline: 2px solid #e6cd7e;
+  outline-offset: 2px;
+}
+
+.gd-skip:hover {
+  color: #f5f1ea;
+}
+
+/* The small "?" that replays a page's tips. */
+.gd-help {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  background: none;
+  color: #a88a4d;
+  font: 500 0.8rem/1 var(--font-sans, Inter), Arial, sans-serif;
+  letter-spacing: 0;
+  cursor: pointer;
+  opacity: 0.8;
+  vertical-align: middle;
+  transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.gd-help:hover,
+.gd-help:focus-visible {
+  opacity: 1;
+  background: #c8a96a;
+  border-color: #c8a96a;
+  color: #0e0d0b;
+}
+
+.gd-help-title {
+  margin-left: 12px;
+  position: relative;
+  top: -0.12em;
+}
+
+/* Bigger target on phones. */
+@media (pointer: coarse) {
+  .gd-help {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+@keyframes gd-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gd-card,
+  .gd-spot,
+  .gd-shade,
+  .gd-dim,
+  .gd-dots span {
+    transition: none;
+    animation: none;
+  }
+  .gd-card,
+  .gd-card.is-above {
+    transform: none;
+  }
+}

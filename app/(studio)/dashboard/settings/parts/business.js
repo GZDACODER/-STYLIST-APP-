@@ -3,6 +3,7 @@ import SettingsForm from "../SettingsForm";
 import SubmitButton from "@/components/SubmitButton";
 import { setShowExamples } from "../actions";
 import { me, optional } from "./common";
+import ShowTipsAgain from "@/components/guide/ShowTipsAgain";
 
 export async function BusinessSection() {
   const { supabase, user, row } = await me("business_name, timezone");
@@ -34,6 +35,7 @@ export async function BusinessSection() {
           </form>
         </section>
       )}
+      <ShowTipsAgain />
     </>
   );
 }

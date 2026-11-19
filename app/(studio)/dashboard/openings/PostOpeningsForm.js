@@ -155,7 +155,7 @@ export default function PostOpeningsForm({ today, daysOff, regularsAllowed = tru
         </div>
       )}
 
-      <fieldset className="field">
+      <fieldset className="field" data-guide="visibility">
         <legend>Who can book</legend>
         <div className="segmented">
           <label className="segment everyone">

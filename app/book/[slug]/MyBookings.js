@@ -5,6 +5,7 @@ import { cancelMyBooking, getMyBookings, getMyRescheduleSlots, rescheduleMyBooki
 import ReschedulePicker from "./ReschedulePicker";
 import { clockTime, formatDate } from "@/lib/availability";
 import { formatPrice } from "@/lib/money";
+import PageGuide from "@/components/guide/PageGuide";
 
 // "Thu, Nov 12" (the year only when it isn't this year).
 function shortDate(text) {
@@ -77,7 +78,8 @@ export default function MyBookings({ slug, businessName, policy, zoneNote, refre
   }
 
   return (
-    <section className="card">
+    <section className="card" data-guide="my-bookings">
+      <PageGuide guideKey="my_bookings" button={false} />
       <h2>Your upcoming appointments</h2>
       {notice && (
         <p className="message success" role="status">

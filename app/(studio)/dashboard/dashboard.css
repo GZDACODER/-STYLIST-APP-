@@ -4882,3 +4882,13 @@ body:has(dialog.client-sheet[open]) {
     max-width: 60%;
   }
 }
+
+/* The "?" in the Assistant's header matches its other round buttons. */
+.aw-head .gd-help-aw {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  color: inherit;
+  opacity: 0.8;
+  font-size: 0.95rem;
+}

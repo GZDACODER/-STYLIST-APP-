@@ -1,5 +1,6 @@
 import { loadBookingHeader as loadHeader } from "@/lib/bookingHeader";
 import { instagramUrl, locationUrl } from "@/lib/profileLinks";
+import GuideProvider from "@/components/guide/GuideProvider";
 
 // The name and links for the top bar: a separate, read-only call, so every
 // booking page (booking, waitlist, claim, paid) can show it.
@@ -31,7 +32,10 @@ export default async function StylistBookingLayout({ children, params }) {
           </nav>
         )}
       </div>
-      <main className="bk-main">{children}</main>
+      {/* First-visit tips for clients (lib/guides.js). */}
+      <GuideProvider mode="client" scope={slug}>
+        <main className="bk-main">{children}</main>
+      </GuideProvider>
     </>
   );
 }
