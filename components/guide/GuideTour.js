@@ -222,6 +222,7 @@ export default function GuideTour({ guide, onFinish }) {
         </div>
       </div>
     </div>,
-    document.body
+    // Inside the dashboard or booking page wrapper, so it gets their fonts.
+    document.querySelector(".db, .bk") || document.body
   );
 }
