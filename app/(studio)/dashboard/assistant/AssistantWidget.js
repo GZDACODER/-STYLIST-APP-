@@ -9,11 +9,22 @@ import { useRouter } from "next/navigation";
 import { answerAssistant, sendToAssistant } from "./actions";
 
 const STORE_KEY = "clientele-assistant-chat";
-const SUGGESTIONS = [
-  "What does my week look like?",
-  "Block off Friday afternoon",
-  "Who's booked tomorrow?",
-  "I'm on vacation Dec 22 to Jan 2",
+// The welcome: what it can do, with examples to tap (they're sent as is).
+const EXAMPLES = [
+  {
+    title: "Ask about your schedule",
+    items: ["What does my week look like?", "Who's booked tomorrow?", "When's my next opening on Saturday?"],
+  },
+  {
+    title: "Tell it what to change",
+    items: ["Block off Friday afternoon", "I'm on vacation Dec 22 to Jan 2", "Add a dentist appointment Thursday at 2"],
+  },
+];
+const CAN = [
+  "Read your bookings, openings, events, days off and holidays (up to a month at a time)",
+  "Look up a client by name, phone or email",
+  "Add an event (one-off or repeating, with or without blocking bookings)",
+  "Block whole days off, and cancel a booking (the client is emailed)",
 ];
 
 // What to show from the conversation: your words and the assistant's text
@@ -171,6 +182,14 @@ export default function AssistantWidget({ firstName = "", locked = false, price 
                   own words, like &quot;block off Friday afternoon&quot; or &quot;who&apos;s booked tomorrow?&quot;. I
                   always check with you before changing anything.
                 </p>
+                <div className="aw-examples">
+                  <p className="aw-examples-title">Things you could say</p>
+                  <ul className="aw-example-list">
+                    {[EXAMPLES[0].items[0], EXAMPLES[0].items[1], EXAMPLES[1].items[0], EXAMPLES[1].items[1]].map((s) => (
+                      <li key={s}>&ldquo;{s}&rdquo;</li>
+                    ))}
+                  </ul>
+                </div>
                 <p className="aw-note ok">
                   The Assistant is an add-on for {price}. Add it in Plan &amp; billing to start chatting.
                 </p>
@@ -185,16 +204,31 @@ export default function AssistantWidget({ firstName = "", locked = false, price 
             {shown.length === 0 && !busy && (
               <div className="aw-welcome">
                 <p className="aw-bubble bot">
-                  Hi{hello ? ` ${hello}` : ""}! Ask me about your schedule, or tell me what to change.
-                  I&apos;ll check with you before changing anything.
+                  Hi{hello ? ` ${hello}` : ""}! I&apos;m your Clientele Assistant. Ask me about your schedule in
+                  your own words, or tell me what to change. I always show you the change first and only make it
+                  when you tap <strong>Confirm</strong>.
                 </p>
-                <div className="aw-chips">
-                  {SUGGESTIONS.map((s) => (
-                    <button key={s} type="button" className="aw-chip" onClick={() => send(s)}>
-                      {s}
-                    </button>
-                  ))}
-                </div>
+                {EXAMPLES.map((g) => (
+                  <div key={g.title} className="aw-examples">
+                    <p className="aw-examples-title">{g.title}</p>
+                    <div className="aw-chips">
+                      {g.items.map((s) => (
+                        <button key={s} type="button" className="aw-chip" onClick={() => send(s)}>
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+                <details className="aw-can">
+                  <summary>What I can do</summary>
+                  <ul>
+                    {CAN.map((c) => (
+                      <li key={c}>{c}</li>
+                    ))}
+                    <li>I can&apos;t take payments, refund deposits, move bookings or message clients (yet).</li>
+                  </ul>
+                </details>
               </div>
             )}
             {shown.map((m) => (

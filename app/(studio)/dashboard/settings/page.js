@@ -4,7 +4,7 @@
 import { redirect } from "next/navigation";
 import { BRAND_NAME } from "@/lib/brand";
 import SettingsShell from "@/components/dash/SettingsShell";
-import { BusinessSection } from "./sections";
+import { BusinessSection } from "./parts/business";
 
 export const metadata = { title: `Settings · ${BRAND_NAME}` };
 

@@ -4746,3 +4746,50 @@ body:has(dialog.client-sheet[open]) {
   align-items: center;
   gap: 10px;
 }
+
+/* Assistant welcome: example groups and "What I can do". */
+.aw-examples {
+  margin-top: 10px;
+}
+
+.aw-examples-title {
+  margin: 0 0 6px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #8a8377;
+}
+
+.aw-example-list {
+  margin: 0;
+  padding-left: 1.1em;
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+.aw-can {
+  margin-top: 12px;
+  font-size: 0.85rem;
+}
+
+.aw-can summary {
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.aw-can ul {
+  margin: 6px 0 0;
+  padding-left: 1.1em;
+  line-height: 1.55;
+}
+
+/* Smaller example chips so the welcome fits a phone screen. */
+.aw-examples .aw-chips {
+  gap: 6px;
+}
+
+.aw-examples .aw-chip {
+  padding: 7px 12px;
+  font-size: 0.82rem;
+}
