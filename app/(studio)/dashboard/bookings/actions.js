@@ -7,6 +7,7 @@ import { emailBookingCancelled, emailDepositRefunded } from "@/lib/bookingEmails
 import { formatPrice } from "@/lib/money";
 import { emailConfigured } from "@/lib/notify";
 import { runWaitlistSafely } from "@/lib/waitlist";
+import { loadPastBookings } from "@/lib/calendarPast";
 
 export async function cancelBooking(formData) {
   const id = String(formData.get("id") || "");
@@ -79,4 +80,27 @@ export async function refundBookingDeposit(prevState, formData) {
       booking.client_email && emailConfigured() ? ", and they've been emailed" : ""
     }.`,
   };
+}
+
+// The Calendar went back past what it loaded: past visits for
+// from <= date < to (a few months at a time), and whether any are older.
+export async function loadOlderBookings(from, to) {
+  const isDate = (v) => /^\d{4}-\d{2}-\d{2}$/.test(String(v || ""));
+  if (!isDate(from) || !isDate(to) || from >= to) return { error: "Bad dates." };
+  // A few months at most per request.
+  if (new Date(to) - new Date(from) > 100 * 24 * 60 * 60 * 1000) return { error: "Too many months at once." };
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Please log in again." };
+  const { data: stylist } = await supabase.from("stylists").select("timezone").eq("id", user.id).maybeSingle();
+  if (!stylist) return { error: "Please log in again." };
+
+  const [bookings, { data: older }] = await Promise.all([
+    loadPastBookings(supabase, from, to, stylist.timezone),
+    supabase.from("bookings").select("id").eq("status", "confirmed").lt("booking_date", from).limit(1),
+  ]);
+  return { bookings, hasOlder: (older || []).length > 0 };
 }

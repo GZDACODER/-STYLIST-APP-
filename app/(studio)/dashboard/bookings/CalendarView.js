@@ -18,6 +18,7 @@ import { EventDetails, EventForm } from "./CalendarEvents";
 import { colorOf, eventOccursOn, eventsOn } from "@/lib/calendarEvents";
 import { holidaysOn } from "@/lib/holidays";
 import { HolidayDayControls } from "../settings/HolidaySettings";
+import { loadOlderBookings } from "./actions";
 
 const MONTHS_BACK = 12;
 const MONTHS_AHEAD = 12;
@@ -28,13 +29,27 @@ const monthIndex = (dateText) => {
   return y * 12 + (m - 1);
 };
 
-// bookings: confirmed bookings from 12 months back on, each with `past`.
+// bookings: confirmed bookings from loadedFrom on, each past one with `past`.
+// loadedFrom / hasOlder: the earliest date loaded, and whether older visits
+// exist; going back past it loads three months at a time.
 // days / seriesOf / today: as BookingList takes them.
 // hours: { weekday: { is_working, start_time, end_time } }; blocked: { "YYYY-MM-DD": reason }
 // events: the stylist's calendar_events rows (null before the step 29 SQL is run).
 // closedHolidays: keys of the federal holidays the business closes on.
 // openAdd: open "Add event" straight away (the page header's + Add event).
-export default function CalendarView({ bookings, days, seriesOf, today, hours, blocked, events, closedHolidays = [], openAdd = false }) {
+export default function CalendarView({
+  bookings: recent,
+  days,
+  seriesOf,
+  today,
+  hours,
+  blocked,
+  events,
+  closedHolidays = [],
+  openAdd = false,
+  loadedFrom = null,
+  hasOlder = false,
+}) {
   const closedSet = new Set(closedHolidays);
   // A federal holiday the business is closed on: every year (Settings), or
   // just this date (a blocked date saved as "Closed – Thanksgiving").
@@ -50,6 +65,12 @@ export default function CalendarView({ bookings, days, seriesOf, today, hours, b
   const [eventSheet, setEventSheet] = useState(() => (openAdd && events ? { mode: "add" } : null));
   const eventList = events || [];
   const openEvent = eventSheet?.id ? eventList.find((e) => e.id === eventSheet.id) : null;
+
+  // Older visits, fetched as the pro goes back. Cleared whenever the page's
+  // data is refreshed (a note saved, a visit wrapped up), then fetched again.
+  const [older, setOlder] = useState({ for: recent, rows: [], from: loadedFrom, more: hasOlder, loading: false, failed: false });
+  const olderNow = older.for === recent ? older : { for: recent, rows: [], from: loadedFrom, more: hasOlder, loading: false, failed: false };
+  const bookings = useMemo(() => [...olderNow.rows, ...recent], [olderNow.rows, recent]);
 
   const byDate = useMemo(() => {
     const map = {};
@@ -70,6 +91,28 @@ export default function CalendarView({ bookings, days, seriesOf, today, hours, b
   }, [eventGone]);
 
   const thisMonth = monthIndex(today);
+
+  // Showing a month before what's loaded: fetch it and the two before it.
+  const needsOlder = Boolean(olderNow.from) && olderNow.more && month < monthIndex(olderNow.from);
+  useEffect(() => {
+    if (!needsOlder || olderNow.loading || olderNow.failed) return;
+    const to = olderNow.from;
+    const y = Math.floor((month - 2) / 12);
+    const m = (month - 2) % 12;
+    const from = `${y}-${String(m + 1).padStart(2, "0")}-01`;
+    const base = olderNow;
+    setOlder({ ...base, loading: true });
+    loadOlderBookings(from, to)
+      .then((res) => {
+        setOlder((cur) => {
+          if (cur.for !== base.for) return cur;
+          if (res?.error) return { ...cur, loading: false, failed: true };
+          return { ...cur, rows: [...(res.bookings || []), ...cur.rows], from, more: Boolean(res.hasOlder), loading: false };
+        });
+      })
+      .catch(() => setOlder((cur) => (cur.for === base.for ? { ...cur, loading: false, failed: true } : cur)));
+  }, [needsOlder, month, olderNow]);
+  const loadingMonth = needsOlder && !olderNow.failed;
   const year = Math.floor(month / 12);
   const monthNum = month % 12;
   const monthStart = new Date(year, monthNum, 1);
@@ -228,6 +271,16 @@ export default function CalendarView({ bookings, days, seriesOf, today, hours, b
             {month !== thisMonth && (
               <button type="button" className="link-button mc-today" onClick={() => goTo(thisMonth)}>
                 Today
+              </button>
+            )}
+            {loadingMonth && (
+              <span className="muted small-text" role="status">
+                Loading…
+              </span>
+            )}
+            {needsOlder && olderNow.failed && (
+              <button type="button" className="link-button" onClick={() => setOlder({ ...olderNow, failed: false })}>
+                Couldn&apos;t load. Try again
               </button>
             )}
           </div>
