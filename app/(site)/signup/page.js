@@ -3,7 +3,11 @@ import SignupForm from "./SignupForm";
 import { BRAND_NAME } from "@/lib/brand";
 import { TRIAL_DAYS } from "@/lib/plans";
 
-export const metadata = { title: `Sign Up · ${BRAND_NAME}` };
+export const metadata = {
+  title: `Sign Up · ${BRAND_NAME}`,
+  description: "Start your free 14-day trial of Clientele: online booking, deposits and a waitlist for beauty pros. No card needed.",
+  alternates: { canonical: "/signup" },
+};
 
 export default function SignupPage() {
   return (

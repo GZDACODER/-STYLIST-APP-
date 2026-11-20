@@ -10,6 +10,7 @@ import { runWeeklySummaries } from "@/lib/weeklySummary";
 import { reportError } from "@/lib/errorAlerts";
 import { runOnboardingEmails } from "@/lib/onboardingEmails";
 import { runClientEmails } from "@/lib/clientEmails";
+import { runOwnerSummary } from "@/lib/ownerSummary";
 
 export async function POST(request) {
   const secret = process.env.CRON_SECRET;
@@ -43,6 +44,13 @@ export async function POST(request) {
     clientEmails = await runClientEmails();
   } catch (error) {
     await reportError("Every-minute job", error, { extra: "Client emails failed" });
+  }
+
+  // The owner's Monday summary.
+  try {
+    await runOwnerSummary();
+  } catch (error) {
+    await reportError("Every-minute job", error, { extra: "Owner summary failed" });
   }
 
   // Getting-started tips for new pros during their trial.

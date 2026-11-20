@@ -11,7 +11,7 @@ import { AVAILABLE_TYPES, COMING_SOON_TYPES } from "@/lib/businessTypes";
 
 const TITLE = `${BRAND_NAME}: Booking that puts your regulars first.`;
 const DESCRIPTION =
-  "Deposits, waitlists and regulars-only times for businesses built on regulars.";
+  "The booking app for hair stylists, barbers, and nail and lash techs: your own booking page, deposits, a smart waitlist and regulars-first times. 14 days free.";
 
 export const metadata = {
   title: TITLE,
