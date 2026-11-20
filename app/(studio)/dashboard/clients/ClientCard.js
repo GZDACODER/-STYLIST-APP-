@@ -17,6 +17,14 @@ import MergeClients from "./MergeClients";
 // The full card, shown in a panel when a row in the client list is tapped.
 // standing: what the standing appointment part needs (see ClientsPage).
 // clients, upcomingCounts, mergeWith: for "Merge with another card".
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+// "11-19" -> "Nov 19"
+const birthdayText = (md) => `${MONTHS[Number(md.slice(0, 2)) - 1]} ${Number(md.slice(3))}`;
+const todayMonthDay = () => {
+  const d = new Date();
+  return `${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+};
+
 export default function ClientCard({ client, standing, clients, upcomingCounts, mergeWith }) {
   const [editing, setEditing] = useState(false);
   const [statusError, setStatusError] = useState(null);
@@ -76,6 +84,29 @@ export default function ClientCard({ client, standing, clients, upcomingCounts, 
         </div>
       )}
       {client.notes && <p className="client-notes">{client.notes}</p>}
+      {(client.birthday || client.feedback) && (
+        <div className="client-extras">
+          {client.birthday && (
+            <p className="small-text">
+              <strong>Birthday:</strong> {birthdayText(client.birthday)}
+              {client.birthday === todayMonthDay() && <span className="badge paid"> Today!</span>}
+            </p>
+          )}
+          {client.feedback && (
+            <p className="small-text">
+              <strong>Feedback:</strong> <span className="rp-stars">{"★".repeat(Math.round(client.feedback.average))}</span>{" "}
+              {client.feedback.average.toFixed(1)} from {client.feedback.count}{" "}
+              {client.feedback.count === 1 ? "visit" : "visits"}
+              {client.feedback.last?.comment && (
+                <>
+                  {" "}
+                  · latest: &ldquo;{client.feedback.last.comment}&rdquo;
+                </>
+              )}
+            </p>
+          )}
+        </div>
+      )}
       <p className="muted small-text">
         {client.completed_visits === 1 ? "1 visit" : `${client.completed_visits || 0} visits`}
         {status === "new" &&

@@ -99,6 +99,28 @@ export default async function ClientsPage({ searchParams }) {
     };
   }
 
+  // Birthdays and feedback from the client home (step 46 SQL; none before).
+  const [{ data: bdayRows, error: bdayError }, { data: fbRows, error: fbError }] = await Promise.all([
+    supabase.from("clients").select("id, birthday").not("birthday", "is", null),
+    supabase
+      .from("visit_feedback")
+      .select("client_id, rating, comment, created_at, booking:bookings(service_name, booking_date)")
+      .order("created_at", { ascending: false })
+      .limit(2000),
+  ]);
+  const birthdayOf = bdayError ? {} : Object.fromEntries((bdayRows || []).map((r) => [r.id, r.birthday]));
+  const feedbackOf = {};
+  for (const f of fbError ? [] : fbRows || []) {
+    if (!f.client_id) continue;
+    const x = (feedbackOf[f.client_id] ??= { count: 0, total: 0, last: f });
+    x.count += 1;
+    x.total += f.rating;
+  }
+  for (const c of clients) {
+    if (birthdayOf[c.id]) c.birthday = birthdayOf[c.id];
+    if (feedbackOf[c.id]) c.feedback = { ...feedbackOf[c.id], average: feedbackOf[c.id].total / feedbackOf[c.id].count };
+  }
+
   // Example clients for a new pro (shown until they have real ones).
   const examples = clients.length === 0 && (await examplesOn(supabase, user.id)) ? exampleData(todayInTimeZone(timeZone)).clients : [];
   for (const e of examples) {
