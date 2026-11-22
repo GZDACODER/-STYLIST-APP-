@@ -224,7 +224,7 @@ export default async function TodayPage() {
       <PageHeader
         hero
         mark={Number(today.slice(8))}
-        eyebrow={dateLine}
+        eyebrow={dateLine.replace(/,? \d+$/, "").replace(", ", " · ")}
         title="Today"
         subtitle={daySummary}
         actions={
