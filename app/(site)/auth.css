@@ -1,0 +1,269 @@
+/* ==========================================================================
+   Log in, sign up, forgot and reset password. Printed rather than app-like:
+   a black plate framed with a fine gold line (beside the form on wide
+   screens, above it on phones) and the form on warm paper with ruled
+   fields and a squared ink button. Matches the dashboard's "Atelier" look.
+   ========================================================================== */
+
+.au {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: grid;
+  grid-template-columns: minmax(340px, 42%) 1fr;
+  background: #f3eee5;
+}
+
+/* ---------- The plate ---------- */
+.au-plate {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100dvh;
+  padding: 18px;
+  background: #12100d;
+  color: #f5f1ea;
+}
+
+.au-frame {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 36px 34px;
+  border: 1px solid rgba(207, 174, 108, 0.5);
+}
+
+.au .logo {
+  align-self: flex-start;
+  font-size: 2.6rem;
+  background: none;
+  color: #cfae6c;
+  -webkit-text-fill-color: #cfae6c;
+}
+
+.au-tag {
+  margin: auto 0 28px;
+  max-width: 13em;
+  font-family: var(--font-display), var(--font-serif), Georgia, serif;
+  font-size: clamp(2rem, 3.4vw, 2.9rem);
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+  color: #fbf6ea;
+}
+
+.au-list {
+  list-style: none;
+  margin: 0;
+  padding: 18px 0 0;
+  border-top: 1px solid rgba(207, 174, 108, 0.35);
+  display: grid;
+  gap: 10px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(245, 241, 234, 0.72);
+}
+
+.au-list span {
+  display: inline-block;
+  width: 3em;
+  color: #cfae6c;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- The paper side ---------- */
+.au-main {
+  /* Light theme for everything inside: the globals read these. */
+  --text: #12100d;
+  --muted: #6b655b;
+  --faint: #a39c90;
+  --input: transparent;
+  --surface: #fbf8f2;
+  --surface-2: #fbf8f2;
+  --border: #c3b8a3;
+  --border-strong: #12100d;
+  --divider: #e4dccd;
+  --gold: #a8874d;
+  --gold-light: #12100d;
+  --gold-soft: rgba(168, 135, 77, 0.12);
+  --success: #3d6b49;
+  --success-soft: rgba(61, 107, 73, 0.08);
+  --error: #9b3426;
+  --error-soft: rgba(155, 52, 38, 0.06);
+  --warning: #8a5a10;
+  --warning-soft: rgba(138, 90, 16, 0.07);
+  color-scheme: light;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 56px 32px;
+  color: var(--text);
+}
+
+.au-sheet {
+  width: 100%;
+  max-width: 440px;
+}
+
+.au-kicker {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 14px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.au-kicker::before {
+  content: "";
+  width: 28px;
+  height: 1px;
+  background: currentColor;
+}
+
+.au-main h1 {
+  font-family: var(--font-display), var(--font-serif), Georgia, serif;
+  font-weight: 500;
+  font-size: clamp(2.4rem, 7vw, 3.2rem);
+  line-height: 1.02;
+  letter-spacing: -0.012em;
+  margin: 0 0 12px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--text);
+}
+
+.au-main a {
+  color: var(--text);
+  text-decoration-color: var(--gold);
+}
+
+/* The form sits on the page, not in a box. */
+.au-main .card {
+  background: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 18px 0 8px;
+  margin: 0 0 18px;
+  overflow: visible;
+}
+
+.au-main .card::before {
+  content: none;
+}
+
+.au-main label {
+  gap: 4px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* Ruled fields: a line to write on. */
+.au-main input,
+.au-main select,
+.au-main textarea {
+  padding: 10px 0 9px;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  background: transparent;
+  color: var(--text);
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.au-main select {
+  -webkit-appearance: none;
+  appearance: none;
+  min-height: 0;
+  padding-right: 24px;
+  background: no-repeat right 4px center / 10px
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%2312100d' stroke-width='1.3'/%3E%3C/svg%3E");
+}
+
+.au-main input:focus,
+.au-main select:focus,
+.au-main textarea:focus {
+  border-color: var(--text);
+  box-shadow: inset 0 -1px 0 var(--text);
+}
+
+.au-main .button {
+  border-radius: 2px;
+  background: var(--text);
+  color: #fbf6ea;
+  border-color: var(--text);
+  box-shadow: none;
+  margin-top: 6px;
+}
+
+.au-main .button:hover:not(:disabled) {
+  box-shadow: inset 0 -2px 0 #cfae6c;
+}
+
+.au-main .button:active {
+  transform: none;
+}
+
+.au-main .button.secondary {
+  background: transparent;
+  color: var(--text);
+  border-color: var(--text);
+}
+
+.au-main .message {
+  border-radius: 2px;
+}
+
+.au-main .message.info {
+  color: var(--text);
+  border-color: var(--gold);
+  border-left-width: 3px;
+}
+
+.au-main .forgot-link {
+  margin: -6px 0 0;
+}
+
+/* ---------- Phones and small tablets: plate on top ---------- */
+@media (max-width: 859px) {
+  .au {
+    grid-template-columns: 1fr;
+    align-content: start;
+  }
+
+  .au-plate {
+    position: static;
+    height: auto;
+    padding: 12px;
+  }
+
+  .au-frame {
+    padding: 22px 22px 24px;
+  }
+
+  .au .logo {
+    font-size: 2.2rem;
+  }
+
+  .au-tag {
+    margin: 18px 0 0;
+    font-size: 1.55rem;
+  }
+
+  .au-list {
+    display: none;
+  }
+
+  .au-main {
+    align-items: flex-start;
+    padding: 36px 22px 56px;
+  }
+}

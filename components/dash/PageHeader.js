@@ -5,10 +5,16 @@
 // that replays them.
 import PageGuide from "@/components/guide/PageGuide";
 
-// hero: the dark, gold-lit header (Home).
-export default function PageHeader({ eyebrow, title, subtitle, actions, guide, hero = false }) {
+// hero: the black header framed in gold (Home, Today).
+// mark: a large figure beside the title (Today's day of the month).
+export default function PageHeader({ eyebrow, title, subtitle, actions, guide, hero = false, mark = null }) {
   return (
-    <header className={hero ? "db-pagehead is-hero" : "db-pagehead"}>
+    <header className={`db-pagehead${hero ? " is-hero" : ""}${mark != null ? " has-mark" : ""}`}>
+      {mark != null && (
+        <p className="db-pagehead-mark" aria-hidden="true">
+          {mark}
+        </p>
+      )}
       <div className="db-pagehead-text">
         {eyebrow && <p className="db-date">{eyebrow}</p>}
         <h1>

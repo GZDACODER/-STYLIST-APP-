@@ -419,3 +419,170 @@
   background: transparent;
   letter-spacing: 0.04em;
 }
+
+/* ---------- Today: the day sheet ---------- */
+.db .db-pagehead.has-mark {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 28px;
+}
+
+.db .db-pagehead-mark {
+  margin: 0;
+  padding-right: 28px;
+  border-right: 1px solid rgba(207, 174, 108, 0.45);
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 400;
+  font-size: clamp(4.6rem, 10vw, 6.6rem);
+  line-height: 0.82;
+  letter-spacing: -0.03em;
+  font-variant-numeric: lining-nums;
+  color: var(--gold-bright);
+}
+
+.db .db-pagehead.has-mark .db-pagehead-sub {
+  letter-spacing: 0.02em;
+}
+
+@media (max-width: 899px) {
+  .db .db-pagehead.has-mark {
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: 20px;
+    row-gap: 22px;
+  }
+  .db .db-pagehead-mark {
+    padding-right: 20px;
+    font-size: 4.6rem;
+  }
+  .db .db-pagehead.has-mark .db-pagehead-actions {
+    grid-column: 1 / -1;
+  }
+}
+
+/* The timeline: times set like a printed schedule. */
+.db .db-section-head h2 {
+  letter-spacing: -0.005em;
+}
+
+.db .db-slot-time {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.15rem;
+  color: var(--ink);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.db .db-slot-time span {
+  font-family: var(--font-sans), sans-serif;
+}
+
+.db .db-next {
+  padding: 18px 18px 14px;
+  border: 1px solid var(--border);
+  border-top: 2px solid var(--ink);
+  background: var(--surface);
+}
+
+.db .db-wrapup {
+  border-radius: var(--r);
+  border-left: 3px solid var(--gold);
+}
+
+/* ---------- Openings: the week strip ---------- */
+.db .op-days {
+  gap: 4px;
+}
+
+.db .op-day {
+  padding: 8px 0 4px;
+  border-color: var(--border);
+  background: transparent;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.62rem;
+}
+
+.db .op-day strong {
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 500;
+  font-size: 1.45rem;
+  line-height: 1.1;
+  letter-spacing: 0;
+  font-variant-numeric: lining-nums;
+}
+
+.db .op-day.active {
+  box-shadow: inset 0 -2px 0 var(--gold-bright);
+}
+
+.db .op-arrow {
+  border-color: var(--ink);
+  background: transparent;
+}
+
+/* ---------- Settings: a numbered table of contents ---------- */
+.db .settings-nav-title {
+  font-size: clamp(2.3rem, 5.2vw, 3.4rem);
+  line-height: 1.02;
+  padding-bottom: 18px;
+  margin-bottom: 0;
+  border-bottom: 1px solid var(--ink);
+}
+
+.settings-nav ul {
+  counter-reset: settings-sec;
+  border-top: 0;
+}
+
+.db .settings-nav-link {
+  grid-template-columns: 2.6em minmax(0, 1fr) auto;
+  justify-items: start;
+  text-align: left;
+  border-left: 0;
+  padding-left: 4px;
+}
+
+.db .settings-nav-link::before {
+  counter-increment: settings-sec;
+  content: counter(settings-sec, decimal-leading-zero);
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  align-self: start;
+  padding-top: 0.35em;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  color: var(--gold);
+  font-variant-numeric: tabular-nums;
+}
+
+.db .settings-nav-label {
+  grid-column: 2;
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 500;
+  font-size: 1.22rem;
+  line-height: 1.2;
+}
+
+.db .settings-nav-note {
+  grid-column: 2;
+}
+
+.db .settings-nav-link .db-row-chevron {
+  grid-column: 3;
+}
+
+.db .settings-nav-link.active {
+  background: var(--gold-soft);
+  box-shadow: inset 2px 0 0 var(--gold);
+}
+
+@media (max-width: 699px) {
+  .db .settings-nav ul {
+    background: transparent;
+    border: 0;
+  }
+  .db .settings-nav-link {
+    padding: 16px 4px;
+  }
+}
