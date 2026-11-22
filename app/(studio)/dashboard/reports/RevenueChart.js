@@ -4,7 +4,7 @@
 // columns from one baseline, a 2px gap between the two parts, a rounded top,
 // hairline gridlines. Hover or tab to a column for its numbers; "Show as
 // table" lists them all. Colors checked for color-blind readers (gold
-// #a8790f and blue #3a5fb8 on white), with a legend and a table as well.
+// #a8790f and charcoal #3d3a35 on white: different in lightness as well as colour), with a legend and a table as well.
 import { useState } from "react";
 import { parseDateString } from "@/lib/availability";
 

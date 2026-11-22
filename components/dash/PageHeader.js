@@ -5,9 +5,10 @@
 // that replays them.
 import PageGuide from "@/components/guide/PageGuide";
 
-export default function PageHeader({ eyebrow, title, subtitle, actions, guide }) {
+// hero: the dark, gold-lit header (Home).
+export default function PageHeader({ eyebrow, title, subtitle, actions, guide, hero = false }) {
   return (
-    <header className="db-pagehead">
+    <header className={hero ? "db-pagehead is-hero" : "db-pagehead"}>
       <div className="db-pagehead-text">
         {eyebrow && <p className="db-date">{eyebrow}</p>}
         <h1>

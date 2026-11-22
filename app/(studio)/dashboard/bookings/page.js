@@ -212,6 +212,7 @@ export default async function BookingsPage({ searchParams }) {
           closedHolidays={closedHolidays}
           loadedFrom={exampleBookings ? null : windowStart}
           hasOlder={!exampleBookings && hasOlder}
+          timeZone={stylist.timezone}
           openAdd={add === "event"}
           key={add === "event" ? "add" : "cal"}
         />

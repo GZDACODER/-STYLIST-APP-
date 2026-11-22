@@ -1766,3 +1766,148 @@ body:has(dialog.pf-viewer[open]) {
   border-radius: 6px;
   font: inherit;
 }
+
+/* ==========================================================================
+   "Atelier" refresh for booking pages, client sign-in and the client home:
+   a gold-lit name panel, soft rounded cards, tile dates, pill times and
+   buttons. Layered over the rules above.
+   ========================================================================== */
+.bk {
+  --r-lg: 20px;
+  --r-md: 14px;
+  --lift: 0 1px 2px rgba(41, 33, 20, 0.04), 0 14px 34px -18px rgba(70, 52, 22, 0.24);
+  background:
+    radial-gradient(900px 420px at 110% -5%, rgba(212, 181, 116, 0.14), transparent 60%),
+    var(--paper);
+}
+
+/* The name panel: a soft gold glow, rounded at the bottom. */
+.bk-plate:not(.bk-plate-photo) {
+  background:
+    radial-gradient(520px 260px at 100% 0%, rgba(212, 181, 116, 0.28), transparent 65%),
+    radial-gradient(420px 260px at 0% 100%, rgba(212, 181, 116, 0.1), transparent 70%),
+    linear-gradient(160deg, #1b1814 0%, #0d0c0a 100%);
+}
+
+.bk-plate {
+  border-radius: 0 0 28px 28px;
+  overflow: hidden;
+}
+
+/* Services: soft cards; the chosen one turns black and gold. */
+.bk .choice-list {
+  gap: 10px;
+  border-bottom: 0;
+}
+
+.bk .choice {
+  padding: 18px 20px;
+  border: 1px solid rgba(41, 33, 20, 0.08);
+  border-radius: var(--r-md);
+  background: #fffdf9;
+  box-shadow: var(--lift);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.bk .choice:hover {
+  transform: translateY(-1px);
+}
+
+.bk .choice.selected {
+  padding-left: 20px;
+  background: radial-gradient(360px 160px at 100% 0%, rgba(212, 181, 116, 0.3), transparent 70%), #12100d;
+  border-color: #12100d;
+  box-shadow: 0 18px 36px -18px rgba(14, 12, 8, 0.7);
+}
+
+.bk .choice.selected .service-name,
+.bk .choice.selected .choice-price {
+  color: #fbf6ea;
+}
+
+.bk .choice.selected .choice-meta {
+  color: rgba(245, 241, 234, 0.7);
+}
+
+/* Dates: rounded tiles. */
+.bk .date-grid {
+  gap: 10px;
+}
+
+.bk .date-choice {
+  min-width: 64px;
+  padding: 10px 8px 12px;
+  border: 1px solid rgba(41, 33, 20, 0.1);
+  border-radius: 16px;
+  background: #fffdf9;
+  box-shadow: var(--lift);
+}
+
+.bk .date-choice.selected,
+.bk .date-choice.selected:hover {
+  background: #12100d;
+  border-color: #12100d;
+  color: #fbf6ea;
+}
+
+.bk .date-choice.selected .date-day,
+.bk .date-choice.selected .date-weekday,
+.bk .date-choice.selected .date-month {
+  color: #fbf6ea;
+}
+
+/* Times: pills. */
+.bk .time-choice {
+  border-radius: 999px;
+}
+
+/* Buttons, inputs, cards. */
+.bk .button,
+.bk .button.small {
+  border-radius: 999px;
+}
+
+.bk .button:not(.secondary) {
+  background: linear-gradient(180deg, #1c1a16 0%, #0e0e0e 100%);
+}
+
+.bk .button:not(.secondary):hover:not(:disabled) {
+  box-shadow: 0 0 0 4px rgba(212, 181, 116, 0.22), 0 12px 24px -12px rgba(14, 14, 14, 0.6);
+}
+
+.bk input[type="text"],
+.bk input[type="email"],
+.bk input[type="tel"],
+.bk input:not([type]),
+.bk textarea,
+.bk select {
+  border-radius: 12px;
+}
+
+.bk .chip {
+  border-radius: 999px;
+}
+
+.bk .message {
+  border-radius: var(--r-md);
+}
+
+/* The client sign-in and home use cards. */
+.bk .cl-main .card {
+  border: 1px solid rgba(41, 33, 20, 0.07);
+  border-radius: var(--r-lg);
+  background: #fffdf9;
+  box-shadow: var(--lift);
+  padding: 24px 22px;
+}
+
+.bk .cl-regular.is-regular {
+  background:
+    radial-gradient(360px 180px at 100% 0%, rgba(212, 181, 116, 0.32), transparent 70%),
+    linear-gradient(160deg, #1b1814 0%, #0d0c0a 100%);
+  border-color: #0d0c0a;
+}
+
+.bk .cl-regular {
+  border-top: 1px solid rgba(41, 33, 20, 0.07);
+}
