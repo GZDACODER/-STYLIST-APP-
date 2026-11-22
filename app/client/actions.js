@@ -151,7 +151,7 @@ export async function forgotProCode(emailText) {
   const base = site();
   const name = String(pros[0].client_name || "").trim().split(/\s+/)[0];
   const list = pros
-    .map((p) => `<p style="margin:0 0 10px;"><strong>${escapeHtml(p.business_name)}</strong><br>ID: <strong style="letter-spacing:1px;">${escapeHtml(p.pro_code)}</strong> · <a href="${escapeHtml(`${base}/client?code=${p.pro_code}`)}" style="color:#8a6d1f;">Sign in</a></p>`)
+    .map((p) => `<p style="margin:0 0 10px;"><strong>${escapeHtml(p.business_name)}</strong><br>ID: <strong style="letter-spacing:1px;">${escapeHtml(p.pro_code)}</strong> · <a href="${escapeHtml(`${base}/client?code=${p.pro_code}`)}" style="color:#12100d;">Sign in</a></p>`)
     .join("");
   await sendEmails([
     {

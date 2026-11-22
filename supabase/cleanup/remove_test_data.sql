@@ -1,6 +1,6 @@
 -- Removing test data. Run in Supabase -> SQL Editor, one step at a time, in order.
 --
--- "Test" means: the test logins (emails with +claude, +run1, +run2 or +client), the
+-- "Test" means: the test logins (emails with +claude, +run1, +run2, +run3 or +client), the
 -- test businesses (Claude Test Studio, Claude Client Test Studio, Claude
 -- Run-through Studio, Launch Test Studio) and everything in them, plus any booking, client, waitlist
 -- entry or intake form made with a test email or test client name on any
@@ -20,7 +20,7 @@ drop table if exists cleanup_test.logins, cleanup_test.pros, cleanup_test.bookin
   cleanup_test.clients, cleanup_test.waitlist_entries, cleanup_test.intake_responses;
 
 create table cleanup_test.logins as
-  select id, email from auth.users where email ~* '\+(claude|run1|run2|client)@';
+  select id, email from auth.users where email ~* '\+(claude|run1|run2|run3|client)@';
 create table cleanup_test.pros as
   select id, business_name from public.stylists
   where id in (select id from cleanup_test.logins)
@@ -28,23 +28,23 @@ create table cleanup_test.pros as
 create table cleanup_test.bookings as
   select id from public.bookings
   where stylist_id in (select id from cleanup_test.pros)
-     or client_email ~* '\+(claude|run1|run2|client)@'
+     or client_email ~* '\+(claude|run1|run2|run3|client)@'
      or client_name ~* '^(run test client|launch test client)$';
 create table cleanup_test.clients as
   select id from public.clients
   where stylist_id in (select id from cleanup_test.pros)
-     or email ~* '\+(claude|run1|run2|client)@'
+     or email ~* '\+(claude|run1|run2|run3|client)@'
      or name ~* '^(run test client|launch test client)$';
 create table cleanup_test.waitlist_entries as
   select id from public.waitlist_entries
   where stylist_id in (select id from cleanup_test.pros)
      or user_id in (select id from cleanup_test.logins)
-     or coalesce(email, verified_email, '') ~* '\+(claude|run1|run2|client)@';
+     or coalesce(email, verified_email, '') ~* '\+(claude|run1|run2|run3|client)@';
 create table cleanup_test.intake_responses as
   select id from public.intake_responses
   where stylist_id in (select id from cleanup_test.pros)
      or user_id in (select id from cleanup_test.logins)
-     or coalesce(email, '') ~* '\+(claude|run1|run2|client)@';
+     or coalesce(email, '') ~* '\+(claude|run1|run2|run3|client)@';
 
 select 'Test logins' as what, count(*) as how_many, string_agg(email, ', ') as details from cleanup_test.logins
 union all
