@@ -19,6 +19,7 @@ import { colorOf, eventOccursOn, eventsOn } from "@/lib/calendarEvents";
 import { holidaysOn } from "@/lib/holidays";
 import { HolidayDayControls } from "../settings/HolidaySettings";
 import { loadOlderBookings } from "./actions";
+import DayView from "./DayView";
 
 const MONTHS_BACK = 12;
 const MONTHS_AHEAD = 12;
@@ -49,6 +50,7 @@ export default function CalendarView({
   openAdd = false,
   loadedFrom = null,
   hasOlder = false,
+  timeZone = null,
 }) {
   const closedSet = new Set(closedHolidays);
   // A federal holiday the business is closed on: every year (Settings), or
@@ -57,7 +59,20 @@ export default function CalendarView({
     holidaysOn(dateText).find(
       (h) => h.key && (closedSet.has(h.key) || blocked[dateText] === `Closed – ${h.name}`)
     );
-  const [view, setView] = useState("month");
+  // Day (the default), Month or List; the last one used is remembered.
+  const [view, setViewState] = useState("day");
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem("clientele-calendar-view");
+      if (saved === "month" || saved === "list" || saved === "day") setViewState(saved);
+    } catch {}
+  }, []);
+  const setView = (v) => {
+    setViewState(v);
+    try {
+      window.localStorage.setItem("clientele-calendar-view", v);
+    } catch {}
+  };
   const [month, setMonth] = useState(() => monthIndex(today));
   const [selected, setSelected] = useState(today);
   const [openId, setOpenId] = useState(null);
@@ -132,6 +147,18 @@ export default function CalendarView({
 
   function closeEventSheet() {
     setEventSheet(null);
+  }
+
+  // Day view: the day before or after, keeping the month (and the visits
+  // loaded for it) in step.
+  function moveDay(n) {
+    const d = parseDateString(selected);
+    d.setDate(d.getDate() + n);
+    const next = toDateString(d);
+    const m = monthIndex(next);
+    if (m < thisMonth - MONTHS_BACK || m > thisMonth + MONTHS_AHEAD) return;
+    setSelected(next);
+    if (m !== month) setMonth(m);
   }
 
   function goTo(newMonth) {
@@ -224,6 +251,7 @@ export default function CalendarView({
       <div className="mc-top">
         <div className="segmented notes-mode" role="group" aria-label="Calendar view">
           {[
+            { value: "day", label: "Day" },
             { value: "month", label: "Month" },
             { value: "list", label: "List" },
           ].map((v) => (
@@ -240,7 +268,29 @@ export default function CalendarView({
         </div>
       </div>
 
-      {view === "list" ? (
+      {view === "day" ? (
+        <DayView
+          date={selected}
+          today={today}
+          timeZone={timeZone}
+          bookings={dayList}
+          events={selEvents}
+          workHours={hasHours ? selHours : null}
+          allDay={[
+            ...(closedOn(selected) ? [{ label: `Closed – ${closedOn(selected).name}`, tone: "closed" }] : []),
+            ...selHolidays.filter((h) => closedOn(selected)?.key !== h.key).map((h) => ({ label: h.name, tone: "holiday" })),
+            ...(selKind === "blocked" ? [{ label: `Blocked${blocked[selected] ? `: ${blocked[selected]}` : ""}`, tone: "blocked" }] : []),
+            ...(selKind === "off" && !closedOn(selected) ? [{ label: "Day off", tone: "off" }] : []),
+          ]}
+          onOpenBooking={(b) => setOpenId(b.id)}
+          onOpenEvent={(e) => setEventSheet({ mode: "view", id: e.id })}
+          onPrev={() => moveDay(-1)}
+          onNext={() => moveDay(1)}
+          onToday={() => goTo(thisMonth)}
+          onAddEvent={events ? () => setEventSheet({ mode: "add" }) : null}
+          loading={loadingMonth}
+        />
+      ) : view === "list" ? (
         days.length === 0 ? (
           <p className="muted">No upcoming bookings.</p>
         ) : (
@@ -318,6 +368,9 @@ export default function CalendarView({
           <div className="mc-day">
             <div className="day-heading">
               <strong>{selected === today ? `Today · ${formatDate(selected)}` : formatDate(selected)}</strong>
+              <button type="button" className="link-button small-text" onClick={() => setView("day")}>
+                Day view
+              </button>
               <span className="muted small-text">
                 {dayList.length === 1 ? "1 booking" : `${dayList.length} bookings`}
               </span>

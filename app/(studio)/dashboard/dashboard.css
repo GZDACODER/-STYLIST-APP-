@@ -937,10 +937,7 @@ body:has(.db) {
   color: var(--muted);
 }
 
-/* Sharp corners on everything inside a panel (openings, calendar, forms). */
-.db .card * {
-  border-radius: 0 !important;
-}
+/* (Corners inside panels follow atelier.css.) */
 
 /* ---------- Settings: Your business (cover photo and links) ---------- */
 .db .field-label {
@@ -2690,7 +2687,7 @@ body:has(dialog.client-sheet[open]) {
 .db .rc-swatch.new,
 .db .rp-key.new,
 .db .rc-seg.new {
-  background: #3a5fb8;
+  background: #3d3a35;
 }
 
 .db .rc {
@@ -5015,4 +5012,298 @@ body:has(dialog.client-sheet[open]) {
 .rp-stars {
   color: #c8a96a;
   letter-spacing: 2px;
+}
+
+/* ============ Calendar: Day view ============ */
+.dv {
+  --dv-gutter: 58px;
+  margin-top: 4px;
+}
+.dv-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 10px;
+}
+.dv-nav {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.dv-nav:hover {
+  border-color: var(--ink);
+}
+.dv-date {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.dv-weekday {
+  font-size: 0.68rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold-dark);
+}
+.dv-date strong {
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 500;
+  font-size: 1.7rem;
+  line-height: 1.1;
+}
+.dv-today {
+  margin-left: auto;
+}
+.dv-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  padding: 10px 0 14px;
+  border-bottom: 1px solid var(--divider);
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.dv-summary strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+.dv-allday {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 0 0 var(--dv-gutter);
+}
+.dv-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  font: inherit;
+  font-size: 0.78rem;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink);
+}
+.dv-chip.holiday {
+  border-color: var(--gold);
+  color: var(--gold-dark);
+}
+.dv-chip.closed,
+.dv-chip.blocked {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #f5f1ea;
+}
+.dv-chip.off {
+  color: var(--muted);
+}
+.dv-chip.event {
+  border-left: 3px solid var(--ev);
+  cursor: pointer;
+}
+.dv-grid {
+  position: relative;
+  margin-top: 12px;
+}
+.dv-off {
+  position: absolute;
+  left: var(--dv-gutter);
+  right: 0;
+  background: repeating-linear-gradient(135deg, rgba(14, 14, 14, 0.035) 0 6px, transparent 6px 12px);
+}
+.dv-hour {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px solid var(--divider);
+}
+.dv-hour span {
+  position: absolute;
+  top: -8px;
+  left: 0;
+  width: calc(var(--dv-gutter) - 10px);
+  text-align: right;
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  color: var(--faint);
+  background: var(--surface);
+  padding-right: 4px;
+}
+.dv-lane {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--dv-gutter);
+  right: 0;
+}
+.dv-block {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 6px 9px;
+  overflow: hidden;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  border: 0;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  animation: dv-in 0.25s ease both;
+}
+.dv-block:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(14, 14, 14, 0.12);
+}
+.dv-block:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 1px;
+}
+.dv-booking {
+  background: linear-gradient(180deg, #fbf6ea, #f6eedb);
+  border-left: 3px solid var(--gold);
+  color: var(--ink);
+}
+.dv-booking.regular {
+  background: linear-gradient(180deg, #14120f, #0e0e0e);
+  border-left-color: var(--gold);
+  color: #f5f1ea;
+}
+.dv-booking.regular .dv-meta {
+  color: rgba(245, 241, 234, 0.7);
+}
+.dv-booking.past {
+  opacity: 0.55;
+}
+.dv-event {
+  background: color-mix(in srgb, var(--ev) 14%, #fff);
+  border-left: 3px solid var(--ev);
+  color: var(--ink);
+}
+.dv-event.blocks {
+  background: repeating-linear-gradient(135deg, #1b1915 0 7px, #26231d 7px 14px);
+  border-left-color: var(--ev);
+  color: #f5f1ea;
+}
+.dv-event.blocks .dv-meta {
+  color: rgba(245, 241, 234, 0.7);
+}
+.dv-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.02rem;
+  font-weight: 600;
+  line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+.dv-meta {
+  font-size: 0.72rem;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+.dv-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 2px;
+}
+.dv-tag {
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border: 1px solid currentColor;
+}
+.dv-tag.paid {
+  color: var(--success);
+}
+.dv-booking.regular .dv-tag.paid {
+  color: #c8e6c9;
+}
+.dv-tag.warn {
+  color: var(--warning);
+}
+.dv-now {
+  position: absolute;
+  left: calc(var(--dv-gutter) - 5px);
+  right: 0;
+  height: 0;
+  border-top: 2px solid var(--gold);
+  z-index: 2;
+  pointer-events: none;
+}
+.dv-now span {
+  position: absolute;
+  left: 0;
+  top: -6px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 0 4px var(--gold-soft);
+}
+.dv-empty {
+  text-align: center;
+  margin: 10px 0 0;
+}
+.dv-add {
+  margin-top: 16px;
+}
+@keyframes dv-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dv-block {
+    animation: none;
+    transition: none;
+  }
+}
+@media (max-width: 599px) {
+  .dv {
+    --dv-gutter: 48px;
+  }
+  .dv-date strong {
+    font-size: 1.4rem;
+  }
+}
+.dv-hour span {
+  white-space: nowrap;
+  font-size: 0.62rem;
+}
+/* Short visits: name and time on one line, no tags. */
+.dv-block.compact {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 9px;
+}
+.dv-block.compact .dv-tags {
+  display: none;
+}
+.dv-block.compact .dv-title {
+  font-size: 0.92rem;
+  flex: 0 1 auto;
+}
+.dv-block.compact .dv-meta {
+  flex: 1 1 auto;
 }

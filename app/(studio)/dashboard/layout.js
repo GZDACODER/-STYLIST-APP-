@@ -12,6 +12,7 @@ import { PLANS } from "@/lib/plans";
 import { formatPrice } from "@/lib/money";
 import GuideProvider from "@/components/guide/GuideProvider";
 import "./dashboard.css";
+import "./atelier.css";
 
 // The same serif as the public booking page.
 const display = Cormorant_Garamond({
