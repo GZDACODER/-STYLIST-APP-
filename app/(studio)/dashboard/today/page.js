@@ -205,11 +205,28 @@ export default async function TodayPage() {
   });
 
 
+  // The day in one line, under the title.
+  const realToday = appointments.filter((b) => !b.example);
+  const upcomingToday = appointments.filter((b) => b.start_time.slice(0, 5) > nowTime);
+  const daySummary = [
+    `${appointments.length} ${appointments.length === 1 ? "appointment" : "appointments"} today`,
+    upcomingToday.length > 0 && upcomingToday.length < appointments.length
+      ? `${upcomingToday.length} still to come`
+      : null,
+    upcomingToday.length > 0 && realToday.length > 0 ? `next at ${clockTime(upcomingToday[0].start_time)}` : null,
+    `${openTimes.length} open ${openTimes.length === 1 ? "time" : "times"} left this week`,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
   return (
     <>
       <PageHeader
+        hero
+        mark={Number(today.slice(8))}
+        eyebrow={dateLine}
         title="Today"
-        subtitle={dateLine}
+        subtitle={daySummary}
         actions={
           <Link href="/dashboard/openings#add-opening" className="button small">
             + Add opening

@@ -12,6 +12,7 @@ export const metadata = {
 export default function SignupPage() {
   return (
     <>
+      <p className="au-kicker">14 days free</p>
       <h1>Create your business account</h1>
       <p className="muted">
         Free for {TRIAL_DAYS} days with everything included. No card needed.

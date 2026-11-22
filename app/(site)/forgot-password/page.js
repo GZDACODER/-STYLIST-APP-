@@ -9,6 +9,7 @@ export default async function ForgotPasswordPage({ searchParams }) {
 
   return (
     <>
+      <p className="au-kicker">Your account</p>
       <h1>Forgot your password?</h1>
       {error === "link" && (
         // The emailed link didn't work: expired, used already, or opened in a

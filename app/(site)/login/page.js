@@ -9,6 +9,7 @@ export default async function LoginPage({ searchParams }) {
 
   return (
     <>
+      <p className="au-kicker">Welcome back</p>
       <h1>Log in</h1>
       {error === "confirm" && (
         // The link confirms the email first. Finishing the log-in only works in

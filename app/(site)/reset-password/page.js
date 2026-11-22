@@ -16,6 +16,7 @@ export default async function ResetPasswordPage() {
   if (!user) {
     return (
       <>
+        <p className="au-kicker">Your account</p>
         <h1>Choose a new password</h1>
         <p className="message error">
           This reset link has expired or was already used. Please{" "}
