@@ -14,6 +14,7 @@ import { normalizePhone, textCodesEnabled } from "@/lib/phone";
 import { emailStylistCancellation, runWaitlistSafely } from "@/lib/waitlist";
 import { emailReschedule } from "@/lib/bookingEmails";
 import { headers } from "next/headers";
+import { DEMO_BOOKING_OFF, isDemoSlug } from "@/lib/demo";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -233,6 +234,7 @@ export async function submitIntake(slug, serviceId, answers, signedName) {
 }
 
 export async function book({ slug, serviceId, date, time, name, phone, email, invite }) {
+  if (isDemoSlug(slug)) return { error: DEMO_BOOKING_OFF };
   // A service that needs the intake form: it must be on file first.
   const intake = await getIntake(slug, serviceId);
   if (intake.needed) return { error: BOOKING_ERRORS.intake_required, code: "intake_required" };
@@ -266,6 +268,7 @@ export async function book({ slug, serviceId, date, time, name, phone, email, in
 // ---------- Waitlist ----------
 
 export async function joinWaitlist({ slug, serviceId, name, phone, email, days, times, textOk }) {
+  if (isDemoSlug(slug)) return { error: DEMO_BOOKING_OFF };
   const supabase = await createBookingClient();
   const { data, error } = await supabase.rpc("join_waitlist", {
     p_slug: String(slug),

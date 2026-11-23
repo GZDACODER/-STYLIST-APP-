@@ -11,6 +11,7 @@ import { MAX_TEAM_MEMBERS, ensureCustomer, ensurePrice, setAssistant, setTeamMem
 import { revalidatePath } from "next/cache";
 import { paymentsConfigured, getStripe } from "@/lib/stripe";
 import { publicSiteUrl } from "@/lib/siteUrl";
+import { DEMO_LOCKED, isDemo } from "@/lib/demo";
 
 async function origin() {
   const h = await headers();
@@ -35,6 +36,7 @@ export async function startCheckout(prevState, formData) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { error: "Please log in again." };
+  if (isDemo(user)) return { error: DEMO_LOCKED };
 
   const plan = await getMyPlan(supabase, user.id);
   if (!plan.ready) return { error: "Run supabase/migrations/0017_plans.sql in Supabase first." };
@@ -100,6 +102,7 @@ export async function changeTeamMembers(prevState, formData) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { error: "Please log in again." };
+  if (isDemo(user)) return { error: DEMO_LOCKED };
   const plan = await getMyPlan(supabase, user.id);
   if (plan.comped) return { error: "Your account is free, so there's nothing to change." };
   if (!plan.subscribed) return { error: "Choose a plan first, then add team members." };
@@ -131,6 +134,7 @@ export async function startAssistantCheckout(prevState, formData) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { error: "Please log in again." };
+  if (isDemo(user)) return { error: DEMO_LOCKED };
   const plan = await getMyPlan(supabase, user.id);
   if (!plan.ready) return { error: "Run supabase/migrations/0017_plans.sql in Supabase first." };
   if (plan.subscribed) return { error: "You already have a subscription. Use the Assistant switch above instead." };
@@ -169,6 +173,7 @@ export async function changeAssistant(prevState, formData) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { error: "Please log in again." };
+  if (isDemo(user)) return { error: DEMO_LOCKED };
   const plan = await getMyPlan(supabase, user.id);
   if (!plan.subscribed) return { error: "Choose a plan first, then add the Assistant." };
 

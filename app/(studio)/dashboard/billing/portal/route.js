@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getStripe, paymentsConfigured } from "@/lib/stripe";
 import { publicSiteUrl } from "@/lib/siteUrl";
+import { DEMO_LOCKED, isDemo } from "@/lib/demo";
 
 export async function GET(request) {
   const site = publicSiteUrl(new URL(request.url).origin);
@@ -15,6 +16,7 @@ export async function GET(request) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.redirect(`${site}/login`);
+  if (isDemo(user)) return NextResponse.redirect(`${site}/dashboard?demo=locked`);
 
   const { data: plan } = await supabase
     .from("stylist_plans")

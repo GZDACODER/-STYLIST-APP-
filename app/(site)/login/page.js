@@ -11,6 +11,9 @@ export default async function LoginPage({ searchParams }) {
     <>
       <p className="au-kicker">Welcome back</p>
       <h1>Log in</h1>
+      {error === "demo" && (
+        <p className="message info">The demo couldn&apos;t open just now. Please try the demo link again in a minute.</p>
+      )}
       {error === "confirm" && (
         // The link confirms the email first. Finishing the log-in only works in
         // the browser that signed up, so on another phone or browser this shows,
