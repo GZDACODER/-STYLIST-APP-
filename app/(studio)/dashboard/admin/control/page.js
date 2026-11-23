@@ -95,7 +95,10 @@ export default async function ControlRoomPage() {
 
   const env = process.env;
   const sha = (env.VERCEL_GIT_COMMIT_SHA || "").slice(0, 7);
-  const commit = (env.VERCEL_GIT_COMMIT_MESSAGE || "").split("\n")[0];
+  // "Merge pull request #117 from owner/branch" reads as "update #117".
+  const rawCommit = (env.VERCEL_GIT_COMMIT_MESSAGE || "").split("\n")[0];
+  const prNumber = rawCommit.match(/^Merge pull request #(\d+)/)?.[1];
+  const commit = prNumber ? `update #${prNumber}` : rawCommit;
   const stripeKey = env.STRIPE_SECRET_KEY || "";
   const stripeLive = stripeKey.startsWith("sk_live") || stripeKey.startsWith("rk_live");
 
@@ -110,7 +113,7 @@ export default async function ControlRoomPage() {
       name: "Website",
       status: "ok",
       value: "Live",
-      note: sha ? `Vercel · version ${sha}${commit ? `: ${commit.slice(0, 60)}` : ""}` : `Vercel · ${env.VERCEL_ENV || "local"}`,
+      note: sha ? `Vercel · ${commit ? commit.slice(0, 60) : `version ${sha}`}` : `Vercel · ${env.VERCEL_ENV || "local"}`,
     },
     {
       name: "Database",
