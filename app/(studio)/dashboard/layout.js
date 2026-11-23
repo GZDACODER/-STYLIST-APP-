@@ -13,6 +13,7 @@ import { PLANS } from "@/lib/plans";
 import { formatPrice } from "@/lib/money";
 import GuideProvider from "@/components/guide/GuideProvider";
 import { isDemo } from "@/lib/demo";
+import { PRO_TERMS_VERSION } from "@/lib/agreements";
 import { TemplateProvider } from "@/components/TemplateContext";
 import { getMyTemplate } from "@/lib/templates/server";
 import "./dashboard.css";
@@ -107,6 +108,19 @@ export default async function DashboardLayout({ children }) {
         </main>
       </div>
     );
+  }
+
+  // The Clientele agreement (step 54 SQL): signed before using the dashboard,
+  // and again when its version changes. Demo accounts are exempt.
+  if (!isDemo(user)) {
+    const { data: signedTerms, error: termsError } = await supabase
+      .from("pro_agreements")
+      .select("id")
+      .eq("stylist_id", user.id)
+      .eq("kind", "pro_terms")
+      .gte("version", PRO_TERMS_VERSION)
+      .limit(1);
+    if (!termsError && !signedTerms?.length) redirect("/agreement");
   }
 
   // The pro's business-type template: words and which features are on.
