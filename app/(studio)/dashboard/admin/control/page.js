@@ -6,10 +6,11 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { isAdmin } from "@/lib/admin";
+import { isAdmin, isOwnerAlias } from "@/lib/admin";
 import { BRAND_NAME } from "@/lib/brand";
 import PageHeader from "@/components/dash/PageHeader";
 import ControlTabs from "./ControlTabs";
+import { templateFor } from "@/lib/templates";
 import CopyLinkButton from "@/components/dash/CopyLinkButton";
 import { publicSiteUrl } from "@/lib/siteUrl";
 
@@ -218,6 +219,15 @@ export default async function ControlRoomPage() {
       : "Everything is running";
 
   const demoLink = `${publicSiteUrl("https://www.clientelesuite.com")}/demo`;
+  // The owner's own extra accounts (same email + "+tag"): Barber, Tattoo...
+  const { data: aliasUsers } = await admin.auth.admin.listUsers({ perPage: 1000 });
+  const aliasIds = (aliasUsers?.users || []).filter((u) => isOwnerAlias(u.email)).map((u) => u.id);
+  const { data: aliasPros } = aliasIds.length
+    ? await admin.from("stylists").select("id, business_name, business_type, pro_code").in("id", aliasIds)
+    : { data: [] };
+  const myAccounts = (aliasPros || [])
+    .map((p) => ({ ...p, label: templateFor(p.business_type).label }))
+    .sort((a, b) => a.label.localeCompare(b.label));
   const list = reports || [];
   const latest = list[0];
 
@@ -236,6 +246,31 @@ export default async function ControlRoomPage() {
         {tiles.map((t) => (
           <Tile key={t.name} t={t} />
         ))}
+      </section>
+
+      <section className="card cr-demo">
+        <h2>Your accounts</h2>
+        <p>
+          Your own accounts for each business type, fully working like Royal Suite. Open one to run it; tap{" "}
+          <strong>Back to my account</strong> to return. No passwords needed.
+        </p>
+        {myAccounts.length === 0 ? (
+          <p className="muted small-text">None yet.</p>
+        ) : (
+          <ul className="cr-accounts">
+            {myAccounts.map((a) => (
+              <li key={a.id}>
+                <span>
+                  <strong>{a.business_name}</strong>
+                  <span className="muted small-text"> · {a.label} · {a.pro_code}</span>
+                </span>
+                <a href={`/dashboard/admin/switch?id=${a.id}`} className="button small">
+                  Open
+                </a>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
       <section className="card cr-demo">

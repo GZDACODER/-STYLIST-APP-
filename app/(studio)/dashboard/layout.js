@@ -112,7 +112,10 @@ export default async function DashboardLayout({ children }) {
   // The pro's business-type template: words and which features are on.
   const tpl = await getMyTemplate();
   // The owner previewing a business type from the Control Room.
-  const previewing = isDemo(user) && Boolean((await cookies()).get("cl_admin_return")?.value);
+  const hasReturn = Boolean((await cookies()).get("cl_admin_return")?.value);
+  const previewing = isDemo(user) && hasReturn;
+  // The owner inside one of their own extra accounts (Control Room > Your accounts).
+  const switchedIn = !isDemo(user) && hasReturn;
   const tplValue = { key: tpl.key, words: tpl.words, modules: tpl.modules };
 
   // The demo salon is shared, so each visitor's own browser remembers which
@@ -167,6 +170,16 @@ export default async function DashboardLayout({ children }) {
               </p>
               <a href="/demo/exit" className="button small">
                 Start your free trial
+              </a>
+            </div>
+          ) : switchedIn ? (
+            <div className="demo-banner" role="note">
+              <p>
+                <strong>You&apos;re in your {tpl.label} account</strong> ({stylist.business_name}). Everything here
+                is real and works like any pro&apos;s account.
+              </p>
+              <a href="/demo/exit-preview" className="button small">
+                Back to my account
               </a>
             </div>
           ) : (
