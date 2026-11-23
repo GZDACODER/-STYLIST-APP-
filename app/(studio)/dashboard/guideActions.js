@@ -4,6 +4,7 @@
 // and "Show tips again". The list is read in the dashboard layout.
 import { createClient } from "@/lib/supabase/server";
 import { isGuideKey } from "@/lib/guides";
+import { isDemo } from "@/lib/demo";
 
 export async function markGuideSeen(keys) {
   const list = (Array.isArray(keys) ? keys : [keys]).filter(isGuideKey).slice(0, 40);
@@ -13,6 +14,8 @@ export async function markGuideSeen(keys) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { ok: false };
+  // The shared demo salon: each visitor's browser remembers instead.
+  if (isDemo(user)) return { ok: true };
   const { error } = await supabase
     .from("onboarding_guides_seen")
     .upsert(list.map((guide_key) => ({ user_id: user.id, guide_key })), { onConflict: "user_id,guide_key", ignoreDuplicates: true });

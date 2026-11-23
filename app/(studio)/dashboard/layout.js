@@ -107,7 +107,9 @@ export default async function DashboardLayout({ children }) {
   }
 
   return (
-    <GuideProvider mode="pro" scope={user.id} initialSeen={guidesSeen}>
+    {/* The demo salon is shared, so each visitor's own browser remembers which
+        tips they've seen (null = this browser only): everyone gets the tour. */}
+    <GuideProvider mode="pro" scope={user.id} initialSeen={isDemo(user) ? null : guidesSeen}>
     <div className={`db ${display.variable}`}>
       <aside className="db-side">
         <div className="db-brand">
