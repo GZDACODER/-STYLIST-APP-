@@ -6,7 +6,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { isAdmin } from "@/lib/admin";
+import { adminEmails, isAdmin } from "@/lib/admin";
 import { BRAND_NAME } from "@/lib/brand";
 import { PLANS } from "@/lib/plans";
 import { formatPrice } from "@/lib/money";
@@ -109,12 +109,20 @@ export default async function ActivityPage({ searchParams }) {
   const { tests: showTestsParam } = await searchParams;
   const showTests = showTestsParam === "1";
   const { data, error } = await createAdminClient().rpc("ops_activity");
-  const all = (data?.pros || []).map((p) => ({ ...p, test: TEST_EMAIL.test(p.email || "") || TEST_NAME.test(p.business_name || "") }));
+  // Your own account(s) (ADMIN_EMAILS) are for building the site, not a pro
+  // using it: kept out of the numbers like test accounts, marked "You".
+  const owners = new Set(adminEmails().map((e) => e.toLowerCase()));
+  const all = (data?.pros || []).map((p) => {
+    const you = owners.has(String(p.email || "").toLowerCase());
+    return { ...p, you, test: you || TEST_EMAIL.test(p.email || "") || TEST_NAME.test(p.business_name || "") };
+  });
   const testCount = all.filter((p) => p.test).length;
   const pros = showTests ? all : all.filter((p) => !p.test);
   const testNames = new Set(all.filter((p) => p.test).map((p) => p.business_name));
   const feed = (data?.feed || []).filter((e) => showTests || !testNames.has(e.pro)).slice(0, 30);
 
+  const stripeKey = process.env.STRIPE_SECRET_KEY || "";
+  const stripeLive = stripeKey.startsWith("sk_live") || stripeKey.startsWith("rk_live");
   const paying = pros.filter((p) => monthly(p) > 0);
   const mrr = paying.reduce((sum, p) => sum + monthly(p), 0);
   const inTrial = pros.filter((p) => !p.paying && !p.comped && p.trial_ends_at && new Date(p.trial_ends_at) > new Date());
@@ -134,11 +142,11 @@ export default async function ActivityPage({ searchParams }) {
       <PageHeader
         eyebrow="Control Room"
         title="Activity"
-        subtitle={`Across every pro · ${showTests ? "including" : "not counting"} ${testCount} test ${testCount === 1 ? "account" : "accounts"}`}
+        subtitle={`Across every pro · ${showTests ? "including" : "not counting"} your own and test accounts (${testCount})`}
         actions={
           testCount > 0 ? (
             <Link href={showTests ? "/dashboard/admin/control/activity" : "/dashboard/admin/control/activity?tests=1"} className="button small secondary">
-              {showTests ? "Hide test accounts" : "Show test accounts"}
+              {showTests ? "Hide yours and tests" : "Show yours and tests"}
             </Link>
           ) : null
         }
@@ -158,7 +166,9 @@ export default async function ActivityPage({ searchParams }) {
         <div className="home-card cr-tile">
           <span className="db-label">Monthly revenue</span>
           <strong className="home-card-value">{money(mrr)}</strong>
-          <span className="muted small-text">Estimated from plans · yearly spread over 12 months</span>
+          <span className="muted small-text">
+            {stripeLive ? "Estimated from plans · yearly spread over 12 months" : "Stripe is in test mode: test payments, not real money"}
+          </span>
         </div>
         <div className="home-card cr-tile">
           <span className="db-label">Deposits, 30 days</span>
@@ -249,7 +259,7 @@ export default async function ActivityPage({ searchParams }) {
                       <a href={`/book/${p.slug}`} target="_blank" rel="noreferrer">
                         {p.business_name}
                       </a>
-                      {p.test && <span className="badge cr-test">Test</span>}
+                      {p.test && <span className="badge cr-test">{p.you ? "You" : "Test"}</span>}
                       <br />
                       <span className="muted small-text">
                         {p.pro_code}
