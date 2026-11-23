@@ -21,6 +21,7 @@ import { EXAMPLE_HOME_STATS, exampleData, examplesOn } from "@/lib/examples";
 import { ExampleTag } from "@/components/dash/Example";
 import ProCode from "@/components/dash/ProCode";
 import { lateText, recentLateNotices } from "@/lib/lateNotices";
+import { isDemo } from "@/lib/demo";
 
 export const metadata = { title: `Home · ${BRAND_NAME}` };
 
@@ -292,7 +293,7 @@ export default async function HomePage() {
       <ProCode code={codeRow?.pro_code} compact />
       {askFeedback && <FeedbackPrompt daysLeft={plan.daysLeft} />}
 
-      {setupLeft > 0 && (
+      {setupLeft > 0 && !isDemo(user) && (
         <section className="card home-setup">
           <h2>Get set up</h2>
           <p className="muted small-text">
