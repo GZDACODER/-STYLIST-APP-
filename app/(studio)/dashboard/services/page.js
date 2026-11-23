@@ -9,7 +9,8 @@ import SettingsShell from "@/components/dash/SettingsShell";
 import EmptyState from "@/components/dash/EmptyState";
 import RowList from "@/components/dash/RowList";
 import { ExampleCard, ExampleTag } from "@/components/dash/Example";
-import { EXAMPLE_SERVICES, examplesOn } from "@/lib/examples";
+import { exampleServices, examplesOn } from "@/lib/examples";
+import { getMyTemplate } from "@/lib/templates/server";
 
 export const metadata = { title: `Services · ${BRAND_NAME}` };
 
@@ -56,7 +57,7 @@ export default async function ServicesPage() {
             <p className="examples-note">Here are some examples. Add your first service below and they&apos;ll go away.</p>
             <RowList
               label="Services"
-              items={EXAMPLE_SERVICES.map((s) => ({
+              items={exampleServices(await getMyTemplate()).map((s) => ({
                 key: s.id,
                 example: true,
                 title: s.name,

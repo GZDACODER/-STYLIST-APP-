@@ -13,6 +13,7 @@ import { BRAND_NAME } from "@/lib/brand";
 import OutcomePicker from "./OutcomePicker";
 import VisitNoteForm from "../notes/VisitNoteForm";
 import LookEditor from "./LookEditor";
+import { getMyTemplate } from "@/lib/templates/server";
 
 export const metadata = { title: `Wrap up visits · ${BRAND_NAME}` };
 
@@ -106,7 +107,7 @@ export default async function WrapupPage() {
 
   // Examples for a new pro who has no visits to wrap up, owed or marked yet.
   const examples =
-    started.length === 0 && owed.length === 0 && (await examplesOn(supabase, user.id)) ? exampleData(today).past : [];
+    started.length === 0 && owed.length === 0 && (await examplesOn(supabase, user.id)) ? exampleData(today, await getMyTemplate()).past : [];
 
   // "My look" for each visit (step 46 SQL): shared notes and the photo, shown
   // to the pro through short-lived links.

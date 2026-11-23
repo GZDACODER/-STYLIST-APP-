@@ -14,6 +14,7 @@ import Collapsible from "@/components/dash/Collapsible";
 import RowList from "@/components/dash/RowList";
 import { exampleData, examplesOn } from "@/lib/examples";
 import { BRAND_NAME } from "@/lib/brand";
+import { getMyTemplate } from "@/lib/templates/server";
 
 export const metadata = { title: `Waitlist · ${BRAND_NAME}` };
 
@@ -67,7 +68,7 @@ export default async function WaitlistPage() {
   };
 
   const exampleWaiting =
-    waiting.length === 0 && booked.length === 0 && (await examplesOn(supabase, user.id)) ? exampleData(today).waitlist : [];
+    waiting.length === 0 && booked.length === 0 && (await examplesOn(supabase, user.id)) ? exampleData(today, await getMyTemplate()).waitlist : [];
 
   const waitingEntries = waiting.map((e) => {
       const told = e.offers.filter((o) => o.notified_at);

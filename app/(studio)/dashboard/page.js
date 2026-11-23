@@ -22,6 +22,7 @@ import { ExampleTag } from "@/components/dash/Example";
 import ProCode from "@/components/dash/ProCode";
 import { lateText, recentLateNotices } from "@/lib/lateNotices";
 import { isDemo } from "@/lib/demo";
+import { getMyTemplate } from "@/lib/templates/server";
 
 export const metadata = { title: `Home · ${BRAND_NAME}` };
 
@@ -257,7 +258,7 @@ export default async function HomePage() {
   // Example Up next rows for a new pro with nothing booked yet.
   const upNext =
     !nextUp.error && (nextUp.data || []).length === 0 && (anyBooking.count || 0) === 0 && showExamples
-      ? exampleData(today).upcoming
+      ? exampleData(today, await getMyTemplate()).upcoming
       : nextUp.data || [];
 
   // Trial feedback: from day 3 of the free trial until they've sent some.

@@ -18,6 +18,7 @@ import { BRAND_NAME } from "@/lib/brand";
 import RegularStar from "@/components/RegularStar";
 import { eventsOn } from "@/lib/calendarEvents";
 import { holidaysOn } from "@/lib/holidays";
+import { getMyTemplate } from "@/lib/templates/server";
 
 export const metadata = { title: `Openings · ${BRAND_NAME}` };
 
@@ -128,7 +129,7 @@ export default async function OpeningsPage() {
   }
 
   // Examples for a new pro (only while they have no openings of their own).
-  const examples = !(openings || []).length && (await examplesOn(supabase, user.id)) ? exampleData(today) : null;
+  const examples = !(openings || []).length && (await examplesOn(supabase, user.id)) ? exampleData(today, await getMyTemplate()) : null;
 
   // Weekdays marked as days off on the Availability tab.
   const daysOff = (hourRows || []).filter((row) => !row.is_working).map((row) => row.weekday);
