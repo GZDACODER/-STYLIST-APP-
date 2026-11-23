@@ -2146,3 +2146,39 @@ body:has(.hm) {
   font-size: 0.66rem;
   letter-spacing: 0.16em;
 }
+
+/* ---------- Clients: find your pro (links to /find) ---------- */
+.hm-find {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 0 var(--gutter) 48px;
+}
+
+.hm-find form {
+  max-width: 560px;
+}
+
+.hm-find label {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 0.95rem;
+  opacity: 0.8;
+}
+
+.hm-find-row {
+  display: flex;
+  gap: 8px;
+}
+
+.hm-find input {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 48px;
+  padding: 0 18px;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 16px;
+}
