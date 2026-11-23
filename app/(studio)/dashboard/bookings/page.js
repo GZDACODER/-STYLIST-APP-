@@ -15,6 +15,7 @@ import RefundDepositButton from "./RefundDepositButton";
 import { formatPrice } from "@/lib/money";
 import { calendarWindowStart, loadPastBookings, movedText } from "@/lib/calendarPast";
 import { getMyTemplate } from "@/lib/templates/server";
+import Words from "@/components/Words";
 
 export const metadata = { title: `Calendar · ${BRAND_NAME}` };
 

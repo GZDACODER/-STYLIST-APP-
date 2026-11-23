@@ -13,6 +13,7 @@ import ClientCard from "./ClientCard";
 import RegularStar from "@/components/RegularStar";
 import Sheet from "@/components/Sheet";
 import { ExampleCard, ExampleTag } from "@/components/dash/Example";
+import Words from "@/components/Words";
 
 // Lowercase, and also keep just the digits so "555-1234" matches "5551234".
 function matches(client, search) {
@@ -191,7 +192,7 @@ export default function ClientList({ clients: realClients, standing, nextVisits 
 
       {exampleMode && (
         <p className="examples-note">
-          These are example clients. Add your own (or take your first booking) and they&apos;ll go away.
+          <Words>{"These are example clients. Add your own (or take your first booking) and they'll go away."}</Words>
         </p>
       )}
       {clients.length === 0 && (
@@ -200,7 +201,7 @@ export default function ClientList({ clients: realClients, standing, nextVisits 
           text="Clients appear here when they book, or add them yourself."
           action={
             <a href="/dashboard/clients?add=client#add-client" className="button small">
-              + Add client
+              <Words>+ Add client</Words>
             </a>
           }
         />

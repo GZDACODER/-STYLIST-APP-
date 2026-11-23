@@ -15,6 +15,7 @@ import { BRAND_NAME } from "@/lib/brand";
 import { todayInTimeZone } from "@/lib/availability";
 import { nowLocal } from "@/lib/localTime";
 import { getMyTemplate } from "@/lib/templates/server";
+import Words from "@/components/Words";
 
 export const metadata = { title: `Clients · ${BRAND_NAME}` };
 
@@ -181,7 +182,7 @@ export default async function ClientsPage({ searchParams }) {
               </a>
             )}
             <a href="/dashboard/clients?add=client#add-client" className="button small">
-              + Add client
+              <Words>+ Add client</Words>
             </a>
           </>
         }

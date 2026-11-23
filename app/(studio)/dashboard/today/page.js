@@ -21,6 +21,7 @@ import { holidaysOn } from "@/lib/holidays";
 import LateNotices from "./LateNotices";
 import { recentLateNotices } from "@/lib/lateNotices";
 import { getMyTemplate } from "@/lib/templates/server";
+import Words from "@/components/Words";
 
 export const metadata = { title: `Today · ${BRAND_NAME}` };
 
@@ -264,7 +265,7 @@ export default async function TodayPage() {
       <div className="db-today">
       <section className="db-today-main">
         <div className="db-section-head">
-          <h2>Today&apos;s appointments</h2>
+          <h2><Words>{"Today's appointments"}</Words></h2>
           <span className="db-label">{timeZoneLabel(tz)} time</span>
         </div>
 

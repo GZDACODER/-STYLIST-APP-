@@ -23,6 +23,7 @@ import ProCode from "@/components/dash/ProCode";
 import { lateText, recentLateNotices } from "@/lib/lateNotices";
 import { isDemo } from "@/lib/demo";
 import { getMyTemplate } from "@/lib/templates/server";
+import Words from "@/components/Words";
 
 export const metadata = { title: `Home · ${BRAND_NAME}` };
 
@@ -395,7 +396,7 @@ export default async function HomePage() {
             + Add event
           </Link>
           <Link href="/dashboard/clients?add=client#add-client" className="button secondary small">
-            + Add client
+            <Words>+ Add client</Words>
           </Link>
           <ShareLinkButton link={bookingLink} businessName={stylist.business_name} />
           <Link href="/dashboard/share" className="button secondary small">
