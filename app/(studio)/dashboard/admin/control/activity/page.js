@@ -121,6 +121,8 @@ export default async function ActivityPage({ searchParams }) {
   const testNames = new Set(all.filter((p) => p.test).map((p) => p.business_name));
   const feed = (data?.feed || []).filter((e) => showTests || !testNames.has(e.pro)).slice(0, 30);
 
+  const stripeKey = process.env.STRIPE_SECRET_KEY || "";
+  const stripeLive = stripeKey.startsWith("sk_live") || stripeKey.startsWith("rk_live");
   const paying = pros.filter((p) => monthly(p) > 0);
   const mrr = paying.reduce((sum, p) => sum + monthly(p), 0);
   const inTrial = pros.filter((p) => !p.paying && !p.comped && p.trial_ends_at && new Date(p.trial_ends_at) > new Date());
@@ -164,7 +166,9 @@ export default async function ActivityPage({ searchParams }) {
         <div className="home-card cr-tile">
           <span className="db-label">Monthly revenue</span>
           <strong className="home-card-value">{money(mrr)}</strong>
-          <span className="muted small-text">Estimated from plans · yearly spread over 12 months</span>
+          <span className="muted small-text">
+            {stripeLive ? "Estimated from plans · yearly spread over 12 months" : "Stripe is in test mode: test payments, not real money"}
+          </span>
         </div>
         <div className="home-card cr-tile">
           <span className="db-label">Deposits, 30 days</span>
