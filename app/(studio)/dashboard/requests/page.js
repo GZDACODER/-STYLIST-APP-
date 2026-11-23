@@ -10,7 +10,14 @@ import RequestActions from "./RequestActions";
 
 export const metadata = { title: `Requests · ${BRAND_NAME}` };
 
-const when = (iso) => new Date(iso).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+const when = (iso, timeZone) => {
+  const opts = { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" };
+  try {
+    return new Date(iso).toLocaleString("en-US", { ...opts, timeZone: timeZone || "America/Chicago" });
+  } catch {
+    return new Date(iso).toLocaleString("en-US", opts);
+  }
+};
 const STATUS = { new: "New", approved: "Approved · link sent", declined: "Declined", booked: "Booked" };
 
 export default async function RequestsPage({ searchParams }) {
@@ -21,9 +28,10 @@ export default async function RequestsPage({ searchParams }) {
   if (!user) redirect("/login");
   const { show } = await searchParams;
   const tab = ["new", "approved", "declined", "booked"].includes(show) ? show : "new";
-  const [{ data: rows, error }, { data: services }] = await Promise.all([
+  const [{ data: rows, error }, { data: services }, { data: me }] = await Promise.all([
     supabase.from("booking_requests").select("*").order("created_at", { ascending: false }).limit(200),
     supabase.from("services").select("id, name").order("name"),
+    supabase.from("stylists").select("timezone").eq("id", user.id).maybeSingle(),
   ]);
   const all = rows || [];
   const list = all.filter((r) => r.status === tab);
@@ -61,7 +69,7 @@ export default async function RequestsPage({ searchParams }) {
                 <span className="badge">{STATUS[r.status]}</span>
               </p>
               <p className="muted small-text">
-                {r.service_name} · {when(r.created_at)} · <a href={`mailto:${r.client_email}`}>{r.client_email}</a>
+                {r.service_name} · {when(r.created_at, me?.timezone)} · <a href={`mailto:${r.client_email}`}>{r.client_email}</a>
                 {r.client_phone ? ` · ${r.client_phone}` : ""}
               </p>
               <p className="rq-idea">{r.idea}</p>
