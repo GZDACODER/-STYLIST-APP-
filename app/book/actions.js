@@ -15,6 +15,7 @@ import { emailStylistCancellation, runWaitlistSafely } from "@/lib/waitlist";
 import { emailReschedule } from "@/lib/bookingEmails";
 import { headers } from "next/headers";
 import { DEMO_BOOKING_OFF, isDemoSlug } from "@/lib/demo";
+import { finishWaiver, signatureBytes, uploadSignature } from "@/lib/waivers";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -210,8 +211,49 @@ export async function getIntake(slug, serviceId) {
   return data;
 }
 
+// After a booking-page intake is saved: the newest response from this
+// client for this business gets the drawn signature and a PDF copy.
+async function keepIntakeSignature(slug, extra, ip, userAgent) {
+  const png = signatureBytes(extra?.signature);
+  if (!png) return;
+  const supabase = await createBookingClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+  const admin = createAdminClient();
+  const { data: s } = await admin.from("stylists").select("id, business_name").eq("slug", String(slug).toLowerCase()).maybeSingle();
+  if (!s) return;
+  const { data: r } = await admin
+    .from("intake_responses")
+    .select("id, signed_name, waiver_text, answers, email, signature_path")
+    .eq("stylist_id", s.id)
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (!r || r.signature_path || !String(r.waiver_text || "").trim()) return;
+  const signaturePath = await uploadSignature(s.id, png);
+  await finishWaiver({
+    responseId: r.id,
+    stylistId: s.id,
+    businessName: s.business_name,
+    signerName: r.signed_name || "",
+    waiverText: r.waiver_text,
+    answers: (r.answers || []).map((a) => ({ label: a.label, answer: a.answer })),
+    forMinor: Boolean(extra.forMinor),
+    guardianName: extra.guardianName,
+    guardianRelation: extra.guardianRelation,
+    signaturePath,
+    png,
+    ip,
+    userAgent,
+    email: r.email || user.email,
+  });
+}
+
 // answers: { questionId: "answer" }. Saved with the IP and browser it came from.
-export async function submitIntake(slug, serviceId, answers, signedName) {
+export async function submitIntake(slug, serviceId, answers, signedName, extra = {}) {
   const h = await headers();
   const ip = (h.get("x-forwarded-for") || "").split(",")[0].trim() || h.get("x-real-ip") || null;
   const clean = {};
@@ -230,6 +272,8 @@ export async function submitIntake(slug, serviceId, answers, signedName) {
     if (!code) console.error("Saving an intake form failed", error.code, error.message);
     return { error: INTAKE_ERRORS[code] || "Your form couldn't be saved. Please try again." };
   }
+  // The drawn signature, guardian details and a PDF copy (step 55 SQL).
+  await keepIntakeSignature(slug, extra, ip, h.get("user-agent")).catch((e) => console.error("Waiver PDF failed", e?.message));
   return { success: true };
 }
 

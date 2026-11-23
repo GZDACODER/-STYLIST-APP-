@@ -211,7 +211,16 @@ export default function BookingFlow({
     setBookError(null);
     startTransition(async () => {
       if (intake?.needed) {
-        const saved = await submitIntake(slug, serviceId, intakeValue.answers, intakeValue.signedName);
+        if (String(intake.waiver_text || "").trim() && !intakeValue.signature) {
+          setBookError("Please sign the waiver in the box.");
+          return;
+        }
+        const saved = await submitIntake(slug, serviceId, intakeValue.answers, intakeValue.signedName, {
+          signature: intakeValue.signature,
+          forMinor: intakeValue.forMinor,
+          guardianName: intakeValue.guardianName,
+          guardianRelation: intakeValue.guardianRelation,
+        });
         if (saved.error) {
           setBookError(saved.error);
           return;

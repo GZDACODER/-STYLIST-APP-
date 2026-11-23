@@ -23,7 +23,7 @@ const STARTERS = [
 let counter = 0;
 const newId = () => `q${Date.now().toString(36)}${(counter++).toString(36)}`;
 
-export default function IntakeBuilder({ questions: initial, waiverText, services }) {
+export default function IntakeBuilder({ questions: initial, waiverText, services, frequency = "first", timing = "booking", starterWaiver = "", typeLabel = "" }) {
   const [state, formAction] = useActionState(saveIntake, null);
   const [questions, setQuestions] = useState(() =>
     (initial || []).map((q) => ({ ...q, optionsText: (q.options || []).join("\n") }))
@@ -145,10 +145,22 @@ export default function IntakeBuilder({ questions: initial, waiverText, services
       <section className="card">
         <h2>Waiver</h2>
         <p className="muted small-text">
-          Clients read this, tick &quot;I agree&quot; and type their full name to sign. We keep the
-          exact text they signed, their name and the date and time. Leave it empty for no waiver.
-          Have a lawyer check your wording.
+          Clients read this, tick &quot;I agree&quot;, type their full name and sign with their finger. A parent or
+          guardian signs for anyone under 18. Leave it empty for no waiver. Have a lawyer check your wording.
         </p>
+        {starterWaiver && waiver.trim() !== starterWaiver.trim() && (
+          <p>
+            <button
+              type="button"
+              className="button small secondary"
+              onClick={() => {
+                if (!waiver.trim() || window.confirm("Replace your waiver text with the starter waiver?")) setWaiver(starterWaiver);
+              }}
+            >
+              Use the starter {typeLabel ? `${typeLabel.toLowerCase()} ` : ""}waiver
+            </button>
+          </p>
+        )}
         <label>
           Waiver text
           <textarea
@@ -160,6 +172,26 @@ export default function IntakeBuilder({ questions: initial, waiverText, services
           />
         </label>
         <input type="hidden" name="waiver_text" value={waiver} />
+        <label>
+          How often clients sign
+          <select name="waiver_frequency" defaultValue={frequency}>
+            <option value="first">Once (first visit only)</option>
+            <option value="yearly">Once a year</option>
+            <option value="every">Every visit</option>
+          </select>
+        </label>
+        <label>
+          When they sign
+          <select name="waiver_timing" defaultValue={timing}>
+            <option value="booking">While booking (they can&apos;t book until it&apos;s signed)</option>
+            <option value="before">Any time before the visit (from their confirmation email)</option>
+          </select>
+        </label>
+        <p className="muted small-text">
+          With &quot;before the visit&quot;, you&apos;ll see <strong>Waiver needed</strong> on your Today page until they sign.
+          Each signature is kept with a drawn signature, the exact text, the time, IP address and device, and a PDF copy
+          is emailed to the client. Change the text and everyone signs the new version next time.
+        </p>
       </section>
 
       <section className="card">

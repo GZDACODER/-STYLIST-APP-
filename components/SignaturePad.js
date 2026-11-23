@@ -5,7 +5,7 @@
 // pro agreement and client waivers.
 import { useEffect, useRef, useState } from "react";
 
-export default function SignaturePad({ name = "signature", label = "Sign here" }) {
+export default function SignaturePad({ name = "signature", label = "Sign here", onChange = null }) {
   const canvas = useRef(null);
   const drawing = useRef(false);
   const [value, setValue] = useState("");
@@ -51,12 +51,15 @@ export default function SignaturePad({ name = "signature", label = "Sign here" }
   const up = () => {
     if (!drawing.current) return;
     drawing.current = false;
-    setValue(canvas.current.toDataURL("image/png"));
+    const url = canvas.current.toDataURL("image/png");
+    setValue(url);
+    onChange?.(url);
   };
   const clear = () => {
     const c = canvas.current;
     c.getContext("2d").clearRect(0, 0, c.width, c.height);
     setValue("");
+    onChange?.("");
   };
 
   return (
