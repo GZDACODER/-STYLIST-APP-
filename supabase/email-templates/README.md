@@ -14,5 +14,5 @@ select all of it, paste the whole file in, then tap **Save**.
 | Magic Link | Your sign-in code | `magic-link.html` |
 | Reset Password | Choose a new Clientele password | `reset-password.html` |
 
-Leave the `{{ .Token }}` and `{{ .ConfirmationURL }}` parts exactly as they are.
+Leave the `{{ .Token }}`, `{{ .SiteURL }}` and `{{ .TokenHash }}` parts exactly as they are.
 Supabase fills them in with the code and the link.
