@@ -184,7 +184,7 @@ export default async function ProfilePage({ params }) {
         </section>
       )}
 
-      {p.show.hours && p.hours.length > 0 && (
+      {p.show.hours && p.hours.some((h) => h.open) && (
         <section className="card">
           <h2>Hours</h2>
           <dl className="pp-hours">
