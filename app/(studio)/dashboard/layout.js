@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { Cormorant_Garamond } from "next/font/google";
 import { createClient } from "@/lib/supabase/server";
 import { logout } from "@/app/auth/actions";
@@ -110,6 +111,8 @@ export default async function DashboardLayout({ children }) {
 
   // The pro's business-type template: words and which features are on.
   const tpl = await getMyTemplate();
+  // The owner previewing a business type from the Control Room.
+  const previewing = isDemo(user) && Boolean((await cookies()).get("cl_admin_return")?.value);
   const tplValue = { key: tpl.key, words: tpl.words, modules: tpl.modules };
 
   // The demo salon is shared, so each visitor's own browser remembers which
@@ -146,7 +149,17 @@ export default async function DashboardLayout({ children }) {
 
       <main className="db-main">
         <div className="db-page">
-          {isDemo(user) ? (
+          {isDemo(user) && previewing ? (
+            <div className="demo-banner" role="note">
+              <p>
+                <strong>Previewing as {tpl.label}</strong>: a sample account with example data, exactly what a new{" "}
+                {tpl.words.pro} sees. Changes reset and nothing is sent.
+              </p>
+              <a href="/demo/exit-preview" className="button small">
+                Exit preview
+              </a>
+            </div>
+          ) : isDemo(user) ? (
             <div className="demo-banner" role="note">
               <p>
                 <strong>You&apos;re exploring Maison Demo</strong>, a sample salon. Tap around and try anything: it

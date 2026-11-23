@@ -239,6 +239,20 @@ export default async function ControlRoomPage() {
       </section>
 
       <section className="card cr-demo">
+        <h2>Preview a business type</h2>
+        <p>
+          See the dashboard exactly as a new pro of each type does, with that trade&apos;s words, example data and features.
+          Opens here; tap <strong>Exit preview</strong> to come back to your account.
+        </p>
+        <p className="cr-preview-buttons">
+          <a href="/dashboard/admin/preview?type=hair" className="button small secondary">Hair stylist</a>
+          <a href="/dashboard/admin/preview?type=barber" className="button small secondary">Barber</a>
+          <a href="/dashboard/admin/preview?type=tattoo" className="button small secondary">Tattoo artist</a>
+          <a href="/dashboard/admin/preview?type=tutor" className="button small secondary">Tutor</a>
+        </p>
+      </section>
+
+      <section className="card cr-demo">
         <h2>Demo link</h2>
         <p>
           Send this to anyone who wants to look around. It opens <strong>Maison Demo</strong>, a sample salon full of

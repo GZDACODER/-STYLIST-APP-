@@ -1055,3 +1055,9 @@
 .db .support-off {
   margin-top: 8px;
 }
+
+.cr-preview-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
