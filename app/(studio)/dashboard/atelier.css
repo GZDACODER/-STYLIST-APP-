@@ -1203,3 +1203,22 @@
 .db .pf-form > .card {
   margin-bottom: 0;
 }
+
+/* ---------- Reviews ---------- */
+.db .rv-big {
+  margin: 0 0 4px;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 2.4rem;
+  line-height: 1;
+}
+
+.db .rv-stars {
+  color: var(--gold);
+  letter-spacing: 2px;
+  font-size: 1.05rem;
+}
+
+.db .rv-reply {
+  padding-left: 12px;
+  border-left: 2px solid var(--border);
+}

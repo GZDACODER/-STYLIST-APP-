@@ -220,6 +220,7 @@ export async function leaveFeedback(codeText, bookingId, rating, comment) {
     p_rating: Number(rating),
     p_comment: String(comment || "").slice(0, 1000),
   });
+  if (error && /not_completed/.test(error.message)) return { error: "You can leave a review once your visit has happened." };
   return error ? { error: "That didn't save. Please try again." } : { ok: true };
 }
 
@@ -238,5 +239,6 @@ export async function feedbackByToken(token, rating, comment) {
     p_rating: Number(rating),
     p_comment: String(comment || "").slice(0, 1000),
   });
+  if (error && /not_completed/.test(error.message)) return { error: "You can leave a review once your visit has happened." };
   return error ? { error: "That didn't save. Please try again." } : { ok: true };
 }

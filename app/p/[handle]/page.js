@@ -10,6 +10,7 @@ import { displayName } from "@/lib/bookingHeader";
 import { formatPrice } from "@/lib/money";
 import { BRAND_NAME } from "@/lib/brand";
 import Portfolio from "@/app/book/[slug]/Portfolio";
+import Reviews from "../Reviews";
 
 async function viewerId() {
   try {
@@ -78,6 +79,12 @@ export default async function ProfilePage({ params }) {
           <p className="pp-kicker">{facts.join(" · ")}</p>
           <h1 className="pp-name">{name}</h1>
           {p.owner && <p className="pp-owner">by {p.owner}</p>}
+          {p.show.reviews && p.reviews?.total > 0 && (
+            <a className="pp-head-rating" href="#reviews">
+              <span className="pp-stars">★</span> {p.reviews.average.toFixed(1)} · {p.reviews.total}{" "}
+              {p.reviews.total === 1 ? "rating" : "ratings"}
+            </a>
+          )}
         </div>
       </header>
 
@@ -154,6 +161,8 @@ export default async function ProfilePage({ params }) {
           </>
         )}
       </section>
+
+      {p.show.reviews && <Reviews reviews={p.reviews} handle={p.handle} name={name} />}
 
       {p.show.portfolio && p.portfolio.length > 0 && <Portfolio photos={p.portfolio} name={name} />}
 
