@@ -6,6 +6,7 @@
 // then asks here to save it. See 0031_portfolio.sql.
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { DEMO_LOCKED, isDemo } from "@/lib/demo";
 
 const PORTFOLIO_MAX = 12;
 const FILE = /^p-\d{10,16}-[a-z0-9]{6}\.jpg$/;
@@ -34,6 +35,7 @@ function setupError(error) {
 export async function startPortfolioUpload() {
   const { supabase, user } = await me();
   if (!user) return { error: "Please log in again." };
+  if (isDemo(user)) return { error: DEMO_LOCKED };
 
   const { count, error: countError } = await supabase
     .from("portfolio_photos")
@@ -56,6 +58,7 @@ export async function startPortfolioUpload() {
 export async function addPortfolioPhoto(path) {
   const { supabase, user } = await me();
   if (!user) return { error: "Please log in again." };
+  if (isDemo(user)) return { error: DEMO_LOCKED };
 
   const filePath = String(path || "");
   const [folder, fileName, ...rest] = filePath.split("/");

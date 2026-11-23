@@ -6,6 +6,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { BUSINESS_TYPE_VALUES } from "@/lib/businessTypes";
+import { DEMO_LOCKED, isDemo } from "@/lib/demo";
 
 export async function signup(prevState, formData) {
   const businessName = String(formData.get("business_name") || "").trim();
@@ -175,6 +176,7 @@ export async function updatePassword(prevState, formData) {
   if (!user) {
     return { error: "This reset link has expired. Please ask for a new one.", expired: true };
   }
+  if (isDemo(user)) return { error: DEMO_LOCKED };
 
   const { error } = await supabase.auth.updateUser({ password });
   if (error) {
@@ -192,8 +194,12 @@ export async function updatePassword(prevState, formData) {
 
 export async function logout() {
   const supabase = await createClient();
-  await supabase.auth.signOut();
-  redirect("/login");
+  // The demo salon is shared: sign out this browser only, not every visitor.
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  await supabase.auth.signOut(isDemo(user) ? { scope: "local" } : undefined);
+  redirect(isDemo(user) ? "/" : "/login");
 }
 
 // "Enter the code from your email": confirms a new account with the code in

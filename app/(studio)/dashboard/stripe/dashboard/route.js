@@ -3,6 +3,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getStripe, paymentsConfigured } from "@/lib/stripe";
+import { DEMO_LOCKED, isDemo } from "@/lib/demo";
 
 export async function GET(request) {
   const origin = new URL(request.url).origin;
@@ -13,6 +14,7 @@ export async function GET(request) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.redirect(`${origin}/login`);
+  if (isDemo(user)) return NextResponse.redirect(`${origin}/dashboard/settings/deposits?stripe=error&reason=${encodeURIComponent(DEMO_LOCKED)}`);
 
   const { data: stylist } = await supabase
     .from("stylists")

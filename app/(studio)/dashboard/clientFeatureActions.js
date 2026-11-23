@@ -6,6 +6,7 @@
 // their own rows.
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { DEMO_LOCKED, isDemo } from "@/lib/demo";
 
 async function me() {
   const supabase = await createClient();
@@ -44,6 +45,7 @@ export async function saveAftercare(prev, formData) {
 export async function saveLook({ bookingId, photoPath, note, removePhoto = false }) {
   const { supabase, user } = await me();
   if (!user) return { error: "Please log in again." };
+  if (isDemo(user)) return { error: DEMO_LOCKED };
   if (photoPath && !String(photoPath).startsWith(`${user.id}/`)) return { error: "That photo didn't upload." };
   const update = { shared_note: String(note || "").trim().slice(0, 1000) || null };
   if (photoPath) update.look_photo_path = photoPath;
@@ -71,6 +73,7 @@ export async function dismissLate(id) {
 export async function startLookUpload(bookingId) {
   const { supabase, user } = await me();
   if (!user) return { error: "Please log in again." };
+  if (isDemo(user)) return { error: DEMO_LOCKED };
   const path = `${user.id}/${String(bookingId).replace(/[^0-9a-f-]/gi, "")}-${Date.now()}.jpg`;
   const { data, error } = await supabase.storage.from("client-looks").createSignedUploadUrl(path);
   if (error) return { error: "Photos aren't set up yet. Run supabase/migrations/0051_client_home.sql." };

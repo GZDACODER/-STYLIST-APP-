@@ -888,3 +888,34 @@
     grid-column: 1 / -1;
   }
 }
+
+/* The demo salon's banner (lib/demo.js) */
+.db .demo-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  margin: 0 0 24px;
+  padding: 16px 20px;
+  background: var(--ink);
+  color: #f5f1ea;
+  outline: 1px solid rgba(207, 174, 108, 0.5);
+  outline-offset: -5px;
+}
+
+.db .demo-banner p {
+  margin: 0;
+  flex: 1 1 280px;
+  font-size: 0.92rem;
+}
+
+.db .demo-banner strong {
+  color: var(--gold-bright);
+}
+
+.db .demo-banner .button {
+  background: var(--gold-bright);
+  border-color: var(--gold-bright);
+  color: var(--ink);
+}

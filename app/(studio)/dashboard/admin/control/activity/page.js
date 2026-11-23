@@ -7,6 +7,7 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { adminEmails, isAdmin } from "@/lib/admin";
+import { DEMO_EMAIL } from "@/lib/demo";
 import { BRAND_NAME } from "@/lib/brand";
 import { PLANS } from "@/lib/plans";
 import { formatPrice } from "@/lib/money";
@@ -23,6 +24,8 @@ const TEST_NAME = /^(claude .*studio|launch test studio)$/i;
 // Accounts that aren't working pros (friends looking around the site), by
 // Pro ID: kept out of the numbers like test accounts, marked "Viewer".
 const VIEWER_CODES = new Set(["CL-PX3Q"]); // Fast Money Media LLC
+// Test accounts made by hand, by Pro ID.
+const TEST_CODES = new Set(["CL-CQ4P"]); // Luxe
 
 function ago(iso) {
   if (!iso) return "never";
@@ -118,7 +121,9 @@ export default async function ActivityPage({ searchParams }) {
   const all = (data?.pros || []).map((p) => {
     const you = owners.has(String(p.email || "").toLowerCase());
     const viewer = VIEWER_CODES.has(p.pro_code);
-    return { ...p, you, viewer, test: you || viewer || TEST_EMAIL.test(p.email || "") || TEST_NAME.test(p.business_name || "") };
+    const demo = String(p.email || "").toLowerCase() === DEMO_EMAIL;
+    const test = you || viewer || demo || TEST_CODES.has(p.pro_code) || TEST_EMAIL.test(p.email || "") || TEST_NAME.test(p.business_name || "");
+    return { ...p, you, viewer, demo, test };
   });
   const testCount = all.filter((p) => p.test).length;
   const pros = showTests ? all : all.filter((p) => !p.test);
@@ -263,7 +268,7 @@ export default async function ActivityPage({ searchParams }) {
                       <a href={`/book/${p.slug}`} target="_blank" rel="noreferrer">
                         {p.business_name}
                       </a>
-                      {p.test && <span className="badge cr-test">{p.you ? "You" : p.viewer ? "Viewer" : "Test"}</span>}
+                      {p.test && <span className="badge cr-test">{p.you ? "You" : p.viewer ? "Viewer" : p.demo ? "Demo" : "Test"}</span>}
                       <br />
                       <span className="muted small-text">
                         {p.pro_code}

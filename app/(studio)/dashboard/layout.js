@@ -11,6 +11,7 @@ import AssistantWidget from "./assistant/AssistantWidget";
 import { PLANS } from "@/lib/plans";
 import { formatPrice } from "@/lib/money";
 import GuideProvider from "@/components/guide/GuideProvider";
+import { isDemo } from "@/lib/demo";
 import "./dashboard.css";
 import "./atelier.css";
 
@@ -136,7 +137,19 @@ export default async function DashboardLayout({ children }) {
 
       <main className="db-main">
         <div className="db-page">
-          <PlanBanner plan={plan} />
+          {isDemo(user) ? (
+            <div className="demo-banner" role="note">
+              <p>
+                <strong>You&apos;re exploring Maison Demo</strong>, a sample salon. Tap around and try anything: it
+                resets every night, and nothing is sent to real people.
+              </p>
+              <a href="/demo/exit" className="button small">
+                Start your free trial
+              </a>
+            </div>
+          ) : (
+            <PlanBanner plan={plan} />
+          )}
           {children}
         </div>
       </main>

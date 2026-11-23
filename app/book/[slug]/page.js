@@ -10,6 +10,7 @@ import { displayName } from "@/lib/bookingHeader";
 import { BRAND_NAME } from "@/lib/brand";
 import { myProsEnabled } from "@/lib/myPros";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { isDemoSlug } from "@/lib/demo";
 
 // cache() means the title and the page share one database call.
 // invite: the secret from a private invite link (?invite=...), if any.
@@ -135,6 +136,12 @@ export default async function BookingPage({ params, searchParams }) {
         </div>
       )}
       <div className="bk-flow">
+        {isDemoSlug(slug) && (
+          <p className="message info bk-demo-note">
+            <strong>This is a demo booking page.</strong> Pick a service and a time to see how booking works. The
+            last step is switched off, so nothing is booked and nothing is sent.
+          </p>
+        )}
         <Portfolio photos={portfolio} name={look.name} />
         <BookingFlow
           page={data}

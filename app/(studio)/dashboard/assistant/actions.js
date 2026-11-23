@@ -14,6 +14,7 @@ import { todayInTimeZone } from "@/lib/availability";
 import { getMyPlan } from "@/lib/plan";
 import { reportError } from "@/lib/errorAlerts";
 import { CHANGE_TOOLS, TOOLS, describeChange, runChangeTool, runReadTool } from "@/lib/assistant/tools";
+import { DEMO_LOCKED, isDemo } from "@/lib/demo";
 
 const MODEL = "claude-opus-5-5";
 // Steps Claude may take for one message (each read is one step).
@@ -65,6 +66,7 @@ async function loadContext() {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { error: "Please log in again." };
+  if (isDemo(user)) return { error: DEMO_LOCKED };
   const { data: stylist } = await supabase
     .from("stylists")
     .select("business_name, timezone")

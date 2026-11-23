@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { isValidTimeZone } from "@/lib/availability";
 import { cleanInstagram } from "@/lib/profileLinks";
 import { planErrorMessage } from "@/lib/plan";
+import { DEMO_LOCKED, isDemo } from "@/lib/demo";
 
 const SLUG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
@@ -41,6 +42,7 @@ export async function saveSettings(prevState, formData) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { error: "Please log in again." };
+  if (isDemo(user)) return { error: DEMO_LOCKED };
 
   const main = {};
   if (has("business_name")) main.business_name = businessName;
@@ -246,6 +248,7 @@ export async function startCoverUpload() {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { error: "Please log in again." };
+  if (isDemo(user)) return { error: DEMO_LOCKED };
 
   const path = `${user.id}/cover-${Date.now()}.jpg`;
   const { data, error } = await supabase.storage.from("covers").createSignedUploadUrl(path);
@@ -275,6 +278,7 @@ export async function saveCoverPhoto(path) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { error: "Please log in again." };
+  if (isDemo(user)) return { error: DEMO_LOCKED };
 
   const filePath = String(path || "");
   const [folder, fileName, ...rest] = filePath.split("/");
@@ -308,6 +312,7 @@ export async function removeCoverPhoto() {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { error: "Please log in again." };
+  if (isDemo(user)) return { error: DEMO_LOCKED };
 
   const { error } = await supabase
     .from("stylists")
@@ -335,6 +340,7 @@ export async function saveBusinessLinks(prevState, formData) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { error: "Please log in again." };
+  if (isDemo(user)) return { error: DEMO_LOCKED };
 
   const { error } = await supabase
     .from("stylists")
