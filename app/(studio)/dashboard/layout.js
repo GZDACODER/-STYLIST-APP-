@@ -12,6 +12,8 @@ import { PLANS } from "@/lib/plans";
 import { formatPrice } from "@/lib/money";
 import GuideProvider from "@/components/guide/GuideProvider";
 import { isDemo } from "@/lib/demo";
+import { TemplateProvider } from "@/components/TemplateContext";
+import { getMyTemplate } from "@/lib/templates/server";
 import "./dashboard.css";
 import "./atelier.css";
 
@@ -106,9 +108,14 @@ export default async function DashboardLayout({ children }) {
     );
   }
 
+  // The pro's business-type template: words and which features are on.
+  const tpl = await getMyTemplate();
+  const tplValue = { key: tpl.key, words: tpl.words, modules: tpl.modules };
+
   // The demo salon is shared, so each visitor's own browser remembers which
   // tips they've seen (null = this browser only): everyone gets the tour.
   return (
+    <TemplateProvider value={tplValue}>
     <GuideProvider mode="pro" scope={user.id} initialSeen={isDemo(user) ? null : guidesSeen}>
     <div className={`db ${display.variable}`}>
       <aside className="db-side">
@@ -164,5 +171,6 @@ export default async function DashboardLayout({ children }) {
       )}
     </div>
     </GuideProvider>
+    </TemplateProvider>
   );
 }

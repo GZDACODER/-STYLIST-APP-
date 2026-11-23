@@ -5,6 +5,7 @@ import Link from "next/link";
 import { SETTINGS_SECTIONS, sectionByKey } from "@/lib/settingsSections";
 import { SETTINGS_GUIDES } from "@/lib/guides";
 import PageHeader from "./PageHeader";
+import Words from "@/components/Words";
 
 export default function SettingsShell({ active, root = false, subtitle, actions, children }) {
   const section = sectionByKey(active);
@@ -20,8 +21,8 @@ export default function SettingsShell({ active, root = false, subtitle, actions,
                 className={s.key === active ? "settings-nav-link active" : "settings-nav-link"}
                 aria-current={s.key === active ? "page" : undefined}
               >
-                <span className="settings-nav-label">{s.label}</span>
-                <span className="settings-nav-note">{s.note}</span>
+                <span className="settings-nav-label"><Words>{s.label}</Words></span>
+                <span className="settings-nav-note"><Words>{s.note}</Words></span>
                 <span className="db-row-chevron" aria-hidden="true" />
               </Link>
             </li>

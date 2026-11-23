@@ -14,6 +14,7 @@ import IntakeFields from "./IntakeFields";
 import MyBookings from "./MyBookings";
 import RegularStar from "@/components/RegularStar";
 import PageGuide from "@/components/guide/PageGuide";
+import { useTemplate } from "@/components/TemplateContext";
 
 // How many dates to show before "More dates".
 const FIRST_DATES = 12;
@@ -44,6 +45,8 @@ export default function BookingFlow({
   myPros = false,
   proCode = null,
 }) {
+  // The pro's words ("Subject" for a tutor), from their template.
+  const { words: W } = useTemplate();
   const router = useRouter();
   const {
     business_name,
@@ -66,7 +69,7 @@ export default function BookingFlow({
     </>
   ) : proCode ? (
     <>
-      · <Link href={`/client?code=${proCode}`}>Your visits</Link>
+      · <Link href={`/client?code=${proCode}`}>Your {W.visits}</Link>
     </>
   ) : null;
   // How they confirmed: their phone number (by text) or their email.
@@ -287,7 +290,7 @@ export default function BookingFlow({
           proCode && (
             <p className="muted small-text bk-mypros-note">
               {business_name}&apos;s ID is <strong>{proCode}</strong>. Sign in with it and your phone number at{" "}
-              <Link href={`/client?code=${proCode}`}>Your visits</Link> to rebook, move a visit or say you&apos;re
+              <Link href={`/client?code=${proCode}`}>Your {W.visits}</Link> to rebook, move a visit or say you&apos;re
               running late.
             </p>
           )
@@ -430,10 +433,10 @@ export default function BookingFlow({
       {!locked && (
         <section className="card">
           <h2 className="bk-h2-help">
-            <span className="bk-num">01</span>Service
+            <span className="bk-num">01</span>{W.Service}
             <PageGuide guideKey="book" className="gd-help-title" />
           </h2>
-          {services.length === 0 && <p className="muted">No services are listed yet.</p>}
+          {services.length === 0 && <p className="muted">No {W.services} are listed yet.</p>}
           <div className="choice-list">
             {services.map((s) => (
               <button
