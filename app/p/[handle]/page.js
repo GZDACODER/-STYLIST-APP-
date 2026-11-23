@@ -11,6 +11,7 @@ import { formatPrice } from "@/lib/money";
 import { BRAND_NAME } from "@/lib/brand";
 import Portfolio from "@/app/book/[slug]/Portfolio";
 import Reviews from "../Reviews";
+import NotifyMe from "../NotifyMe";
 
 async function viewerId() {
   try {
@@ -124,11 +125,12 @@ export default async function ProfilePage({ params }) {
             <h2>Booking is for regulars right now</h2>
             <p className="muted small-text">
               {name} is only taking {p.words.appointments} with regulars at the moment.
-              {p.waitlist ? " You can join the waitlist on their booking page to hear about openings." : ""}
+              {" "}Get an email the moment booking opens up.
             </p>
             <div className="pp-actions">
-              <Link className="button" href={bookHref}>
-                Open booking page
+              <NotifyMe handle={p.handle} name={name} services={p.services} words={p.words} primary />
+              <Link className="button secondary" href={bookHref}>
+                I&apos;m a regular
               </Link>
             </div>
           </>
@@ -157,6 +159,7 @@ export default async function ProfilePage({ params }) {
               <Link className="button" href={bookHref}>
                 See availability
               </Link>
+              <NotifyMe handle={p.handle} name={name} services={p.services} words={p.words} />
             </div>
           </>
         )}

@@ -35,11 +35,22 @@ export default async function Page() {
     .eq("id", user.id)
     .maybeSingle();
 
+  const { count: followers } = await supabase
+    .from("profile_followers")
+    .select("id", { count: "exact", head: true })
+    .not("verified_at", "is", null)
+    .is("unsubscribed_at", null);
+
   return (
     <SettingsShell active="profile" subtitle="A page clients can find, share and book from.">
       {error || !s ? (
         <p className="message error">Public profiles aren&apos;t set up yet (step 57 SQL).</p>
       ) : (
+        <>
+        <p className="message info">
+          <strong>{followers || 0}</strong> {followers === 1 ? "person is" : "people are"} following you for opening alerts.{" "}
+          <a href="/dashboard/followers">See who</a> · <a href="/dashboard/reviews">Reviews</a>
+        </p>
         <ProfileForm
           site={publicSiteUrl("https://www.clientelesuite.com")}
           initial={{
@@ -57,6 +68,7 @@ export default async function Page() {
             show: { ...DEFAULT_SHOW, ...(s.profile_show || {}) },
           }}
         />
+        </>
       )}
     </SettingsShell>
   );
