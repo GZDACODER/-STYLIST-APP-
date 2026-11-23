@@ -1,0 +1,176 @@
+/* Public pro profiles (/p/<handle>), inside .bk (book.css). Phone first. */
+.bk .pp {
+  max-width: 720px;
+  padding-top: 28px;
+  padding-bottom: 40px;
+}
+
+.bk .pp-preview {
+  margin-bottom: 22px;
+}
+
+.bk .pp-head {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.bk .pp-photo {
+  width: 96px;
+  height: 96px;
+  flex: none;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 1px solid var(--hair);
+}
+
+.bk .pp-photo-blank {
+  display: grid;
+  place-items: center;
+  background: var(--ink);
+  color: var(--accent);
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 2.6rem;
+}
+
+.bk .pp-kicker {
+  margin: 0 0 4px;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.bk .pp-name {
+  margin: 0;
+  font-family: var(--font-display), "Cormorant Garamond", Georgia, serif;
+  font-weight: 500;
+  font-size: clamp(2rem, 8vw, 2.8rem);
+  line-height: 1.05;
+}
+
+.bk .pp-owner {
+  margin: 4px 0 0;
+  font-style: italic;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.15rem;
+  color: var(--ink-soft);
+}
+
+.bk .pp-bio {
+  margin: 0 0 16px;
+  white-space: pre-line;
+}
+
+.bk .pp-tags {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 16px;
+  padding: 0;
+}
+
+.bk .pp-tags li {
+  padding: 4px 10px;
+  border: 1px solid var(--hair);
+  font-size: 0.82rem;
+}
+
+.bk .pp-links {
+  display: flex;
+  gap: 18px;
+  margin-bottom: 26px;
+  font-size: 0.9rem;
+}
+
+.bk .pp-links a {
+  color: var(--ink);
+  text-underline-offset: 3px;
+}
+
+.bk .pp-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+
+.bk .pp-actions .button {
+  flex: 1 1 200px;
+}
+
+.bk .pp-times {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 8px;
+  margin: 6px 0 0;
+  padding: 0;
+}
+
+.bk .pp-times a {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 12px;
+  border: 1px solid var(--hair);
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 0.85rem;
+}
+
+.bk .pp-times a strong {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.bk .pp-times a:hover {
+  border-color: var(--ink);
+}
+
+.bk .pp-services {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.bk .pp-services a {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--hair);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.bk .pp-svc-meta {
+  flex: none;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+}
+
+.bk .pp-policy {
+  white-space: pre-line;
+}
+
+.bk .pp-hours {
+  margin: 0 0 10px;
+}
+
+.bk .pp-hours > div {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--hair);
+  font-size: 0.92rem;
+}
+
+.bk .pp-hours > div.closed {
+  color: var(--ink-faint);
+}
+
+.bk .pp-hours dd {
+  margin: 0;
+}
