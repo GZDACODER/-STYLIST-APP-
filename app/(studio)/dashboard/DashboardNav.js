@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTemplate } from "@/components/TemplateContext";
 
 // Thin line icons, drawn for this app (24 x 24, 1.4px strokes).
 const ICONS = {
@@ -71,12 +72,12 @@ const ITEMS = [
   // In the side menu only: the phone tab bar is full (Home links to it).
   { href: "/dashboard/today", label: "Today", icon: "today", wide: true },
   { href: "/dashboard/bookings", label: "Calendar", icon: "calendar" },
-  { href: "/dashboard/clients", label: "Clients", icon: "clients" },
+  { href: "/dashboard/clients", label: "Clients", word: "Clients", icon: "clients" },
   { href: "/dashboard/openings", label: "Openings", icon: "openings" },
-  { href: "/dashboard/waitlist", label: "Waitlist", icon: "waitlist" },
+  { href: "/dashboard/waitlist", label: "Waitlist", icon: "waitlist", module: "waitlist" },
   { href: "/dashboard/notes", label: "Notes", icon: "notes", also: ["/dashboard/wrapup"] },
   // In the side menu only: the phone tab bar is full (Home links to it).
-  { href: "/dashboard/reports", label: "Reports", icon: "reports", wide: true },
+  { href: "/dashboard/reports", label: "Reports", icon: "reports", wide: true, module: "reports" },
   {
     href: "/dashboard/settings",
     label: "Settings",
@@ -92,10 +93,13 @@ function isActive(item, pathname) {
 
 export default function DashboardNav() {
   const pathname = usePathname();
+  // The pro's template: their word for clients, and tabs they've turned off.
+  const { words, modules } = useTemplate();
+  const items = ITEMS.filter((i) => !i.module || modules[i.module] !== false).map((i) => (i.word ? { ...i, label: words[i.word] || i.label } : i));
 
   return (
     <nav className="db-nav" aria-label="Dashboard">
-      {ITEMS.map((item) => {
+      {items.map((item) => {
         const active = isActive(item, pathname);
         return (
           <Link

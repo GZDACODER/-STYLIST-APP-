@@ -22,6 +22,7 @@ import { ExampleTag } from "@/components/dash/Example";
 import ProCode from "@/components/dash/ProCode";
 import { lateText, recentLateNotices } from "@/lib/lateNotices";
 import { isDemo } from "@/lib/demo";
+import { getMyTemplate } from "@/lib/templates/server";
 
 export const metadata = { title: `Home · ${BRAND_NAME}` };
 
@@ -186,21 +187,22 @@ export default async function HomePage() {
   const dash = (q, value) => (q.error ? "—" : value);
   // A new pro with nothing booked yet sees example numbers (tagged Example).
   const exampleStats = showExamples && (anyBooking.count || 0) === 0 && !nextUp.error ? EXAMPLE_HOME_STATS : null;
-  const cards = exampleStats
-    ? [
-        { label: "Today's bookings", value: exampleStats.todays, href: "/dashboard/today", example: true },
-        { label: "This week's revenue", value: money(exampleStats.weekRevenueCents), note: "Booked Mon–Sun", href: "/dashboard/reports", example: true },
-        { label: "Deposits collected", value: money(exampleStats.depositsCents), note: "This week", href: "/dashboard/reports", example: true },
-        { label: "New clients", value: exampleStats.newClients, note: "This month", href: "/dashboard/clients", example: true },
-        { label: "Waitlist", value: exampleStats.waiting, note: "Waiting now", href: "/dashboard/waitlist", example: true },
-      ]
-    : [
-    { label: "Today's bookings", value: dash(todays, todays.count ?? 0), href: "/dashboard/today" },
-    { label: "This week's revenue", value: dash(weekRows, money(weekRevenue)), note: "Booked Mon–Sun", href: "/dashboard/reports" },
-    { label: "Deposits collected", value: dash(paidDeposits, money(depositsThisWeek)), note: "This week", href: "/dashboard/reports" },
-    { label: "New clients", value: dash(newClients, newThisMonth), note: "This month", href: "/dashboard/clients" },
-    { label: "Waitlist", value: dash(waiting, waitingCount), note: "Waiting now", href: "/dashboard/waitlist" },
-  ];
+  // Home's cards follow the pro's template: its order, its words, and only
+  // for features that are on.
+  const tpl = await getMyTemplate();
+  const W = tpl.words;
+  const ex = Boolean(exampleStats);
+  const allCards = {
+    today: { label: `Today's ${W.appointments === "appointments" ? "bookings" : W.appointments}`, value: ex ? exampleStats.todays : dash(todays, todays.count ?? 0), href: "/dashboard/today" },
+    revenue: { label: "This week's revenue", value: ex ? money(exampleStats.weekRevenueCents) : dash(weekRows, money(weekRevenue)), note: "Booked Mon–Sun", href: "/dashboard/reports", module: "reports" },
+    deposits: { label: "Deposits collected", value: ex ? money(exampleStats.depositsCents) : dash(paidDeposits, money(depositsThisWeek)), note: "This week", href: "/dashboard/reports", module: "deposits" },
+    newClients: { label: `New ${W.clients}`, value: ex ? exampleStats.newClients : dash(newClients, newThisMonth), note: "This month", href: "/dashboard/clients" },
+    waitlist: { label: "Waitlist", value: ex ? exampleStats.waiting : dash(waiting, waitingCount), note: "Waiting now", href: "/dashboard/waitlist", module: "waitlist" },
+  };
+  const cards = tpl.homeCards
+    .map((k) => allCards[k])
+    .filter((c) => c && (!c.module || tpl.modules[c.module]))
+    .map((c) => ({ ...c, example: ex }));
 
   // Needs attention: only what's actually there.
   const exampleStatsOn = showExamples && (anyBooking.count || 0) === 0;
@@ -257,7 +259,7 @@ export default async function HomePage() {
   // Example Up next rows for a new pro with nothing booked yet.
   const upNext =
     !nextUp.error && (nextUp.data || []).length === 0 && (anyBooking.count || 0) === 0 && showExamples
-      ? exampleData(today).upcoming
+      ? exampleData(today, await getMyTemplate()).upcoming
       : nextUp.data || [];
 
   // Trial feedback: from day 3 of the free trial until they've sent some.

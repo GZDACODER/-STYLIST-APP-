@@ -9,7 +9,8 @@ import SettingsShell from "@/components/dash/SettingsShell";
 import EmptyState from "@/components/dash/EmptyState";
 import RowList from "@/components/dash/RowList";
 import { ExampleCard, ExampleTag } from "@/components/dash/Example";
-import { EXAMPLE_SERVICES, examplesOn } from "@/lib/examples";
+import { exampleServices, examplesOn } from "@/lib/examples";
+import { getMyTemplate } from "@/lib/templates/server";
 
 export const metadata = { title: `Services · ${BRAND_NAME}` };
 
@@ -28,6 +29,8 @@ function formatDuration(minutes) {
 }
 
 export default async function ServicesPage() {
+  // Aftercare tips are off for some business types (tutors), or by the pro.
+  const aftercareOn = (await getMyTemplate()).modules.aftercare;
   const supabase = await createClient();
   const {
     data: { user },
@@ -56,7 +59,7 @@ export default async function ServicesPage() {
             <p className="examples-note">Here are some examples. Add your first service below and they&apos;ll go away.</p>
             <RowList
               label="Services"
-              items={EXAMPLE_SERVICES.map((s) => ({
+              items={exampleServices(await getMyTemplate()).map((s) => ({
                 key: s.id,
                 example: true,
                 title: s.name,
@@ -102,7 +105,7 @@ export default async function ServicesPage() {
                   <p className="muted small-text">
                     Deposits for this service are set in <a href="/dashboard/settings/deposits">Deposits</a>.
                   </p>
-                  {aftercareOf && <AftercareForm id={service.id} aftercare={aftercareOf[service.id] || ""} />}
+                  {aftercareOn && aftercareOf && <AftercareForm id={service.id} aftercare={aftercareOf[service.id] || ""} />}
                   <form action={deleteService}>
                     <input type="hidden" name="id" value={service.id} />
                     <SubmitButton className="button secondary small" pendingText="Deleting...">

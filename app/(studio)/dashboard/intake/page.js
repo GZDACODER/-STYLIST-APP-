@@ -6,6 +6,7 @@ import IntakeBuilder from "./IntakeBuilder";
 import SettingsShell from "@/components/dash/SettingsShell";
 import { exampleData, examplesOn } from "@/lib/examples";
 import { ExampleTag } from "@/components/dash/Example";
+import { getMyTemplate } from "@/lib/templates/server";
 
 export const metadata = { title: `Intake form & waiver · ${BRAND_NAME}` };
 
@@ -34,7 +35,7 @@ export default async function IntakePage() {
 
   const example =
     !(form?.questions || []).length && !form?.waiver_text && (await examplesOn(supabase, user.id))
-      ? exampleData(new Date().toISOString().slice(0, 10)).intake
+      ? exampleData(new Date().toISOString().slice(0, 10), await getMyTemplate()).intake
       : null;
 
   return (

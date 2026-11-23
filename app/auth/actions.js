@@ -5,7 +5,7 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { BUSINESS_TYPE_VALUES } from "@/lib/businessTypes";
+import { TYPE_CHOICES } from "@/lib/templates";
 import { DEMO_LOCKED, isDemo } from "@/lib/demo";
 
 export async function signup(prevState, formData) {
@@ -13,9 +13,9 @@ export async function signup(prevState, formData) {
   const firstName = String(formData.get("first_name") || "").trim();
   const email = String(formData.get("email") || "").trim();
   const password = String(formData.get("password") || "");
-  // Optional; anything not on the list is left empty.
+  // The business type picked on step 2 (lib/templates); hair stylist if none.
   const rawType = String(formData.get("business_type") || "");
-  const businessType = BUSINESS_TYPE_VALUES.includes(rawType) ? rawType : "";
+  const businessType = TYPE_CHOICES.some((t) => t.value === rawType) ? rawType : "hair";
 
   if (!businessName) return { error: "Please enter your business name." };
   if (firstName.length > 50) return { error: "Please keep your first name to 50 characters." };

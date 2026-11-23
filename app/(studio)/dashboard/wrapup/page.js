@@ -13,6 +13,7 @@ import { BRAND_NAME } from "@/lib/brand";
 import OutcomePicker from "./OutcomePicker";
 import VisitNoteForm from "../notes/VisitNoteForm";
 import LookEditor from "./LookEditor";
+import { getMyTemplate } from "@/lib/templates/server";
 
 export const metadata = { title: `Wrap up visits · ${BRAND_NAME}` };
 
@@ -43,6 +44,8 @@ function deposit(b) {
 }
 
 export default async function WrapupPage() {
+  // My look is off for some business types (tutors), or by the pro.
+  const showLook = (await getMyTemplate()).modules.myLook;
   const supabase = await createClient();
   const {
     data: { user },
@@ -106,7 +109,7 @@ export default async function WrapupPage() {
 
   // Examples for a new pro who has no visits to wrap up, owed or marked yet.
   const examples =
-    started.length === 0 && owed.length === 0 && (await examplesOn(supabase, user.id)) ? exampleData(today).past : [];
+    started.length === 0 && owed.length === 0 && (await examplesOn(supabase, user.id)) ? exampleData(today, await getMyTemplate()).past : [];
 
   // "My look" for each visit (step 46 SQL): shared notes and the photo, shown
   // to the pro through short-lived links.
@@ -156,7 +159,7 @@ export default async function WrapupPage() {
           owed={b.outcome === "completed_owed"}
         />
       )}
-      {looks[b.id]?.ready && <LookEditor bookingId={b.id} photoUrl={looks[b.id].photo} note={looks[b.id].note} />}
+      {showLook && looks[b.id]?.ready && <LookEditor bookingId={b.id} photoUrl={looks[b.id].photo} note={looks[b.id].note} />}
     </li>
   );
 
@@ -218,7 +221,7 @@ export default async function WrapupPage() {
                   {b.owed_cents ? ` · ${formatPrice(b.owed_cents)} owed` : ""}
                 </p>
                 {b.visit_note && <p className="visit-note-text">{b.visit_note}</p>}
-                {b.shared_note && <LookEditor bookingId={b.id} note={b.shared_note} example />}
+                {showLook && b.shared_note && <LookEditor bookingId={b.id} note={b.shared_note} example />}
               </li>
             ))}
           </ul>

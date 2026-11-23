@@ -4,6 +4,7 @@
 // guide: the first-visit tips for this page (lib/guides.js); adds the "?"
 // that replays them.
 import PageGuide from "@/components/guide/PageGuide";
+import Words from "@/components/Words";
 
 // hero: the black header framed in gold (Home, Today).
 // mark: a large figure beside the title (Today's day of the month).
@@ -16,12 +17,12 @@ export default function PageHeader({ eyebrow, title, subtitle, actions, guide, h
         </p>
       )}
       <div className="db-pagehead-text">
-        {eyebrow && <p className="db-date">{eyebrow}</p>}
+        {eyebrow && <p className="db-date"><Words>{eyebrow}</Words></p>}
         <h1>
-          {title}
+          <Words>{title}</Words>
           {guide && <PageGuide guideKey={guide} className="gd-help-title" />}
         </h1>
-        {subtitle && <p className="muted small-text db-pagehead-sub">{subtitle}</p>}
+        {subtitle && <p className="muted small-text db-pagehead-sub"><Words>{subtitle}</Words></p>}
       </div>
       {actions && <div className="db-pagehead-actions">{actions}</div>}
     </header>

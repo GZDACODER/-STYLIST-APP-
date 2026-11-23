@@ -14,6 +14,7 @@ import { ExampleCard, ExampleTag } from "@/components/dash/Example";
 import { BRAND_NAME } from "@/lib/brand";
 import { todayInTimeZone } from "@/lib/availability";
 import { nowLocal } from "@/lib/localTime";
+import { getMyTemplate } from "@/lib/templates/server";
 
 export const metadata = { title: `Clients · ${BRAND_NAME}` };
 
@@ -122,9 +123,10 @@ export default async function ClientsPage({ searchParams }) {
   }
 
   // Example clients for a new pro (shown until they have real ones).
-  const examples = clients.length === 0 && (await examplesOn(supabase, user.id)) ? exampleData(todayInTimeZone(timeZone)).clients : [];
+  const exAll = clients.length === 0 && (await examplesOn(supabase, user.id)) ? exampleData(todayInTimeZone(timeZone), await getMyTemplate()) : null;
+  const examples = exAll ? exAll.clients : [];
   for (const e of examples) {
-    const next = exampleData(todayInTimeZone(timeZone)).upcoming.find((b) => b.client_name === e.name);
+    const next = exAll.upcoming.find((b) => b.client_name === e.name);
     if (next) nextVisits[e.id] = { date: next.booking_date, time: next.start_time.slice(0, 5), service: next.service_name };
   }
 

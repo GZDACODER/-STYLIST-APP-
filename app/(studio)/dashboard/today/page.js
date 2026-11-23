@@ -20,6 +20,7 @@ import { eventsOn } from "@/lib/calendarEvents";
 import { holidaysOn } from "@/lib/holidays";
 import LateNotices from "./LateNotices";
 import { recentLateNotices } from "@/lib/lateNotices";
+import { getMyTemplate } from "@/lib/templates/server";
 
 export const metadata = { title: `Today · ${BRAND_NAME}` };
 
@@ -175,7 +176,7 @@ export default async function TodayPage() {
   // example appointments today and an example Next up.
   let exampleNext = null;
   if (!todays.error && appointments.length === 0 && !nextUp.data && (await examplesOn(supabase, user.id))) {
-    const ex = exampleData(today);
+    const ex = exampleData(today, await getMyTemplate());
     appointments.push(...ex.upcoming.filter((b) => b.booking_date === today));
     exampleNext = ex.upcoming.find((b) => b.booking_date > today) || null;
   }

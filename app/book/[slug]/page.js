@@ -11,6 +11,8 @@ import { BRAND_NAME } from "@/lib/brand";
 import { myProsEnabled } from "@/lib/myPros";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isDemoSlug } from "@/lib/demo";
+import { TemplateProvider } from "@/components/TemplateContext";
+import { templateFor } from "@/lib/templates";
 
 // cache() means the title and the page share one database call.
 // invite: the secret from a private invite link (?invite=...), if any.
@@ -99,6 +101,16 @@ export default async function BookingPage({ params, searchParams }) {
     portfolio = [];
   }
 
+  // The pro's business type sets the words on this page ("Subject" for a tutor).
+  let bookingTemplate = null;
+  try {
+    const { data: typeRow } = await createAdminClient().from("stylists").select("business_type, modules").eq("slug", slug).maybeSingle();
+    const t = templateFor(typeRow?.business_type, typeRow?.modules);
+    bookingTemplate = { key: t.key, words: t.words, modules: t.modules };
+  } catch {
+    bookingTemplate = null;
+  }
+
   return (
     <div className="bk-layout" style={look.accent ? { "--accent": look.accent } : undefined}>
       {/* The stylist's name is shown once, as the cursive signature in the
@@ -143,6 +155,7 @@ export default async function BookingPage({ params, searchParams }) {
           </p>
         )}
         <Portfolio photos={portfolio} name={look.name} />
+        <TemplateProvider value={bookingTemplate}>
         <BookingFlow
           page={data}
           invite={invite}
@@ -154,6 +167,7 @@ export default async function BookingPage({ params, searchParams }) {
           myPros={myProsEnabled()}
           proCode={await proCodeFor(slug)}
         />
+        </TemplateProvider>
       </div>
     </div>
   );

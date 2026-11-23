@@ -14,6 +14,7 @@ import { CancelledDepositBadge } from "./badges";
 import RefundDepositButton from "./RefundDepositButton";
 import { formatPrice } from "@/lib/money";
 import { calendarWindowStart, loadPastBookings, movedText } from "@/lib/calendarPast";
+import { getMyTemplate } from "@/lib/templates/server";
 
 export const metadata = { title: `Calendar · ${BRAND_NAME}` };
 
@@ -151,7 +152,7 @@ export default async function BookingsPage({ searchParams }) {
   // Examples for a new pro: bookings while they have none (past or
   // upcoming), events while they have none, cancelled while none.
   const showExamples = await pending.examples;
-  const ex = showExamples ? exampleData(today) : null;
+  const ex = showExamples ? exampleData(today, await getMyTemplate()) : null;
   const exampleBookings = ex && upcoming.length === 0 && cancelled.length === 0 && pastRows.length === 0 && !hasOlder;
   if (ex && events && events.length === 0) events.push(...ex.events);
   const calendarBookings = exampleBookings ? [...ex.past.map((b) => ({ ...b, past: true })), ...ex.upcoming] : [...pastRows, ...upcoming];

@@ -6,6 +6,7 @@
 // keeps keyboard focus while it's open.
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useWords } from "@/components/Words";
 
 const GAP = 12; // between the spotlight and the card
 const PAD = 8; // around the highlighted element
@@ -32,6 +33,8 @@ function findTarget(selectors) {
 const reducedMotion = () => window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
 export default function GuideTour({ guide, onFinish }) {
+  // The pro's own words ("students" for a tutor); unchanged elsewhere.
+  const swap = useWords();
   const steps = guide.steps;
   const [index, setIndex] = useState(0);
   const [rect, setRect] = useState(null); // the highlighted element, or null
@@ -191,9 +194,9 @@ export default function GuideTour({ guide, onFinish }) {
           {guide.title} · {index + 1} of {steps.length}
         </p>
         <h2 id={titleId} className="gd-title">
-          {step.title}
+          {swap(step.title)}
         </h2>
-        <p className="gd-text">{step.text}</p>
+        <p className="gd-text">{swap(step.text)}</p>
         <div className="gd-dots" aria-hidden="true">
           {steps.map((_, i) => (
             <span key={i} className={i === index ? "active" : ""} />

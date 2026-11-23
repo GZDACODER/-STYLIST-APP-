@@ -9,6 +9,7 @@ import { BRAND_NAME } from "@/lib/brand";
 import NotesView from "./NotesView";
 import PageHeader from "@/components/dash/PageHeader";
 import { exampleData, examplesOn } from "@/lib/examples";
+import { getMyTemplate } from "@/lib/templates/server";
 
 export const metadata = { title: `Notes · ${BRAND_NAME}` };
 
@@ -89,7 +90,7 @@ export default async function NotesPage() {
 
   // Examples for a new pro with no finished visits yet.
   if (visits.length === 0 && (await examplesOn(supabase, user.id))) {
-    const ex = exampleData(today);
+    const ex = exampleData(today, await getMyTemplate());
     for (const b of ex.past) {
       const card = ex.clients.find((c) => c.name === b.client_name);
       visits.push({
