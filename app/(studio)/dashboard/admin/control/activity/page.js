@@ -7,7 +7,7 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { adminEmails, isAdmin } from "@/lib/admin";
-import { DEMO_EMAIL } from "@/lib/demo";
+import { isDemoEmail } from "@/lib/demo";
 import { BRAND_NAME } from "@/lib/brand";
 import { PLANS } from "@/lib/plans";
 import { formatPrice } from "@/lib/money";
@@ -121,7 +121,7 @@ export default async function ActivityPage({ searchParams }) {
   const all = (data?.pros || []).map((p) => {
     const you = owners.has(String(p.email || "").toLowerCase());
     const viewer = VIEWER_CODES.has(p.pro_code);
-    const demo = String(p.email || "").toLowerCase() === DEMO_EMAIL;
+    const demo = isDemoEmail(p.email);
     const test = you || viewer || demo || TEST_CODES.has(p.pro_code) || TEST_EMAIL.test(p.email || "") || TEST_NAME.test(p.business_name || "");
     return { ...p, you, viewer, demo, test };
   });
