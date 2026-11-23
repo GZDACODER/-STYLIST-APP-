@@ -276,6 +276,11 @@ export default async function HomePage() {
         subtitle={stylist.business_name}
         actions={
           <>
+            {isAdmin(user) && (
+              <Link href="/dashboard/admin/control" className="button small secondary">
+                Control Room
+              </Link>
+            )}
             <CopyLinkButton link={bookingLink} />
             <a href={bookingLink} target="_blank" rel="noreferrer" className="button small">
               View booking page
@@ -401,7 +406,8 @@ export default async function HomePage() {
           {isAdmin(user) && (
             <>
               {" "}
-              · <Link href="/dashboard/admin/feedback">Trial feedback (admin)</Link> ·{" "}
+              · <Link href="/dashboard/admin/control">Control Room (admin)</Link> ·{" "}
+              <Link href="/dashboard/admin/feedback">Trial feedback (admin)</Link> ·{" "}
               <Link href="/dashboard/admin/disputes">Disputes (admin)</Link> ·{" "}
               <Link href="/dashboard/admin/errors">Errors (admin)</Link>
             </>
