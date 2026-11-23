@@ -919,3 +919,20 @@
   border-color: var(--gold-bright);
   color: var(--ink);
 }
+
+.cr-demo-link {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--ink);
+  background: var(--surface-2);
+}
+
+.cr-demo-link span {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.25rem;
+  flex: 1 1 200px;
+  overflow-wrap: anywhere;
+}

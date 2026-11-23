@@ -408,6 +408,7 @@ export default async function HomePage() {
             <>
               {" "}
               · <Link href="/dashboard/admin/control">Control Room (admin)</Link> ·{" "}
+              <CopyLinkButton link="https://www.clientelesuite.com/demo" label="Copy demo link" className="link-button small-text" /> ·{" "}
               <Link href="/dashboard/admin/feedback">Trial feedback (admin)</Link> ·{" "}
               <Link href="/dashboard/admin/disputes">Disputes (admin)</Link> ·{" "}
               <Link href="/dashboard/admin/errors">Errors (admin)</Link>

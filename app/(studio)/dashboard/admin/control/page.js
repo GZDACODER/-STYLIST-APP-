@@ -10,6 +10,8 @@ import { isAdmin } from "@/lib/admin";
 import { BRAND_NAME } from "@/lib/brand";
 import PageHeader from "@/components/dash/PageHeader";
 import ControlTabs from "./ControlTabs";
+import CopyLinkButton from "@/components/dash/CopyLinkButton";
+import { publicSiteUrl } from "@/lib/siteUrl";
 
 export const metadata = { title: `Control Room · ${BRAND_NAME}` };
 export const dynamic = "force-dynamic";
@@ -176,6 +178,7 @@ export default async function ControlRoomPage() {
       ? `Running · ${warnings} to look at`
       : "Everything is running";
 
+  const demoLink = `${publicSiteUrl("https://www.clientelesuite.com")}/demo`;
   const list = reports || [];
   const latest = list[0];
 
@@ -194,6 +197,21 @@ export default async function ControlRoomPage() {
         {tiles.map((t) => (
           <Tile key={t.name} t={t} />
         ))}
+      </section>
+
+      <section className="card cr-demo">
+        <h2>Demo link</h2>
+        <p>
+          Send this to anyone who wants to look around. It opens <strong>Maison Demo</strong>, a sample salon full of
+          example bookings, clients and tips, with no sign-up or password. It resets every night.
+        </p>
+        <p className="cr-demo-link">
+          <span>{demoLink.replace(/^https?:\/\//, "")}</span>
+          <CopyLinkButton link={demoLink} label="Copy demo link" className="button small" />
+        </p>
+        <p className="muted small-text">
+          Opening it on this device signs you out of your own account. To look at it yourself, use a private tab.
+        </p>
       </section>
 
       <div className="home-grid">
