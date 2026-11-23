@@ -936,3 +936,122 @@
   flex: 1 1 200px;
   overflow-wrap: anywhere;
 }
+
+/* ---------- Settings: business type and features ---------- */
+.db .type-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.db .type-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 104px;
+  padding: 16px 14px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  color: var(--ink);
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.db .type-card input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.db .type-card:hover {
+  border-color: var(--ink);
+}
+
+.db .type-card.selected {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fbf6ea;
+  box-shadow: inset 0 -3px 0 var(--gold-bright);
+}
+
+.db .type-card-name {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.3rem;
+  line-height: 1.1;
+}
+
+.db .type-card-blurb {
+  font-size: 0.8rem;
+  line-height: 1.35;
+  color: var(--muted);
+}
+
+.db .type-card.selected .type-card-blurb {
+  color: rgba(245, 241, 234, 0.7);
+}
+
+.db .type-card-now {
+  margin-top: auto;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.db .type-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--ink);
+  background: var(--surface-2);
+}
+
+.db .type-words {
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.db .type-words th {
+  text-align: left;
+  font-weight: 500;
+  color: var(--muted);
+  padding: 4px 16px 4px 0;
+}
+
+.db .module-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--hair);
+}
+
+.db .module-list li {
+  border-bottom: 1px solid var(--hair);
+}
+
+.db .module-row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 2px;
+  font-size: 0.95rem;
+  color: var(--ink);
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: 400;
+}
+
+.db .module-row input {
+  margin-top: 4px;
+  width: auto;
+}
+
+.db .support-off {
+  margin-top: 8px;
+}

@@ -29,6 +29,8 @@ function formatDuration(minutes) {
 }
 
 export default async function ServicesPage() {
+  // Aftercare tips are off for some business types (tutors), or by the pro.
+  const aftercareOn = (await getMyTemplate()).modules.aftercare;
   const supabase = await createClient();
   const {
     data: { user },
@@ -103,7 +105,7 @@ export default async function ServicesPage() {
                   <p className="muted small-text">
                     Deposits for this service are set in <a href="/dashboard/settings/deposits">Deposits</a>.
                   </p>
-                  {aftercareOf && <AftercareForm id={service.id} aftercare={aftercareOf[service.id] || ""} />}
+                  {aftercareOn && aftercareOf && <AftercareForm id={service.id} aftercare={aftercareOf[service.id] || ""} />}
                   <form action={deleteService}>
                     <input type="hidden" name="id" value={service.id} />
                     <SubmitButton className="button secondary small" pendingText="Deleting...">

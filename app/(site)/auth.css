@@ -267,3 +267,89 @@
     padding: 36px 22px 56px;
   }
 }
+
+/* ---------- Sign-up step 2: business type cards ---------- */
+.au-main .au-step-title {
+  font-family: var(--font-display), var(--font-serif), Georgia, serif;
+  font-weight: 500;
+  font-size: 1.7rem;
+  line-height: 1.1;
+  margin: 0;
+  color: var(--text);
+}
+
+.type-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.au-main .type-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 112px;
+  padding: 16px 14px;
+  border: 1px solid var(--border);
+  background: #fbf8f2;
+  cursor: pointer;
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: 400;
+  color: var(--text);
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.au-main .type-card input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.au-main .type-card:hover {
+  border-color: var(--text);
+}
+
+.au-main .type-card.selected {
+  background: #12100d;
+  border-color: #12100d;
+  color: #fbf6ea;
+  box-shadow: inset 0 -3px 0 #cfae6c;
+}
+
+.type-card-name {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.35rem;
+  line-height: 1.1;
+}
+
+.type-card-blurb {
+  font-size: 0.8rem;
+  line-height: 1.35;
+  color: var(--muted);
+}
+
+.type-card.selected .type-card-blurb {
+  color: rgba(245, 241, 234, 0.7);
+}
+
+.type-card:has(input:focus-visible) {
+  outline: 2px solid #a8874d;
+  outline-offset: 2px;
+}
+
+.type-soon {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.type-soon span {
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-right: 6px;
+}

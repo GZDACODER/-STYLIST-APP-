@@ -44,6 +44,8 @@ function deposit(b) {
 }
 
 export default async function WrapupPage() {
+  // My look is off for some business types (tutors), or by the pro.
+  const showLook = (await getMyTemplate()).modules.myLook;
   const supabase = await createClient();
   const {
     data: { user },
@@ -157,7 +159,7 @@ export default async function WrapupPage() {
           owed={b.outcome === "completed_owed"}
         />
       )}
-      {looks[b.id]?.ready && <LookEditor bookingId={b.id} photoUrl={looks[b.id].photo} note={looks[b.id].note} />}
+      {showLook && looks[b.id]?.ready && <LookEditor bookingId={b.id} photoUrl={looks[b.id].photo} note={looks[b.id].note} />}
     </li>
   );
 
@@ -219,7 +221,7 @@ export default async function WrapupPage() {
                   {b.owed_cents ? ` · ${formatPrice(b.owed_cents)} owed` : ""}
                 </p>
                 {b.visit_note && <p className="visit-note-text">{b.visit_note}</p>}
-                {b.shared_note && <LookEditor bookingId={b.id} note={b.shared_note} example />}
+                {showLook && b.shared_note && <LookEditor bookingId={b.id} note={b.shared_note} example />}
               </li>
             ))}
           </ul>
