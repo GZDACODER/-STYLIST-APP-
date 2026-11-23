@@ -46,8 +46,8 @@ begin
     business_type = 'hair',
     timezone = tz,
     tagline = 'Silk presses, braids, color and lashes',
-    cover_photo_url = null,
-    instagram = null,
+    cover_photo_url = '',
+    instagram = '',
     show_examples = true,
     regular_perks = 'A free deep condition every 5th visit',
     birthday_perk = '15% off any visit in your birthday month'
