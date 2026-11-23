@@ -11,6 +11,7 @@ import { reportError } from "@/lib/errorAlerts";
 import { runOnboardingEmails } from "@/lib/onboardingEmails";
 import { runClientEmails } from "@/lib/clientEmails";
 import { runOwnerSummary } from "@/lib/ownerSummary";
+import { runFollowerAlerts } from "@/lib/followers";
 
 export async function POST(request) {
   const secret = process.env.CRON_SECRET;
@@ -84,6 +85,15 @@ export async function POST(request) {
     weekly = await runWeeklySummaries();
   } catch (error) {
     await reportError("Every-minute job", error, { extra: "Weekly summaries failed" });
+  }
+
+  // Opening alerts for clients following a pro's profile (step 60 SQL).
+  try {
+    await runFollowerAlerts();
+  } catch (error) {
+    if (!/follower|profile_followers/.test(String(error?.message))) {
+      await reportError("Every-minute job", error, { extra: "Opening alerts failed" });
+    }
   }
 
   if (!waitlistConfigured()) {

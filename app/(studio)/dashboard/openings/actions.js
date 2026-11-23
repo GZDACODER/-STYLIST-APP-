@@ -1,6 +1,7 @@
 "use server";
 
 // Server actions for posting openings.
+import { checkNewOpeningsSafely } from "@/lib/followers";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { planErrorMessage } from "@/lib/plan";
@@ -148,6 +149,7 @@ export async function postOpenings(prevState, formData) {
 
   // New times: tell anyone on the waitlist who wants them.
   const { told } = await runWaitlistSafely(user.id, await siteOrigin());
+  await checkNewOpeningsSafely(user.id);
   const toldText = told
     ? ` ${told} ${told === 1 ? "client" : "clients"} on your waitlist ${told === 1 ? "was" : "were"} emailed.`
     : "";
@@ -182,6 +184,7 @@ export async function setOpeningVisibility(id, visibility) {
     }
     // Opening a "Regulars only" time to everyone is news for the waitlist.
     await runWaitlistSafely(user.id, await siteOrigin());
+  await checkNewOpeningsSafely(user.id);
   }
   revalidatePath("/dashboard/openings");
   return { success: true };
@@ -203,6 +206,7 @@ export async function openHoldToEveryone(formData) {
   // The database's security rules only let a stylist remove their own holds.
   await supabase.from("regulars_holds").delete().eq("id", id);
   await runWaitlistSafely(user.id, await siteOrigin());
+  await checkNewOpeningsSafely(user.id);
   revalidatePath("/dashboard/openings");
 }
 
@@ -235,6 +239,7 @@ export async function updateOpening(prevState, formData) {
   if (!data) return { error: "That opening isn't there any more." };
   // It may have new times in it: tell the waitlist.
   await runWaitlistSafely(user.id, await siteOrigin());
+  await checkNewOpeningsSafely(user.id);
   revalidatePath("/dashboard/openings");
   return { success: "Saved.", savedAt: Date.now() };
 }
@@ -292,6 +297,7 @@ export async function duplicateOpening(prevState, formData) {
   const { error } = await supabase.from("openings").insert(rows);
   if (error) return { error: planErrorMessage(error) || error.message };
   await runWaitlistSafely(user.id, await siteOrigin());
+  await checkNewOpeningsSafely(user.id);
   revalidatePath("/dashboard/openings");
   return {
     success: `Copied to ${rows.length} day${rows.length > 1 ? "s" : ""}.${skipped ? ` Skipped ${skipped} already open.` : ""}`,
@@ -325,6 +331,7 @@ export async function bulkOpenings(ids, op) {
           .gt("end_time", o.start_time);
       }
       await runWaitlistSafely(user.id, await siteOrigin());
+  await checkNewOpeningsSafely(user.id);
     }
   } else {
     return { error: "Unknown option." };

@@ -1,5 +1,6 @@
 "use server";
 
+import { checkNewOpeningsSafely } from "@/lib/followers";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { isValidTimeZone } from "@/lib/availability";
@@ -178,6 +179,8 @@ export async function saveRegulars(prevState, formData) {
   else if (promoted > 0) {
     notes.push(`${promoted} ${promoted === 1 ? "client is" : "clients are"} now Regulars.`);
   }
+  // Turning Regulars-only off opens times to everyone: alert followers.
+  await checkNewOpeningsSafely(user.id);
   return { success: ["Saved.", ...notes].join(" ") };
 }
 
