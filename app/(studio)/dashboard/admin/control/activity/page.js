@@ -115,6 +115,14 @@ export default async function ActivityPage({ searchParams }) {
   const { tests: showTestsParam } = await searchParams;
   const showTests = showTestsParam === "1";
   const { data, error } = await createAdminClient().rpc("ops_activity");
+  // Each pro's latest signed Clientele agreement (step 54 SQL).
+  const { data: agreementRows } = await createAdminClient()
+    .from("pro_agreements")
+    .select("id, stylist_id, version, signed_at")
+    .eq("kind", "pro_terms")
+    .order("signed_at", { ascending: false });
+  const agreementOf = {};
+  for (const a of agreementRows || []) if (!agreementOf[a.stylist_id]) agreementOf[a.stylist_id] = a;
   // Your own account(s) (ADMIN_EMAILS) are for building the site, not a pro
   // using it: kept out of the numbers like test accounts, marked "You".
   const owners = new Set(adminEmails().map((e) => e.toLowerCase()));
@@ -256,6 +264,7 @@ export default async function ActivityPage({ searchParams }) {
                 <th>Clients</th>
                 <th>Last login</th>
                 <th>Joined</th>
+                <th>Agreement</th>
               </tr>
             </thead>
             <tbody>
@@ -293,6 +302,15 @@ export default async function ActivityPage({ searchParams }) {
                     <td>{p.clients}</td>
                     <td className="muted small-text">{ago(p.last_sign_in)}</td>
                     <td className="muted small-text">{shortDate(p.created_at)}</td>
+                    <td className="small-text">
+                      {agreementOf[p.id] ? (
+                        <a href={`/dashboard/agreement-pdf/${agreementOf[p.id].id}`} target="_blank" rel="noreferrer">
+                          v{agreementOf[p.id].version} · {shortDate(agreementOf[p.id].signed_at)}
+                        </a>
+                      ) : (
+                        <span className="cr-word warn">Not signed</span>
+                      )}
+                    </td>
                   </tr>
                 );
               })}
