@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(scripts/sb-sql.sh *)",
+      "Bash(./scripts/sb-sql.sh *)",
+      "Bash(node scripts/nightly-check.mjs)",
+      "Bash(node scripts/nightly-check.mjs *)",
+      "Bash(gh api *)",
+      "Bash(npx next build *)",
+      "Bash(git status *)",
+      "Bash(git diff *)",
+      "Bash(git log *)"
+    ]
+  }
+}
