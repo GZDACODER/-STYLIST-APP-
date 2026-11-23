@@ -1077,3 +1077,24 @@
   padding: 10px 0;
   border-bottom: 1px solid var(--hair);
 }
+
+/* Today: what clients did from their email links */
+.db .db-activity {
+  margin: 0 0 22px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--gold);
+  background: var(--surface);
+}
+
+.db .db-activity ul {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+}
+
+.db .db-activity li {
+  padding: 6px 0;
+  border-top: 1px solid var(--hair);
+  font-size: 0.92rem;
+}
