@@ -106,9 +106,9 @@ export default async function DashboardLayout({ children }) {
     );
   }
 
+  // The demo salon is shared, so each visitor's own browser remembers which
+  // tips they've seen (null = this browser only): everyone gets the tour.
   return (
-    {/* The demo salon is shared, so each visitor's own browser remembers which
-        tips they've seen (null = this browser only): everyone gets the tour. */}
     <GuideProvider mode="pro" scope={user.id} initialSeen={isDemo(user) ? null : guidesSeen}>
     <div className={`db ${display.variable}`}>
       <aside className="db-side">
