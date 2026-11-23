@@ -7,6 +7,7 @@ import SettingsShell from "@/components/dash/SettingsShell";
 import { exampleData, examplesOn } from "@/lib/examples";
 import { ExampleTag } from "@/components/dash/Example";
 import { getMyTemplate } from "@/lib/templates/server";
+import Words from "@/components/Words";
 
 export const metadata = { title: `Intake form & waiver · ${BRAND_NAME}` };
 
@@ -51,7 +52,7 @@ export default async function IntakePage() {
             Example form <ExampleTag />
           </h2>
           <p className="muted small-text">
-            What a new client fills in when they book. Write your own below; this example is never sent to anyone.
+            <Words>What a new client fills in when they book. Write your own below; this example is never sent to anyone.</Words>
           </p>
           <ol className="example-questions">
             {example.questions.map((q) => (

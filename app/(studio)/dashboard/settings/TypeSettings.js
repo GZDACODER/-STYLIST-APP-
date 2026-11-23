@@ -56,8 +56,14 @@ export function TypePicker({ current }) {
           </table>
           {moduleChanges.length > 0 && (
             <p className="small-text">
-              Turned {moduleChanges.map((k) => `${next.modules[k] ? "on" : "off"}: ${MODULE_LABELS[k].label}`).join(" · ")}
-              {" "}(unless you've chosen otherwise below).
+              {[
+                ["Turns on", moduleChanges.filter((k) => next.modules[k])],
+                ["Turns off", moduleChanges.filter((k) => !next.modules[k])],
+              ]
+                .filter(([, keys]) => keys.length)
+                .map(([what, keys]) => `${what}: ${keys.map((k) => MODULE_LABELS[k].label).join(", ")}.`)
+                .join(" ")}{" "}
+              Anything you&apos;ve switched yourself below stays as you set it.
             </p>
           )}
           <p className="message info small-text">

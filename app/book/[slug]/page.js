@@ -12,7 +12,7 @@ import { myProsEnabled } from "@/lib/myPros";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isDemoSlug } from "@/lib/demo";
 import { TemplateProvider } from "@/components/TemplateContext";
-import { templateFor } from "@/lib/templates";
+import { swapWords, templateFor } from "@/lib/templates";
 
 // cache() means the title and the page share one database call.
 // invite: the secret from a private invite link (?invite=...), if any.
@@ -125,7 +125,7 @@ export default async function BookingPage({ params, searchParams }) {
             <p className="bk-headline">{data.tagline}</p>
           </>
         ) : (
-          !look.logo && <p className="bk-kicker">Reserve your appointment</p>
+          !look.logo && <p className="bk-kicker">{swapWords("Reserve your appointment", bookingTemplate?.words)}</p>
         )}
       </header>
       {look.photo ? (

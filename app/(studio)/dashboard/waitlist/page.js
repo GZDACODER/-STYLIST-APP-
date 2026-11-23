@@ -15,6 +15,7 @@ import RowList from "@/components/dash/RowList";
 import { exampleData, examplesOn } from "@/lib/examples";
 import { BRAND_NAME } from "@/lib/brand";
 import { getMyTemplate } from "@/lib/templates/server";
+import Words from "@/components/Words";
 
 export const metadata = { title: `Waitlist · ${BRAND_NAME}` };
 
@@ -108,7 +109,7 @@ export default async function WaitlistPage() {
         <h2>Who&apos;s waiting</h2>
         {waiting.length === 0 && exampleWaiting.length > 0 && (
           <>
-            <p className="examples-note">These are example waitlist entries. They go away once real clients join.</p>
+            <p className="examples-note"><Words>These are example waitlist entries. They go away once real clients join.</Words></p>
             <WaitingList entries={exampleWaiting} />
           </>
         )}
