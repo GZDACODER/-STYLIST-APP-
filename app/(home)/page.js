@@ -128,6 +128,19 @@ export default async function HomePage() {
           </div>
         </section>
 
+        {/* ---------- Clients: find your pro ---------- */}
+        <section className="hm-find" aria-label="Find your pro">
+          <form action="/find" method="get" role="search">
+            <label htmlFor="hm-find-q">Booking with someone? Find your pro</label>
+            <div className="hm-find-row">
+              <input id="hm-find-q" name="q" type="search" placeholder="Name or Pro ID" maxLength={80} enterKeyHint="search" />
+              <button type="submit" className="hm-button">
+                Search
+              </button>
+            </div>
+          </form>
+        </section>
+
         {/* ---------- Who it's for ---------- */}
         <section className="hm-for" aria-label="Who it's for">
           <ul>

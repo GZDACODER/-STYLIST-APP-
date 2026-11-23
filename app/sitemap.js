@@ -7,6 +7,7 @@ export default function sitemap() {
   return [
     page("", 1, "weekly"),
     page("/switch", 0.8),
+    page("/find", 0.7, "daily"),
     page("/signup", 0.7),
     page("/login", 0.3, "yearly"),
     page("/terms", 0.2, "yearly"),
