@@ -586,3 +586,163 @@
     padding: 16px 4px;
   }
 }
+
+/* ---------- Control Room (admin) ---------- */
+.cr-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0 0 24px;
+}
+
+@media (max-width: 1099px) {
+  .cr-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.cr-tile-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.cr-tile-head .db-label {
+  flex: 1;
+  min-width: 0;
+}
+
+.db .cr-tile.is-warn {
+  border-top-color: #b0761b;
+}
+
+.db .cr-tile.is-fail {
+  border-top-color: var(--error);
+  background: var(--error-soft);
+}
+
+.cr-dot {
+  display: inline-block;
+  flex: none;
+  width: 9px;
+  height: 9px;
+  background: #3d6b49;
+}
+
+.cr-dot.warn {
+  background: #b0761b;
+}
+
+.cr-dot.fail {
+  background: var(--error);
+}
+
+.cr-word {
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #3d6b49;
+  white-space: nowrap;
+}
+
+.cr-word.warn {
+  color: #8a5a10;
+}
+
+.cr-word.fail {
+  color: var(--error);
+}
+
+.cr-report-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.cr-list {
+  margin: 4px 0 14px;
+  padding-left: 18px;
+}
+
+.cr-checks {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+}
+
+.cr-checks li {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--hair);
+}
+
+.cr-history {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 14px;
+}
+
+.cr-history .muted {
+  margin-left: 8px;
+}
+
+.cr-meter-row {
+  margin-bottom: 18px;
+}
+
+.cr-meter-text {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.cr-meter {
+  height: 6px;
+  background: var(--divider);
+}
+
+.cr-meter span {
+  display: block;
+  height: 100%;
+  background: #3d6b49;
+}
+
+.cr-meter.warn span {
+  background: #b0761b;
+}
+
+.cr-meter.fail span {
+  background: var(--error);
+}
+
+.cr-meter-row p {
+  margin: 6px 0 0;
+}
+
+.cr-figures {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.cr-figures > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 10px;
+  border-top: 2px solid var(--ink);
+}
+
+@media (max-width: 599px) {
+  .cr-figures {
+    grid-template-columns: 1fr;
+  }
+}
