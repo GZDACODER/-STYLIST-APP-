@@ -5,7 +5,7 @@ Short answer: the site itself won't crash. The limits of the free plans are what
 
 ## Your steps (accounts and settings)
 
-- [ ] **Supabase sign-up emails.** In Supabase, go to Authentication → Emails → SMTP settings and send through Resend. Supabase's built-in sender only manages a few emails an hour, so new pros would miss their confirmation email.
+- [x] **Supabase sign-up emails** (done: they already go through Resend, and the templates now match the site).
 - [ ] **Resend paid plan** (about $20/mo). The free plan allows about 100 emails a day.
 - [ ] **Supabase Pro** (about $25/mo). Adds daily backups and more database and photo storage.
 - [ ] **Vercel Pro** (about $20/mo). The free Hobby plan isn't allowed for a paying business.
