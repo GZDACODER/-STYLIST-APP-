@@ -5,7 +5,7 @@ import { TRIAL_DAYS } from "@/lib/plans";
 
 export const metadata = {
   title: `Sign Up · ${BRAND_NAME}`,
-  description: "Start your free 14-day trial of Clientele: online booking, deposits and a waitlist for beauty pros. No card needed.",
+  description: "Start your free 14-day trial of Clientele: online booking, deposits, waivers and a waitlist for independent pros. No card needed.",
   alternates: { canonical: "/signup" },
 };
 

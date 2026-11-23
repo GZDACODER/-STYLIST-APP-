@@ -81,6 +81,19 @@ export default function ClientIntake({ clientId }) {
                   <p className="intake-waiver-copy">{response.waiver_text}</p>
                 </details>
               )}
+              {response.signed_name && response.for_minor && (
+                <p className="small-text muted">
+                  Signed by a parent or guardian: {response.guardian_name}
+                  {response.guardian_relation ? ` (${response.guardian_relation})` : ""}
+                </p>
+              )}
+              {response.pdf_path && (
+                <p>
+                  <a href={`/dashboard/waiver-pdf/${response.id}`} className="button small secondary" target="_blank" rel="noreferrer">
+                    Signed waiver (PDF)
+                  </a>
+                </p>
+              )}
             </>
           )}
           <p>

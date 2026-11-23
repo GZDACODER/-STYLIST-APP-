@@ -59,6 +59,8 @@ export async function saveIntake(prevState, formData) {
   const waiver = String(formData.get("waiver_text") || "").trim();
   if (waiver.length > 10000) return { error: "Please keep the waiver under 10,000 characters." };
   const ticked = new Set(formData.getAll("service").map(String));
+  const frequency = ["first", "every", "yearly"].includes(String(formData.get("waiver_frequency"))) ? String(formData.get("waiver_frequency")) : "first";
+  const timing = ["booking", "before"].includes(String(formData.get("waiver_timing"))) ? String(formData.get("waiver_timing")) : "booking";
 
   const { supabase, user } = await me();
   if (!user) return { error: "Please log in again." };
@@ -70,8 +72,8 @@ export async function saveIntake(prevState, formData) {
     .maybeSingle();
   if (readError) return { error: missing(readError) ? SETUP : readError.message };
   const { error } = existing
-    ? await supabase.from("intake_forms").update({ questions, waiver_text: waiver }).eq("stylist_id", user.id)
-    : await supabase.from("intake_forms").insert({ stylist_id: user.id, questions, waiver_text: waiver });
+    ? await supabase.from("intake_forms").update({ questions, waiver_text: waiver, waiver_frequency: frequency, waiver_timing: timing }).eq("stylist_id", user.id)
+    : await supabase.from("intake_forms").insert({ stylist_id: user.id, questions, waiver_text: waiver, waiver_frequency: frequency, waiver_timing: timing });
   if (error) return { error: missing(error) ? SETUP : error.message };
 
   const { data: services, error: serviceError } = await supabase.from("services").select("id, intake_required");

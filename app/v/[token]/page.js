@@ -8,6 +8,7 @@ import { notFound } from "next/navigation";
 import { clockTime, formatDate, timeZoneLabel } from "@/lib/availability";
 import { formatPrice } from "@/lib/money";
 import { loadVisitForManage } from "@/lib/manageLink";
+import { createAdminClient } from "@/lib/supabase/admin";
 import RunningLate from "./RunningLate";
 
 export const dynamic = "force-dynamic";
@@ -21,6 +22,8 @@ export default async function ManagePage({ params }) {
   const book = `/book/${s.slug}`;
   const balance = v.deposit_status === "paid" ? Math.max(0, (v.price_cents || 0) - (v.deposit_cents || 0)) : null;
   const policy = String(v.cancellation_policy || "").trim();
+  // The pro's form and waiver for this visit (step 55 SQL).
+  const { data: waiver } = await createAdminClient().rpc("waiver_for_visit", { p_token: token });
 
   return (
     <div className="mv">
@@ -64,6 +67,12 @@ export default async function ManagePage({ params }) {
               </dd>
             </div>
           )}
+          {waiver?.has_form && (
+            <div>
+              <dt>Waiver</dt>
+              <dd>{waiver.needed ? <a href={`/v/${token}/waiver`}>Not signed yet · Sign now</a> : "Signed ✓"}</dd>
+            </div>
+          )}
           {v.location && (
             <div>
               <dt>{v.online ? "Online" : "Where"}</dt>
@@ -82,6 +91,11 @@ export default async function ManagePage({ params }) {
         <section className="card mv-actions">
           {v.today && <RunningLate token={token} />}
           <div className="mv-grid">
+            {waiver?.needed && (
+              <a href={`/v/${token}/waiver`} className="button">
+                Sign waiver
+              </a>
+            )}
             <a href={`${book}/reschedule?t=${token}`} className="button">
               Reschedule
             </a>

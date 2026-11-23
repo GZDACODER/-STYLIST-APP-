@@ -12,6 +12,8 @@ import Words from "@/components/Words";
 export const metadata = { title: `Intake form & waiver · ${BRAND_NAME}` };
 
 export default async function IntakePage() {
+  // The starter waiver for the pro's business type (lib/templates).
+  const tplForWaiver = await getMyTemplate();
   const supabase = await createClient();
   const {
     data: { user },
@@ -19,7 +21,7 @@ export default async function IntakePage() {
   if (!user) redirect("/login");
 
   const [{ data: form, error }, { data: services, error: serviceError }] = await Promise.all([
-    supabase.from("intake_forms").select("questions, waiver_text, version").maybeSingle(),
+    supabase.from("intake_forms").select("questions, waiver_text, version, waiver_frequency, waiver_timing").maybeSingle(),
     supabase.from("services").select("id, name, intake_required").order("created_at"),
   ]);
 
@@ -70,7 +72,15 @@ export default async function IntakePage() {
           </p>
         </section>
       )}
-      <IntakeBuilder questions={form?.questions || []} waiverText={form?.waiver_text || ""} services={services || []} />
+      <IntakeBuilder
+        questions={form?.questions || []}
+        waiverText={form?.waiver_text || ""}
+        services={services || []}
+        frequency={form?.waiver_frequency || "first"}
+        timing={form?.waiver_timing || "booking"}
+        starterWaiver={tplForWaiver.presets.intake.waiver || ""}
+        typeLabel={tplForWaiver.label}
+      />
     </SettingsShell>
   );
 }

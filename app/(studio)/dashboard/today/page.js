@@ -188,6 +188,13 @@ export default async function TodayPage() {
   const appointments = (todays.data || []).filter(
     (b) => b.status === "confirmed" || new Date(b.hold_expires_at).getTime() > now
   );
+  // Bookings whose client hasn't signed the waiver yet (step 55 SQL).
+  const realIds = appointments.filter((b) => !b.example && b.id).map((b) => b.id);
+  const { data: missingRows } = realIds.length
+    ? await supabase.rpc("bookings_missing_waiver", { p_booking_ids: realIds })
+    : { data: [] };
+  const missingWaiver = new Set((missingRows || []).map((r) => (typeof r === "string" ? r : r.bookings_missing_waiver || r.id)));
+
   // Examples for a new pro with nothing booked at all (today or later):
   // example appointments today and an example Next up.
   let exampleNext = null;
@@ -387,6 +394,7 @@ export default async function TodayPage() {
                     <div className="db-slot-meta">{b.service_name}</div>
                     <div className="db-slot-tags">
                       {standingIds.has(b.id) && <span className="badge standing">Standing</span>}
+                      {missingWaiver.has(b.id) && <span className="badge unpaid">Waiver needed</span>}
                       {b.status === "pending_payment" ? (
                         <span className="badge unpaid">Paying deposit now</span>
                       ) : (

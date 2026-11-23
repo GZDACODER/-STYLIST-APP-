@@ -18,7 +18,7 @@ export default function SiteLayout({ children }) {
       <aside className="au-plate">
         <div className="au-frame">
           <Logo />
-          <p className="au-tag">The appointment book for beauty pros</p>
+          <p className="au-tag">Booking and business tools for independent pros</p>
           <ol className="au-list">
             <li>
               <span>01</span>Online booking and deposits

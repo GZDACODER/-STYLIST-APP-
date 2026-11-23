@@ -1,8 +1,11 @@
 "use client";
 
+import SignaturePad from "@/components/SignaturePad";
+
 // The intake form and waiver inside "Your details", for services that need
 // them (first booking only). The answers are saved just before booking.
-// intake: { questions, waiver_text }. value: { answers, signedName, agreed }.
+// intake: { questions, waiver_text }. value: { answers, signedName, agreed,
+// signature (drawn, PNG data URL), forMinor, guardianName, guardianRelation }.
 export default function IntakeFields({ intake, businessName, value, onChange }) {
   const { answers, signedName, agreed } = value;
   const setAnswer = (id, answer) => onChange({ ...value, answers: { ...answers, [id]: answer } });
@@ -92,9 +95,48 @@ export default function IntakeFields({ intake, businessName, value, onChange }) 
               required
             />
           </label>
+          <label className="check-row">
+            <input
+              type="checkbox"
+              checked={Boolean(value.forMinor)}
+              onChange={(e) => onChange({ ...value, forMinor: e.target.checked })}
+            />
+            I&apos;m a parent or guardian signing for someone under 18
+          </label>
+          {value.forMinor && (
+            <div className="intake-guardian">
+              <label>
+                Your full name (parent or guardian)
+                <input
+                  type="text"
+                  autoComplete="name"
+                  maxLength={100}
+                  value={value.guardianName || ""}
+                  onChange={(e) => onChange({ ...value, guardianName: e.target.value })}
+                  required
+                />
+              </label>
+              <label>
+                Relationship
+                <input
+                  type="text"
+                  maxLength={40}
+                  placeholder="e.g. Mother"
+                  value={value.guardianRelation || ""}
+                  onChange={(e) => onChange({ ...value, guardianRelation: e.target.value })}
+                  required
+                />
+              </label>
+            </div>
+          )}
+          <SignaturePad
+            name="intake_signature"
+            label={value.forMinor ? "Parent or guardian signature" : "Your signature"}
+            onChange={(d) => onChange({ ...value, signature: d })}
+          />
           <p className="muted small-text">
-            Signed {new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}. Typing your
-            name counts as your signature.
+            Signed {new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}. You&apos;ll
+            get a PDF copy by email.
           </p>
         </div>
       )}
