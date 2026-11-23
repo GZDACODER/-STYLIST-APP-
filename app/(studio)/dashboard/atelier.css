@@ -1061,3 +1061,19 @@
   flex-wrap: wrap;
   gap: 8px;
 }
+
+.cr-accounts {
+  list-style: none;
+  margin: 0 0 4px;
+  padding: 0;
+  border-top: 1px solid var(--hair);
+}
+
+.cr-accounts li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--hair);
+}

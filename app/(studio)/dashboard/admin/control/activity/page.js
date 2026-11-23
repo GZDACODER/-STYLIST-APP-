@@ -6,7 +6,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { adminEmails, isAdmin } from "@/lib/admin";
+import { adminEmails, isAdmin, isOwnerAlias } from "@/lib/admin";
 import { isDemoEmail } from "@/lib/demo";
 import { BRAND_NAME } from "@/lib/brand";
 import { PLANS } from "@/lib/plans";
@@ -119,7 +119,7 @@ export default async function ActivityPage({ searchParams }) {
   // using it: kept out of the numbers like test accounts, marked "You".
   const owners = new Set(adminEmails().map((e) => e.toLowerCase()));
   const all = (data?.pros || []).map((p) => {
-    const you = owners.has(String(p.email || "").toLowerCase());
+    const you = owners.has(String(p.email || "").toLowerCase()) || isOwnerAlias(p.email);
     const viewer = VIEWER_CODES.has(p.pro_code);
     const demo = isDemoEmail(p.email);
     const test = you || viewer || demo || TEST_CODES.has(p.pro_code) || TEST_EMAIL.test(p.email || "") || TEST_NAME.test(p.business_name || "");
