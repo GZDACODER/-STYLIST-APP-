@@ -9,6 +9,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { isAdmin } from "@/lib/admin";
 import { BRAND_NAME } from "@/lib/brand";
 import PageHeader from "@/components/dash/PageHeader";
+import ControlTabs from "./ControlTabs";
 
 export const metadata = { title: `Control Room · ${BRAND_NAME}` };
 export const dynamic = "force-dynamic";
@@ -183,6 +184,8 @@ export default async function ControlRoomPage() {
         title={headline}
         subtitle={`Checked ${when(new Date().toISOString())} Central · refresh to check again`}
       />
+
+      <ControlTabs active="health" />
 
       <section className="cr-grid" aria-label="Services">
         {tiles.map((t) => (
