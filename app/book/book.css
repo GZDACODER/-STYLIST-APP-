@@ -1914,3 +1914,76 @@ body:has(dialog.pf-viewer[open]) {
   margin: 0 0 22px;
   border-left: 3px solid #a8874d;
 }
+
+/* ---------- Manage my appointment (/v/<code>) ---------- */
+.bk .mv-when {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.35rem;
+  line-height: 1.35;
+  margin: 0 0 22px;
+}
+
+.bk .mv-details dl {
+  margin: 0 0 14px;
+}
+
+.bk .mv-details dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(18, 16, 13, 0.12);
+}
+
+.bk .mv-details dt {
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #6b655b;
+}
+
+.bk .mv-details dd {
+  margin: 0;
+  text-align: right;
+}
+
+.bk .mv-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.bk .mv-grid .button {
+  min-height: 48px;
+  justify-content: center;
+  text-align: center;
+}
+
+.bk .mv-label {
+  margin: 0 0 8px;
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #a8874d;
+}
+
+.bk .mv-late {
+  margin-bottom: 18px;
+}
+
+.bk .mv-late-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.bk .mv-late-buttons .chip {
+  min-height: 44px;
+  flex: 1;
+}
+
+.bk .mv-foot {
+  margin-top: 8px;
+}

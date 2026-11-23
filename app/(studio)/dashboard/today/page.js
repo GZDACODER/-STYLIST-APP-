@@ -25,6 +25,21 @@ import Words from "@/components/Words";
 
 export const metadata = { title: `Today · ${BRAND_NAME}` };
 
+const ACTION_WORDS = {
+  cancelled: "cancelled from their email",
+  rescheduled: "moved their appointment",
+  running_late: "is running late",
+  calendar: "added it to their calendar",
+  waiver_signed: "signed your waiver",
+};
+
+function agoShort(iso) {
+  const m = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
+  if (m < 60) return `${Math.max(1, m)} min ago`;
+  const h = Math.round(m / 60);
+  return h < 24 ? `${h} hr ago` : `${Math.round(h / 24)} days ago`;
+}
+
 // Monday to Sunday of the week that contains `today` ("YYYY-MM-DD").
 function weekRange(today) {
   const day = parseDateString(today);
@@ -188,6 +203,15 @@ export default async function TodayPage() {
     lateNotices = [{ id: "example-late", minutes: 10, example: true, booking: { client_name: "Maya Jones", service_name: "Silk Press", start_time: "14:00:00" } }];
   }
 
+  // What clients did from their email links in the last 3 days (step 53 SQL).
+  const { data: activityRows } = await supabase
+    .from("client_activity")
+    .select("id, created_at, client_name, action, detail")
+    .gte("created_at", new Date(Date.now() - 3 * 86400000).toISOString())
+    .order("created_at", { ascending: false })
+    .limit(10);
+  const clientActivity = activityRows || [];
+
   // Today's timeline: all-day events first, then appointments and timed
   // events in time order.
   const timeline = [
@@ -237,6 +261,23 @@ export default async function TodayPage() {
       />
 
       <LateNotices notices={lateNotices} />
+
+      {clientActivity.length > 0 && (
+        <section className="db-activity" aria-label="From your clients">
+          <h2 className="db-label">
+            <Words>From your clients</Words>
+          </h2>
+          <ul>
+            {clientActivity.map((a) => (
+              <li key={a.id}>
+                <strong>{a.client_name || "A client"}</strong> {ACTION_WORDS[a.action] || a.action}
+                {a.detail ? ` (${a.detail})` : ""}
+                <span className="muted small-text"> · {agoShort(a.created_at)}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {(toWrapUp > 0 || owedCount > 0) && (
         <section className="db-wrapup" aria-label="Wrap up visits">

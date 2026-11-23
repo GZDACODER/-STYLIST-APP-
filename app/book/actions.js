@@ -383,6 +383,18 @@ export async function cancelMyBooking(slug, bookingId) {
 
 const TOKEN_PATTERN = /^[0-9a-f]{64}$/;
 
+// Notes what a client did from an email link on the pro's Today page
+// (client_activity, step 53 SQL). Never stops the action itself.
+async function logClientAction(token, action, detail = null) {
+  try {
+    const admin = createAdminClient();
+    const { data: b } = await admin.from("bookings").select("id, stylist_id, client_name").eq("cancel_token", String(token)).maybeSingle();
+    if (b) await admin.from("client_activity").insert({ stylist_id: b.stylist_id, booking_id: b.id, client_name: b.client_name || "", action, detail });
+  } catch (error) {
+    console.error("Couldn't log client action", error?.message);
+  }
+}
+
 // "Cancel this visit": the same rules as cancelling here on the booking page.
 export async function cancelVisitByToken(token) {
   if (!TOKEN_PATTERN.test(String(token))) return { error: "This link doesn't work." };
@@ -395,7 +407,7 @@ export async function cancelVisitByToken(token) {
 
   // Let the stylist know, and tell anyone on the waitlist the time is free.
   const origin = await siteOrigin();
-  await Promise.all([emailStylistCancellation(data), runWaitlistSafely(data.stylist_id, origin)]);
+  await Promise.all([emailStylistCancellation(data), runWaitlistSafely(data.stylist_id, origin), logClientAction(token, "cancelled")]);
   return { success: true };
 }
 
@@ -476,6 +488,7 @@ export async function rescheduleByToken(token, date, time) {
   });
   if (error) return rescheduleError(error);
   await afterReschedule(data);
+  await logClientAction(token, "rescheduled", `to ${String(date)} ${String(time).slice(0, 5)}`);
   return { moved: data };
 }
 
