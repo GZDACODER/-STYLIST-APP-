@@ -31,6 +31,12 @@ const ICONS = {
       <path d="M15.5 5.6a3 3 0 0 1 0 5.8M17.5 14.9c1.9.7 3.2 2.4 3.5 5.1" />
     </>
   ),
+  requests: (
+    <>
+      <path d="M3.5 6.5h17v11h-17z" />
+      <path d="M3.5 7l8.5 6 8.5-6" />
+    </>
+  ),
   openings: (
     <>
       <circle cx="12" cy="12" r="8.5" />
@@ -71,6 +77,7 @@ const ITEMS = [
   { href: "/dashboard", label: "Home", icon: "home", exact: true },
   // In the side menu only: the phone tab bar is full (Home links to it).
   { href: "/dashboard/today", label: "Today", icon: "today", wide: true },
+  { href: "/dashboard/requests", label: "Requests", icon: "requests", module: "requests" },
   { href: "/dashboard/bookings", label: "Calendar", icon: "calendar" },
   { href: "/dashboard/clients", label: "Clients", word: "Clients", icon: "clients" },
   { href: "/dashboard/openings", label: "Openings", icon: "openings" },

@@ -11,6 +11,7 @@ import RowList from "@/components/dash/RowList";
 import { ExampleCard, ExampleTag } from "@/components/dash/Example";
 import { exampleServices, examplesOn } from "@/lib/examples";
 import { getMyTemplate } from "@/lib/templates/server";
+import { setRequestFirst } from "../requests/actions";
 
 export const metadata = { title: `Services · ${BRAND_NAME}` };
 
@@ -30,7 +31,9 @@ function formatDuration(minutes) {
 
 export default async function ServicesPage() {
   // Aftercare tips are off for some business types (tutors), or by the pro.
-  const aftercareOn = (await getMyTemplate()).modules.aftercare;
+  const myModules = (await getMyTemplate()).modules;
+  const aftercareOn = myModules.aftercare;
+  const requestsOn = myModules.requests;
   const supabase = await createClient();
   const {
     data: { user },
@@ -44,6 +47,11 @@ export default async function ServicesPage() {
   const showExamples = await examplesOn(supabase, user.id);
   // Aftercare tips (step 46 SQL); the form shows once it's run.
   const { data: aftercareRows, error: aftercareError } = await supabase.from("services").select("id, aftercare");
+  // "Ask for a request first" (step 56 SQL).
+  const { data: rfRows, error: rfError } = requestsOn
+    ? await supabase.from("services").select("id, request_first")
+    : { data: null, error: true };
+  const requestFirstOf = rfError ? null : Object.fromEntries((rfRows || []).map((r) => [r.id, Boolean(r.request_first)]));
   const aftercareOf = aftercareError ? null : Object.fromEntries((aftercareRows || []).map((r) => [r.id, r.aftercare || ""]));
 
   return (
@@ -89,7 +97,7 @@ export default async function ServicesPage() {
             items={services.map((service) => ({
               key: service.id,
               title: service.name,
-              sub: `${formatPrice(service.price_cents)} · ${formatDuration(service.duration_minutes)}`,
+              sub: `${formatPrice(service.price_cents)} · ${formatDuration(service.duration_minutes)}${requestFirstOf?.[service.id] ? " · Request first" : ""}`,
               panel: (
                 <>
                   <dl className="booking-facts">
@@ -105,6 +113,23 @@ export default async function ServicesPage() {
                   <p className="muted small-text">
                     Deposits for this service are set in <a href="/dashboard/settings/deposits">Deposits</a>.
                   </p>
+                  {requestFirstOf && (
+                    <form action={setRequestFirst} className="rq-toggle">
+                      <input type="hidden" name="id" value={service.id} />
+                      <input type="hidden" name="on" value={requestFirstOf[service.id] ? "false" : "true"} />
+                      <p className="small-text">
+                        <strong>Ask for a request first:</strong> {requestFirstOf[service.id] ? "On" : "Off"}.{" "}
+                        <span className="muted">
+                          {requestFirstOf[service.id]
+                            ? "Clients send their idea and photos; you approve before they can book."
+                            : "Clients book this straight away."}
+                        </span>
+                      </p>
+                      <SubmitButton className="button secondary small" pendingText="Saving...">
+                        {requestFirstOf[service.id] ? "Let clients book directly" : "Ask for a request first"}
+                      </SubmitButton>
+                    </form>
+                  )}
                   {aftercareOn && aftercareOf && <AftercareForm id={service.id} aftercare={aftercareOf[service.id] || ""} />}
                   <form action={deleteService}>
                     <input type="hidden" name="id" value={service.id} />

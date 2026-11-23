@@ -101,6 +101,28 @@ export default async function BookingPage({ params, searchParams }) {
     portfolio = [];
   }
 
+  // Services the pro approves first, and an approved request's link (step 56 SQL).
+  const requestInfo = { ids: [], approved: null };
+  try {
+    const admin = createAdminClient();
+    const { data: st } = await admin.from("stylists").select("id").eq("slug", slug).maybeSingle();
+    if (st) {
+      const { data: rs } = await admin.from("services").select("id").eq("stylist_id", st.id).eq("request_first", true);
+      requestInfo.ids = (rs || []).map((r) => r.id);
+      const tokenParam = String((await searchParams)?.request || "");
+      if (/^[0-9a-f]{48}$/.test(tokenParam)) {
+        const { data: rq } = await admin
+          .from("booking_requests")
+          .select("approved_service_id, status, stylist_id")
+          .eq("token", tokenParam)
+          .maybeSingle();
+        if (rq && rq.status === "approved" && rq.stylist_id === st.id) requestInfo.approved = { token: tokenParam, serviceId: rq.approved_service_id };
+      }
+    }
+  } catch {
+    // Before step 56 SQL: no requests.
+  }
+
   // The pro's business type sets the words on this page ("Subject" for a tutor).
   let bookingTemplate = null;
   try {
@@ -163,9 +185,12 @@ export default async function BookingPage({ params, searchParams }) {
           waitlistReady={waitlistConfigured()}
           textsAvailable={textsEnabled()}
           textCodes={textCodesEnabled()}
-          initialServiceId={initialServiceId}
+          initialServiceId={requestInfo.approved?.serviceId || initialServiceId}
           myPros={myProsEnabled()}
           proCode={await proCodeFor(slug)}
+          requestServiceIds={requestInfo.ids}
+          approvedRequest={requestInfo.approved}
+          photosOn={Boolean(bookingTemplate?.modules?.bookingPhotos)}
         />
         </TemplateProvider>
       </div>

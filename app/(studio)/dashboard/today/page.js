@@ -5,6 +5,7 @@ import EmptyState from "@/components/dash/EmptyState";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import {
   clockTime,
   parseDateString,
@@ -193,6 +194,16 @@ export default async function TodayPage() {
   const { data: missingRows } = realIds.length
     ? await supabase.rpc("bookings_missing_waiver", { p_booking_ids: realIds })
     : { data: [] };
+  // Reference photos clients added when booking (step 56 SQL).
+  const photosOf = {};
+  if (realIds.length) {
+    const { data: ph } = await supabase.from("booking_photos").select("booking_id, path").in("booking_id", realIds);
+    if (ph?.length) {
+      const { data: signed } = await createAdminClient().storage.from("booking-photos").createSignedUrls(ph.map((p) => p.path), 3600);
+      const urlOf = Object.fromEntries((signed || []).filter((d) => d.signedUrl).map((d) => [d.path, d.signedUrl]));
+      for (const p of ph) if (urlOf[p.path]) (photosOf[p.booking_id] ||= []).push(urlOf[p.path]);
+    }
+  }
   const missingWaiver = new Set((missingRows || []).map((r) => (typeof r === "string" ? r : r.bookings_missing_waiver || r.id)));
 
   // Examples for a new pro with nothing booked at all (today or later):
@@ -392,6 +403,16 @@ export default async function TodayPage() {
                       )}
                     </div>
                     <div className="db-slot-meta">{b.service_name}</div>
+                    {photosOf[b.id] && (
+                      <div className="rq-photos small">
+                        {photosOf[b.id].map((u) => (
+                          <a key={u} href={u} target="_blank" rel="noreferrer">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={u} alt="Client's reference photo" loading="lazy" />
+                          </a>
+                        ))}
+                      </div>
+                    )}
                     <div className="db-slot-tags">
                       {standingIds.has(b.id) && <span className="badge standing">Standing</span>}
                       {missingWaiver.has(b.id) && <span className="badge unpaid">Waiver needed</span>}

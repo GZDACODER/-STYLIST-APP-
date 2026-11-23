@@ -1102,3 +1102,85 @@
 .cr-table {
   min-width: 860px;
 }
+
+/* ---------- Requests inbox ---------- */
+.rq-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.db .rq-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 4px;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.3rem;
+}
+
+.db .rq-idea {
+  margin: 12px 0;
+  padding: 12px 14px;
+  background: var(--surface-2);
+  border-left: 3px solid var(--gold);
+  white-space: pre-line;
+}
+
+.db .rq-facts {
+  margin: 0 0 12px;
+}
+
+.db .rq-facts > div {
+  display: flex;
+  gap: 12px;
+  padding: 4px 0;
+  font-size: 0.92rem;
+}
+
+.db .rq-facts dt {
+  min-width: 80px;
+  color: var(--muted);
+}
+
+.db .rq-facts dd {
+  margin: 0;
+}
+
+.db .rq-photos {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.db .rq-photos img {
+  width: 110px;
+  height: 110px;
+  object-fit: cover;
+  border: 1px solid var(--border);
+}
+
+.db .rq-actions .row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.db .rq-photos.small {
+  margin: 6px 0;
+}
+
+.db .rq-photos.small img {
+  width: 56px;
+  height: 56px;
+}
+
+.db .rq-toggle {
+  margin: 12px 0;
+}
