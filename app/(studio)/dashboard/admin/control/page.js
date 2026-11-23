@@ -38,6 +38,30 @@ const size = (bytes) => (bytes >= 1024 * MB ? `${(bytes / 1024 / MB).toFixed(1)}
 
 const WORD = { ok: "Fine", warn: "Look at it", fail: "Broken" };
 
+// Resend's free plan sends about 100 emails a day.
+const EMAIL_DAY_LIMIT = 100;
+
+const shortDay = (d) => new Date(`${d}T12:00:00`).toLocaleDateString("en-US", { weekday: "short" });
+
+function CountMeter({ label, used, limit, note }) {
+  const pct = Math.min(100, (used / limit) * 100);
+  const status = pct >= 90 ? "fail" : pct >= 70 ? "warn" : "ok";
+  return (
+    <div className="cr-meter-row">
+      <div className="cr-meter-text">
+        <span>{label}</span>
+        <span className="muted small-text">
+          {used} of about {limit} · {Math.round(pct)}%
+        </span>
+      </div>
+      <div className={`cr-meter ${status}`} aria-hidden="true">
+        <span style={{ width: `${Math.max(pct, 0.6)}%` }} />
+      </div>
+      {note && <p className="muted small-text">{note}</p>}
+    </div>
+  );
+}
+
 function Tile({ t }) {
   const body = (
     <>
@@ -109,6 +133,7 @@ export default async function ControlRoomPage() {
   const jobLate = !job?.last_run || Date.now() - new Date(job.last_run).getTime() > 5 * 60000;
   const jobStatus = !job ? "fail" : jobLate ? "fail" : (calls?.bad_1h || 0) > 0 || (job.failed_1h || 0) > 0 ? "warn" : "ok";
   const emailOn = Boolean(env.RESEND_API_KEY && env.EMAIL_FROM);
+  const emailsToday = Number(s.emails_today || 0);
 
   const tiles = [
     {
@@ -133,9 +158,23 @@ export default async function ControlRoomPage() {
     },
     {
       name: "Emails",
-      status: !emailOn ? "fail" : (s.after_visit_stuck || 0) > 0 ? "warn" : "ok",
-      value: !emailOn ? "Off" : s.after_visit_stuck ? `${s.after_visit_stuck} late` : "Sending",
-      note: emailOn ? `Resend · last aftercare email ${ago(s.last_after_visit)}` : "RESEND_API_KEY or EMAIL_FROM missing in Vercel",
+      status: !emailOn
+        ? "fail"
+        : emailsToday >= EMAIL_DAY_LIMIT * 0.9
+          ? "fail"
+          : emailsToday >= EMAIL_DAY_LIMIT * 0.7 || (s.after_visit_stuck || 0) > 0 || (s.emails_failed_24h || 0) > 0
+            ? "warn"
+            : "ok",
+      value: !emailOn ? "Off" : s.email_log_ready ? `${emailsToday} today` : "Sending",
+      note: !emailOn
+        ? "RESEND_API_KEY or EMAIL_FROM missing in Vercel"
+        : [
+            `Resend · about ${EMAIL_DAY_LIMIT} a day on the free plan`,
+            s.emails_failed_24h ? `${s.emails_failed_24h} failed in 24 hours` : null,
+            s.after_visit_stuck ? `${s.after_visit_stuck} aftercare late` : null,
+          ]
+            .filter(Boolean)
+            .join(" · "),
     },
     {
       name: "Payments",
@@ -289,9 +328,17 @@ export default async function ControlRoomPage() {
             limit={STORAGE_LIMIT}
             note="Supabase free plan: 1 GB. Pro: 100 GB."
           />
-          <p className="muted small-text">
-            Emails: Resend&apos;s free plan sends about 100 a day. See your plans list in LAUNCH_READINESS.md.
-          </p>
+          <CountMeter
+            label="Emails today"
+            used={emailsToday}
+            limit={EMAIL_DAY_LIMIT}
+            note="Resend free plan: about 100 a day (sign-up and sign-in codes from Supabase count too, but aren't in this number). Pro: 50,000 a month."
+          />
+          {Array.isArray(s.emails_week) && s.emails_week.length > 0 && (
+            <p className="muted small-text">
+              Last 7 days: {s.emails_week.map((d) => `${shortDay(d.day)} ${d.sent}`).join(" · ")}
+            </p>
+          )}
         </section>
       </div>
 
