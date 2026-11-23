@@ -174,3 +174,131 @@
 .bk .pp-hours dd {
   margin: 0;
 }
+
+/* ---------- Reviews ---------- */
+.bk .pp-stars {
+  color: var(--accent);
+  letter-spacing: 2px;
+}
+
+.bk .pp-head-rating {
+  display: inline-block;
+  margin-top: 6px;
+  color: var(--ink);
+  font-size: 0.9rem;
+  text-decoration: none;
+}
+
+.bk .pp-rating-big {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin: 0;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 2.8rem;
+  line-height: 1;
+}
+
+.bk .pp-rating-big .pp-stars {
+  font-family: var(--font-sans), sans-serif;
+  font-size: 1.1rem;
+}
+
+.bk .pp-bars {
+  list-style: none;
+  margin: 12px 0 8px;
+  padding: 0;
+  max-width: 360px;
+}
+
+.bk .pp-bars li {
+  display: grid;
+  grid-template-columns: 34px 1fr 30px;
+  gap: 8px;
+  align-items: center;
+  font-size: 0.82rem;
+  padding: 2px 0;
+}
+
+.bk .pp-bar {
+  display: block;
+  height: 6px;
+  background: var(--hair);
+}
+
+.bk .pp-bar > span {
+  display: block;
+  height: 100%;
+  background: var(--ink);
+}
+
+.bk .pp-bar-n {
+  text-align: right;
+  color: var(--ink-soft);
+}
+
+.bk .pp-review-list {
+  list-style: none;
+  margin: 18px 0 0;
+  padding: 0;
+}
+
+.bk .pp-review-list > li {
+  padding: 16px 0;
+  border-top: 1px solid var(--hair);
+}
+
+.bk .pp-review-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  align-items: baseline;
+  margin: 0 0 6px;
+}
+
+.bk .pp-review-text {
+  margin: 0 0 8px;
+  white-space: pre-line;
+}
+
+.bk .pp-review-reply {
+  margin: 0 0 8px;
+  padding-left: 12px;
+  border-left: 2px solid var(--accent);
+  color: var(--ink-soft);
+}
+
+.bk .pp-report-link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink-faint);
+  font: inherit;
+  font-size: 0.78rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.bk .pp-report {
+  margin-top: 8px;
+  padding: 12px;
+  border: 1px solid var(--hair);
+}
+
+.bk .pp-report fieldset {
+  border: 0;
+  margin: 0 0 8px;
+  padding: 0;
+}
+
+.bk .pp-radio {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 4px 0;
+  font-size: 0.88rem;
+}
+
+.bk .pp-report-done {
+  color: var(--ink-soft);
+}

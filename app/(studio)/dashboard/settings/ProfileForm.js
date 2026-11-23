@@ -105,7 +105,10 @@ export default function ProfileForm({ initial, site }) {
             <span>{label}</span>
           </label>
         ))}
-        <p className="muted small-text">Reviews show once you&apos;ve approved some (coming next).</p>
+        <p className="muted small-text">
+          Your star rating counts every rating. Written reviews only show once you approve them in{" "}
+          <a href="/dashboard/reviews">Reviews</a>.
+        </p>
       </section>
 
       <SubmitButton pendingText="Saving...">Save profile</SubmitButton>
