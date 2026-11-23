@@ -15,6 +15,8 @@ import MyBookings from "./MyBookings";
 import RegularStar from "@/components/RegularStar";
 import PageGuide from "@/components/guide/PageGuide";
 import { useTemplate } from "@/components/TemplateContext";
+import RequestForm from "./RequestForm";
+import PhotoPicker from "@/components/PhotoPicker";
 
 // How many dates to show before "More dates".
 const FIRST_DATES = 12;
@@ -44,6 +46,11 @@ export default function BookingFlow({
   // My Pros link (MY_PROS_ENABLED), or else the pro's ID for client sign-in.
   myPros = false,
   proCode = null,
+  // Services the pro approves first, an approved request's booking link,
+  // and whether clients can add photos (step 56 SQL).
+  requestServiceIds = [],
+  approvedRequest = null,
+  photosOn = false,
 }) {
   // The pro's words ("Subject" for a tutor), from their template.
   const { words: W } = useTemplate();
@@ -119,6 +126,9 @@ export default function BookingFlow({
   const [intakeValue, setIntakeValue] = useState({ answers: {}, signedName: "", agreed: false });
 
   const service = services.find((s) => s.id === serviceId);
+  // This service needs a request first (unless they came from an approval link for it).
+  const isRequest = Boolean(service && requestServiceIds.includes(service.id) && approvedRequest?.serviceId !== service.id);
+  const [photoPaths, setPhotoPaths] = useState([]);
   const deposit = service?.deposit_cents || 0;
 
   // Load open times when a service is picked, and again after the visitor
@@ -237,6 +247,8 @@ export default function BookingFlow({
         phone: viewer_phone ? formatPhone(viewer_phone) : phone,
         email: viewer_phone ? email : "",
         invite,
+        photos: photoPaths,
+        requestToken: approvedRequest?.serviceId === serviceId ? approvedRequest.token : null,
       });
       if (result.error) {
         setBookError(result.error);
@@ -467,8 +479,18 @@ export default function BookingFlow({
         </section>
       )}
 
+      {/* ---------- 2. Request (services the pro approves first) ---------- */}
+      {service && !locked && isRequest && (
+        <section className="card" id="bk-request">
+          <h2>
+            <span className="bk-num">02</span>Send a request
+          </h2>
+          <RequestForm slug={slug} service={service} businessName={business_name} photosOn={photosOn} />
+        </section>
+      )}
+
       {/* ---------- 2. Time ---------- */}
-      {service && !locked && (
+      {service && !locked && !isRequest && (
         <section className="card" id="bk-times">
           <h2>
             <span className="bk-num">02</span>Date &amp; time
@@ -594,7 +616,7 @@ export default function BookingFlow({
       )}
 
       {/* ---------- 3. Details ---------- */}
-      {service && !locked && date && time && !showWaitlist && (
+      {service && !locked && !isRequest && date && time && !showWaitlist && (
         <section className="card">
           <h2>
             <span className="bk-num">03</span>Your details
@@ -664,6 +686,16 @@ export default function BookingFlow({
 
               {intake?.needed && (
                 <IntakeFields intake={intake} businessName={business_name} value={intakeValue} onChange={setIntakeValue} />
+              )}
+
+              {photosOn && (
+                <PhotoPicker
+                  slug={slug}
+                  max={3}
+                  label="Photos (optional)"
+                  note="Inspiration or reference photos for your visit."
+                  onChange={setPhotoPaths}
+                />
               )}
 
               {policy && (

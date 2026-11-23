@@ -11,11 +11,12 @@ import {
 } from "@/lib/stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { normalizePhone, textCodesEnabled } from "@/lib/phone";
-import { emailStylistCancellation, runWaitlistSafely } from "@/lib/waitlist";
+import { emailStylistCancellation, runWaitlistSafely, stylistEmails } from "@/lib/waitlist";
 import { emailReschedule } from "@/lib/bookingEmails";
 import { headers } from "next/headers";
 import { DEMO_BOOKING_OFF, isDemoSlug } from "@/lib/demo";
 import { finishWaiver, signatureBytes, uploadSignature } from "@/lib/waivers";
+import { emailButton, emailConfigured, emailLayout, escapeHtml, sendEmails } from "@/lib/notify";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -277,8 +278,28 @@ export async function submitIntake(slug, serviceId, answers, signedName, extra =
   return { success: true };
 }
 
-export async function book({ slug, serviceId, date, time, name, phone, email, invite }) {
+export async function book({ slug, serviceId, date, time, name, phone, email, invite, photos = [], requestToken = null }) {
   if (isDemoSlug(slug)) return { error: DEMO_BOOKING_OFF };
+  // Services the pro approves first (step 56 SQL) can only be booked with
+  // the link from an approved request, for that service.
+  const admin = createAdminClient();
+  const { data: svc } = await admin
+    .from("services")
+    .select("id, request_first, stylist:stylists(id, slug)")
+    .eq("id", String(serviceId))
+    .maybeSingle();
+  let approved = null;
+  if (svc?.request_first) {
+    if (/^[0-9a-f]{48}$/.test(String(requestToken || ""))) {
+      const { data: rq } = await admin
+        .from("booking_requests")
+        .select("id, status, approved_service_id, stylist_id")
+        .eq("token", String(requestToken))
+        .maybeSingle();
+      if (rq && rq.status === "approved" && rq.approved_service_id === svc.id && rq.stylist_id === svc.stylist?.id) approved = rq;
+    }
+    if (!approved) return { error: "This service needs an approved request first. Send a request, and you'll get a link to book." };
+  }
   // A service that needs the intake form: it must be on file first.
   const intake = await getIntake(slug, serviceId);
   if (intake.needed) return { error: BOOKING_ERRORS.intake_required, code: "intake_required" };
@@ -302,11 +323,109 @@ export async function book({ slug, serviceId, date, time, name, phone, email, in
     };
   }
 
+  // Photos the client added (only their own uploads for this pro), and an
+  // approved request that's now booked.
+  try {
+    const sid = svc?.stylist?.id;
+    const ok = (Array.isArray(photos) ? photos : []).map(String).filter((p) => sid && p.startsWith(`${sid}/`)).slice(0, 3);
+    if (ok.length) await admin.from("booking_photos").insert(ok.map((path) => ({ stylist_id: sid, booking_id: data.id, path })));
+    if (approved) {
+      await admin.from("booking_requests").update({ status: "booked", booking_id: data.id }).eq("id", approved.id);
+      await admin.from("booking_photos").update({ booking_id: data.id }).eq("request_id", approved.id).is("booking_id", null);
+    }
+  } catch (e) {
+    console.error("Couldn't attach booking photos", e?.message);
+  }
+
   // This service needs a deposit: the time is held while they pay on Stripe.
   if (data.status === "pending_payment") {
     return depositCheckout(data.id, { invite: invite ? String(invite) : undefined });
   }
   return { booking: data };
+}
+
+// ---------- Requests (approve before booking) ----------
+export async function sendRequest({ slug, serviceId, name, email, phone, idea, placement, size, availability, photos = [] }) {
+  if (isDemoSlug(slug)) return { error: DEMO_BOOKING_OFF };
+  const clean = (v, n) => String(v || "").trim().slice(0, n);
+  const f = {
+    name: clean(name, 100),
+    email: clean(email, 200).toLowerCase(),
+    phone: clean(phone, 40),
+    idea: clean(idea, 3000),
+    placement: clean(placement, 200),
+    size: clean(size, 200),
+    availability: clean(availability, 500),
+  };
+  if (!f.name || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(f.email)) return { error: "Please add your name and a valid email." };
+  if (!f.idea) return { error: "Please describe your idea." };
+  const admin = createAdminClient();
+  const h = await headers();
+  const ip = (h.get("x-forwarded-for") || "").split(",")[0].trim() || "unknown";
+  const { data: ok } = await admin.rpc("rate_ok", { p_bucket: `request-ip:${ip}`, p_max: 8, p_window: "1 hour" });
+  if (ok === false) return { error: "Too many requests. Please try again later." };
+  const { data: svc } = await admin
+    .from("services")
+    .select("id, name, request_first, stylist:stylists(id, slug, business_name)")
+    .eq("id", String(serviceId))
+    .maybeSingle();
+  if (!svc?.stylist || svc.stylist.slug !== String(slug).toLowerCase()) return { error: "This service isn't available." };
+  const sid = svc.stylist.id;
+  const okPhotos = (Array.isArray(photos) ? photos : []).map(String).filter((p) => p.startsWith(`${sid}/`)).slice(0, 3);
+  const { data: rq, error } = await admin
+    .from("booking_requests")
+    .insert({
+      stylist_id: sid,
+      service_id: svc.id,
+      service_name: svc.name,
+      client_name: f.name,
+      client_email: f.email,
+      client_phone: f.phone || null,
+      idea: f.idea,
+      placement: f.placement || null,
+      size: f.size || null,
+      availability: f.availability || null,
+      photos: okPhotos,
+    })
+    .select("id")
+    .single();
+  if (error) return { error: "Couldn't send your request. Please try again." };
+  if (okPhotos.length) await admin.from("booking_photos").insert(okPhotos.map((path) => ({ stylist_id: sid, request_id: rq.id, path })));
+  await admin.from("client_activity").insert({ stylist_id: sid, client_name: f.name, action: "requested", detail: svc.name });
+  await emailNewRequest({ stylistId: sid, businessName: svc.stylist.business_name, serviceName: svc.name, ...f }).catch(() => {});
+  return { success: true };
+}
+
+async function emailNewRequest(r) {
+  if (!emailConfigured()) return;
+  const admin = createAdminClient();
+  const to = (await stylistEmails(admin, [r.stylistId]))[r.stylistId];
+  const site = await siteOrigin();
+  const messages = [];
+  if (to) {
+    messages.push({
+      to,
+      subject: `New request from ${r.name}: ${r.serviceName}`,
+      html: emailLayout("New booking request", [
+        `<p><strong>${escapeHtml(r.name)}</strong> sent a request for <strong>${escapeHtml(r.serviceName)}</strong>.</p>`,
+        `<p style="margin:18px 0;padding:14px 16px;background:#f3eee5;border-left:3px solid #a8874d;white-space:pre-line;">${escapeHtml(r.idea)}${
+          r.placement ? `\n\nPlacement: ${escapeHtml(r.placement)}` : ""
+        }${r.size ? `\nSize: ${escapeHtml(r.size)}` : ""}</p>`,
+        `<p>${emailButton(`${site}/dashboard/requests`, "Review the request")}</p>`,
+      ]),
+      text: `${r.name} sent a request for ${r.serviceName}.\n\n${r.idea}\n\nReview it: ${site}/dashboard/requests`,
+    });
+  }
+  messages.push({
+    to: r.email,
+    subject: `Your request to ${r.businessName}`,
+    html: emailLayout("Request sent", [
+      `<p>Hi ${escapeHtml(r.name.split(" ")[0])},</p>`,
+      `<p>Thanks! ${escapeHtml(r.businessName)} has your ${escapeHtml(r.serviceName)} request and will email you. If they approve it, you'll get a link to book your time.</p>`,
+    ]),
+    text: `Thanks! ${r.businessName} has your ${r.serviceName} request and will email you.`,
+  });
+  await sendEmails(messages);
 }
 
 // ---------- Waitlist ----------

@@ -2031,3 +2031,69 @@ body:has(dialog.pf-viewer[open]) {
   border-left: 3px solid #a8874d;
   background: rgba(168, 135, 77, 0.08);
 }
+
+/* ---------- Photos at booking and requests ---------- */
+.bk .photos-pick-label {
+  margin: 0;
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #6b655b;
+}
+
+.bk .photos-pick-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.bk .photos-pick-thumb {
+  position: relative;
+  width: 84px;
+  height: 84px;
+}
+
+.bk .photos-pick-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border: 1px solid rgba(18, 16, 13, 0.2);
+}
+
+.bk .photos-pick-thumb button {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 0;
+  background: #12100d;
+  color: #fbf6ea;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.bk .photos-pick-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 84px;
+  height: 84px;
+  border: 1px dashed #12100d;
+  font-size: 0.8rem;
+  cursor: pointer;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.bk .photos-pick-add input {
+  display: none;
+}
+
+.bk .photos-pick-add.busy {
+  opacity: 0.6;
+}
