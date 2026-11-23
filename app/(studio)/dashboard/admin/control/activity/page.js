@@ -20,6 +20,9 @@ export const dynamic = "force-dynamic";
 const DAY = 24 * 60 * 60 * 1000;
 const TEST_EMAIL = /\+(claude|run\d*|client)@/i;
 const TEST_NAME = /^(claude .*studio|launch test studio)$/i;
+// Accounts that aren't working pros (friends looking around the site), by
+// Pro ID: kept out of the numbers like test accounts, marked "Viewer".
+const VIEWER_CODES = new Set(["CL-PX3Q"]); // Fast Money Media LLC
 
 function ago(iso) {
   if (!iso) return "never";
@@ -114,7 +117,8 @@ export default async function ActivityPage({ searchParams }) {
   const owners = new Set(adminEmails().map((e) => e.toLowerCase()));
   const all = (data?.pros || []).map((p) => {
     const you = owners.has(String(p.email || "").toLowerCase());
-    return { ...p, you, test: you || TEST_EMAIL.test(p.email || "") || TEST_NAME.test(p.business_name || "") };
+    const viewer = VIEWER_CODES.has(p.pro_code);
+    return { ...p, you, viewer, test: you || viewer || TEST_EMAIL.test(p.email || "") || TEST_NAME.test(p.business_name || "") };
   });
   const testCount = all.filter((p) => p.test).length;
   const pros = showTests ? all : all.filter((p) => !p.test);
@@ -142,11 +146,11 @@ export default async function ActivityPage({ searchParams }) {
       <PageHeader
         eyebrow="Control Room"
         title="Activity"
-        subtitle={`Across every pro · ${showTests ? "including" : "not counting"} your own and test accounts (${testCount})`}
+        subtitle={`Across every pro · ${showTests ? "including" : "not counting"} yours, viewers and tests (${testCount})`}
         actions={
           testCount > 0 ? (
             <Link href={showTests ? "/dashboard/admin/control/activity" : "/dashboard/admin/control/activity?tests=1"} className="button small secondary">
-              {showTests ? "Hide yours and tests" : "Show yours and tests"}
+              {showTests ? "Hide them" : "Show all accounts"}
             </Link>
           ) : null
         }
@@ -259,7 +263,7 @@ export default async function ActivityPage({ searchParams }) {
                       <a href={`/book/${p.slug}`} target="_blank" rel="noreferrer">
                         {p.business_name}
                       </a>
-                      {p.test && <span className="badge cr-test">{p.you ? "You" : "Test"}</span>}
+                      {p.test && <span className="badge cr-test">{p.you ? "You" : p.viewer ? "Viewer" : "Test"}</span>}
                       <br />
                       <span className="muted small-text">
                         {p.pro_code}
