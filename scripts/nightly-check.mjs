@@ -39,6 +39,11 @@ if (stats) {
     job ? `${stats.calls?.ok_1h ?? job.runs_1h}/60 good calls in the last hour` : "not running"
   );
   add("Errors in the last 24 hours", stats.errors_24h > 0 ? "warn" : "ok", `${stats.errors_24h}`);
+  if (stats.email_log_ready) {
+    const pct = Math.round((stats.emails_today / 100) * 100);
+    add("Emails today (Resend free plan ~100/day)", pct >= 90 ? "fail" : pct >= 70 ? "warn" : "ok", `${stats.emails_today} sent today`);
+    add("Emails that failed (24 hours)", stats.emails_failed_24h > 0 ? "warn" : "ok", `${stats.emails_failed_24h}`);
+  }
   add("Aftercare emails on time", stats.after_visit_stuck > 0 ? "warn" : "ok", stats.after_visit_stuck ? `${stats.after_visit_stuck} late` : "");
   const dbPct = Math.round((stats.db_bytes / (500 * 1024 * 1024)) * 100);
   const stPct = Math.round((stats.storage_bytes / (1024 * 1024 * 1024)) * 100);
