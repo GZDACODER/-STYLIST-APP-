@@ -107,7 +107,7 @@ export default function InsightsView({ x, compare, invitedRecently, emailOf }) {
         ) : (
           <ul className="rq-list">
             {x.overdue.map((o) => (
-              <li key={o.clientId} className="mn-row">
+              <li key={o.key} className="mn-row">
                 <p className="rq-head">
                   <span>{o.name}</span>
                   <span className="badge">{Math.round(o.since / 7)} weeks</span>
@@ -116,8 +116,8 @@ export default function InsightsView({ x, compare, invitedRecently, emailOf }) {
                   Last: {o.service}, {formatDate(o.last)} · {o.visits} {o.visits === 1 ? "visit" : "visits"}
                   {o.usual ? ` · usually every ${Math.round(o.usual / 7) || 1} ${Math.round(o.usual / 7) === 1 ? "week" : "weeks"}` : ""}
                 </p>
-                {emailOf[o.clientId] ? (
-                  <InviteBack id={o.clientId} serviceId={o.serviceId} invitedRecently={invitedRecently.has(o.clientId)} />
+                {(o.clientId && emailOf[o.clientId]) || o.email ? (
+                  <InviteBack id={o.clientId} bookingId={o.bookingId} serviceId={o.serviceId} invitedRecently={Boolean(o.clientId && invitedRecently.has(o.clientId))} />
                 ) : (
                   <p className="small-text muted">No email on file</p>
                 )}

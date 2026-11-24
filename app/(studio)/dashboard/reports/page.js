@@ -11,6 +11,7 @@ import { PERIODS, addDays, daysBetween, owedTotals, periodRange, revenueSeries, 
 import ReportsView from "./ReportsView";
 import InsightsView from "./InsightsView";
 import { insights } from "@/lib/insights";
+import { owedOn } from "@/lib/moneyTab";
 import { exampleReportData, examplesOn } from "@/lib/examples";
 
 export const metadata = { title: `Insights · ${BRAND_NAME}` };
@@ -108,7 +109,15 @@ export default async function ReportsPage({ searchParams }) {
   const series = revenueSeries({ bookings, regularIds, from: range.from, to: range.to, kind: range.buckets, now });
   // A balance owed with an amount written down (step 24) uses it.
   const owedFull = new Map(bookings.filter((b) => b.outcome === "completed_owed").map((b) => [b.id, b]));
-  const owed = owedTotals((owedRows || []).map((b) => owedFull.get(b.id) || b));
+  // Less balances paid since (recorded in Money, step 62 SQL).
+  const owedList = (owedRows || []).map((b) => owedFull.get(b.id) || b);
+  const paidBal = new Map();
+  if (!example && owedList.length) {
+    const { data: bal } = await supabase.from("payments").select("booking_id, amount_cents").eq("kind", "balance").in("booking_id", owedList.map((b) => b.id));
+    for (const p of bal || []) paidBal.set(p.booking_id, (paidBal.get(p.booking_id) || 0) + p.amount_cents);
+  }
+  const stillOwed = owedList.map((b) => owedOn(b, paidBal)).filter((c) => c > 0);
+  const owed = paidBal.size ? { count: stillOwed.length, cents: stillOwed.reduce((a, c) => a + c, 0) } : owedTotals(owedList);
 
   // Top regulars this period: visits that went ahead, then what they spent.
   const names = new Map((clientRows || []).map((c) => [c.id, c.name]));
@@ -155,7 +164,7 @@ export default async function ReportsPage({ searchParams }) {
     const [{ data: all, error: allError }, { data: pays }, { data: hours }, { data: inv }] = await Promise.all([
       supabase
         .from("bookings")
-        .select("id, client_id, client_name, service_id, service_name, booking_date, start_time, status, outcome, price_cents, cancelled_at")
+        .select("id, client_id, client_name, client_email, service_id, service_name, booking_date, start_time, status, outcome, price_cents, cancelled_at")
         .gte("booking_date", back)
         .lte("booking_date", addDays(today, 120))
         .limit(10000),
