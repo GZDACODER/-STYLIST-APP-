@@ -4,6 +4,7 @@
 // services and highlights (from the real templates, lib/templates), with a
 // link to that trade's live demo.
 import { useState } from "react";
+import { PhoneShot } from "./FeatureTabs";
 
 export default function TradeSwitcher({ trades }) {
   const [i, setI] = useState(0);
@@ -39,21 +40,8 @@ export default function TradeSwitcher({ trades }) {
             Try the {t.label.toLowerCase()} demo
           </a>
         </div>
-        <div className="hm-fx-visual" aria-hidden="true">
-          <div className="hm-fx-card">
-            <p className="hm-fx-label">
-              Your {t.words.services} · your {t.words.clients}
-            </p>
-            <ul className="hm-fx-list">
-              {t.services.map((s) => (
-                <li key={s.name}>
-                  <span>{s.name}</span>
-                  <em>{s.price}</em>
-                </li>
-              ))}
-            </ul>
-            <span className="hm-fx-button">Book a {t.words.appointment}</span>
-          </div>
+        <div className="hm-fx-visual">
+          <PhoneShot src={`trade-${t.key}`} alt={`A ${t.label.toLowerCase()}'s booking page on Clientele, with their ${t.words.services} and prices`} />
         </div>
       </div>
     </div>
