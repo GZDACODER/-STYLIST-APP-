@@ -2212,3 +2212,23 @@ body:has(.hm) {
 .hm-trade {
   margin-top: 22px;
 }
+
+/* Real screens from the demo, in a simple phone frame. */
+.hm-phone {
+  margin: 0 auto;
+  width: min(100%, 300px);
+  padding: 10px;
+  border-radius: 38px;
+  background: #050504;
+  border: 1px solid rgba(184, 151, 90, 0.45);
+  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+}
+
+.hm-phone img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 620 / 1056;
+  border-radius: 28px;
+  background: #f5f1ea;
+}
