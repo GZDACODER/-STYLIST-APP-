@@ -125,8 +125,14 @@ export default async function BookingPage({ params, searchParams }) {
 
   // The pro's business type sets the words on this page ("Subject" for a tutor).
   let bookingTemplate = null;
+  let giftCards = false;
   try {
-    const { data: typeRow } = await createAdminClient().from("stylists").select("business_type, modules").eq("slug", slug).maybeSingle();
+    const { data: typeRow } = await createAdminClient()
+      .from("stylists")
+      .select("business_type, modules, gift_cards_on, stripe_charges_enabled")
+      .eq("slug", slug)
+      .maybeSingle();
+    giftCards = Boolean(typeRow?.gift_cards_on && typeRow?.stripe_charges_enabled);
     const t = templateFor(typeRow?.business_type, typeRow?.modules);
     bookingTemplate = { key: t.key, words: t.words, modules: t.modules };
   } catch {
@@ -193,6 +199,11 @@ export default async function BookingPage({ params, searchParams }) {
           photosOn={Boolean(bookingTemplate?.modules?.bookingPhotos)}
         />
         </TemplateProvider>
+        {giftCards && (
+          <p className="bk-gift-link">
+            <a href={`/book/${slug}/gift`}>Give a gift card</a>
+          </p>
+        )}
       </div>
     </div>
   );

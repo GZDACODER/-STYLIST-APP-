@@ -58,7 +58,8 @@ export default async function MoneyPage({ searchParams }) {
     <>
       <PageHeader guide="money" title="Money" subtitle="What you've earned, what's owed, and payments you take outside the app." />
       <p className="small-text">
-        Rebooking, busy times and clients to invite back are in <Link href="/dashboard/reports">Insights</Link>.
+        Rebooking, busy times and clients to invite back are in <Link href="/dashboard/reports">Insights</Link>. Sell and
+        redeem <Link href="/dashboard/gift-cards">gift cards</Link>.
       </p>
       {m.error && <p className="message error">Money isn&apos;t set up yet (step 62 SQL).</p>}
 

@@ -62,6 +62,12 @@ const ICONS = {
       <path d="M6.5 9.5v5M17.5 9.5v5" />
     </>
   ),
+  gift: (
+    <>
+      <rect x="3.5" y="8.5" width="17" height="12" rx="1" />
+      <path d="M3.5 12.5h17M12 8.5v12M12 8.5C10 5 6.5 5 7.5 7.5 8.2 9 12 8.5 12 8.5zM12 8.5c2-3.5 5.5-3.5 4.5-1-.7 1.5-4.5 1-4.5 1z" />
+    </>
+  ),
   reviews: <path d="M12 3.5l2.6 5.3 5.9.9-4.25 4.1 1 5.85L12 16.9l-5.25 2.75 1-5.85L3.5 9.7l5.9-.9z" />,
   reports: (
     <>
@@ -94,6 +100,7 @@ const ITEMS = [
   // In the side menu only: the phone tab bar is full (Home links to it).
   // In the side menu only (phones reach it from Home's money card).
   { href: "/dashboard/money", label: "Money", icon: "money", wide: true },
+  { href: "/dashboard/gift-cards", label: "Gift cards", icon: "gift", wide: true },
   // In the side menu only (phones reach it from Settings > Public profile).
   { href: "/dashboard/reviews", label: "Reviews", icon: "reviews", wide: true },
   { href: "/dashboard/reports", label: "Insights", icon: "reports", wide: true, module: "reports" },
