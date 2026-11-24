@@ -194,6 +194,23 @@ export default async function TodayPage() {
   const { data: missingRows } = realIds.length
     ? await supabase.rpc("bookings_missing_waiver", { p_booking_ids: realIds })
     : { data: [] };
+  // Projects (step 67 SQL): "Sleeve · session 2 of 4" on project sessions.
+  const projectOf = {};
+  if (realIds.length) {
+    const { data: pj } = await supabase.from("bookings").select("id, project_id, project:projects(id, title, sessions_planned)").in("id", realIds).not("project_id", "is", null);
+    for (const r of pj || []) {
+      if (!r.project) continue;
+      const { data: all } = await supabase
+        .from("bookings")
+        .select("id, booking_date, start_time, status, outcome")
+        .eq("project_id", r.project_id)
+        .order("booking_date")
+        .order("start_time");
+      const kept = (all || []).filter((x) => x.status === "confirmed" && x.outcome !== "no_show");
+      const n = kept.findIndex((x) => x.id === r.id) + 1;
+      projectOf[r.id] = { id: r.project.id, label: `${r.project.title} · session ${n || "?"}${r.project.sessions_planned ? ` of ${r.project.sessions_planned}` : ""}` };
+    }
+  }
   // Reference photos clients added when booking (step 56 SQL).
   const photosOf = {};
   if (realIds.length) {
@@ -403,7 +420,15 @@ export default async function TodayPage() {
                         </span>
                       )}
                     </div>
-                    <div className="db-slot-meta">{b.service_name}</div>
+                    <div className="db-slot-meta">
+                      {b.service_name}
+                      {projectOf[b.id] && (
+                        <>
+                          {" · "}
+                          <Link href={`/dashboard/projects/${projectOf[b.id].id}`}>{projectOf[b.id].label}</Link>
+                        </>
+                      )}
+                    </div>
                     {photosOf[b.id] && (
                       <div className="rq-photos small">
                         {photosOf[b.id].map((u) => (
