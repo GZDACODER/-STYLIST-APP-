@@ -11,6 +11,8 @@ import { ExampleTag } from "@/components/dash/Example";
 import Link from "next/link";
 import { publicSiteUrl } from "@/lib/siteUrl";
 import PostOpeningsForm from "./PostOpeningsForm";
+import AddPanel from "../shell/AddPanel";
+import WaitlistBody from "../waitlist/WaitlistBody";
 import OpeningsList from "./OpeningsList";
 import PausedNote from "@/components/PausedNote";
 import { getMyPlan } from "@/lib/plan";
@@ -21,8 +23,10 @@ import { holidaysOn } from "@/lib/holidays";
 import { getMyTemplate } from "@/lib/templates/server";
 
 export const metadata = { title: `Openings · ${BRAND_NAME}` };
+// Openings | Waitlist (owner's redesign spec). /dashboard/waitlist redirects
+// to the Waitlist tab.
 
-export default async function OpeningsPage() {
+export default async function OpeningsPage({ searchParams }) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -36,6 +40,10 @@ export default async function OpeningsPage() {
     .maybeSingle();
   if (!stylist) redirect("/dashboard");
 
+  const tpl = await getMyTemplate();
+  const waitlistOn = tpl.modules.waitlist !== false;
+  const { tab: tabParam } = await searchParams;
+  const tab = tabParam === "waitlist" && waitlistOn ? "waitlist" : "openings";
   const today = todayInTimeZone(stylist.timezone);
   const plan = await getMyPlan(supabase, user.id);
 
@@ -158,13 +166,34 @@ export default async function OpeningsPage() {
         actions={
           <>
             <CopyLinkButton link={`${origin}/book/${stylist.slug}`} />
-            <a href="#add-opening" className="button small">
-              + Add opening
-            </a>
+            <AddPanel id="add-opening" label="+ Add opening" title="Open times for booking">
+              <p className="muted small-text">
+                Clients can only book times you open here. &quot;Regulars only&quot; times are hidden from everyone
+                except verified regulars.
+              </p>
+              {!plan.has.regulars && (
+                <PausedNote feature="regulars">Your plan is paused, so new openings are for everyone.</PausedNote>
+              )}
+              <PostOpeningsForm today={today} daysOff={daysOff} regularsAllowed={plan.has.regulars} />
+            </AddPanel>
           </>
         }
       />
 
+      {waitlistOn && (
+        <nav className="cr-tabs page-tabs" aria-label="Openings">
+          <Link href="/dashboard/openings" className={tab === "openings" ? "cr-tab active" : "cr-tab"} aria-current={tab === "openings" ? "page" : undefined}>
+            Openings
+          </Link>
+          <Link href="/dashboard/openings?tab=waitlist" className={tab === "waitlist" ? "cr-tab active" : "cr-tab"} aria-current={tab === "waitlist" ? "page" : undefined}>
+            Waitlist
+          </Link>
+        </nav>
+      )}
+      {tab === "waitlist" ? (
+        <WaitlistBody />
+      ) : (
+      <>
       <section className="card">
         <OpeningsList
           openings={openings}
@@ -176,19 +205,6 @@ export default async function OpeningsPage() {
         />
       </section>
 
-      <section className="card" id="add-opening">
-        <h2>Open times for booking</h2>
-        <p className="muted">
-          Clients can only book times you open here. &quot;Regulars only&quot; times are hidden from
-          everyone except verified regulars.
-        </p>
-        {!plan.has.regulars && (
-          <PausedNote feature="regulars">
-            Your plan is paused, so new openings are for everyone.
-          </PausedNote>
-        )}
-        <PostOpeningsForm today={today} daysOff={daysOff} regularsAllowed={plan.has.regulars} />
-      </section>
 
       {holds.length > 0 && (
         <section className="card">
@@ -246,6 +262,8 @@ export default async function OpeningsPage() {
         </section>
       )}
 
+      </>
+      )}
     </>
   );
 }

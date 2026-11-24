@@ -82,7 +82,41 @@ export async function getClientHistory(clientId) {
   }
   upcoming.reverse();
 
+  // Money they've paid: deposits taken online, plus payments recorded on
+  // Money (tips, balances, products). Linked by card, or by one of their bookings.
+  const ids = (bookings || []).map((b) => b.id);
+  const payCols = "id, booking_id, kind, method, amount_cents, paid_on, note";
+  const [{ data: byClient }, { data: byBooking }] = await Promise.all([
+    supabase.from("payments").select(payCols).eq("client_id", String(clientId)).limit(500),
+    ids.length
+      ? supabase.from("payments").select(payCols).in("booking_id", ids.slice(0, 300)).limit(500)
+      : Promise.resolve({ data: [] }),
+  ]);
+  const seen = new Set();
+  const payments = [];
+  for (const p of [...(byClient || []), ...(byBooking || [])]) {
+    if (seen.has(p.id)) continue;
+    seen.add(p.id);
+    payments.push({ id: p.id, date: p.paid_on, kind: p.kind, method: p.method, amountCents: p.amount_cents, note: p.note });
+  }
+  for (const b of bookings || []) {
+    if (b.deposit_status === "paid" && b.deposit_cents > 0) {
+      payments.push({
+        id: `dep-${b.id}`,
+        date: b.booking_date,
+        kind: "deposit",
+        method: "online",
+        amountCents: b.deposit_cents,
+        note: b.status === "cancelled" ? `${b.service_name} (cancelled, deposit kept)` : b.service_name,
+      });
+    }
+  }
+  payments.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+  const paidCents = payments.reduce((sum, p) => sum + p.amountCents, 0);
+
   return {
+    payments,
+    paidCents,
     visits,
     cancelled,
     noShows,
@@ -93,7 +127,7 @@ export async function getClientHistory(clientId) {
     lastVisit,
     upcoming: upcoming.slice(0, 5),
     upcomingCount: upcoming.length,
-    recent: past.slice(0, 8),
+    recent: past.slice(0, 40),
     recentCancelled: (bookings || []).filter((b) => b.status === "cancelled").slice(0, 3),
   };
 }

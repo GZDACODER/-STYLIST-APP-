@@ -10,7 +10,7 @@ import RegularStar from "@/components/RegularStar";
 import ConfirmAction from "@/components/ConfirmAction";
 import { displayPhone } from "@/lib/phone";
 import StandingSection from "../standing/StandingSection";
-import ClientHistory from "./ClientHistory";
+import { HistorySummary, PaymentsTab, VisitsTab, useClientHistory } from "./ClientHistory";
 import ClientIntake from "./ClientIntake";
 import MergeClients from "./MergeClients";
 
@@ -25,8 +25,17 @@ const todayMonthDay = () => {
   return `${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 };
 
+const TABS = [
+  ["overview", "Overview"],
+  ["visits", "Visits & notes"],
+  ["payments", "Payments"],
+];
+
 export default function ClientCard({ client, standing, clients, upcomingCounts, mergeWith }) {
   const [editing, setEditing] = useState(false);
+  // Merging lives on Overview, so a "Review" from the duplicates list opens there.
+  const [tab, setTab] = useState("overview");
+  const { history, pending, reload } = useClientHistory(client.id);
   const [statusError, setStatusError] = useState(null);
   // Show the new status straight away while it saves in the background.
   const [status, setOptimisticStatus] = useOptimistic(client.status);
@@ -77,6 +86,25 @@ export default function ClientCard({ client, standing, clients, upcomingCounts, 
         </button>
       </div>
 
+      <nav className="cr-tabs client-tabs" aria-label={`${client.name}: sections`}>
+        {TABS.map(([value, label]) => (
+          <button
+            key={value}
+            type="button"
+            className={tab === value ? "cr-tab active" : "cr-tab"}
+            aria-pressed={tab === value}
+            onClick={() => setTab(value)}
+          >
+            {label}
+          </button>
+        ))}
+      </nav>
+
+      {tab === "visits" && <VisitsTab history={history} pending={pending} cardNote={client.notes} onSaved={reload} />}
+      {tab === "payments" && <PaymentsTab history={history} pending={pending} />}
+
+      {tab === "overview" && (
+      <>
       {(client.phone || client.email) && (
         <div className="client-contact">
           {client.phone && <a href={`tel:${client.phone}`}>{displayPhone(client.phone)}</a>}
@@ -134,7 +162,7 @@ export default function ClientCard({ client, standing, clients, upcomingCounts, 
       </div>
       {statusError && <p className="message error">Couldn't change status: {statusError}</p>}
 
-      <ClientHistory clientId={client.id} />
+      <HistorySummary history={history} pending={pending} />
       <ClientIntake clientId={client.id} />
 
       {/* Standing appointments are for Regulars only. */}
@@ -162,6 +190,8 @@ export default function ClientCard({ client, standing, clients, upcomingCounts, 
           fields={{ id: client.id }}
         />
       </div>
+      </>
+      )}
     </div>
   );
 }

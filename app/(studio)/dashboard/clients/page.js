@@ -16,11 +16,13 @@ import { todayInTimeZone } from "@/lib/availability";
 import { nowLocal } from "@/lib/localTime";
 import { getMyTemplate } from "@/lib/templates/server";
 import Words from "@/components/Words";
+import AddPanel from "../shell/AddPanel";
+import SplitMenu from "../shell/SplitMenu";
 
 export const metadata = { title: `Clients · ${BRAND_NAME}` };
 
 export default async function ClientsPage({ searchParams }) {
-  const { add, client: clientParam } = await searchParams;
+  const { client: clientParam } = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -88,6 +90,21 @@ export default async function ClientsPage({ searchParams }) {
     .order("booking_date", { ascending: true })
     .order("start_time", { ascending: true })
     .limit(2000);
+  // Each client's last visit (most recent one that went ahead).
+  const { data: pastRows } = await supabase
+    .from("bookings")
+    .select("client_id, booking_date, outcome")
+    .eq("status", "confirmed")
+    .not("client_id", "is", null)
+    .lte("booking_date", today)
+    .order("booking_date", { ascending: false })
+    .limit(5000);
+  const lastVisits = {};
+  for (const b of pastRows || []) {
+    if (b.outcome === "no_show" || b.outcome === "replaced") continue;
+    lastVisits[b.client_id] ??= b.booking_date;
+  }
+
   const now = nowLocal(timeZone);
   const nextVisits = {};
   const upcomingCounts = {};
@@ -129,6 +146,8 @@ export default async function ClientsPage({ searchParams }) {
   for (const e of examples) {
     const next = exAll.upcoming.find((b) => b.client_name === e.name);
     if (next) nextVisits[e.id] = { date: next.booking_date, time: next.start_time.slice(0, 5), service: next.service_name };
+    const last = exAll.past.find((b) => b.client_name === e.name);
+    if (last) lastVisits[e.id] = last.booking_date;
   }
 
   const standing = {
@@ -146,22 +165,7 @@ export default async function ClientsPage({ searchParams }) {
     return <p className="message error">Couldn't load your clients: {error.message}</p>;
   }
 
-  const addOpen = add === "client" || (clients.length === 0 && examples.length === 0);
-  const addClient = (
-    <section className="card" id="add-client">
-      {/* Open for a new stylist or from "+ Add client"; tucked away otherwise. */}
-      <details className="add-client" open={addOpen}>
-        <summary>
-          <h2>Add a client</h2>
-        </summary>
-        <p className="muted">
-          Regulars will get first pick of your openings. Blocked clients won't be able to book.
-          Add their mobile number so the booking page recognizes them.
-        </p>
-        <AddClientForm />
-      </details>
-    </section>
-  );
+  const importNotes = sample(await getMyTemplate()).importNotes;
 
   return (
     <>
@@ -172,106 +176,92 @@ export default async function ClientsPage({ searchParams }) {
           <>
             {clients.length > 0 && (
               // A plain link: the browser downloads the CSV file.
-              <a href="/dashboard/clients/export" className="button secondary small" download>
+              <a href="/dashboard/clients/export" className="button ghost small" download>
                 Export
               </a>
             )}
-            {stylist && (
-              <a href="/dashboard/clients?add=invite#invite" className="button secondary small">
-                Invite
-              </a>
-            )}
-            <a href="/dashboard/clients?add=client#add-client" className="button small">
-              <Words>+ Add client</Words>
-            </a>
+            <SplitMenu label="Import or invite">
+              <a href="#import">Import clients</a>
+              {stylist && <a href="#invite">Invite a new client</a>}
+            </SplitMenu>
+            <AddPanel id="add-client" label={<Words>+ Add client</Words>} title="Add a client">
+              <p className="muted">
+                Regulars will get first pick of your openings. Blocked clients won&apos;t be able to book.
+                Add their mobile number so the booking page recognizes them.
+              </p>
+              <AddClientForm />
+            </AddPanel>
           </>
         }
       />
-
-      {addOpen && addClient}
 
       <section className="card">
         <ClientList
           clients={clients}
           standing={standing}
           nextVisits={nextVisits}
+          lastVisits={lastVisits}
           examples={examples}
           upcomingCounts={upcomingCounts}
           openId={typeof clientParam === "string" && /^[0-9a-f-]{36}$/i.test(clientParam) ? clientParam : null}
         />
       </section>
 
-      {!addOpen && addClient}
-
-      <section className="card">
-        <details className="add-client" open={examples.length > 0 || undefined}>
-          <summary>
-            <h2>Import clients</h2>
-          </summary>
-          <ImportClients example={examples.length > 0} importNotes={sample(await getMyTemplate()).importNotes} />
-        </details>
-      </section>
+      <AddPanel id="import" trigger={false} title="Import clients">
+        <ImportClients example={examples.length > 0} importNotes={importNotes} />
+      </AddPanel>
 
       {stylist && (
-        <section className="card" id="invite">
-          <details className="add-client" open={add === "invite" || stylist.regulars_only}>
-            <summary>
-              <h2>Invite a new client</h2>
-            </summary>
-            <p className="muted">
-              Make a private link for one new client and text it to them. It lets just that person
-              book one appointment from your &quot;Everyone&quot; times, even when Settings is on{" "}
-              &quot;Regulars only&quot;. Links work for 30 days. Once they&apos;ve booked, they
-              show below as Invited.
-            </p>
-            {plan.has.regulars ? (
-              <InviteForm slug={stylist.slug} businessName={stylist.business_name} />
-            ) : (
-              <PausedNote feature="regulars">
-                Your plan is paused, so new invite links can&apos;t be made.
-              </PausedNote>
-            )}
-            {invites.length === 0 && examples.length > 0 && (
-              <>
-                <h3 className="list-title">Your invites</h3>
-                <RowList
-                  label="Clients"
-                  items={[
-                    {
-                      key: "example-invite-1",
-                      example: true,
-                      title: "Jordan Lee",
-                      sub: "(555) 010-0167 · Link not used yet · works for 30 days",
-                      badge: <ExampleTag />,
-                      fullPanel: (
-                        <ExampleCard
-                          title="Invite for Jordan Lee"
-                          facts={[
-                            ["Link", `/book/${stylist.slug}?invite=…`],
-                            ["Works for", "One booking from your Everyone times, within 30 days"],
-                            ["Status", "Sent, not used yet"],
-                          ]}
-                          addHref="/dashboard/clients?add=invite#invite"
-                          addLabel="Make a real invite link"
-                        />
-                      ),
-                    },
-                  ]}
-                />
-              </>
-            )}
-            {invites.length > 0 && (
-              <>
-                <h3 className="list-title">Your invites</h3>
-                <InviteList
-                  invites={invites}
-                  slug={stylist.slug}
-                  businessName={stylist.business_name}
-                />
-              </>
-            )}
-          </details>
-        </section>
+        <AddPanel id="invite" trigger={false} title="Invite a new client">
+          <p className="muted">
+            Make a private link for one new client and text it to them. It lets just that person
+            book one appointment from your &quot;Everyone&quot; times, even when Settings is on{" "}
+            &quot;Regulars only&quot;. Links work for 30 days. Once they&apos;ve booked, they
+            show below as Invited.
+          </p>
+          {plan.has.regulars ? (
+            <InviteForm slug={stylist.slug} businessName={stylist.business_name} />
+          ) : (
+            <PausedNote feature="regulars">
+              Your plan is paused, so new invite links can&apos;t be made.
+            </PausedNote>
+          )}
+          {invites.length === 0 && examples.length > 0 && (
+            <>
+              <h3 className="list-title">Your invites</h3>
+              <RowList
+                label="Clients"
+                items={[
+                  {
+                    key: "example-invite-1",
+                    example: true,
+                    title: "Jordan Lee",
+                    sub: "(555) 010-0167 · Link not used yet · works for 30 days",
+                    badge: <ExampleTag />,
+                    fullPanel: (
+                      <ExampleCard
+                        title="Invite for Jordan Lee"
+                        facts={[
+                          ["Link", `/book/${stylist.slug}?invite=…`],
+                          ["Works for", "One booking from your Everyone times, within 30 days"],
+                          ["Status", "Sent, not used yet"],
+                        ]}
+                        addHref="/dashboard/clients#invite"
+                        addLabel="Make a real invite link"
+                      />
+                    ),
+                  },
+                ]}
+              />
+            </>
+          )}
+          {invites.length > 0 && (
+            <>
+              <h3 className="list-title">Your invites</h3>
+              <InviteList invites={invites} slug={stylist.slug} businessName={stylist.business_name} />
+            </>
+          )}
+        </AddPanel>
       )}
     </>
   );

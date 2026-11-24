@@ -241,9 +241,9 @@ export default function ReportsView({ period, range, today, s: thisPeriod, befor
           {owed.count === 0
             ? "Nobody owes you anything."
             : `${owed.count} ${owed.count === 1 ? "visit has" : "visits have"} a balance owed: ${money(owed.cents)} in all.`}{" "}
-          {owed.count > 0 && <Link href="/dashboard/notes">See them in Notes</Link>}
+          {owed.count > 0 && <Link href="/dashboard/money?tab=owed">See them on Money</Link>}
         </p>
-        <p className="muted small-text">Any date, not only this period. Uses the amount written in Notes, else the price less any deposit.</p>
+        <p className="muted small-text">Any date, not only this period. Uses the amount written on the visit, else the price less any deposit.</p>
       </section>
     </>
   );
