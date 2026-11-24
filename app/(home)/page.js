@@ -233,6 +233,7 @@ export default async function HomePage() {
               <DeskShot
                 src="dash-home"
                 priority
+                hideOnPhones
                 alt="The Clientele dashboard: a good-morning greeting, the next three appointments, what needs attention, and this week's numbers"
               />
             </div>
