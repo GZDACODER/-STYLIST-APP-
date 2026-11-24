@@ -95,7 +95,7 @@ const MORE = [
   { href: "/dashboard/wrapup", label: "Wrap up visits", icon: "notes" },
   { href: "/dashboard/projects", label: "Projects", icon: "projects", module: "projects" },
   { href: "/dashboard/packages", label: "Packages", icon: "gift", module: "packages" },
-  { href: "/dashboard/gift-cards", label: "Gift cards", icon: "gift" },
+  { href: "/dashboard/money?tab=gifts", label: "Gift cards", icon: "gift" },
   { href: "/dashboard/followers", label: "Following you", icon: "followers" },
   { href: "/dashboard/activity", label: "Activity", icon: "activity" },
   { href: "/dashboard/share", label: "Share kit", icon: "share" },
@@ -112,7 +112,7 @@ const ACTIONS = [
   { href: "/dashboard/money#record", label: "Record payment", icon: "money", fab: true },
   { share: true, href: "#share", label: "Share booking link", icon: "share" },
   { href: "/dashboard/share", label: "Share kit (QR code and story)", icon: "share" },
-  { href: "/dashboard/gift-cards#redeem", label: "Redeem gift card", icon: "gift" },
+  { href: "/dashboard/money?tab=gifts#redeem", label: "Redeem gift card", icon: "gift" },
 ];
 
 function isActive(item, pathname) {

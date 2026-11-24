@@ -4,6 +4,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { BRAND_NAME } from "@/lib/brand";
+import Banner from "../shell/Banner";
 import PageHeader from "@/components/dash/PageHeader";
 import EmptyState from "@/components/dash/EmptyState";
 import SubmitButton from "@/components/SubmitButton";
@@ -40,6 +41,21 @@ export default async function ReviewsPage({ searchParams }) {
   return (
     <>
       <PageHeader guide="reviews" title="Reviews" subtitle="Choose which reviews show on your public profile, and reply if you like." />
+      {!(me?.handle && me.profile_on) && (
+        <Banner id="reviews-profile">
+          {me?.handle ? (
+            <>
+              Your public profile is off, so approved reviews aren&apos;t shown yet.{" "}
+              <Link href="/dashboard/settings/profile">Turn it on</Link>
+            </>
+          ) : (
+            <>
+              Set up your public profile to show the reviews you approve.{" "}
+              <Link href="/dashboard/settings/profile">Set it up</Link>
+            </>
+          )}
+        </Banner>
+      )}
       {error && <p className="message error">Reviews aren&apos;t set up yet (step 58 SQL).</p>}
 
       <section className="card rv-summary">
@@ -56,18 +72,12 @@ export default async function ReviewsPage({ searchParams }) {
         ) : (
           <p className="muted">No ratings yet. Clients are asked for one in the email after each visit.</p>
         )}
-        <p className="small-text">
-          {me?.handle ? (
-            <>
-              Your profile: <Link href={`/p/${me.handle}`}>clientelesuite.com/p/{me.handle}</Link>
-              {!me.profile_on && " (off)"}
-            </>
-          ) : (
-            <>
-              Set up your <Link href="/dashboard/settings/profile">public profile</Link> to show reviews.
-            </>
-          )}
-        </p>
+        {me?.handle && (
+          <p className="small-text">
+            Your profile: <Link href={`/p/${me.handle}`}>clientelesuite.com/p/{me.handle}</Link>
+            {!me.profile_on && " (off)"}
+          </p>
+        )}
       </section>
 
       <nav className="cr-tabs" aria-label="Reviews">

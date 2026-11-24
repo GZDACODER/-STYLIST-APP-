@@ -1459,3 +1459,59 @@
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
+
+/* ---------- Money ---------- */
+.db .mn-periodbar {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.db .mn-periodbar .mn-period {
+  margin: 0;
+}
+
+@media (min-width: 900px) {
+  .db .mn-periodbar {
+    grid-template-columns: auto minmax(260px, 360px);
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+.db .mn-breakdown {
+  margin-top: 16px;
+  gap: 8px 28px;
+}
+
+.db .mn-tab-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.db .mn-tab-head h2 {
+  margin: 0;
+}
+
+/* Tabs drawn as buttons (client card) look like the link tabs. */
+.db button.cr-tab {
+  background: none;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  border-radius: 0;
+  min-height: 40px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.db button.cr-tab.active {
+  border-bottom-color: var(--gold);
+}
+
+/* Insights cards: two up. */
+.db .in-cards > .card {
+  margin-top: 0;
+}

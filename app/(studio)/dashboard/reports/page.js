@@ -1,5 +1,5 @@
-// Reports: revenue, visits, no-shows, Regulars vs new clients, deposits and
-// balances owed, for a period (this month by default), compared with the
+// Insights: revenue, visits, no-shows, Regulars vs new clients and deposits
+// for a period (this month by default), compared with the
 // period before. Worked out from the bookings already stored; see lib/reports.js.
 import PageHeader from "@/components/dash/PageHeader";
 import { redirect } from "next/navigation";
@@ -7,12 +7,10 @@ import { createClient } from "@/lib/supabase/server";
 import { todayInTimeZone } from "@/lib/availability";
 import { nowLocal } from "@/lib/localTime";
 import { BRAND_NAME } from "@/lib/brand";
-import { PERIODS, addDays, daysBetween, owedTotals, periodRange, revenueSeries, summarize } from "@/lib/reports";
+import { PERIODS, addDays, daysBetween, periodRange, revenueSeries, summarize } from "@/lib/reports";
 import ReportsView from "./ReportsView";
-import InsightsView from "./InsightsView";
 import { insights } from "@/lib/insights";
 import { getMyTemplate } from "@/lib/templates/server";
-import { owedOn } from "@/lib/moneyTab";
 import { exampleReportData, examplesOn, sample } from "@/lib/examples";
 
 export const metadata = { title: `Insights · ${BRAND_NAME}` };
@@ -33,7 +31,8 @@ export default async function ReportsPage({ searchParams }) {
   const tz = stylist.timezone;
   const today = todayInTimeZone(tz);
   const now = nowLocal(tz);
-  const { period: asked } = await searchParams;
+  const { period: asked, tab: askedTab } = await searchParams;
+  const tab = ["revenue", "clients", "schedule"].includes(askedTab) ? askedTab : "revenue";
   const period = PERIODS.some((p) => p.value === asked) ? asked : "this_month";
   const range = periodRange(period, today);
 
@@ -71,15 +70,7 @@ export default async function ReportsPage({ searchParams }) {
     );
   }
 
-  let [{ data: clientRows }, { data: owedRows }] = await Promise.all([
-    supabase.from("clients").select("id, status, created_at, name"),
-    supabase
-      .from("bookings")
-      .select("id, status, outcome, price_cents, deposit_cents, deposit_status")
-      .eq("status", "confirmed")
-      .eq("outcome", "completed_owed")
-      .limit(2000),
-  ]);
+  let { data: clientRows } = await supabase.from("clients").select("id, status, created_at, name");
 
   // A new pro with no bookings or clients yet: an example report, worked out
   // by the same code from a sample book of visits (never saved).
@@ -88,7 +79,6 @@ export default async function ReportsPage({ searchParams }) {
     const ex = exampleReportData(range.prevFrom, range.to, today);
     rows = ex.bookings;
     clientRows = ex.clients;
-    owedRows = ex.bookings.filter((b) => b.status === "confirmed" && b.outcome === "completed_owed");
     example = true;
   }
 
@@ -108,17 +98,6 @@ export default async function ReportsPage({ searchParams }) {
   const before = summarize({ bookings, regularIds, clientsCreated, from: range.prevFrom, to: prevTo, now });
   if (inProgress) range.compare = `the same days ${range.compare}`;
   const series = revenueSeries({ bookings, regularIds, from: range.from, to: range.to, kind: range.buckets, now });
-  // A balance owed with an amount written down (step 24) uses it.
-  const owedFull = new Map(bookings.filter((b) => b.outcome === "completed_owed").map((b) => [b.id, b]));
-  // Less balances paid since (recorded in Money, step 62 SQL).
-  const owedList = (owedRows || []).map((b) => owedFull.get(b.id) || b);
-  const paidBal = new Map();
-  if (!example && owedList.length) {
-    const { data: bal } = await supabase.from("payments").select("booking_id, amount_cents").eq("kind", "balance").in("booking_id", owedList.map((b) => b.id));
-    for (const p of bal || []) paidBal.set(p.booking_id, (paidBal.get(p.booking_id) || 0) + p.amount_cents);
-  }
-  const stillOwed = owedList.map((b) => owedOn(b, paidBal)).filter((c) => c > 0);
-  const owed = paidBal.size ? { count: stillOwed.length, cents: stillOwed.reduce((a, c) => a + c, 0) } : owedTotals(owedList);
 
   // Top regulars this period: visits that went ahead, then what they spent.
   const names = new Map((clientRows || []).map((c) => [c.id, c.name]));
@@ -204,20 +183,18 @@ export default async function ReportsPage({ searchParams }) {
   }
 
   return (
-    <>
     <ReportsView
+      tab={tab}
+      insight={insightData}
       period={period}
       range={range}
       today={today}
       s={thisPeriod}
       before={before}
       series={series}
-      owed={owed}
       topRegulars={topRegulars}
       feedback={feedback}
       example={example}
     />
-    {insightData && <InsightsView {...insightData} compare={range.compare} />}
-    </>
   );
 }

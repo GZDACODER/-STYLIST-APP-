@@ -22,7 +22,7 @@ export async function setGiftCards(prev, formData) {
   const on = formData.get("on") === "true";
   const { error } = await supabase.from("stylists").update({ gift_cards_on: on }).eq("id", user.id);
   if (error) return { error: "Couldn't save. Please try again." };
-  revalidatePath("/dashboard/gift-cards");
+  revalidatePath("/dashboard/money");
   return { success: on ? "Gift cards are on. Share the link below." : "Gift cards are off. Cards already sold still work." };
 }
 
@@ -46,6 +46,6 @@ export async function redeemGift(prev, formData) {
     if (/too_much/.test(error.message)) return { error: "That's more than the card has left." };
     return { error: "Couldn't redeem. Please try again." };
   }
-  revalidatePath("/dashboard/gift-cards");
+  revalidatePath("/dashboard/money");
   return { success: `Took ${formatPrice(amount)} off ${code}. ${formatPrice(data)} left on it.`, at: Date.now() };
 }

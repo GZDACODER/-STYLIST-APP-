@@ -6,8 +6,14 @@ import { PERIODS } from "@/lib/reports";
 import RevenueChart from "./RevenueChart";
 import PageHeader from "@/components/dash/PageHeader";
 import { ExampleTag } from "@/components/dash/Example";
+import { ComeBack, Heatmap, InviteBackList, TopServices } from "./InsightsView";
 
 const money = (cents) => formatPrice(cents).replace(/\.00$/, "");
+const TABS = [
+  ["revenue", "Revenue"],
+  ["clients", "Clients"],
+  ["schedule", "Schedule"],
+];
 const pct = (x) => `${Math.round(x * 100)}%`;
 
 // "+12% vs last month", or nothing when there's nothing to compare with.
@@ -18,7 +24,7 @@ function change(now, before, compare) {
   return `${diff > 0 ? "+" : "\u2212"}${Math.round(Math.abs(diff) * 100)}% vs ${compare}`;
 }
 
-export default function ReportsView({ period, range, today, s: thisPeriod, before, series, owed, topRegulars = [], feedback = null, example = false }) {
+export default function ReportsView({ tab = "revenue", insight = null, period, range, today, s: thisPeriod, before, series, topRegulars = [], feedback = null, example = false }) {
   const s = thisPeriod;
   const regShare = s.revenueCents ? s.regular.cents / s.revenueCents : null;
   const avg = (g) => (g.visits ? money(Math.round(g.cents / g.visits)) : "—");
@@ -65,7 +71,7 @@ export default function ReportsView({ period, range, today, s: thisPeriod, befor
             {PERIODS.map((p) => (
               <Link
                 key={p.value}
-                href={p.value === "this_month" ? "/dashboard/reports" : `/dashboard/reports?period=${p.value}`}
+                href={`/dashboard/reports?${p.value === "this_month" ? "" : `period=${p.value}&`}tab=${tab}`}
                 className={p.value === period ? "chip active" : "chip"}
                 aria-current={p.value === period ? "page" : undefined}
                 scroll={false}
@@ -93,13 +99,27 @@ export default function ReportsView({ period, range, today, s: thisPeriod, befor
         )}
       </section>
 
-      <section className="card">
+      <nav className="cr-tabs page-tabs" aria-label="Insights">
+        {TABS.map(([k, l]) => (
+          <Link
+            key={k}
+            href={`/dashboard/reports?${period === "this_month" ? "" : `period=${period}&`}tab=${k}`}
+            className={tab === k ? "cr-tab active" : "cr-tab"}
+            scroll={false}
+          >
+            {l}
+          </Link>
+        ))}
+      </nav>
+
+      {tab === "revenue" && (
+        <div className="g12 in-cards">
+      <section className="card span-6">
         <h2>Revenue by {range.buckets === "month" ? "month" : "week"}</h2>
         <p className="muted small-text">Split by who the client is: Regulars, or New (everyone else).</p>
         <RevenueChart series={series} from={range.from} kind={range.buckets} />
       </section>
-
-      <section className="card">
+      <section className="card span-6">
         <h2>Regulars vs new clients</h2>
         <p className="muted small-text">
           {regShare == null
@@ -139,9 +159,50 @@ export default function ReportsView({ period, range, today, s: thisPeriod, befor
         </div>
         <p className="muted small-text">Regulars are the clients who are Regulars now.</p>
       </section>
+          {insight && <TopServices x={insight.x} />}
+      <section className="card span-6">
+        <h2>Deposits</h2>
+        <div className="table-wrap">
+          <table className="rp-table">
+            <tbody>
+              <tr><th scope="row">Collected</th><td>{money(s.depositsCents)}</td></tr>
+              <tr><th scope="row">Clientele fee (3% + 30¢ each)</th><td>−{money(s.feesCents)}</td></tr>
+              <tr className="rp-total"><th scope="row">To your Stripe account</th><td>{money(s.depositsCents - s.feesCents)}</td></tr>
+              <tr><th scope="row">Kept from cancellations</th><td>{money(s.keptCents)}{s.keptCount ? ` (${s.keptCount})` : ""}</td></tr>
+              {s.refundedCents > 0 && (
+                <tr><th scope="row">Refunded</th><td>{money(s.refundedCents)}</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+        <p className="muted small-text">Counted on the day each deposit was paid. Stripe&apos;s own fees aren&apos;t included.</p>
+      </section>
+        </div>
+      )}
 
+      {tab === "clients" && (
+        <div className="g12 in-cards">
+          {insight && <ComeBack x={insight.x} compare={range.compare} />}
+      <section className="card span-6">
+        <h2>Top regulars</h2>
+        {topRegulars.length === 0 ? (
+          <p className="muted">No visits from Regulars in this period yet.</p>
+        ) : (
+          <ol className="rp-top">
+            {topRegulars.map((r, i) => (
+              <li key={`${r.name}-${i}`}>
+                <span className="rp-top-name">{r.name}</span>
+                <span className="muted small-text">
+                  {r.visits} {r.visits === 1 ? "visit" : "visits"} · {money(r.cents)}
+                </span>
+              </li>
+            ))}
+          </ol>
+        )}
+      </section>
+          {insight && <InviteBackList x={insight.x} invitedRecently={insight.invitedRecently} emailOf={insight.emailOf} />}
       {feedback && (
-        <section className="card">
+        <section className="card span-6">
           <h2>Client feedback</h2>
           {feedback.count === 0 ? (
             <p className="muted">
@@ -168,26 +229,12 @@ export default function ReportsView({ period, range, today, s: thisPeriod, befor
           )}
         </section>
       )}
+        </div>
+      )}
 
-      <section className="card">
-        <h2>Top regulars</h2>
-        {topRegulars.length === 0 ? (
-          <p className="muted">No visits from Regulars in this period yet.</p>
-        ) : (
-          <ol className="rp-top">
-            {topRegulars.map((r, i) => (
-              <li key={`${r.name}-${i}`}>
-                <span className="rp-top-name">{r.name}</span>
-                <span className="muted small-text">
-                  {r.visits} {r.visits === 1 ? "visit" : "visits"} · {money(r.cents)}
-                </span>
-              </li>
-            ))}
-          </ol>
-        )}
-      </section>
-
-      <section className="card">
+      {tab === "schedule" && (
+        <div className="g12 in-cards">
+      <section className="card span-6">
         <h2>Bookings</h2>
         <div className="table-wrap">
           <table className="rp-table">
@@ -216,35 +263,9 @@ export default function ReportsView({ period, range, today, s: thisPeriod, befor
           <p className="muted small-text">Visits not marked yet count as having gone ahead.</p>
         )}
       </section>
-
-      <section className="card">
-        <h2>Deposits</h2>
-        <div className="table-wrap">
-          <table className="rp-table">
-            <tbody>
-              <tr><th scope="row">Collected</th><td>{money(s.depositsCents)}</td></tr>
-              <tr><th scope="row">Clientele fee (3% + 30¢ each)</th><td>−{money(s.feesCents)}</td></tr>
-              <tr className="rp-total"><th scope="row">To your Stripe account</th><td>{money(s.depositsCents - s.feesCents)}</td></tr>
-              <tr><th scope="row">Kept from cancellations</th><td>{money(s.keptCents)}{s.keptCount ? ` (${s.keptCount})` : ""}</td></tr>
-              {s.refundedCents > 0 && (
-                <tr><th scope="row">Refunded</th><td>{money(s.refundedCents)}</td></tr>
-              )}
-            </tbody>
-          </table>
+          {insight && <Heatmap x={insight.x} />}
         </div>
-        <p className="muted small-text">Counted on the day each deposit was paid. Stripe&apos;s own fees aren&apos;t included.</p>
-      </section>
-
-      <section className="card">
-        <h2>Balances owed</h2>
-        <p>
-          {owed.count === 0
-            ? "Nobody owes you anything."
-            : `${owed.count} ${owed.count === 1 ? "visit has" : "visits have"} a balance owed: ${money(owed.cents)} in all.`}{" "}
-          {owed.count > 0 && <Link href="/dashboard/money?tab=owed">See them on Money</Link>}
-        </p>
-        <p className="muted small-text">Any date, not only this period. Uses the amount written on the visit, else the price less any deposit.</p>
-      </section>
+      )}
     </>
   );
 }
