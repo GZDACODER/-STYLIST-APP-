@@ -1341,3 +1341,109 @@
 .db .mn-exports {
   margin-top: 14px;
 }
+
+/* ---------- Insights ---------- */
+.db .in-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+}
+
+.db .in-stat {
+  padding: 14px;
+  background: var(--surface, #fff);
+}
+
+.db .in-stat p {
+  margin: 0;
+}
+
+.db .in-stat-label {
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.db .in-stat-value {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 2rem;
+  line-height: 1.1;
+  margin: 4px 0 !important;
+}
+
+.db .in-stat-note {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.db .in-grid {
+  display: grid;
+  gap: 3px;
+  margin-top: 12px;
+}
+
+.db .in-grid-row {
+  display: grid;
+  grid-template-columns: 74px repeat(7, 1fr);
+  gap: 3px;
+}
+
+.db .in-grid-head,
+.db .in-grid-side {
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-align: center;
+  align-self: center;
+}
+
+.db .in-grid-side {
+  text-align: left;
+}
+
+.db .in-cell {
+  display: grid;
+  place-items: center;
+  height: 38px;
+  font-size: 0.8rem;
+  background: rgba(14, 13, 11, var(--a, 0.08));
+}
+
+.db .in-cell.off {
+  background: repeating-linear-gradient(45deg, transparent 0 4px, var(--border) 4px 5px);
+}
+
+.db .in-bars {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+}
+
+.db .in-bars li {
+  display: grid;
+  grid-template-columns: minmax(90px, 1.2fr) 2fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 6px 0;
+  font-size: 0.9rem;
+}
+
+.db .in-bar {
+  display: block;
+  height: 8px;
+  background: var(--border);
+}
+
+.db .in-bar > span {
+  display: block;
+  height: 100%;
+  background: var(--ink);
+}
+
+.db .in-bar-num {
+  font-size: 0.82rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}

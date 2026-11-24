@@ -404,7 +404,7 @@ export default async function HomePage() {
           </Link>
         </div>
         <p className="muted small-text home-more-links">
-          <Link href="/dashboard/today">Today</Link> · <Link href="/dashboard/reports">Reports</Link> ·{" "}
+          <Link href="/dashboard/today">Today</Link> · <Link href="/dashboard/money">Money</Link> · <Link href="/dashboard/reports">Insights</Link> ·{" "}
           <Link href="/dashboard/wrapup">Wrap up visits</Link> ·{" "}
           <Link href="/dashboard/feedback">Share feedback</Link>
           {isAdmin(user) && (
