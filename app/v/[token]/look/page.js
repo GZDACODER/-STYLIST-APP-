@@ -19,7 +19,18 @@ export default async function LookPage({ params }) {
     .select("service_name, booking_date, look_photo_path, look_consent, stylist:stylists(business_name, handle, profile_on)")
     .eq("cancel_token", token)
     .maybeSingle();
-  if (!b?.look_photo_path || !b.stylist) notFound();
+  if (!b?.stylist) notFound();
+  // The pro removed or replaced the photo since they asked.
+  if (!b.look_photo_path)
+    return (
+      <section className="card">
+        <h1>This photo isn&apos;t shared any more</h1>
+        <p>
+          {displayName(b.stylist.business_name)} has removed or replaced it, so there&apos;s nothing to answer. If they
+          share a new one and want to show it, they&apos;ll ask you again.
+        </p>
+      </section>
+    );
   const { data } = await admin.storage.from("client-looks").createSignedUrl(b.look_photo_path, 3600);
   const name = displayName(b.stylist.business_name);
   return (
