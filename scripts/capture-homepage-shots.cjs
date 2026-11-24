@@ -5,7 +5,7 @@
 // Captures real Clientele screens from the live demos for the homepage.
 const { chromium, devices } = require('playwright'); const sharp=require('sharp'); const S='https://www.clientelesuite.com';
 const OUT=require('path').join(__dirname,'..','public','home')+'/'; const which=process.argv[2]||'all';
-const HIDE=`.demo-banner,.gd-layer,.gd-help-title,[data-guide-layer],.bk-demo-note,.as-fab,[class*="assistant-fab"],nextjs-portal,.aw-launch,.aw-fab,[class^="aw-"]{display:none!important}`;
+const HIDE=`[aria-label^="Show tips"],.demo-banner,.gd-layer,.gd-help-title,[data-guide-layer],.bk-demo-note,.as-fab,[class*="assistant-fab"],nextjs-portal,.aw-launch,.aw-fab,[class^="aw-"]{display:none!important}`;
 async function shot(p, name, {y=0, h=700}={}) {
   await p.addStyleTag({content:HIDE}); await p.waitForTimeout(600);
   const buf=await p.screenshot({clip:{x:0,y,width:390,height:h}});
