@@ -5,90 +5,80 @@
 import { useEffect, useRef, useState } from "react";
 import RegularStar from "@/components/RegularStar";
 
+// The six parts of the suite. Each: a short pitch, three points and a small
+// picture drawn in code (no images, so the page stays fast).
 const TABS = [
+  {
+    key: "booking",
+    label: "Booking",
+    title: "A booking page that looks like you.",
+    text: "Your name, your work and your prices. Clients book, pay a deposit and manage their visit from one link. No app to download.",
+    points: [
+      "Deposits paid straight to your own Stripe account.",
+      "A waitlist that fills cancellations for you.",
+      "Booking rules: notice, breaks, start times, a daily limit.",
+    ],
+    visual: "page",
+  },
   {
     key: "regulars",
     label: "Regulars first",
     title: "Your best clients never fight for a spot.",
     text: "The clients who keep your book full get first pick of your time. Everyone else books what's left.",
     points: [
-      "Mark any opening “Regulars only”; nobody else sees it.",
+      "Regulars-only times nobody else sees.",
+      "Standing appointments held months ahead.",
       "New openings go to regulars first.",
-      "Book full? Switch the whole page to regulars-only in one tap.",
     ],
     visual: "times",
   },
   {
-    key: "waitlist",
-    label: "Smart waitlist",
-    title: "Cancellations fill themselves.",
-    text: "Clients pick the days and times they want. When a time opens, the waitlist is emailed straight away, and regulars hear first.",
+    key: "money",
+    label: "Money",
+    title: "Every dollar in one place.",
+    text: "What you earned by day, week, month or year, including cash, Zelle and Cash App. Balances owed, payouts and gift cards too.",
     points: [
-      "First to claim the time gets it.",
-      "Deposits still apply to waitlist bookings.",
-      "No more texting your list one by one.",
+      "Record tips and product sales in seconds.",
+      "Friendly balance reminders, one tap.",
+      "Spreadsheet and PDF downloads for tax time.",
     ],
-    visual: "waitlist",
+    visual: "money",
   },
   {
-    key: "deposits",
-    label: "Deposits",
-    title: "Deposits up front, paid to you.",
-    text: "Set a dollar amount or a percent for each service. Clients pay before the time is theirs, straight into your own Stripe account.",
+    key: "clients",
+    label: "Clients",
+    title: "Remember everything about everyone.",
+    text: "Notes on every visit, their look and formulas, intake forms and signed waivers, all on the client's card.",
     points: [
-      "A cancellation policy clients agree to before paying.",
-      "Late cancel? Keep the deposit, or refund it in one tap.",
-      "Apple Pay and Google Pay on phones that have them.",
-    ],
-    visual: "deposit",
-  },
-  {
-    key: "wrapup",
-    label: "Wrap-ups",
-    title: "Close out the day in a minute.",
-    text: "One email at the end of the day: mark each visit kept, no-show or someone else came. Balances owed get flagged until they're paid.",
-    points: [
-      "Notes on every visit, by client or by day.",
-      "No-shows and balances show on the client's history.",
-      "Monday summary of last week's numbers.",
+      "Signed waivers saved as PDFs.",
+      "Share a photo of their look after the visit.",
+      "Close out the day in a minute with wrap-ups.",
     ],
     visual: "wrapup",
   },
   {
-    key: "assistant",
-    label: "Assistant",
-    title: "Run your book in plain words.",
-    text: "Ask “Who's booked tomorrow?” or say “Block off Friday afternoon”. The Assistant reads your schedule and makes the change after you confirm.",
+    key: "found",
+    label: "Get found",
+    title: "A profile clients can find and share.",
+    text: "Your work, reviews, prices and next open times on one page. Clients search for you by name and follow you for openings.",
     points: [
-      "Answers about bookings, openings, events and holidays.",
-      "Adds events, blocks days off, cancels a booking.",
-      "Nothing changes until you tap Confirm.",
+      "Reviews only from real visits, and you choose which show.",
+      "'Notify me' emails followers when you open times.",
+      "Made for your Instagram and TikTok bio.",
     ],
-    visual: "assistant",
+    visual: "profile",
   },
   {
-    key: "standing",
-    label: "Standing appointments",
-    title: "Their usual time, held for them.",
-    text: "Set a regular's every-4-weeks Tuesday once. Their visits are held three months ahead and keep rolling forward.",
+    key: "insights",
+    label: "Insights",
+    title: "Know what's working.",
+    text: "Rebooking, no-shows, your busiest and quietest times, top services and average ticket, compared with last month.",
     points: [
-      "Every 2 to 12 weeks, on their usual day and time.",
-      "Skip or move one date without touching the rest.",
-      "Skips your days off and closed holidays.",
+      "See who's overdue and invite them back in one tap.",
+      "Spot quiet slots to fill with an offer.",
+      "Plain numbers, no spreadsheets.",
     ],
-    visual: "standing",
-  },
-  {
-    key: "page",
-    label: "Your booking page",
-    title: "A booking page that looks like you.",
-    text: "Your name over your own cover photo, your portfolio, Instagram and location. No marketplace, no other pros on the page, no app for clients to download.",
-    points: [
-      "Clients book, move or cancel from one link.",
-      "Intake forms and waivers for new clients.",
-      "Confirmations and reminders sent for you.",
-    ],
-    visual: "page",
+    visual: "insights",
   },
 ];
 
@@ -160,6 +150,61 @@ function Visual({ kind }) {
               <em className="no">No-show</em>
             </li>
           </ul>
+        </div>
+      );
+    case "money":
+      return (
+        <div className="hm-fx-card">
+          <p className="hm-fx-label">This week · earned</p>
+          <p className="hm-fx-big">$1,840</p>
+          <div className="hm-fx-bars" aria-hidden="true">
+            {[40, 72, 55, 90, 64, 100, 20].map((h, i) => (
+              <span key={i} style={{ height: `${h}%` }} />
+            ))}
+          </div>
+          <ul className="hm-fx-list">
+            <li>
+              <span>Cash App · tip</span>
+              <em className="ok">+$20</em>
+            </li>
+            <li>
+              <span>Ana R. · balance</span>
+              <em className="owed">$15 owed</em>
+            </li>
+          </ul>
+        </div>
+      );
+    case "profile":
+      return (
+        <div className="hm-fx-card">
+          <p className="hm-fx-label">clientelesuite.com/p/royaltystudio</p>
+          <p className="hm-fx-big">
+            Royalty Studio <span className="hm-fx-stars">★ 4.9</span>
+          </p>
+          <p className="hm-fx-quote">“Best silk press I&apos;ve had. It lasted all week!”</p>
+          <p className="hm-fx-foot">Next open: Thu 10:30 AM · 128 following</p>
+          <span className="hm-fx-button">Notify me of openings</span>
+        </div>
+      );
+    case "insights":
+      return (
+        <div className="hm-fx-card">
+          <p className="hm-fx-label">This month</p>
+          <ul className="hm-fx-list">
+            <li>
+              <span>Rebooked</span>
+              <em className="ok">78%</em>
+            </li>
+            <li>
+              <span>No-shows</span>
+              <em>3%</em>
+            </li>
+            <li>
+              <span>Busiest</span>
+              <em>Sat mornings</em>
+            </li>
+          </ul>
+          <p className="hm-fx-foot">4 clients to invite back</p>
         </div>
       );
     case "assistant":

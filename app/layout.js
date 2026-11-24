@@ -4,14 +4,15 @@ import { BRAND_NAME } from "@/lib/brand";
 
 // Fonts are downloaded at build time and served with the site.
 const script = Great_Vibes({ subsets: ["latin"], weight: "400", variable: "--font-script" });
-const serif = Playfair_Display({ subsets: ["latin"], variable: "--font-serif" });
+// Not preloaded: few pages use it, and preloading it slowed the homepage.
+const serif = Playfair_Display({ subsets: ["latin"], variable: "--font-serif", preload: false });
 const sans = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 // The site's public address, so shared links and preview images use
 // www.clientelesuite.com (NEXT_PUBLIC_SITE_URL in Vercel).
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.clientelesuite.com";
 const DESCRIPTION =
-  "Deposits, waitlists and regulars-only times for businesses built on regulars.";
+  "Booking and business tools for independent pros. Your regulars come first.";
 
 export const metadata = {
   metadataBase: new URL(SITE_URL),

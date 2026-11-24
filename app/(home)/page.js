@@ -8,10 +8,12 @@ import FeatureTabs from "./FeatureTabs";
 import PricingToggle from "./PricingToggle";
 import Icon from "./Icon";
 import { AVAILABLE_TYPES, COMING_SOON_TYPES } from "@/lib/businessTypes";
+import { templateFor } from "@/lib/templates";
+import TradeSwitcher from "./TradeSwitcher";
 
-const TITLE = `${BRAND_NAME}: Booking that puts your regulars first.`;
+const TITLE = `${BRAND_NAME}: Run your whole business from one place.`;
 const DESCRIPTION =
-  "The booking app for hair stylists, barbers, tattoo artists and tutors: your own booking page, deposits, a smart waitlist and regulars-first times. 14 days free.";
+  "Booking, deposits, money, clients, reviews and insights in one app for hair stylists, barbers, tattoo artists and tutors. Your regulars come first. 14 days free, no card.";
 
 export const metadata = {
   title: TITLE,
@@ -35,11 +37,53 @@ const NO_EXTRA = [
   "Self-serve reschedule",
   "Intake forms and waivers",
   "Portfolio photos",
-  "Reports",
+  "Money tracking and exports",
+  "Insights",
+  "Public profile and reviews",
+  "Gift cards",
+  "Opening alerts for followers",
   "Calendar events and holidays",
   "Client import and export",
   "Help switching from another app",
 ];
+
+// The trade switcher's content: words and example services come from the
+// real templates; the highlights are written for each trade.
+const TRADES = [
+  {
+    key: "stylist",
+    demo: "hair",
+    title: "For hair stylists",
+    points: ["Regulars-only times for your best clients", "Deposits on long services like braids", "Aftercare tips emailed after every visit", "Share their look and color formula"],
+  },
+  {
+    key: "barber",
+    demo: "barber",
+    title: "For barbers",
+    points: ["Standing every-2-weeks cuts, held for your regulars", "Book my usual: their cut in one tap", "Cash and tips tracked in Money", "Deposits that stop no-shows"],
+  },
+  {
+    key: "tattoo",
+    demo: "tattoo",
+    title: "For tattoo artists",
+    points: ["Request first: idea, placement and reference photos", "A deposit on every session", "Consent waiver with an age check, signed on their phone", "Healing aftercare emailed after each session"],
+  },
+  {
+    key: "tutor",
+    demo: "tutor",
+    title: "For tutors",
+    points: ["Students and sessions, not clients and appointments", "Weekly standing sessions", "An intake form for goals and grade level", "Reminders so nobody forgets a session"],
+  },
+].map((t) => {
+  const tpl = templateFor(t.key === "stylist" ? "hair" : t.key);
+  return {
+    ...t,
+    label: tpl.label,
+    blurb: tpl.blurb,
+    words: { services: tpl.words.services || "services", clients: tpl.words.clients || "clients", appointment: tpl.words.appointment || "appointment" },
+    services: (tpl.presets.services || []).slice(0, 4).map((x) => ({ name: x.name, price: x.price_cents ? price(x.price_cents) : "Free" })),
+  };
+});
 
 const NEVER = ["Booking fees charged to your clients", "A cut of new clients", "A marketplace listing next to other pros"];
 
@@ -76,8 +120,8 @@ export default async function HomePage() {
           <a href="#features" className="hm-hide-phone">
             Features
           </a>
-          <a href="#switching" className="hm-hide-phone">
-            Switching
+          <a href="#trades" className="hm-hide-phone">
+            Your trade
           </a>
           <a href="#pricing" className="hm-hide-phone">
             Pricing
@@ -110,19 +154,20 @@ export default async function HomePage() {
         {/* ---------- Hero ---------- */}
         <section className="hm-hero">
           <div className="hm-hero-copy">
-            <p className="hm-kicker">Booking for pros with a full book</p>
+            <p className="hm-kicker">Booking and business tools for independent pros</p>
             <h1>
-              Booking that puts your <em>regulars</em> first.
+              Run your whole business from one place. <em>Your regulars come first.</em>
             </h1>
             <p className="hm-lede">
-              Deposits, waitlists and regulars-only times for businesses built on regulars.
+              Bookings, deposits, money, clients, reviews and insights in one app, for hair stylists, barbers,
+              tattoo artists and tutors.
             </p>
             <div className="hm-cta-row">
               <Link href="/signup" className="hm-button">
                 Start free trial
               </Link>
-              <a href="#features" className="hm-button hm-button-ghost">
-                See how it works
+              <a href="/demo" className="hm-button hm-button-ghost">
+                Try the live demo
               </a>
             </div>
             <p className="hm-fine">{TRIAL_DAYS} days free. No card needed.</p>
@@ -150,14 +195,22 @@ export default async function HomePage() {
 
         {/* ---------- Features (one tab at a time) ---------- */}
         <section id="features" className="hm-section">
-          <p className="hm-kicker">What you get</p>
+          <p className="hm-kicker">One app, six jobs</p>
           <h2>
-            Built for a book full of <em>regulars.</em>
+            Everything behind the chair, <em>handled.</em>
           </h2>
-          <p className="hm-section-lede">
-            Everything a busy pro needs in one plan: tap through what makes Clientele different.
-          </p>
+          <p className="hm-section-lede">Booking, regulars, money, clients, getting found and insights. One plan, no add-on fees.</p>
           <FeatureTabs />
+        </section>
+
+        {/* ---------- Made for your trade ---------- */}
+        <section id="trades" className="hm-section">
+          <p className="hm-kicker">Made for your trade</p>
+          <h2>Your words, your services, your way of working.</h2>
+          <p className="hm-section-lede">
+            Pick your trade when you sign up and Clientele sets itself up for it. Switch any time without losing anything.
+          </p>
+          <TradeSwitcher trades={TRADES} />
         </section>
 
         {/* ---------- Switching ---------- */}
@@ -224,23 +277,27 @@ export default async function HomePage() {
         {/* ---------- Final call ---------- */}
         <section className="hm-final">
           <h2>
-            Give your regulars <em>first pick.</em>
+            Your whole business, <em>one place.</em>
           </h2>
           <p>Set up in minutes. {TRIAL_DAYS} days free, no card.</p>
           <div className="hm-cta-row hm-cta-center">
             <Link href="/signup" className="hm-button">
               Start free trial
             </Link>
-            <Link href="/switch" className="hm-button hm-button-ghost">
-              Switching? Start here
-            </Link>
+            <a href="/demo" className="hm-button hm-button-ghost">
+              Try the live demo
+            </a>
           </div>
+          <p className="hm-fine">
+            Switching from another app? <Link href="/switch">Here&apos;s how</Link>.
+          </p>
         </section>
       </main>
 
       <footer className="hm-footer">
         <span className="hm-logo hm-logo-small">{BRAND_NAME}</span>
         <nav aria-label="Footer">
+          <Link href="/find">Find your pro</Link>
           <Link href="/switch">Switch to {BRAND_NAME}</Link>
           <Link href={account.href}>{account.label}</Link>
           <Link href="/terms">Terms</Link>
