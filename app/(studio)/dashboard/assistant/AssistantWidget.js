@@ -112,6 +112,13 @@ export default function AssistantWidget({ firstName = "", locked = false, price 
     if (open) endRef.current?.scrollIntoView({ block: "end" });
   }, [open, messages, pending, busy, notice, error]);
 
+  // "Ask the assistant" in the "+" menu or quick actions opens the panel.
+  useEffect(() => {
+    const show = () => setOpen(true);
+    window.addEventListener("clientele:assistant", show);
+    return () => window.removeEventListener("clientele:assistant", show);
+  }, []);
+
   useEffect(() => {
     if (!open) return;
     inputRef.current?.focus();

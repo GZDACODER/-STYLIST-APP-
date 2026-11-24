@@ -551,10 +551,18 @@
     cursor: pointer;
   }
 
-  /* The Assistant's button moves left so it doesn't sit on the "+". */
+  /* The Assistant opens from "Ask the assistant" in the "+" menu, so its
+     floating button stays hidden on phones (the panel has its own Close).
+     It shows only while the Assistant is waiting for you to confirm a
+     change, at the left so it doesn't sit on the "+". */
   .db .aw-launcher {
     right: auto;
     left: 16px;
+  }
+
+  .db .aw-launcher:not(.waiting),
+  .db .aw-launcher.open {
+    display: none;
   }
 
   .db .db-page {

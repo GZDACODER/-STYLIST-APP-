@@ -139,7 +139,7 @@ export default async function DashboardLayout({ children }) {
     <GuideProvider mode="pro" scope={user.id} initialSeen={isDemo(user) ? null : guidesSeen}>
     <div className={`db ${display.variable}`}>
       {/* The frame: grouped nav, drawer, phone tab bar, quick actions. */}
-      <AppShell businessName={stylist.business_name} slug={stylist.slug} email={user.email} logout={logout} />
+      <AppShell businessName={stylist.business_name} slug={stylist.slug} email={user.email} logout={logout} assistant={assistantOn} />
 
       <main className="db-main">
         <div className="db-page">
