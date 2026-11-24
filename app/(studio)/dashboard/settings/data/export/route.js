@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 
 const cell = (v) => {
   const s = String(v ?? "");
-  const safe = /^[=+\-@]/.test(s) ? `'${s}` : s;
+  const safe = /^(=|@|[+-](?![0-9 ().]+$))/.test(s) ? `'${s}` : s;
   return /[",\n]/.test(safe) ? `"${safe.replace(/"/g, '""')}"` : safe;
 };
 const dollars = (c) => (c == null ? "" : (c / 100).toFixed(2));

@@ -9,7 +9,7 @@ import { formatPrice } from "@/lib/money";
 const csvCell = (v) => {
   const s = String(v ?? "");
   // Leading = + - @ would run as a formula in a spreadsheet.
-  const safe = /^[=+\-@]/.test(s) ? `'${s}` : s;
+  const safe = /^(=|@|[+-](?![0-9 ().]+$))/.test(s) ? `'${s}` : s;
   return /[",\n]/.test(safe) ? `"${safe.replace(/"/g, '""')}"` : safe;
 };
 const dollars = (c) => (c / 100).toFixed(2);
