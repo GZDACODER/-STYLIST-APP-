@@ -2147,38 +2147,20 @@ body:has(.hm) {
   letter-spacing: 0.16em;
 }
 
-/* ---------- Clients: find your pro (links to /find) ---------- */
-.hm-find {
-  max-width: var(--max);
-  margin: 0 auto;
-  padding: 0 var(--gutter) 48px;
+/* "Find your pro" in the top bar (search: /find). */
+.hm-nav-links > a.hm-find-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text);
 }
 
-.hm-find form {
-  max-width: 560px;
-}
+@media (max-width: 420px) {
+  .hm-find-link span {
+    display: none;
+  }
 
-.hm-find label {
-  display: block;
-  margin-bottom: 10px;
-  font-size: 0.95rem;
-  opacity: 0.8;
-}
-
-.hm-find-row {
-  display: flex;
-  gap: 8px;
-}
-
-.hm-find input {
-  flex: 1 1 auto;
-  min-width: 0;
-  min-height: 48px;
-  padding: 0 18px;
-  border-radius: 999px;
-  border: 1px solid currentColor;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  font-size: 16px;
+  .hm-find-link {
+    padding: 8px 2px;
+  }
 }
