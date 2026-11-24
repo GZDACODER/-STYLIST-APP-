@@ -968,3 +968,239 @@
     transform: none;
   }
 }
+
+/* =========================================================
+   Layout system: 1200px content, a 12-column grid, stat rows,
+   empty states, folded sections, ghost buttons, header actions.
+   ========================================================= */
+.db .db-page {
+  max-width: 1200px;
+}
+
+.db .db-pagehead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px 24px;
+}
+
+.db .db-pagehead-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.db .button.ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--ink, #0e0d0b);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.db .button.ghost:hover:not(:disabled) {
+  background: rgba(14, 13, 11, 0.05);
+  box-shadow: none;
+}
+
+.g12 {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 20px;
+  align-items: start;
+}
+
+.g12 > * {
+  grid-column: span 12;
+  margin-bottom: 0 !important;
+}
+
+@media (min-width: 900px) {
+  .g12 > .span-8 {
+    grid-column: span 8;
+  }
+
+  .g12 > .span-4 {
+    grid-column: span 4;
+  }
+
+  .g12 > .span-6 {
+    grid-column: span 6;
+  }
+}
+
+.db .g12 {
+  margin-bottom: 20px;
+}
+
+/* Stat tiles: a row; scrolls sideways on phones. */
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.db .stat-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 18px;
+  border: 1px solid var(--glass-line);
+  border-radius: 12px;
+  background: var(--glass);
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
+  box-shadow: var(--glass-shadow);
+  color: var(--ink, #0e0d0b);
+  text-decoration: none;
+}
+
+.stat-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted, #6b655b);
+}
+
+.stat-value {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.9rem;
+  font-weight: 500;
+  line-height: 1.1;
+}
+
+.stat-note {
+  font-size: 0.8rem;
+  color: var(--muted, #6b655b);
+}
+
+@media (max-width: 767px) {
+  .stat-row {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    margin: 0 -20px 20px;
+    padding: 2px 20px 6px;
+    scrollbar-width: none;
+  }
+
+  .stat-row::-webkit-scrollbar {
+    display: none;
+  }
+
+  .db .stat-tile {
+    flex: 0 0 62%;
+    scroll-snap-align: start;
+  }
+}
+
+/* Empty state: a small icon, one line, one action. */
+.empty-mini {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 0;
+}
+
+.empty-mini p {
+  margin: 0;
+  color: var(--muted, #6b655b);
+}
+
+.empty-mini-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(168, 135, 77, 0.12);
+  color: var(--gold, #a8874d);
+}
+
+/* Folded sections (accordions). */
+.db details.fold {
+  padding: 0;
+}
+
+.db details.fold > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 52px;
+  padding: 0 22px;
+  list-style: none;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.db details.fold > summary::-webkit-details-marker {
+  display: none;
+}
+
+.db details.fold > summary::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform 0.15s;
+}
+
+.db details.fold[open] > summary::after {
+  transform: rotate(-135deg);
+}
+
+.db details.fold > :not(summary) {
+  padding: 0 22px 18px;
+}
+
+.fold-links {
+  list-style: none;
+  margin: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.fold-links a,
+.fold-links .link-button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+}
+
+/* Tabs that don't fit scroll sideways. */
+.db .cr-tabs {
+  overflow-x: auto;
+  flex-wrap: nowrap;
+  scrollbar-width: none;
+}
+
+.db .cr-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.db .cr-tab {
+  flex: none;
+  white-space: nowrap;
+}
+
+/* Tap targets on phones. */
+@media (max-width: 767px) {
+  .db .button,
+  .db .button.small {
+    min-height: 44px;
+  }
+
+  .db .db-pagehead-actions {
+    margin-left: 0;
+    justify-content: flex-start;
+  }
+}
