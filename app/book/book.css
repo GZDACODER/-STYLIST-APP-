@@ -2097,3 +2097,35 @@ body:has(dialog.pf-viewer[open]) {
 .bk .photos-pick-add.busy {
   opacity: 0.6;
 }
+
+/* "Can I share your look?" (/v/<code>/look) */
+.bk .lk-photo {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  margin: 14px 0;
+  border: 1px solid var(--hair);
+}
+
+.bk .lk-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.bk .lk-actions .button {
+  flex: 1 1 200px;
+}
+
+.bk .cl-look-share {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--hair);
+}
+
+.bk .cl-look-share .row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

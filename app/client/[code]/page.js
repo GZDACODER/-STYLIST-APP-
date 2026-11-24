@@ -29,9 +29,16 @@ export default async function ClientHomePage({ params }) {
 
   // The style photo: a short-lived link, made only after the check above.
   let lookPhoto = null;
+  let lookConsent = null;
   if (home.look?.photo_path) {
-    const { data } = await createAdminClient().storage.from("client-looks").createSignedUrl(home.look.photo_path, 60 * 60);
+    const admin = createAdminClient();
+    const [{ data }, { data: c }] = await Promise.all([
+      admin.storage.from("client-looks").createSignedUrl(home.look.photo_path, 60 * 60),
+      // Their answer about the pro's public profile (step 61 SQL).
+      admin.from("bookings").select("look_consent, look_consent_asked_at").eq("id", home.look.booking_id).maybeSingle(),
+    ]);
     lookPhoto = data?.signedUrl || null;
+    lookConsent = c ? { answer: c.look_consent, asked: Boolean(c.look_consent_asked_at) } : null;
   }
 
   // "Add to Google Calendar" links, worked out here in the pro's time zone.
@@ -59,6 +66,7 @@ export default async function ClientHomePage({ params }) {
       today={todayInTimeZone(home.timezone)}
       zoneNote={`Times are in ${timeZoneLabel(home.timezone)} time.`}
       lookPhoto={lookPhoto}
+      lookConsent={lookConsent}
     />
   );
 }

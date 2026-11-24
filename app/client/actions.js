@@ -242,3 +242,14 @@ export async function feedbackByToken(token, rating, comment) {
   if (error && /not_completed/.test(error.message)) return { error: "You can leave a review once your visit has happened." };
   return error ? { error: "That didn't save. Please try again." } : { ok: true };
 }
+
+// "My look" on the pro's public profile: the client's yes or no (step 61 SQL).
+export async function lookConsent(codeText, bookingId, yes) {
+  const booking = await createBookingClient();
+  const { error } = await booking.rpc("client_look_consent", {
+    p_code: cleanCode(codeText),
+    p_booking_id: String(bookingId),
+    p_yes: Boolean(yes),
+  });
+  return error ? { error: "That didn't save. Please try again." } : { ok: true, consent: yes ? "yes" : "no" };
+}
