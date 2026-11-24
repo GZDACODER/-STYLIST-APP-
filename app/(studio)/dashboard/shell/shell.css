@@ -1511,10 +1511,7 @@
   border-bottom-color: var(--gold);
 }
 
-/* Insights cards: two up. */
-.db .in-cards > .card {
-  margin-top: 0;
-}
+
 
 /* ---------- Settings: grouped list, Save bar ---------- */
 .db .settings-nav-group-title {
@@ -1583,10 +1580,6 @@
   }
 }
 
-.db .in-cards {
-  align-items: start;
-}
-
 /* Settings list rows: label and note on the left, chevron on the right
    (the old numbered layout put them in a second column). */
 .db .settings-nav-link .settings-nav-label,
@@ -1603,4 +1596,85 @@
 
 .db .settings-nav-link {
   padding-left: 12px;
+}
+
+/* ---------- Layout: no holes between cards ----------
+   Two independent stacking columns: each card sits right under the one
+   above it, whatever the heights. One column below 900px. */
+.stack-cols {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.stack-col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+.db .stack-col > .card {
+  margin: 0;
+}
+
+@media (min-width: 900px) {
+  .stack-cols {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+  .stack-col {
+    flex: 1 1 0;
+  }
+  /* A column left empty (e.g. no data for its cards) gives its room back. */
+  .stack-col:empty {
+    display: none;
+  }
+}
+
+.db .mn-breakdown.stack-cols,
+.db .mn-breakdown .stack-col {
+  gap: 8px 28px;
+  margin-bottom: 0;
+}
+
+.db .mn-breakdown {
+  margin-top: 16px;
+}
+
+/* Side-by-side pairs in one row (Home: Up next / Needs attention) share a
+   height, so there's no hole under the shorter one. */
+.g12.g12-even {
+  align-items: stretch;
+}
+
+/* Today: the appointments card reaches the bottom of the side panel; the
+   side panel stays sticky when the list is the longer one. */
+.db .db-today.g12 > .span-8 {
+  align-self: stretch;
+}
+
+/* Needs attention is a narrow column on wide screens: the action goes
+   under the text instead of squeezing it. */
+@media (min-width: 900px) {
+  .db .span-4 .home-attention {
+    grid-template-columns: 8px minmax(0, 1fr) 10px;
+    grid-template-areas:
+      "dot main chev"
+      ". action chev";
+    row-gap: 2px;
+  }
+  .db .span-4 .home-attention .home-attention-action {
+    justify-self: start;
+  }
+}
+
+/* Stat tiles share one row from tablet up (no tile left alone on a row). */
+@media (min-width: 768px) {
+  .stat-row {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+  }
 }

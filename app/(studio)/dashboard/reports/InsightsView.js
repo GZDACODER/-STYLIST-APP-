@@ -22,7 +22,7 @@ function Stat({ label, value, note }) {
 
 export function ComeBack({ x, compare }) {
   return (
-  <section className="card span-6">
+  <section className="card">
     <h2>How your clients come back</h2>
     <div className="in-stats">
       <Stat label="Rebooked" value={pct(x.rebookRate)} note={x.rebookable ? `${x.rebooked} of ${x.rebookable} visits booked again` : "No visits yet"} />
@@ -39,7 +39,7 @@ export function ComeBack({ x, compare }) {
 export function Heatmap({ x }) {
   const max = Math.max(1, ...x.grid.flat());
   return (
-  <section className="card span-6">
+  <section className="card">
     <h2>Busiest and slowest times</h2>
     <p className="muted small-text">
       The last 12 weeks and the next 4.
@@ -79,7 +79,7 @@ export function Heatmap({ x }) {
 export function TopServices({ x }) {
   const topMax = Math.max(1, ...x.topServices.map((s) => s.cents));
   return (
-  <section className="card span-6">
+  <section className="card">
     <h2>
       <Words>Top services</Words>
     </h2>
@@ -106,7 +106,7 @@ export function TopServices({ x }) {
 
 export function InviteBackList({ x, invitedRecently, emailOf }) {
   return (
-  <section className="card span-6">
+  <section className="card">
     <h2>
       <Words>Clients to invite back</Words>
     </h2>

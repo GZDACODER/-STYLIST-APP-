@@ -113,13 +113,17 @@ export default function ReportsView({ tab = "revenue", insight = null, period, r
       </nav>
 
       {tab === "revenue" && (
-        <div className="g12 in-cards">
-      <section className="card span-6">
+        <div className="stack-cols in-cards">
+          <div className="stack-col">
+      <section className="card">
         <h2>Revenue by {range.buckets === "month" ? "month" : "week"}</h2>
         <p className="muted small-text">Split by who the client is: Regulars, or New (everyone else).</p>
         <RevenueChart series={series} from={range.from} kind={range.buckets} />
       </section>
-      <section className="card span-6">
+          {insight && <TopServices x={insight.x} />}
+          </div>
+          <div className="stack-col">
+      <section className="card">
         <h2>Regulars vs new clients</h2>
         <p className="muted small-text">
           {regShare == null
@@ -159,8 +163,7 @@ export default function ReportsView({ tab = "revenue", insight = null, period, r
         </div>
         <p className="muted small-text">Regulars are the clients who are Regulars now.</p>
       </section>
-          {insight && <TopServices x={insight.x} />}
-      <section className="card span-6">
+      <section className="card">
         <h2>Deposits</h2>
         <div className="table-wrap">
           <table className="rp-table">
@@ -177,13 +180,18 @@ export default function ReportsView({ tab = "revenue", insight = null, period, r
         </div>
         <p className="muted small-text">Counted on the day each deposit was paid. Stripe&apos;s own fees aren&apos;t included.</p>
       </section>
+          </div>
         </div>
       )}
 
       {tab === "clients" && (
-        <div className="g12 in-cards">
+        <div className="stack-cols in-cards">
+          <div className="stack-col">
           {insight && <ComeBack x={insight.x} compare={range.compare} />}
-      <section className="card span-6">
+          {insight && <InviteBackList x={insight.x} invitedRecently={insight.invitedRecently} emailOf={insight.emailOf} />}
+          </div>
+          <div className="stack-col">
+      <section className="card">
         <h2>Top regulars</h2>
         {topRegulars.length === 0 ? (
           <p className="muted">No visits from Regulars in this period yet.</p>
@@ -200,9 +208,8 @@ export default function ReportsView({ tab = "revenue", insight = null, period, r
           </ol>
         )}
       </section>
-          {insight && <InviteBackList x={insight.x} invitedRecently={insight.invitedRecently} emailOf={insight.emailOf} />}
       {feedback && (
-        <section className="card span-6">
+        <section className="card">
           <h2>Client feedback</h2>
           {feedback.count === 0 ? (
             <p className="muted">
@@ -229,12 +236,14 @@ export default function ReportsView({ tab = "revenue", insight = null, period, r
           )}
         </section>
       )}
+          </div>
         </div>
       )}
 
       {tab === "schedule" && (
-        <div className="g12 in-cards">
-      <section className="card span-6">
+        <div className="stack-cols in-cards">
+          <div className="stack-col">
+      <section className="card">
         <h2>Bookings</h2>
         <div className="table-wrap">
           <table className="rp-table">
@@ -263,7 +272,10 @@ export default function ReportsView({ tab = "revenue", insight = null, period, r
           <p className="muted small-text">Visits not marked yet count as having gone ahead.</p>
         )}
       </section>
+          </div>
+          <div className="stack-col">
           {insight && <Heatmap x={insight.x} />}
+          </div>
         </div>
       )}
     </>
