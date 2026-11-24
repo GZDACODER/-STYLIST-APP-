@@ -14,16 +14,14 @@ import PageHeader from "@/components/dash/PageHeader";
 import CopyLinkButton from "@/components/dash/CopyLinkButton";
 import { RowChevron } from "@/components/dash/RowList";
 import RegularStar from "@/components/RegularStar";
-import ShareLinkButton from "./ShareLinkButton";
+import ShareCta from "./shell/ShareCta";
 import FeedbackPrompt from "./FeedbackPrompt";
 import { isAdmin } from "@/lib/admin";
 import { EXAMPLE_HOME_STATS, exampleData, examplesOn } from "@/lib/examples";
 import { ExampleTag } from "@/components/dash/Example";
-import ProCode from "@/components/dash/ProCode";
 import { lateText, recentLateNotices } from "@/lib/lateNotices";
 import { isDemo } from "@/lib/demo";
 import { getMyTemplate } from "@/lib/templates/server";
-import Words from "@/components/Words";
 
 export const metadata = { title: `Home · ${BRAND_NAME}` };
 
@@ -272,28 +270,27 @@ export default async function HomePage() {
   const name = String(nameRow?.first_name || "").trim();
   const dateLine = parseDateString(today).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
 
+  // Order of operations: set up first, then what's next and what needs you,
+  // then the numbers. Secondary links and admin tools are folded away.
+  const proCode = codeRow?.pro_code;
   return (
     <>
-      <PageHeader guide="home" hero
+      <PageHeader
+        guide="home"
         eyebrow={dateLine}
         title={name ? `${greeting(tz)}, ${name}` : greeting(tz)}
         subtitle={stylist.business_name}
         actions={
           <>
-            {isAdmin(user) && (
-              <Link href="/dashboard/admin/control" className="button small secondary">
-                Control Room
-              </Link>
-            )}
-            <CopyLinkButton link={bookingLink} />
-            <a href={bookingLink} target="_blank" rel="noreferrer" className="button small">
+            {proCode && <CopyLinkButton link={proCode} label={`Pro ID ${proCode}`} className="button small ghost" />}
+            <a href={bookingLink} target="_blank" rel="noreferrer" className="button small secondary">
               View booking page
             </a>
+            <ShareCta url={bookingLink} businessName={stylist.business_name} />
           </>
         }
       />
 
-      <ProCode code={codeRow?.pro_code} compact />
       {askFeedback && <FeedbackPrompt daysLeft={plan.daysLeft} />}
 
       {setupLeft > 0 && !isDemo(user) && (
@@ -314,19 +311,8 @@ export default async function HomePage() {
         </section>
       )}
 
-      <section className="home-cards" aria-label="At a glance">
-        {cards.map((c) => (
-          <Link key={c.label} href={c.href} className="home-card">
-            <span className="db-label">{c.label}</span>
-            <strong className="home-card-value">{c.value}</strong>
-            {c.note && <span className="muted small-text">{c.note}</span>}
-            {c.example && <ExampleTag />}
-          </Link>
-        ))}
-      </section>
-
-      <div className="home-grid">
-        <section className="card">
+      <div className="g12">
+        <section className="card span-8">
           <div className="home-section-head">
             <h2>Up next</h2>
             <Link href="/dashboard/today" className="small-text">
@@ -334,9 +320,17 @@ export default async function HomePage() {
             </Link>
           </div>
           {upNext.length === 0 ? (
-            <div className="db-empty">
-              <p className="db-empty-title">Nothing booked yet</p>
-              <p className="muted small-text">Open some times and share your booking link.</p>
+            <div className="empty-mini">
+              <span className="empty-mini-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                  <rect x="3.5" y="5" width="17" height="15" rx="1.5" />
+                  <path d="M3.5 9.5h17M8 3v4M16 3v4" />
+                </svg>
+              </span>
+              <p>Nothing booked yet.</p>
+              <Link href="/dashboard/openings#add-opening" className="button small">
+                Add opening
+              </Link>
             </div>
           ) : (
             <ul className="client-rows">
@@ -363,10 +357,17 @@ export default async function HomePage() {
           )}
         </section>
 
-        <section className="card">
+        <section className="card span-4">
           <h2>Needs attention</h2>
           {attention.length === 0 ? (
-            <p className="muted">All clear. Nothing needs you right now.</p>
+            <div className="empty-mini">
+              <span className="empty-mini-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                  <path d="m5 12.5 4.5 4.5L19 7.5" />
+                </svg>
+              </span>
+              <p>All clear.</p>
+            </div>
           ) : (
             <ul className="client-rows">
               {attention.map((a) => (
@@ -377,7 +378,6 @@ export default async function HomePage() {
                       <span className="client-row-text">{a.text}</span>
                     </span>
                     <span className="home-attention-action">{a.action}</span>
-                    <RowChevron />
                   </Link>
                 </li>
               ))}
@@ -386,49 +386,67 @@ export default async function HomePage() {
         </section>
       </div>
 
-      <section className="card">
-        <h2>Quick actions</h2>
-        <div className="home-actions">
-          <Link href="/dashboard/openings#add-opening" className="button secondary small">
-            + Add opening
+      <section className="stat-row" aria-label="At a glance">
+        {cards.map((c) => (
+          <Link key={c.label} href={c.href} className="stat-tile">
+            <span className="stat-label">{c.label}</span>
+            <strong className="stat-value">{c.value}</strong>
+            {c.note && <span className="stat-note">{c.note}</span>}
+            {c.example && <ExampleTag />}
           </Link>
-          <Link href="/dashboard/bookings?add=event" className="button secondary small">
-            + Add event
-          </Link>
-          <Link href="/dashboard/clients?add=client#add-client" className="button secondary small">
-            <Words>+ Add client</Words>
-          </Link>
-          <ShareLinkButton link={bookingLink} businessName={stylist.business_name} />
-          <Link href="/dashboard/share" className="button secondary small">
-            Share kit (QR, story)
-          </Link>
-        </div>
-        <p className="muted small-text home-more-links">
-          <Link href="/dashboard/today">Today</Link> · <Link href="/dashboard/money">Money</Link> · <Link href="/dashboard/reports">Insights</Link> ·{" "}
+        ))}
+      </section>
+
+      <details className="card fold">
+        <summary>More</summary>
+        <ul className="fold-links">
+          <li>
+            <Link href="/dashboard/wrapup">Wrap up visits</Link>
+          </li>
+          <li>
+            <Link href="/dashboard/share">Share kit (QR code and story)</Link>
+          </li>
           {tpl.modules.projects && (
-            <>
-              <Link href="/dashboard/projects">Projects</Link> ·{" "}
-            </>
+            <li>
+              <Link href="/dashboard/projects">Projects</Link>
+            </li>
           )}
           {tpl.modules.packages && (
-            <>
-              <Link href="/dashboard/packages">Packages</Link> ·{" "}
-            </>
+            <li>
+              <Link href="/dashboard/packages">Packages</Link>
+            </li>
           )}
-          <Link href="/dashboard/wrapup">Wrap up visits</Link> · <Link href="/dashboard/activity">Activity</Link> ·{" "}
-          <Link href="/dashboard/feedback">Share feedback</Link>
-          {isAdmin(user) && (
-            <>
-              {" "}
-              · <Link href="/dashboard/admin/control">Control Room (admin)</Link> ·{" "}
-              <CopyLinkButton link="https://www.clientelesuite.com/demo" label="Copy demo link" className="link-button small-text" /> ·{" "}
-              <Link href="/dashboard/admin/feedback">Trial feedback (admin)</Link> ·{" "}
-              <Link href="/dashboard/admin/disputes">Disputes (admin)</Link> ·{" "}
-              <Link href="/dashboard/admin/errors">Errors (admin)</Link>
-            </>
-          )}
-        </p>
-      </section>
+          <li>
+            <Link href="/dashboard/activity">Activity</Link>
+          </li>
+          <li>
+            <Link href="/dashboard/feedback">Share feedback</Link>
+          </li>
+        </ul>
+      </details>
+
+      {isAdmin(user) && (
+        <details className="card fold">
+          <summary>Admin</summary>
+          <ul className="fold-links">
+            <li>
+              <Link href="/dashboard/admin/control">Control Room</Link>
+            </li>
+            <li>
+              <CopyLinkButton link="https://www.clientelesuite.com/demo" label="Copy demo link" className="link-button" />
+            </li>
+            <li>
+              <Link href="/dashboard/admin/feedback">Trial feedback</Link>
+            </li>
+            <li>
+              <Link href="/dashboard/admin/disputes">Disputes</Link>
+            </li>
+            <li>
+              <Link href="/dashboard/admin/errors">Errors</Link>
+            </li>
+          </ul>
+        </details>
+      )}
     </>
   );
 }
