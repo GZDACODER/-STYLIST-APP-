@@ -8,6 +8,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { cleanHandle, DEFAULT_SHOW, handleProblem } from "@/lib/profileShared";
 import { publicSiteUrl } from "@/lib/siteUrl";
 import ProfileForm from "../ProfileForm";
+import { sample } from "@/lib/examples";
 import ClientLooks from "../ClientLooks";
 import { getMyTemplate } from "@/lib/templates/server";
 
@@ -56,6 +57,7 @@ export default async function Page() {
         </p>
         <ProfileForm
           site={publicSiteUrl("https://www.clientelesuite.com")}
+          hints={sample(await getMyTemplate())}
           initial={{
             handle: s.handle || (await suggestHandle(s.business_name, user.id)),
             savedHandle: s.handle || null,

@@ -11,8 +11,9 @@ import { PERIODS, addDays, daysBetween, owedTotals, periodRange, revenueSeries, 
 import ReportsView from "./ReportsView";
 import InsightsView from "./InsightsView";
 import { insights } from "@/lib/insights";
+import { getMyTemplate } from "@/lib/templates/server";
 import { owedOn } from "@/lib/moneyTab";
-import { exampleReportData, examplesOn } from "@/lib/examples";
+import { exampleReportData, examplesOn, sample } from "@/lib/examples";
 
 export const metadata = { title: `Insights · ${BRAND_NAME}` };
 
@@ -134,11 +135,15 @@ export default async function ReportsPage({ searchParams }) {
   // Client feedback this period (step 46 SQL): the average and recent ones.
   let feedbackRows = [];
   if (example) {
-    feedbackRows = [
-      { rating: 5, comment: "Best silk press I've had. It lasted all week!", created_at: `${range.from}T15:00:00Z`, booking: { client_name: "Leah Kim", service_name: "Silk Press" } },
-      { rating: 5, comment: "", created_at: `${range.from}T15:00:00Z`, booking: { client_name: "Maya Jones", service_name: "Silk Press" } },
-      { rating: 4, comment: "Loved it, ran a little behind.", created_at: `${range.from}T15:00:00Z`, booking: { client_name: "Ana Ruiz", service_name: "Trim & Style" } },
-    ];
+    // Sample reviews that match the pro's trade (lib/templates samples).
+    const tpl = await getMyTemplate();
+    const svc = (tpl.presets.services || []).map((x) => x.name);
+    feedbackRows = sample(tpl).reviews.slice(0, 3).map((r, i) => ({
+      rating: r.rating,
+      comment: i === 1 ? "" : r.comment,
+      created_at: `${range.from}T15:00:00Z`,
+      booking: { client_name: r.name, service_name: svc[i % Math.max(1, svc.length)] || "Appointment" },
+    }));
   } else {
     const { data: fb, error: fbError } = await supabase
       .from("visit_feedback")

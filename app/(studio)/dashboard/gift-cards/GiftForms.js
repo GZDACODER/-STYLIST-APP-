@@ -18,7 +18,7 @@ export function GiftSwitch({ on, ready }) {
   );
 }
 
-export function RedeemForm() {
+export function RedeemForm({ notePlaceholder }) {
   const [state, action] = useActionState(redeemGift, null);
   const form = useRef(null);
   useEffect(() => {
@@ -38,7 +38,7 @@ export function RedeemForm() {
       </div>
       <label>
         Note (optional)
-        <input name="note" maxLength={200} placeholder="e.g. Silk press, Dec 4" />
+        <input name="note" maxLength={200} placeholder={notePlaceholder} />
       </label>
       <SubmitButton pendingText="Redeeming...">Redeem</SubmitButton>
       <FormMessage state={state} />
