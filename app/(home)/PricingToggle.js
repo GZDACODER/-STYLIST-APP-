@@ -16,54 +16,54 @@ export default function PricingToggle({ allin, team, assistant, trialDays, inclu
   const pick = (plan) => money(yearly ? plan.yearlyCents : plan.monthlyCents);
 
   return (
-    <div className="hm-pricing">
-      <div className="hm-toggle" role="group" aria-label="Billing">
+    <div className="ln-pricing">
+      <div className="ln-toggle" role="group" aria-label="Billing">
         <button type="button" className={!yearly ? "active" : ""} aria-pressed={!yearly} onClick={() => setYearly(false)}>
           Monthly
         </button>
         <button type="button" className={yearly ? "active" : ""} aria-pressed={yearly} onClick={() => setYearly(true)}>
-          Yearly <span className="hm-toggle-save">2 months free</span>
+          Yearly <span className="ln-toggle-save">2 months free</span>
         </button>
       </div>
 
-      <div className="hm-price-grid">
-        <div className="hm-price-card is-main">
-          <span className="hm-tier-badge">All-in</span>
-          <p className="hm-price">
+      <div className="ln-price-grid">
+        <div className="ln-card ln-price-card is-main">
+          <span className="ln-eyebrow">All-in</span>
+          <p className="ln-price">
             {pick(allin)}
             <span>{per}</span>
           </p>
-          <p className="hm-plan-alt">Every feature, for one pro.{yearly ? " Billed once a year." : ""}</p>
-          <details className="hm-included">
+          <p className="ln-muted">Every feature, for one pro.{yearly ? " Billed once a year." : ""}</p>
+          <details className="ln-included">
             <summary>Everything included</summary>
-            <ul className="hm-plan-list">
+            <ul className="ln-checks">
               {included.map((item) => (
                 <li key={item}>{item}</li>
               ))}
             </ul>
           </details>
-          <Link href="/signup" className="hm-button">
-            Start {trialDays}-day free trial
+          <Link href="/signup" className="ln-btn ln-btn-gold">
+            Start your {trialDays}-day free trial
           </Link>
         </div>
 
-        <div className="hm-price-card">
-          <span className="hm-tier-badge is-quiet">Team members</span>
-          <p className="hm-price is-small">
+        <div className="ln-card ln-price-card">
+          <span className="ln-eyebrow">Team members</span>
+          <p className="ln-price is-small">
             {pick(team)}
             <span>{per} each</span>
           </p>
-          <p className="hm-plan-alt">Half the price of the plan. Add or remove any time.</p>
+          <p className="ln-muted">Half the price of the plan. Add or remove any time.</p>
         </div>
 
         {assistantOn && (
-          <div className="hm-price-card">
-            <span className="hm-tier-badge is-quiet">Optional · Assistant</span>
-            <p className="hm-price is-small">
+          <div className="ln-card ln-price-card">
+            <span className="ln-eyebrow">Optional · Assistant</span>
+            <p className="ln-price is-small">
               {pick(assistant)}
               <span>{per}</span>
             </p>
-            <p className="hm-plan-alt">Ask about your schedule and make changes in your own words. Included in the free trial.</p>
+            <p className="ln-muted">Ask about your schedule and make changes in your own words. Included in the free trial.</p>
           </div>
         )}
       </div>

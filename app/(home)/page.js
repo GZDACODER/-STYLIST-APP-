@@ -6,6 +6,9 @@ import { formatPrice } from "@/lib/money";
 import FeatureTabs from "./FeatureTabs";
 import PricingToggle from "./PricingToggle";
 import Icon from "./Icon";
+import TrialCta from "./TrialCta";
+import { DeskShot, PhoneShot } from "./Shots";
+import "./landing.css";
 import { AVAILABLE_TYPES, COMING_SOON_TYPES } from "@/lib/businessTypes";
 import { templateFor } from "@/lib/templates";
 import TradeSwitcher from "./TradeSwitcher";
@@ -86,6 +89,52 @@ const TRADES = [
 
 const NEVER = ["Booking fees charged to your clients", "A cut of new clients", "A marketplace listing next to other pros"];
 
+// Real quotes from Clientele pros, shown in the social proof row. Add one
+// only with the pro's permission: { quote, name, trade, city }. The row of
+// facts shows either way; quotes show once there's at least one.
+const TESTIMONIALS = [];
+
+// What's always true, for the social proof row.
+const FACTS = [
+  { value: "$0", label: "Booking fees charged to your clients" },
+  { value: `${TRIAL_DAYS} days`, label: "Free to try. No card needed" },
+  { value: "1 plan", label: "Every feature included" },
+  { value: "Your Stripe", label: "Deposits paid straight to your own account" },
+];
+
+const FAQ = [
+  {
+    q: "Do my clients need to download an app?",
+    a: "No. They book from your link in any browser, pay a deposit if you ask for one, and can reschedule or cancel from their confirmation email.",
+  },
+  {
+    q: "How does the free trial work?",
+    a: `You get every feature for ${TRIAL_DAYS} days with no card. Choose your plan before it ends to keep going; if you don't, nothing is charged.`,
+  },
+  {
+    q: "What does it cost to take deposits?",
+    a: `${DEPOSIT_FEE_PERCENT}% + ${DEPOSIT_FEE_FIXED_CENTS}¢ per deposit, which covers card processing. Deposits go straight to your own Stripe account.`,
+  },
+  {
+    q: "Can I bring my clients from Booksy, GlossGenius or Square?",
+    a: "Yes. Export a spreadsheet from your old app and import it in a few taps, or email us the file and we'll import it for you. Keep your old app until you're ready.",
+  },
+  {
+    q: "What are Regulars?",
+    a: "The clients who keep your book full. You can give them times nobody else sees, standing appointments held months ahead, and first pick of new openings.",
+  },
+  {
+    q: "Can I cancel any time?",
+    a: "Yes, from Settings, with no fees. You can download all your clients, bookings and payments first.",
+  },
+  {
+    q: "Does it work for my team?",
+    a: `Yes. Add team members for ${price(PLANS.team.monthlyCents)}/mo each, half the price of the plan.`,
+  },
+];
+
+const SWITCH_FROM = ["Booksy", "GlossGenius", "Square", "Vagaro", "Acuity", "A paper book"];
+
 export default async function HomePage() {
   // The homepage stays the homepage when logged in; the top button says
   // "View dashboard" instead of "Log in".
@@ -93,9 +142,7 @@ export default async function HomePage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  const account = user
-    ? { href: "/dashboard", label: "View dashboard" }
-    : { href: "/login", label: "Log in" };
+  const account = user ? { href: "/dashboard", label: "View dashboard" } : { href: "/login", label: "Log in" };
 
   const { allin, team, assistant } = PLANS;
   const included = [
@@ -107,162 +154,212 @@ export default async function HomePage() {
     "Self-serve reschedule and cancel",
     "End-of-day wrap-up, notes and reports",
   ];
+  const navLinks = [
+    ["#features", "Features"],
+    ["#trades", "Your trade"],
+    ["#pricing", "Pricing"],
+  ];
 
   return (
-    <>
-      <header className="hm-nav">
-        <div className="hm-nav-inner">
-        <Link href="/" className="hm-logo" aria-label={`${BRAND_NAME} home`}>
-          {BRAND_NAME}
-        </Link>
-        <nav className="hm-nav-links" aria-label="Main">
-          <a href="#features" className="hm-hide-phone">
-            Features
-          </a>
-          <a href="#trades" className="hm-hide-phone">
-            Your trade
-          </a>
-          <a href="#pricing" className="hm-hide-phone">
-            Pricing
-          </a>
-          {/* Clients looking for their pro (search: /find). */}
-          <Link href="/find" className="hm-find-link" aria-label="Find your pro">
-            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <circle cx="10.5" cy="10.5" r="6.5" />
-              <path d="M15.5 15.5 20 20" />
-            </svg>
-            <span>Find your pro</span>
+    <div className="ln">
+      {/* ---------- Top nav: frosted and sticky ---------- */}
+      <header className="ln-nav">
+        <div className="ln-nav-inner">
+          <Link href="/" className="ln-logo" aria-label={`${BRAND_NAME} home`}>
+            {BRAND_NAME}
           </Link>
-          {user ? (
-            <Link href={account.href} className="hm-button hm-button-small">
+          <nav className="ln-nav-links" aria-label="Main">
+            {navLinks.map(([href, label]) => (
+              <a key={href} href={href}>
+                {label}
+              </a>
+            ))}
+            <Link href="/find" className="ln-find">
+              <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <circle cx="10.5" cy="10.5" r="6.5" />
+                <path d="M15.5 15.5 20 20" />
+              </svg>
+              Find your pro
+            </Link>
+          </nav>
+          <div className="ln-nav-end">
+            <Link href={account.href} className="ln-login">
               {account.label}
             </Link>
-          ) : (
-            <>
-              <Link href="/login">Log in</Link>
-              <Link href="/signup" className="hm-button hm-button-small">
-                Start free trial
-              </Link>
-            </>
-          )}
-        </nav>
+            {!user && <TrialCta small />}
+            {/* Phones: the section links and Find your pro in a small menu. */}
+            <details className="ln-menu">
+              <summary aria-label="Menu">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" aria-hidden="true">
+                  <path d="M4 7h16M4 12h16M4 17h16" />
+                </svg>
+              </summary>
+              <div className="ln-menu-sheet">
+                {navLinks.map(([href, label]) => (
+                  <a key={href} href={href}>
+                    {label}
+                  </a>
+                ))}
+                <Link href="/find">Find your pro</Link>
+                <Link href={account.href}>{account.label}</Link>
+              </div>
+            </details>
+          </div>
         </div>
       </header>
 
       <main>
         {/* ---------- Hero ---------- */}
-        <section className="hm-hero">
-          <div className="hm-hero-copy">
-            <p className="hm-kicker">Booking and business tools for independent pros</p>
+        <section className="ln-hero ln-wrap">
+          <div className="ln-hero-copy">
+            <p className="ln-eyebrow">Booking and business tools for independent pros</p>
             <h1>
               Run your whole business from one place. <em>Your regulars come first.</em>
             </h1>
-            <p className="hm-lede">
-              Bookings, deposits, money, clients, reviews and insights in one app, for hair stylists, barbers,
-              tattoo artists and tutors.
+            <p className="ln-lede">
+              Bookings, deposits, money, clients, reviews and insights in one app, for hair stylists, barbers, tattoo
+              artists and tutors.
             </p>
-            <div className="hm-cta-row">
-              <Link href="/signup" className="hm-button">
-                Start free trial
-              </Link>
-              <a href="/demo" className="hm-button hm-button-ghost">
+            <div className="ln-cta-row">
+              <TrialCta />
+              <a href="/demo" className="ln-btn ln-btn-ghost">
                 Try the live demo
               </a>
             </div>
-            <p className="hm-fine">{TRIAL_DAYS} days free. No card needed.</p>
-            <p className="hm-switch-line">
-              Coming from Booksy, GlossGenius, Acuity, Square or Vagaro?{" "}
-              <Link href="/switch">See how switching works →</Link>
-            </p>
+            <p className="ln-fine">{TRIAL_DAYS} days free. No card needed.</p>
           </div>
-          <div className="hm-hero-visual">
-            {/* A real Clientele booking page (the demo), not a drawing. */}
-            <figure className="hm-phone hm-phone-hero">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/home/hero.webp"
-                alt="A Clientele booking page on a phone: the business name, a short tagline and their services"
-                width={620}
-                height={1056}
-                fetchPriority="high"
-                decoding="async"
+          <div className="ln-hero-visual">
+            <div className="ln-hero-desk">
+              <DeskShot
+                src="dash-home"
+                priority
+                alt="The Clientele dashboard: a good-morning greeting, the next three appointments, what needs attention, and this week's numbers"
               />
-            </figure>
+            </div>
+            <div className="ln-hero-phone">
+              <PhoneShot
+                src="dash-today-phone"
+                height={1208}
+                priority
+                alt="Today in Clientele on a phone: the date, three appointments today and the next one up"
+              />
+            </div>
           </div>
         </section>
 
-        {/* ---------- Who it's for ---------- */}
-        <section className="hm-for" aria-label="Who it's for">
+        {/* ---------- Trade strip ---------- */}
+        <section className="ln-strip ln-wrap" aria-label="Who it's for">
+          <span className="ln-strip-label">Made for</span>
           <ul>
             {AVAILABLE_TYPES.map((t) => (
               <li key={t.value}>{t.label}</li>
             ))}
           </ul>
-          <p className="hm-soon">
-            <span className="hm-soon-tag">Coming soon</span> {COMING_SOON_TYPES.map((t) => t.label).join(" · ")}
-          </p>
+          {COMING_SOON_TYPES.length > 0 && (
+            <p className="ln-soon">
+              <span>Coming soon</span> {COMING_SOON_TYPES.map((t) => t.label).join(" · ")}
+            </p>
+          )}
+        </section>
+
+        {/* ---------- Social proof ---------- */}
+        <section className="ln-proof ln-wrap" aria-label="Why pros choose Clientele">
+          <div className="ln-facts">
+            {FACTS.map((f) => (
+              <div key={f.label} className="ln-card ln-fact">
+                <strong>{f.value}</strong>
+                <span>{f.label}</span>
+              </div>
+            ))}
+          </div>
+          {TESTIMONIALS.length > 0 && (
+            <div className="ln-quotes">
+              {TESTIMONIALS.map((t) => (
+                <figure key={t.name} className="ln-card ln-quote">
+                  <blockquote>&ldquo;{t.quote}&rdquo;</blockquote>
+                  <figcaption>
+                    <strong>{t.name}</strong> · {t.trade}
+                    {t.city ? `, ${t.city}` : ""}
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
+          )}
         </section>
 
         {/* ---------- Features (one tab at a time) ---------- */}
-        <section id="features" className="hm-section">
-          <p className="hm-kicker">One app, six jobs</p>
-          <h2>
-            Everything behind the chair, <em>handled.</em>
-          </h2>
-          <p className="hm-section-lede">Booking, regulars, money, clients, getting found and insights. One plan, no add-on fees.</p>
+        <section id="features" className="ln-section ln-wrap">
+          <header className="ln-head">
+            <p className="ln-eyebrow">One app, six jobs</p>
+            <h2>
+              Everything behind the chair, <em>handled.</em>
+            </h2>
+            <p className="ln-lede">Booking, regulars, money, clients, getting found and insights. One plan, no add-on fees.</p>
+          </header>
           <FeatureTabs />
         </section>
 
         {/* ---------- Made for your trade ---------- */}
-        <section id="trades" className="hm-section">
-          <p className="hm-kicker">Made for your trade</p>
-          <h2>Your words, your services, your way of working.</h2>
-          <p className="hm-section-lede">
-            Pick your trade when you sign up and Clientele sets itself up for it. Switch any time without losing anything.
-          </p>
+        <section id="trades" className="ln-section ln-wrap">
+          <header className="ln-head">
+            <p className="ln-eyebrow">Made for your trade</p>
+            <h2>Your words, your services, your way of working.</h2>
+            <p className="ln-lede">
+              Pick your trade when you sign up and Clientele sets itself up for it. Switch any time without losing anything.
+            </p>
+          </header>
           <TradeSwitcher trades={TRADES} />
         </section>
 
         {/* ---------- Switching ---------- */}
-        <section id="switching" className="hm-section hm-switch-strip">
-          <div>
-            <p className="hm-kicker">Make the switch</p>
-            <h2>Moving over takes an afternoon.</h2>
-            <p className="hm-section-lede">
-              Coming from Booksy, GlossGenius, Acuity, Square, Vagaro or a paper book? Bring your clients, keep
-              your old app until you&apos;re ready, and let us help.
-            </p>
-          </div>
-          <ol className="hm-steps3">
-            <li>
+        <section id="switching" className="ln-section ln-wrap">
+          <header className="ln-head">
+            <p className="ln-eyebrow">Make the switch</p>
+            <h2>Switching from Booksy, GlossGenius or Square?</h2>
+            <p className="ln-lede">Moving over takes an afternoon. Bring your clients, keep your old app until you&apos;re ready, and let us help.</p>
+          </header>
+          <ul className="ln-from" aria-label="Pros switch from">
+            {SWITCH_FROM.map((x) => (
+              <li key={x}>{x}</li>
+            ))}
+          </ul>
+          <ol className="ln-steps">
+            <li className="ln-card">
+              <span className="ln-step-n">1</span>
               <Icon name="swap" />
               <h3>Import your client list</h3>
-              <p>Export a CSV from your old app and import it in a few taps. Names, phones, emails and notes come over.</p>
+              <p>Export a spreadsheet from your old app and import it in a few taps. Names, phones, emails and notes come over.</p>
             </li>
-            <li>
+            <li className="ln-card">
+              <span className="ln-step-n">2</span>
               <Icon name="link" />
               <h3>We&apos;ll help you move</h3>
               <p>Can&apos;t find the export, or want it done for you? Email us the file and we&apos;ll import it.</p>
             </li>
-            <li>
+            <li className="ln-card">
+              <span className="ln-step-n">3</span>
               <Icon name="repeat" />
               <h3>Run both side by side</h3>
               <p>Bookings already made stay in your old app. New ones come to Clientele. Cancel the old one when you&apos;re ready.</p>
             </li>
           </ol>
-          <Link href="/switch" className="hm-button hm-button-ghost">
-            Read the switching guide
-          </Link>
+          <div className="ln-center">
+            <Link href="/switch" className="ln-btn ln-btn-ghost">
+              Read the switching guide
+            </Link>
+          </div>
         </section>
 
         {/* ---------- Pricing ---------- */}
-        <section id="pricing" className="hm-section">
-          <p className="hm-kicker">Pricing</p>
-          <h2>One plan. Everything included.</h2>
-          <p className="hm-section-lede">
-            {price(allin.monthlyCents)}/mo for everything, or yearly and get 2 months free. {TRIAL_DAYS}-day free
-            trial, no card needed, cancel any time.
-          </p>
+        <section id="pricing" className="ln-section ln-wrap">
+          <header className="ln-head">
+            <p className="ln-eyebrow">Pricing</p>
+            <h2>One plan. Everything included.</h2>
+            <p className="ln-lede">
+              {price(allin.monthlyCents)}/mo for everything, or yearly and get 2 months free. {TRIAL_DAYS}-day free trial, no
+              card needed, cancel any time.
+            </p>
+          </header>
           <PricingToggle
             allin={allin}
             team={team}
@@ -271,51 +368,79 @@ export default async function HomePage() {
             included={[...new Set([...included, ...NO_EXTRA])]}
             assistantOn={Boolean(process.env.ANTHROPIC_API_KEY)}
           />
-          <div className="hm-never">
+          <div className="ln-never">
             <h3>And never</h3>
-            <ul className="hm-noextra-list is-never">
+            <ul>
               {NEVER.map((item) => (
                 <li key={item}>{item}</li>
               ))}
             </ul>
           </div>
-          <p className="hm-fine">
-            Deposits: {DEPOSIT_FEE_PERCENT}% + {DEPOSIT_FEE_FIXED_CENTS}¢ per deposit, which covers card processing.
-          </p>
+        </section>
+
+        {/* ---------- FAQ ---------- */}
+        <section id="faq" className="ln-section ln-wrap ln-faq-wrap">
+          <header className="ln-head">
+            <p className="ln-eyebrow">Questions</p>
+            <h2>Good to know.</h2>
+          </header>
+          <div className="ln-faq">
+            {FAQ.map((f) => (
+              <details key={f.q} className="ln-faq-item">
+                <summary>{f.q}</summary>
+                <p>{f.a}</p>
+              </details>
+            ))}
+          </div>
         </section>
 
         {/* ---------- Final call ---------- */}
-        <section className="hm-final">
-          <h2>
-            Your whole business, <em>one place.</em>
-          </h2>
-          <p>Set up in minutes. {TRIAL_DAYS} days free, no card.</p>
-          <div className="hm-cta-row hm-cta-center">
-            <Link href="/signup" className="hm-button">
-              Start free trial
-            </Link>
-            <a href="/demo" className="hm-button hm-button-ghost">
-              Try the live demo
-            </a>
+        <section className="ln-wrap">
+          <div className="ln-card ln-final">
+            <h2>
+              Your whole business, <em>one place.</em>
+            </h2>
+            <p className="ln-lede">Set up in minutes. {TRIAL_DAYS} days free, no card.</p>
+            <div className="ln-cta-row ln-center">
+              <TrialCta />
+              <a href="/demo" className="ln-btn ln-btn-ghost">
+                Try the live demo
+              </a>
+            </div>
           </div>
-          <p className="hm-fine">
-            Switching from another app? <Link href="/switch">Here&apos;s how</Link>.
-          </p>
         </section>
       </main>
 
-      <footer className="hm-footer">
-        <span className="hm-logo hm-logo-small">{BRAND_NAME}</span>
-        <nav aria-label="Footer">
-          <Link href="/find">Find your pro</Link>
-          <Link href="/switch">Switch to {BRAND_NAME}</Link>
-          <Link href={account.href}>{account.label}</Link>
-          <Link href="/terms">Terms</Link>
-          <Link href="/privacy">Privacy</Link>
-          <a href="mailto:hello@clientelesuite.com">Contact · hello@clientelesuite.com</a>
-        </nav>
-        <p>© {new Date().getFullYear()} {BRAND_NAME}</p>
+      <footer className="ln-footer">
+        <div className="ln-wrap ln-footer-grid">
+          <div>
+            <span className="ln-logo">{BRAND_NAME}</span>
+            <p className="ln-muted">Booking and business tools for independent pros.</p>
+          </div>
+          <nav aria-label="Product">
+            <h3>Product</h3>
+            <a href="#features">Features</a>
+            <a href="#pricing">Pricing</a>
+            <a href="/demo">Live demo</a>
+            <Link href="/switch">Switch to {BRAND_NAME}</Link>
+          </nav>
+          <nav aria-label="For clients">
+            <h3>For clients</h3>
+            <Link href="/find">Find your pro</Link>
+            <Link href="/client">Client sign in</Link>
+          </nav>
+          <nav aria-label="Company">
+            <h3>Company</h3>
+            <Link href={account.href}>{account.label}</Link>
+            <Link href="/terms">Terms</Link>
+            <Link href="/privacy">Privacy</Link>
+            <a href="mailto:hello@clientelesuite.com">hello@clientelesuite.com</a>
+          </nav>
+        </div>
+        <p className="ln-wrap ln-copy">
+          © {new Date().getFullYear()} {BRAND_NAME}
+        </p>
       </footer>
-    </>
+    </div>
   );
 }
