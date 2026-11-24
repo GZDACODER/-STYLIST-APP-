@@ -91,9 +91,8 @@ const GROUPS = [
 const MORE = [
   { href: "/dashboard", label: "Home", icon: "home", exact: true },
   { href: "/dashboard/requests", label: "Requests", icon: "requests", module: "requests" },
-  { href: "/dashboard/waitlist", label: "Waitlist", icon: "waitlist", module: "waitlist" },
+  { href: "/dashboard/openings?tab=waitlist", label: "Waitlist", icon: "waitlist", module: "waitlist" },
   { href: "/dashboard/wrapup", label: "Wrap up visits", icon: "notes" },
-  { href: "/dashboard/notes", label: "Notes", icon: "notes" },
   { href: "/dashboard/projects", label: "Projects", icon: "projects", module: "projects" },
   { href: "/dashboard/packages", label: "Packages", icon: "gift", module: "packages" },
   { href: "/dashboard/gift-cards", label: "Gift cards", icon: "gift" },

@@ -191,8 +191,8 @@ export default async function WrapupPage() {
         title="Wrap up visits"
         subtitle="How did each visit go? No-shows and balances owed show on the client's History and your Today page. Nothing is charged or refunded automatically."
         actions={
-          <Link href="/dashboard/notes" className="button secondary small">
-            Notes
+          <Link href="/dashboard/clients" className="button secondary small">
+            Clients
           </Link>
         }
       />

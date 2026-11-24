@@ -1,7 +1,7 @@
 "use client";
 
-// "Your clients": search, filters, then one slim row per client (name,
-// phone, Regular/Invited, next appointment). Tapping a row opens the full
+// "Your clients": search, filters, then a table (name, phone, last visit,
+// next visit, tag); stacked cards on a phone. Tapping a row opens the full
 // card in a panel: full screen on a phone, centered on iPad and computer.
 import EmptyState from "@/components/dash/EmptyState";
 import ShowMore from "@/components/dash/ShowMore";
@@ -44,37 +44,55 @@ function nextVisitText(visit, today) {
   return `${date}, ${time}`;
 }
 
-function ClientRow({ client, next, today, duplicate, onOpen }) {
+// "Today", "3 weeks ago"... for the last visit column.
+function lastVisitText(date, today) {
+  if (!date) return "—";
+  const days = Math.round((parseDateString(today) - parseDateString(date)) / 86400000);
+  if (days <= 0) return "Today";
+  if (days === 1) return "Yesterday";
+  if (days < 14) return `${days} days ago`;
+  if (days < 60) return `${Math.round(days / 7)} weeks ago`;
+  if (days < 730) return `${Math.round(days / 30)} months ago`;
+  return `${Math.round(days / 365)} years ago`;
+}
+
+// One row of the table: name, phone, last visit, next visit, tag. On a
+// phone the same row stacks into a card.
+function ClientRow({ client, next, last, today, duplicate, onOpen }) {
   return (
     <li>
       <button type="button" className={client.example ? "client-row is-example" : "client-row"} onClick={onOpen} aria-haspopup="dialog">
-        <span className="client-row-main">
-          <span className="client-row-name">
-            <span className="client-row-text">{client.name}</span>
-            {client.status === "regular" && (
-              <span className="badge regular row-badge">
-                <RegularStar label={null} size={9} /> Regular
-              </span>
-            )}
-            {client.status === "blocked" && <span className="badge blocked row-badge">Blocked</span>}
-            {client.invited_at && <span className="badge invited row-badge">Invited</span>}
-            {client.example && <ExampleTag />}
-            {duplicate && (
-              <span className="dup-dot" title="Possible duplicate" aria-label="Possible duplicate" />
-            )}
-          </span>
-          <span className="client-row-phone">
-            {client.phone ? displayPhone(client.phone) : client.email || "No phone"}
-          </span>
+        <span className="ct-cell ct-name">
+          {client.name}
+          {client.example && <> <ExampleTag /></>}
+          {duplicate && <span className="dup-dot" title="Possible duplicate" aria-label="Possible duplicate" />}
         </span>
-        <span className={next ? "client-row-next" : "client-row-next none"}>
+        <span className="ct-cell ct-phone">
+          {client.phone ? displayPhone(client.phone) : client.email || <span className="ct-muted">No phone</span>}
+        </span>
+        <span className="ct-cell ct-last">
+          <span className="sr-only">Last visit: </span>
+          {lastVisitText(last, today)}
+        </span>
+        <span className="ct-cell ct-next">
           {next ? (
             <>
-              <span className="client-row-next-label">Next</span>
+              <span className="sr-only">Next visit: </span>
               {nextVisitText(next, today)}
             </>
           ) : (
-            "No upcoming visit"
+            <span className="ct-muted">No upcoming visit</span>
+          )}
+        </span>
+        <span className="ct-cell ct-tag">
+          {client.status === "regular" && (
+            <span className="badge regular row-badge">
+              <RegularStar label={null} size={9} /> Regular
+            </span>
+          )}
+          {client.status === "blocked" && <span className="badge blocked row-badge">Blocked</span>}
+          {client.status !== "regular" && client.status !== "blocked" && client.invited_at && (
+            <span className="badge invited row-badge">Invited</span>
           )}
         </span>
         <svg className="client-row-chevron" width="8" height="14" viewBox="0 0 8 14" aria-hidden="true">
@@ -87,7 +105,7 @@ function ClientRow({ client, next, today, duplicate, onOpen }) {
 
 // examples: example clients (lib/examples.js), shown only while there are
 // no real ones.
-export default function ClientList({ clients: realClients, standing, nextVisits = {}, upcomingCounts = {}, examples = [], openId = null }) {
+export default function ClientList({ clients: realClients, standing, nextVisits = {}, lastVisits = {}, upcomingCounts = {}, examples = [], openId = null }) {
   const exampleMode = realClients.length === 0 && examples.length > 0;
   const clients = exampleMode ? examples : realClients;
   const [search, setSearch] = useState("");
@@ -201,7 +219,7 @@ export default function ClientList({ clients: realClients, standing, nextVisits 
           title="No clients yet"
           text="Clients appear here when they book, or add them yourself."
           action={
-            <a href="/dashboard/clients?add=client#add-client" className="button small">
+            <a href="/dashboard/clients#add-client" className="button small">
               <Words>+ Add client</Words>
             </a>
           }
@@ -211,12 +229,23 @@ export default function ClientList({ clients: realClients, standing, nextVisits 
         <EmptyState title="No clients match" text="Try a different search or filter." />
       )}
 
-      <ShowMore className="client-rows" noun="more clients" key={`${filter}|${query}`}>
+      {shown.length > 0 && (
+        <div className="client-table-head" aria-hidden="true">
+          <span>Name</span>
+          <span>Phone</span>
+          <span>Last visit</span>
+          <span>Next visit</span>
+          <span>Tag</span>
+          <span />
+        </div>
+      )}
+      <ShowMore className="client-rows client-table" noun="more clients" key={`${filter}|${query}`}>
         {shown.map((client) => (
           <ClientRow
             key={client.id}
             client={client}
             next={nextVisits[client.id]}
+            last={lastVisits[client.id] || (client.example ? null : undefined)}
             today={standing?.today}
             duplicate={duplicateIds.has(client.id)}
             onOpen={() => setOpen({ id: client.id, mergeWith: null })}
@@ -236,7 +265,7 @@ export default function ClientList({ clients: realClients, standing, nextVisits 
               ["Next visit", nextVisits[openClient.id] ? nextVisitText(nextVisits[openClient.id], standing?.today) : "None booked"],
               ["Notes", openClient.notes],
             ]}
-            addHref="/dashboard/clients?add=client#add-client"
+            addHref="/dashboard/clients#add-client"
             addLabel="+ Add your own client"
           >
             {openClient.intake && (

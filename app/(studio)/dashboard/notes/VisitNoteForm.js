@@ -9,7 +9,7 @@ import { formatPrice } from "@/lib/money";
 
 const dollars = (cents) => (cents == null ? "" : (cents / 100).toFixed(2).replace(/\.00$/, ""));
 
-export default function VisitNoteForm({ bookingId, note, owedCents, owed }) {
+export default function VisitNoteForm({ bookingId, note, owedCents, owed, onSaved }) {
   const [editing, setEditing] = useState(false);
   const [text, setText] = useState(note || "");
   const [amount, setAmount] = useState(dollars(owedCents));
@@ -29,7 +29,10 @@ export default function VisitNoteForm({ bookingId, note, owedCents, owed }) {
     startTransition(async () => {
       const result = await setVisitNote(bookingId, text, owed ? amount : dollars(owedCents));
       if (result?.error) setError(result.error);
-      else setEditing(false);
+      else {
+        setEditing(false);
+        onSaved?.();
+      }
     });
   }
 

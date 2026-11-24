@@ -163,8 +163,8 @@ export function BookingDetails({ booking: b, seriesId, today }) {
             {b.outcome === "completed_owed" && b.owed_cents != null && ` · ${formatPrice(b.owed_cents)} owed`}
           </p>
           {b.visit_note && <p className="visit-note-text">{b.visit_note}</p>}
-          <Link href="/dashboard/notes" className="link-button quiet-link">
-            {b.outcome ? "Notes" : "Mark it in Notes"}
+          <Link href={b.outcome ? (b.client_id ? `/dashboard/clients?client=${b.client_id}` : "/dashboard/clients") : "/dashboard/wrapup"} className="link-button quiet-link">
+            {b.outcome ? "Visits & notes" : "Mark it in Wrap up visits"}
           </Link>
         </div>
       ) : (
