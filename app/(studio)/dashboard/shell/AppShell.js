@@ -51,7 +51,17 @@ const ICONS = {
     </>
   ),
   chevron: <path d="m9 6 6 6-6 6" />,
+  sparkle: (
+    <>
+      <path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z" />
+      <path d="M18.5 15.5l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z" />
+    </>
+  ),
 };
+
+// "Ask the assistant" (only when the Assistant is on): in the "+" menu and
+// quick actions. On phones it replaces the floating Assistant button.
+const ASSISTANT_ACTION = { assistant: true, href: "#assistant", label: "Ask the assistant", icon: "sparkle", fab: true };
 
 export function Icon({ name, size = 18, className = "" }) {
   return (
@@ -130,7 +140,7 @@ function NavLink({ item, pathname, onClick }) {
   );
 }
 
-export default function AppShell({ businessName, slug, email, logout }) {
+export default function AppShell({ businessName, slug, email, logout, assistant = false }) {
   const pathname = usePathname();
   const router = useRouter();
   const { words, modules } = useTemplate();
@@ -147,7 +157,10 @@ export default function AppShell({ businessName, slug, email, logout }) {
   );
   const more = useMemo(() => MORE.filter(on), [on]);
   const moreOpen = more.some((i) => isActive(i, pathname));
-  const actions = useMemo(() => ACTIONS.map((a) => ({ ...a, label: label(a) })), [label]);
+  const actions = useMemo(
+    () => [...ACTIONS, ...(assistant ? [ASSISTANT_ACTION] : [])].map((a) => ({ ...a, label: label(a) })),
+    [label, assistant]
+  );
 
   // Close everything when the page changes.
   useEffect(() => {
@@ -177,6 +190,11 @@ export default function AppShell({ businessName, slug, email, logout }) {
   const [toast, setToast] = useState(null);
   const go = async (item) => {
     setQuick(null);
+    if (item.assistant) {
+      // Opens the Assistant panel (AssistantWidget listens for this).
+      window.dispatchEvent(new Event("clientele:assistant"));
+      return;
+    }
     if (item.share) {
       const r = await shareBookingLink(bookingUrl, businessName);
       if (r === "copied") setToast("Booking link copied");
@@ -344,7 +362,7 @@ function QuickActions({ mode, actions, pages, clientsWord, onGo, onClose }) {
   const match = (x) => x.label.toLowerCase().includes(term);
   const people = term.length >= 1 ? clients.filter((c) => c.name.toLowerCase().includes(term)).slice(0, 8) : [];
   const list = [
-    ...actions.filter(match).map((a) => ({ ...a, kind: a.share ? "Share" : "Add" })),
+    ...actions.filter(match).map((a) => ({ ...a, kind: a.share ? "Share" : a.assistant ? "Ask" : "Add" })),
     ...pages.filter(match).map((p) => ({ ...p, kind: "Go to" })),
     ...people.map((c) => ({ href: `/dashboard/clients?client=${c.id}`, label: c.name, icon: "clients", kind: clientsWord })),
   ];
