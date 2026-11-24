@@ -1,5 +1,8 @@
 "use server";
 
+import { createAdminClient } from "@/lib/supabase/admin";
+import { SUPPORT_LENGTHS } from "@/lib/support";
+
 // Settings > Business type: switch the pro's type (lib/templates) and turn
 // features on or off; Settings > Support access: the switch and its log.
 // Switching type never touches bookings, clients, notes or services: only
@@ -49,18 +52,28 @@ export async function saveModules(prev, formData) {
   return { success: "Saved." };
 }
 
-const HOURS = { "24h": 24, "7d": 24 * 7, "30d": 24 * 30, always: 24 * 3650 };
-
 export async function setSupportAccess(prev, formData) {
   const { supabase, user } = await me();
   if (!user) return { error: "Please log in again." };
   if (isDemo(user)) return { error: DEMO_LOCKED };
   const choice = String(formData.get("length") || "off");
-  const until = choice === "off" ? null : new Date(Date.now() + (HOURS[choice] || 24) * 3600 * 1000).toISOString();
+  const length = SUPPORT_LENGTHS.find(([k]) => k === choice);
+  const level = formData.get("level") === "edit" ? "edit" : "view";
+  const until = choice === "off" || !length ? null : new Date(Date.now() + length[2] * 3600 * 1000).toISOString();
   const { error } = await supabase
     .from("support_access")
-    .upsert({ stylist_id: user.id, until, updated_at: new Date().toISOString() }, { onConflict: "stylist_id" });
+    .upsert({ stylist_id: user.id, until, level, updated_at: new Date().toISOString() }, { onConflict: "stylist_id" });
   if (error) return { error: "Couldn't save. Please try again." };
+  // On the pro's Activity page too (written by the server; not emailed).
+  await createAdminClient()
+    .from("support_log")
+    .insert({
+      stylist_id: user.id,
+      actor: "You",
+      action: until ? `Turned on support access (${level === "edit" ? "view and edit" : "view only"}, ${length[1]})` : "Turned off support access",
+      level: "owner",
+    });
   revalidatePath("/dashboard/settings/support");
+  revalidatePath("/dashboard/activity");
   return { success: until ? "Support access is on." : "Support access is off." };
 }

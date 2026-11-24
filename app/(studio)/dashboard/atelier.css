@@ -1447,3 +1447,16 @@
   color: var(--muted);
   font-variant-numeric: tabular-nums;
 }
+
+.db .support-level {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.db .support-level legend {
+  margin-bottom: 6px;
+  font-weight: 600;
+}

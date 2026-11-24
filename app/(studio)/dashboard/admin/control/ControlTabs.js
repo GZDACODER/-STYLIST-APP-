@@ -14,6 +14,9 @@ export default function ControlTabs({ active }) {
       <Link href="/dashboard/admin/control/reviews" className={active === "reviews" ? "cr-tab active" : "cr-tab"} aria-current={active === "reviews" ? "page" : undefined}>
         Reviews
       </Link>
+      <Link href="/dashboard/admin/control/support" className={active === "support" ? "cr-tab active" : "cr-tab"} aria-current={active === "support" ? "page" : undefined}>
+        Support
+      </Link>
     </nav>
   );
 }
