@@ -1,6 +1,6 @@
 "use client";
 
-// Settings → Business: "Show tips again" resets every first-visit guide, so
+// Settings → Example data & tips: "Show tips again" resets every first-visit guide, so
 // each page shows its tips again the next time it's opened.
 import { useState, useTransition } from "react";
 import { useGuides } from "./GuideProvider";

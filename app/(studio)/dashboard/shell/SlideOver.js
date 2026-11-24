@@ -8,9 +8,15 @@ import { useEffect, useRef } from "react";
 export default function SlideOver({ open, onClose, title, children }) {
   const panel = useRef(null);
   const drag = useRef(null);
+  // The latest onClose, so a new function each render doesn't re-run the
+  // effect below (which would move focus back to the first field).
+  const closeRef = useRef(onClose);
+  useEffect(() => {
+    closeRef.current = onClose;
+  });
   useEffect(() => {
     if (!open) return;
-    const onKey = (e) => e.key === "Escape" && onClose();
+    const onKey = (e) => e.key === "Escape" && closeRef.current();
     window.addEventListener("keydown", onKey);
     const first = panel.current?.querySelector("input, select, textarea, button:not(.so-close)");
     first?.focus({ preventScroll: true });
@@ -19,7 +25,7 @@ export default function SlideOver({ open, onClose, title, children }) {
       window.removeEventListener("keydown", onKey);
       document.documentElement.classList.remove("so-lock");
     };
-  }, [open, onClose]);
+  }, [open]);
   if (!open) return null;
   const down = (e) => {
     drag.current = { y: e.clientY, dy: 0 };

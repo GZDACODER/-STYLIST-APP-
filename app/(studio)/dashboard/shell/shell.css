@@ -1515,3 +1515,74 @@
 .db .in-cards > .card {
   margin-top: 0;
 }
+
+/* ---------- Settings: grouped list, Save bar ---------- */
+.db .settings-nav-group-title {
+  margin: 18px 0 6px;
+  padding-left: 12px;
+  font-family: inherit;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.db .settings-nav-group:first-child .settings-nav-group-title {
+  margin-top: 0;
+}
+
+.db .settings-nav-group ul {
+  position: static;
+}
+
+.db .settings-nav-group.is-help {
+  margin-top: 12px;
+}
+
+@media (min-width: 768px) {
+  .db .settings-nav-groups {
+    position: sticky;
+    top: 72px;
+  }
+}
+
+.db .save-bar {
+  display: none;
+}
+
+.db .save-bar.is-on {
+  position: sticky;
+  bottom: calc(12px + env(safe-area-inset-bottom));
+  z-index: 25;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+  padding: 10px 12px 10px 16px;
+  border-radius: 14px;
+  border: 1px solid var(--glass-line);
+  background: rgba(251, 248, 242, 0.92);
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
+  box-shadow: var(--glass-shadow);
+  font-weight: 600;
+}
+
+.db .save-bar-actions {
+  display: flex;
+  gap: 8px;
+}
+
+@media (max-width: 767px) {
+  /* Above the bottom tab bar. */
+  .db .save-bar.is-on {
+    bottom: calc(76px + env(safe-area-inset-bottom));
+  }
+}
+
+.db .in-cards {
+  align-items: start;
+}
