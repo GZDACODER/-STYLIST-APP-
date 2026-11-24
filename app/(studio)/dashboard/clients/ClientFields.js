@@ -1,8 +1,13 @@
+"use client";
+
 import { CLIENT_STATUSES } from "@/lib/clients";
+import { useTemplate } from "@/components/TemplateContext";
 import RegularStar from "@/components/RegularStar";
 
 // The inputs shared by the "add" and "edit" client forms.
 export default function ClientFields({ values = {} }) {
+  // Parent or guardian (step 68 SQL), when Parent notes is on (tutors).
+  const { modules } = useTemplate();
   return (
     <>
       <label>
@@ -32,6 +37,18 @@ export default function ClientFields({ values = {} }) {
           />
         </label>
       </div>
+      {modules?.parentNotes && (
+        <div className="row wrap">
+          <label>
+            Parent or guardian
+            <input name="guardian_name" type="text" maxLength={100} defaultValue={values.guardian_name || ""} placeholder="e.g. Dana Brooks" />
+          </label>
+          <label>
+            Their email
+            <input name="guardian_email" type="email" autoComplete="off" maxLength={254} defaultValue={values.guardian_email || ""} />
+          </label>
+        </div>
+      )}
       <label>
         Notes (only you see these)
         <textarea

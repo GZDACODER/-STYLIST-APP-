@@ -211,6 +211,18 @@ export default async function TodayPage() {
       projectOf[r.id] = { id: r.project.id, label: `${r.project.title} · session ${n || "?"}${r.project.sessions_planned ? ` of ${r.project.sessions_planned}` : ""}` };
     }
   }
+  // Packages (step 68 SQL): "Package · 7 of 10 left" for clients with one.
+  const packageOf = {};
+  if (realIds.length) {
+    const { data: who } = await supabase.from("bookings").select("id, client_id").in("id", realIds).not("client_id", "is", null);
+    const ids = [...new Set((who || []).map((w) => w.client_id))];
+    if (ids.length) {
+      const { data: pk } = await supabase.from("client_packages").select("client_id, name, sessions_total, sessions_used").in("client_id", ids).eq("status", "active");
+      const left = {};
+      for (const k of pk || []) left[k.client_id] = `${k.name} · ${k.sessions_total - k.sessions_used} of ${k.sessions_total} left`;
+      for (const w of who || []) if (left[w.client_id]) packageOf[w.id] = left[w.client_id];
+    }
+  }
   // Reference photos clients added when booking (step 56 SQL).
   const photosOf = {};
   if (realIds.length) {
@@ -442,6 +454,7 @@ export default async function TodayPage() {
                     <div className="db-slot-tags">
                       {standingIds.has(b.id) && <span className="badge standing">Standing</span>}
                       {missingWaiver.has(b.id) && <span className="badge unpaid">Waiver needed</span>}
+                      {packageOf[b.id] && <span className="badge">{packageOf[b.id]}</span>}
                       {b.status === "pending_payment" ? (
                         <span className="badge unpaid">Paying deposit now</span>
                       ) : (

@@ -107,6 +107,7 @@ const ITEMS = [
   // In the side menu only (phones reach it from Home's money card).
   // Side menu only (phones: Home's links and Today's session labels).
   { href: "/dashboard/projects", label: "Projects", icon: "projects", wide: true, module: "projects" },
+  { href: "/dashboard/packages", label: "Packages", icon: "gift", wide: true, module: "packages" },
   { href: "/dashboard/money", label: "Money", icon: "money", wide: true },
   { href: "/dashboard/gift-cards", label: "Gift cards", icon: "gift", wide: true },
   // In the side menu only (phones reach it from Settings > Public profile).

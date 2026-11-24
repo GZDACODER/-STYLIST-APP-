@@ -13,6 +13,7 @@ import { BRAND_NAME } from "@/lib/brand";
 import OutcomePicker from "./OutcomePicker";
 import VisitNoteForm from "../notes/VisitNoteForm";
 import LookEditor from "./LookEditor";
+import ParentNoteForm from "./ParentNoteForm";
 import { getMyTemplate } from "@/lib/templates/server";
 
 export const metadata = { title: `Wrap up visits · ${BRAND_NAME}` };
@@ -45,7 +46,10 @@ function deposit(b) {
 
 export default async function WrapupPage() {
   // My look is off for some business types (tutors), or by the pro.
-  const showLook = (await getMyTemplate()).modules.myLook;
+  const tplW = await getMyTemplate();
+  const showLook = tplW.modules.myLook;
+  // Parent notes (step 68 SQL), for tutors by default.
+  const showParent = tplW.modules.parentNotes;
   const supabase = await createClient();
   const {
     data: { user },
@@ -160,8 +164,26 @@ export default async function WrapupPage() {
         />
       )}
       {showLook && looks[b.id]?.ready && <LookEditor bookingId={b.id} photoUrl={looks[b.id].photo} note={looks[b.id].note} />}
+      {showParent && parents[b.id] && (
+        <ParentNoteForm
+          bookingId={b.id}
+          note={parents[b.id].parent_note}
+          sentAt={parents[b.id].parent_note_sent_at}
+          guardian={parents[b.id].client ? { name: parents[b.id].client.guardian_name, email: parents[b.id].client.guardian_email } : null}
+        />
+      )}
     </li>
   );
+
+  // Each visit's parent note and the student's parent (step 68 SQL).
+  const parents = {};
+  if (showParent && lookIds.length) {
+    const { data: pRows } = await supabase
+      .from("bookings")
+      .select("id, parent_note, parent_note_sent_at, client:clients(guardian_name, guardian_email)")
+      .in("id", lookIds);
+    for (const r of pRows || []) parents[r.id] = r;
+  }
 
   return (
     <>

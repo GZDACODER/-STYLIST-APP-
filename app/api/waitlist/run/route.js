@@ -87,6 +87,16 @@ export async function POST(request) {
     await reportError("Every-minute job", error, { extra: "Weekly summaries failed" });
   }
 
+  // Packages (step 68 SQL): count sessions that have started.
+  try {
+    if (process.env.SUPABASE_SECRET_KEY) {
+      const { error } = await createAdminClient().rpc("package_apply_due");
+      if (error && !/package_apply_due/.test(error.message)) await reportError("Every-minute job", new Error(`Packages: ${error.message}`));
+    }
+  } catch (error) {
+    await reportError("Every-minute job", error, { extra: "Packages failed" });
+  }
+
   // Opening alerts for clients following a pro's profile (step 60 SQL).
   try {
     await runFollowerAlerts();
