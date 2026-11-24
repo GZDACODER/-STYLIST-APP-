@@ -1,6 +1,6 @@
 "use client";
 
-// Today: clients who said they're running late, with Dismiss.
+// Today: clients who said they're running late, as a slim banner with Dismiss.
 import { useTransition } from "react";
 import { clockTime } from "@/lib/availability";
 import { lateText } from "@/lib/lateNotices";
@@ -11,7 +11,7 @@ export default function LateNotices({ notices }) {
   const [pending, startTransition] = useTransition();
   if (!notices.length) return null;
   return (
-    <section className="card late-notices" aria-label="Running late">
+    <section className="late-banner" aria-label="Running late">
       {notices.map((n) => (
         <div key={n.id} className="late-notice">
           <span>
