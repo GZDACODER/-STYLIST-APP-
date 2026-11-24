@@ -1249,3 +1249,95 @@
 .db .lk-list p {
   margin: 0 0 6px;
 }
+
+/* ---------- Money ---------- */
+.db .mn-period {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 4px 0 14px;
+}
+
+.db .mn-period a {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--border);
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 1.3rem;
+}
+
+.db .mn-lines {
+  margin: 10px 0;
+}
+
+.db .mn-lines > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.94rem;
+}
+
+.db .mn-lines dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.db .mn-sub {
+  margin: 18px 0 0;
+}
+
+.db .mn-chart {
+  margin: 16px 0 4px;
+}
+
+.db .mn-chart svg {
+  display: block;
+  width: 100%;
+  height: 120px;
+}
+
+.db .mn-bar {
+  fill: var(--ink);
+}
+
+.db .mn-bar.future {
+  fill: var(--border);
+}
+
+.db .mn-axis {
+  stroke: var(--border);
+  stroke-width: 0.3;
+}
+
+.db .mn-labels {
+  display: grid;
+  font-size: 0.66rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+.db .mn-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  align-items: end;
+}
+
+.db .mn-row {
+  padding: 12px 0;
+  border-top: 1px solid var(--border);
+}
+
+.db .mn-row .rq-head {
+  font-size: 1.05rem;
+}
+
+.db .mn-exports {
+  margin-top: 14px;
+}

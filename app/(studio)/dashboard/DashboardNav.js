@@ -55,6 +55,13 @@ const ICONS = {
       <path d="M15 3.5v3h3M9 11h6M9 14.5h6M9 18h3.5" />
     </>
   ),
+  money: (
+    <>
+      <rect x="3.5" y="6.5" width="17" height="11" rx="1" />
+      <circle cx="12" cy="12" r="2.5" />
+      <path d="M6.5 9.5v5M17.5 9.5v5" />
+    </>
+  ),
   reviews: <path d="M12 3.5l2.6 5.3 5.9.9-4.25 4.1 1 5.85L12 16.9l-5.25 2.75 1-5.85L3.5 9.7l5.9-.9z" />,
   reports: (
     <>
@@ -85,6 +92,8 @@ const ITEMS = [
   { href: "/dashboard/waitlist", label: "Waitlist", icon: "waitlist", module: "waitlist" },
   { href: "/dashboard/notes", label: "Notes", icon: "notes", also: ["/dashboard/wrapup"] },
   // In the side menu only: the phone tab bar is full (Home links to it).
+  // In the side menu only (phones reach it from Home's money card).
+  { href: "/dashboard/money", label: "Money", icon: "money", wide: true },
   // In the side menu only (phones reach it from Settings > Public profile).
   { href: "/dashboard/reviews", label: "Reviews", icon: "reviews", wide: true },
   { href: "/dashboard/reports", label: "Reports", icon: "reports", wide: true, module: "reports" },
