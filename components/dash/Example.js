@@ -18,7 +18,7 @@ export function ExampleCard({ title, facts = [], children, addHref, addLabel }) 
       </div>
       <p className="message info small-text">
         This is an example, so you can see how it works. It isn&apos;t saved, clients never see it, and it
-        disappears once you add your own (or turn off Show example data in Settings → Business).
+        disappears once you add your own (or turn off Show example data in Settings → Example data & tips).
       </p>
       {facts.length > 0 && (
         <dl className="booking-facts">

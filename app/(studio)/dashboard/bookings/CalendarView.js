@@ -15,6 +15,7 @@ import { WEEKDAYS, clockTime, formatDate, parseDateString, shortTime, toDateStri
 import Sheet from "@/components/Sheet";
 import BookingList, { BookingDetails, BookingRow } from "./BookingList";
 import { EventDetails, EventForm } from "./CalendarEvents";
+import SlideOver from "../shell/SlideOver";
 import { colorOf, eventOccursOn, eventsOn } from "@/lib/calendarEvents";
 import { holidaysOn } from "@/lib/holidays";
 import { HolidayDayControls } from "../settings/HolidaySettings";
@@ -494,10 +495,17 @@ export default function CalendarView({
         </Sheet>
       )}
 
-      {eventSheet && (eventSheet.mode === "add" || openEvent) && (
+      {/* Adding an event opens in the slide-over, like the other "Add" forms. */}
+      <SlideOver open={eventSheet?.mode === "add"} onClose={() => setEventSheet(null)} title="Add event">
+        {eventSheet?.mode === "add" && (
+          <EventForm key={`add-${selected}`} event={null} date={selected} scope="all" onSaved={closeEventSheet} />
+        )}
+      </SlideOver>
+
+      {eventSheet && eventSheet.mode !== "add" && openEvent && (
         <Sheet
           key={`${eventSheet.mode}-${eventSheet.scope || ""}-${eventSheet.id || selected}`}
-          label={openEvent ? openEvent.title : "Add event"}
+          label={openEvent.title}
           backLabel="Calendar"
           onClose={() => setEventSheet(null)}
         >
