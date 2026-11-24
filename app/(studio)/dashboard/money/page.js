@@ -128,7 +128,7 @@ export default async function MoneyPage({ searchParams }) {
         </p>
       </section>
 
-      <section className="card">
+      <section className="card" id="record">
         <h2>Record a payment</h2>
         <p className="muted small-text">Cash, Zelle, Cash App or anything else you take outside the app: tips, product sales or other income.</p>
         <RecordPayment clients={clients || []} today={m.today} notePlaceholder={sample(await getMyTemplate()).paymentNote} />

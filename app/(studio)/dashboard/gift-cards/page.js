@@ -60,7 +60,7 @@ export default async function GiftCardsPage() {
         </p>
       </section>
 
-      <section className="card">
+      <section className="card" id="redeem">
         <h2>Redeem a gift card</h2>
         <p className="muted small-text">When a client pays with a gift card, enter its code and how much to take off.</p>
         <RedeemForm notePlaceholder={sample(await getMyTemplate()).giftNote} />

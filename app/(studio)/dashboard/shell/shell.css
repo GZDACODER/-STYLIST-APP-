@@ -1,0 +1,597 @@
+/* =========================================================
+   The pro app's frame (shell/AppShell.js), owner's redesign spec.
+   Dark nav, cream content, gold accent, serif headings.
+   ========================================================= */
+.db {
+  --sh-w: 248px;
+  --sh-ink: #0e0d0b;
+  --sh-text: #f5f1ea;
+  --sh-soft: rgba(245, 241, 234, 0.62);
+  --sh-line: rgba(245, 241, 234, 0.1);
+  --sh-gold: #c8a96a;
+  --sh-blur: 16px;
+}
+
+/* The old frame is replaced. */
+.db .db-side,
+.db .db-topbar {
+  display: none !important;
+}
+
+/* ---------- The nav (wide screens), also the drawer ---------- */
+.sh-side {
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 30;
+  width: var(--sh-w);
+  display: flex;
+  flex-direction: column;
+  background: var(--sh-ink);
+  color: var(--sh-text);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.sh-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 26px 22px 18px;
+  color: var(--sh-text);
+  text-decoration: none;
+}
+
+.sh-brand-name {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.4rem;
+  font-weight: 500;
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+
+.sh-brand-mark {
+  font-family: var(--font-script), cursive;
+  font-size: 1rem;
+  color: rgba(245, 241, 234, 0.5);
+}
+
+.sh-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 16px 10px;
+  min-height: 40px;
+  padding: 0 10px;
+  border: 1px solid var(--sh-line);
+  border-radius: 8px;
+  background: rgba(245, 241, 234, 0.05);
+  color: var(--sh-soft);
+  font: inherit;
+  font-size: 0.86rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.sh-search span {
+  flex: 1;
+}
+
+.sh-search:hover {
+  color: var(--sh-text);
+  border-color: rgba(245, 241, 234, 0.22);
+}
+
+.sh-kbd {
+  padding: 1px 6px;
+  border: 1px solid var(--sh-line);
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.7rem;
+  color: var(--sh-soft);
+}
+
+.sh-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 8px 10px 16px;
+}
+
+.sh-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.sh-group-label {
+  margin: 0 0 4px;
+  padding: 0 12px;
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(245, 241, 234, 0.42);
+}
+
+.sh-more > summary {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  list-style: none;
+  cursor: pointer;
+  min-height: 28px;
+}
+
+.sh-more > summary::-webkit-details-marker {
+  display: none;
+}
+
+.sh-more .sh-chev {
+  transition: transform 0.15s;
+}
+
+.sh-more[open] .sh-chev {
+  transform: rotate(90deg);
+}
+
+.db .sh-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 40px;
+  padding: 0 12px;
+  border-radius: 8px;
+  color: var(--sh-soft);
+  text-decoration: none;
+  font-size: 0.92rem;
+  font-weight: 500;
+}
+
+.db .sh-link:hover {
+  color: var(--sh-text);
+  background: rgba(245, 241, 234, 0.05);
+}
+
+.db .sh-link.active {
+  color: var(--sh-text);
+  background: rgba(200, 169, 106, 0.12);
+}
+
+.db .sh-link.active .sh-icon {
+  color: var(--sh-gold);
+}
+
+.sh-icon {
+  flex: none;
+}
+
+.sh-foot {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 10px 22px;
+  border-top: 1px solid var(--sh-line);
+}
+
+.sh-email {
+  padding: 0 12px;
+  font-size: 0.76rem;
+  color: rgba(245, 241, 234, 0.45);
+  overflow-wrap: anywhere;
+}
+
+.sh-logout {
+  min-height: 32px;
+  padding: 0 12px;
+  border: 0;
+  background: none;
+  color: rgba(245, 241, 234, 0.75);
+  font: inherit;
+  font-size: 0.84rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+/* ---------- Top bar, tab bar, "+" (hidden on wide screens) ---------- */
+.sh-top,
+.sh-tabs,
+.sh-fab {
+  display: none;
+}
+
+.sh-top {
+  position: sticky;
+  top: 0;
+  z-index: 25;
+  align-items: center;
+  gap: 8px;
+  min-height: 56px;
+  padding: 0 8px;
+  padding-top: env(safe-area-inset-top);
+  background: var(--sh-ink);
+  color: var(--sh-text);
+}
+
+.db .sh-top-brand {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.25rem;
+  color: var(--sh-text);
+  text-decoration: none;
+}
+
+.sh-top-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.sh-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 29;
+  border: 0;
+  padding: 0;
+  background: rgba(14, 13, 11, 0.4);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  cursor: default;
+}
+
+/* ---------- Layers: More sheet and quick actions ---------- */
+.sh-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+}
+
+.sh-layer > .sh-scrim {
+  z-index: 0;
+}
+
+.sh-sheet,
+.sh-quick {
+  position: absolute;
+  z-index: 1;
+  background: rgba(251, 248, 242, 0.86);
+  -webkit-backdrop-filter: blur(var(--sh-blur)) saturate(1.2);
+  backdrop-filter: blur(var(--sh-blur)) saturate(1.2);
+  color: var(--ink, #0e0d0b);
+  box-shadow: 0 24px 60px -12px rgba(14, 13, 11, 0.35);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .sh-sheet,
+  .sh-quick {
+    background: #fbf8f2;
+  }
+
+  .sh-scrim {
+    background: rgba(14, 13, 11, 0.55);
+  }
+}
+
+.sh-handle {
+  display: none;
+  width: 40px;
+  height: 5px;
+  margin: 8px auto 4px;
+  border-radius: 3px;
+  background: rgba(14, 13, 11, 0.18);
+}
+
+/* Quick actions: a centred panel on wide screens. */
+.sh-quick {
+  top: 12vh;
+  left: 50%;
+  width: min(560px, calc(100vw - 32px));
+  max-height: 70vh;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(14, 13, 11, 0.1);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.sh-quick-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 6px 6px 16px;
+  border-bottom: 1px solid rgba(14, 13, 11, 0.08);
+}
+
+.sh-quick-search input {
+  flex: 1;
+  min-width: 0;
+  min-height: 48px;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 16px;
+  color: inherit;
+  outline: none;
+}
+
+.sh-quick-title {
+  margin: 14px 18px 6px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(14, 13, 11, 0.55);
+}
+
+.sh-quick-list {
+  list-style: none;
+  margin: 0;
+  padding: 6px;
+  overflow-y: auto;
+}
+
+.sh-quick-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 46px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 0.95rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.sh-quick-item.active {
+  background: rgba(168, 135, 77, 0.14);
+}
+
+.sh-quick-ico {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: #fff;
+  border: 1px solid rgba(14, 13, 11, 0.08);
+  color: #a8874d;
+}
+
+.sh-quick-label {
+  flex: 1;
+}
+
+.sh-quick-kind {
+  font-size: 0.76rem;
+  color: rgba(14, 13, 11, 0.45);
+}
+
+.sh-quick-empty {
+  padding: 18px 14px;
+  color: rgba(14, 13, 11, 0.55);
+}
+
+/* The More sheet (phones). */
+.sh-sheet {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 0 12px calc(16px + env(safe-area-inset-bottom));
+  border-radius: 18px 18px 0 0;
+}
+
+.sh-sheet .sh-handle {
+  display: block;
+}
+
+.sh-sheet-list {
+  display: grid;
+  gap: 2px;
+}
+
+.db .sh-sheet .sh-link {
+  min-height: 48px;
+  color: #0e0d0b;
+}
+
+.db .sh-sheet .sh-link.active {
+  background: rgba(168, 135, 77, 0.14);
+}
+
+.db .sh-sheet .sh-link .sh-icon {
+  color: #a8874d;
+}
+
+.sh-sheet-label {
+  margin: 14px 0 4px;
+  color: rgba(14, 13, 11, 0.5);
+}
+
+.sh-sheet-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(14, 13, 11, 0.1);
+}
+
+.sh-sheet-foot .sh-email {
+  padding: 0;
+  color: rgba(14, 13, 11, 0.55);
+}
+
+.sh-sheet-foot .sh-logout {
+  min-height: 44px;
+  color: #0e0d0b;
+}
+
+/* ---------- Layout by width ---------- */
+@media (min-width: 1024px) {
+  .db .db-main {
+    margin-left: var(--sh-w);
+  }
+}
+
+/* Tablets: the nav becomes a drawer, opened from the top bar. */
+@media (max-width: 1023px) {
+  .db .db-main {
+    margin-left: 0;
+  }
+
+  .sh-top {
+    display: flex;
+  }
+
+  .sh-side {
+    transform: translateX(-100%);
+    transition: transform 0.22s ease;
+    width: min(300px, 86vw);
+    z-index: 31;
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .sh-side.open {
+    transform: none;
+    box-shadow: 24px 0 60px rgba(0, 0, 0, 0.35);
+  }
+
+  .sh-side .sh-search {
+    display: none;
+  }
+}
+
+/* Phones: bottom tab bar, "+", full-screen quick actions, lighter blur. */
+@media (max-width: 767px) {
+  .db {
+    --sh-blur: 8px;
+  }
+
+  .sh-menu {
+    display: none;
+  }
+
+  .sh-top {
+    padding-left: 16px;
+  }
+
+  .sh-tabs {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 25;
+    display: flex;
+    background: var(--sh-ink);
+    border-top: 1px solid var(--sh-line);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .db .sh-tab {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    min-height: 56px;
+    border: 0;
+    background: none;
+    color: var(--sh-soft);
+    font: inherit;
+    font-size: 0.68rem;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .db .sh-tab.active {
+    color: var(--sh-text);
+  }
+
+  .db .sh-tab.active .sh-icon {
+    color: var(--sh-gold);
+  }
+
+  .sh-fab {
+    position: fixed;
+    right: 16px;
+    bottom: calc(72px + env(safe-area-inset-bottom));
+    z-index: 26;
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    border: 0;
+    border-radius: 50%;
+    background: #a8874d;
+    color: #14110a;
+    box-shadow: 0 12px 28px rgba(14, 13, 11, 0.35);
+    cursor: pointer;
+  }
+
+  /* The Assistant's button moves left so it doesn't sit on the "+". */
+  .db .aw-launcher {
+    right: auto;
+    left: 16px;
+  }
+
+  .db .db-page {
+    padding-bottom: calc(140px + env(safe-area-inset-bottom));
+  }
+
+  /* Quick actions: full screen. */
+  .sh-quick {
+    inset: 0;
+    top: 0;
+    left: 0;
+    width: auto;
+    max-height: none;
+    transform: none;
+    border-radius: 0;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* From the "+": a bottom sheet instead. */
+  .sh-quick.is-actions {
+    inset: auto 0 0 0;
+    border-radius: 18px 18px 0 0;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  }
+
+  .sh-quick.is-actions .sh-handle {
+    display: block;
+  }
+
+  .sh-quick-item {
+    min-height: 52px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sh-side {
+    transition: none;
+  }
+}

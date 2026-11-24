@@ -3,11 +3,10 @@ import { cookies } from "next/headers";
 import { Cormorant_Garamond } from "next/font/google";
 import { createClient } from "@/lib/supabase/server";
 import { logout } from "@/app/auth/actions";
-import { BRAND_NAME } from "@/lib/brand";
 import PlanBanner from "./PlanBanner";
 import CreateStylistForm from "./CreateStylistForm";
 import { getMyPlan } from "@/lib/plan";
-import DashboardNav from "./DashboardNav";
+import AppShell from "./shell/AppShell";
 import AssistantWidget from "./assistant/AssistantWidget";
 import { PLANS } from "@/lib/plans";
 import { formatPrice } from "@/lib/money";
@@ -18,6 +17,7 @@ import { TemplateProvider } from "@/components/TemplateContext";
 import { getMyTemplate } from "@/lib/templates/server";
 import "./dashboard.css";
 import "./atelier.css";
+import "./shell/shell.css";
 
 // The same serif as the public booking page.
 const display = Cormorant_Garamond({
@@ -138,31 +138,8 @@ export default async function DashboardLayout({ children }) {
     <TemplateProvider value={tplValue}>
     <GuideProvider mode="pro" scope={user.id} initialSeen={isDemo(user) ? null : guidesSeen}>
     <div className={`db ${display.variable}`}>
-      <aside className="db-side">
-        <div className="db-brand">
-          <span className="db-brand-name">{stylist.business_name}</span>
-          <span className="db-brand-mark">{BRAND_NAME}</span>
-        </div>
-        <DashboardNav />
-        <div className="db-side-foot">
-          <span className="db-side-email">{user.email}</span>
-          <form action={logout}>
-            <button type="submit" className="db-logout">
-              Log out
-            </button>
-          </form>
-        </div>
-      </aside>
-
-      {/* Phones and iPad portrait: a slim bar at the top (the nav moves to the bottom). */}
-      <header className="db-topbar">
-        <span className="db-brand-name">{stylist.business_name}</span>
-        <form action={logout}>
-          <button type="submit" className="db-logout">
-            Log out
-          </button>
-        </form>
-      </header>
+      {/* The frame: grouped nav, drawer, phone tab bar, quick actions. */}
+      <AppShell businessName={stylist.business_name} email={user.email} logout={logout} />
 
       <main className="db-main">
         <div className="db-page">
