@@ -20,7 +20,7 @@ export async function runningLateByLink(token, minutes) {
   }
   const row = data?.[0];
   if (row && emailConfigured()) {
-    const to = (await stylistEmails(admin, [row.stylist_id]))[row.stylist_id];
+    const to = (await stylistEmails(admin, [row.stylist_id], "running_late"))[row.stylist_id];
     if (to) {
       const late = row.minutes >= 15 ? "15+ minutes" : `${row.minutes} minutes`;
       await sendEmails([

@@ -5,8 +5,9 @@ import { BRAND_NAME } from "@/lib/brand";
 import SettingsShell from "@/components/dash/SettingsShell";
 import { createClient } from "@/lib/supabase/server";
 import SupportAccessForm from "../SupportAccessForm";
+import { DataSection } from "../parts/data";
 
-export const metadata = { title: `Support access · ${BRAND_NAME}` };
+export const metadata = { title: `Privacy & support · ${BRAND_NAME}` };
 
 const when = (iso, zone) =>
   new Date(iso).toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit", timeZone: zone });
@@ -73,6 +74,9 @@ export default async function Page() {
           </ul>
         )}
       </section>
+      <div id="data">
+        <DataSection />
+      </div>
     </SettingsShell>
   );
 }
