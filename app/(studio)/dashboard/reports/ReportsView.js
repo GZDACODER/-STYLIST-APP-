@@ -44,7 +44,7 @@ export default function ReportsView({ period, range, today, s: thisPeriod, befor
     <>
       <PageHeader
         guide="reports"
-        title="Reports"
+        title="Insights"
         subtitle={
           <>
             {label}: {formatDate(range.from)} – {formatDate(range.to)}

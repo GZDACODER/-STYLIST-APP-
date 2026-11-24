@@ -96,7 +96,7 @@ const ITEMS = [
   { href: "/dashboard/money", label: "Money", icon: "money", wide: true },
   // In the side menu only (phones reach it from Settings > Public profile).
   { href: "/dashboard/reviews", label: "Reviews", icon: "reviews", wide: true },
-  { href: "/dashboard/reports", label: "Reports", icon: "reports", wide: true, module: "reports" },
+  { href: "/dashboard/reports", label: "Insights", icon: "reports", wide: true, module: "reports" },
   {
     href: "/dashboard/settings",
     label: "Settings",

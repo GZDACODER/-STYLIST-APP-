@@ -9,9 +9,11 @@ import { nowLocal } from "@/lib/localTime";
 import { BRAND_NAME } from "@/lib/brand";
 import { PERIODS, addDays, daysBetween, owedTotals, periodRange, revenueSeries, summarize } from "@/lib/reports";
 import ReportsView from "./ReportsView";
+import InsightsView from "./InsightsView";
+import { insights } from "@/lib/insights";
 import { exampleReportData, examplesOn } from "@/lib/examples";
 
-export const metadata = { title: `Reports · ${BRAND_NAME}` };
+export const metadata = { title: `Insights · ${BRAND_NAME}` };
 
 const COLUMNS =
   "id, booking_date, start_time, status, price_cents, deposit_cents, deposit_status, deposit_paid_at, outcome, client_id";
@@ -61,7 +63,7 @@ export default async function ReportsPage({ searchParams }) {
   if (rows === null) {
     return (
       <>
-        <PageHeader title="Reports" />
+        <PageHeader title="Insights" />
         <p className="message error">Couldn&apos;t load your bookings: {loadError?.message}</p>
       </>
     );
@@ -146,7 +148,48 @@ export default async function ReportsPage({ searchParams }) {
 
   const topRegulars = [...tally.values()].sort((a, b) => b.visits - a.visits || b.cents - a.cents).slice(0, 5);
 
+  // Insights (step 63 SQL): about a year of bookings plus what's booked ahead.
+  let insightData = null;
+  if (!example) {
+    const back = addDays(today, -400) < range.prevFrom ? addDays(today, -400) : range.prevFrom;
+    const [{ data: all, error: allError }, { data: pays }, { data: hours }, { data: inv }] = await Promise.all([
+      supabase
+        .from("bookings")
+        .select("id, client_id, client_name, service_id, service_name, booking_date, start_time, status, outcome, price_cents, cancelled_at")
+        .gte("booking_date", back)
+        .lte("booking_date", addDays(today, 120))
+        .limit(10000),
+      supabase.from("payments").select("kind, amount_cents, paid_on").gte("paid_on", range.from).lte("paid_on", range.to).limit(5000),
+      supabase.from("working_hours").select("weekday, is_working, start_time, end_time"),
+      supabase.from("clients").select("id, email, invited_back_at"),
+    ]);
+    if (!allError) {
+      const toLocal = (iso) => (iso ? new Intl.DateTimeFormat("sv-SE", { timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(iso)).replace(" ", "T") : null);
+      const workingCells = new Set();
+      for (const h of hours || []) {
+        if (!h.is_working || !h.start_time || !h.end_time) continue;
+        const d = (h.weekday + 6) % 7;
+        if (h.start_time < "12:00") workingCells.add(`${d}-0`);
+        if (h.start_time < "17:00" && h.end_time > "12:00") workingCells.add(`${d}-1`);
+        if (h.end_time > "17:00") workingCells.add(`${d}-2`);
+      }
+      insightData = {
+        x: insights({
+          bookings: (all || []).map((b) => ({ ...b, cancelled_local: toLocal(b.cancelled_at) })),
+          payments: pays || [],
+          range: { ...range, prevTo },
+          now,
+          today,
+          workingCells,
+        }),
+        invitedRecently: new Set((inv || []).filter((c) => c.invited_back_at && Date.now() - new Date(c.invited_back_at).getTime() < 30 * 86400000).map((c) => c.id)),
+        emailOf: Object.fromEntries((inv || []).filter((c) => c.email).map((c) => [c.id, true])),
+      };
+    }
+  }
+
   return (
+    <>
     <ReportsView
       period={period}
       range={range}
@@ -159,5 +202,7 @@ export default async function ReportsPage({ searchParams }) {
       feedback={feedback}
       example={example}
     />
+    {insightData && <InsightsView {...insightData} compare={range.compare} />}
+    </>
   );
 }
