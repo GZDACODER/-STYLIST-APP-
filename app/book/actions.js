@@ -399,7 +399,7 @@ export async function sendRequest({ slug, serviceId, name, email, phone, idea, p
 async function emailNewRequest(r) {
   if (!emailConfigured()) return;
   const admin = createAdminClient();
-  const to = (await stylistEmails(admin, [r.stylistId]))[r.stylistId];
+  const to = (await stylistEmails(admin, [r.stylistId], "requests"))[r.stylistId];
   const site = await siteOrigin();
   const messages = [];
   if (to) {
