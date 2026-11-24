@@ -1,8 +1,10 @@
 "use client";
 
 // Homepage feature explorer: one tab at a time instead of a long scroll.
-// Each tab has a short pitch, three points and a small picture drawn in code.
+// Each tab has a short pitch, three points and a real screenshot of the
+// redesigned page: the dashboard in a frosted window, public pages in a phone.
 import { useEffect, useRef, useState } from "react";
+import { DeskShot, PhoneShot } from "./Shots";
 
 // The six parts of the suite. Each: a short pitch, three points and a small
 // real screenshot of Clientele from the live demo.
@@ -22,8 +24,9 @@ const TABS = [
   },
   {
     key: "regulars",
-    shot: "regulars",
-    alt: "Today in Clientele: appointments with Regular badges and deposits paid",
+    shot: "dash-today",
+    desk: true,
+    alt: "Today in Clientele: the date, appointments with Regular badges and deposits paid, next up and open times",
     label: "Regulars first",
     title: "Your best clients never fight for a spot.",
     text: "The clients who keep your book full get first pick of your time. Everyone else books what's left.",
@@ -35,8 +38,9 @@ const TABS = [
   },
   {
     key: "money",
-    shot: "money",
-    alt: "Money in Clientele: earnings this month, tips, product sales and a chart",
+    shot: "dash-money",
+    desk: true,
+    alt: "Money in Clientele: earned, deposits online, owed to you and payouts, a chart and how you were paid",
     label: "Money",
     title: "Every dollar in one place.",
     text: "What you earned by day, week, month or year, including cash, Zelle and Cash App. Balances owed, payouts and gift cards too.",
@@ -48,8 +52,9 @@ const TABS = [
   },
   {
     key: "clients",
-    shot: "clients",
-    alt: "Clients in Clientele: Regular and new clients with phone numbers",
+    shot: "dash-clients",
+    desk: true,
+    alt: "Clients in Clientele: a table of names, phones, last and next visits, with Regular tags",
     label: "Clients",
     title: "Remember everything about everyone.",
     text: "Notes on every visit, their look and formulas, intake forms and signed waivers, all on the client's card.",
@@ -74,8 +79,9 @@ const TABS = [
   },
   {
     key: "insights",
-    shot: "insights",
-    alt: "Insights in Clientele: rebooking, came back, new clients and average ticket",
+    shot: "dash-insights",
+    desk: true,
+    alt: "Insights in Clientele: revenue and visits this month, how clients come back and top regulars",
     label: "Insights",
     title: "Know what's working.",
     text: "Rebooking, no-shows, your busiest and quietest times, top services and average ticket, compared with last month.",
@@ -86,17 +92,6 @@ const TABS = [
     ],
   },
 ];
-
-// A real screen from the live demo, in a phone frame (public/home/*.webp,
-// taken from the demo accounts; retake them when the app's look changes).
-export function PhoneShot({ src, alt }) {
-  return (
-    <figure className="hm-phone">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={`/home/${src}.webp`} alt={alt} width={620} height={1056} loading="lazy" decoding="async" />
-    </figure>
-  );
-}
 
 export default function FeatureTabs() {
   const [active, setActive] = useState(0);
@@ -118,8 +113,8 @@ export default function FeatureTabs() {
   }
 
   return (
-    <div className="hm-fx" onMouseEnter={() => setPaused(true)}>
-      <div className="hm-fx-tabs" role="tablist" aria-label="Features" ref={tabsRef}>
+    <div className="ln-fx" onMouseEnter={() => setPaused(true)}>
+      <div className="ln-tabs" role="tablist" aria-label="Features" ref={tabsRef}>
         {TABS.map((t, i) => (
           <button
             key={t.key}
@@ -128,25 +123,25 @@ export default function FeatureTabs() {
             id={`fx-tab-${t.key}`}
             aria-selected={i === active}
             aria-controls="fx-panel"
-            className={i === active ? "hm-fx-tab active" : "hm-fx-tab"}
+            className={i === active ? "ln-tab active" : "ln-tab"}
             onClick={() => pick(i)}
           >
             {t.label}
           </button>
         ))}
       </div>
-      <div className="hm-fx-panel" role="tabpanel" id="fx-panel" aria-labelledby={`fx-tab-${tab.key}`} key={tab.key}>
-        <div className="hm-fx-copy">
+      <div className={tab.desk ? "ln-fx-panel" : "ln-fx-panel is-phone"} role="tabpanel" id="fx-panel" aria-labelledby={`fx-tab-${tab.key}`} key={tab.key}>
+        <div className="ln-fx-copy">
           <h3>{tab.title}</h3>
           <p>{tab.text}</p>
-          <ul className="hm-points">
+          <ul className="ln-points">
             {tab.points.map((p) => (
               <li key={p}>{p}</li>
             ))}
           </ul>
         </div>
-        <div className="hm-fx-visual">
-          <PhoneShot src={tab.shot} alt={tab.alt} />
+        <div className={tab.desk ? "ln-fx-visual is-desk" : "ln-fx-visual"}>
+          {tab.desk ? <DeskShot src={tab.shot} alt={tab.alt} /> : <PhoneShot src={tab.shot} alt={tab.alt} />}
         </div>
       </div>
     </div>
