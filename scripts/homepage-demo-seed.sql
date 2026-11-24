@@ -25,7 +25,9 @@ begin
   -- Past visits this month.
   for i in 0..15 loop
     d := today - (1 + i * 1.3)::int;
-    if extract(dow from d) in (0, 1) then continue; end if;
+    -- Closed Sunday and Monday: move to the Saturday before (skipping lost
+    -- the one "balance owed" visit when it fell on a Sunday).
+    if extract(dow from d) = 0 then d := d - 1; elsif extract(dow from d) = 1 then d := d - 2; end if;
     insert into public.bookings (stylist_id, service_id, service_name, price_cents, booking_date, start_time, end_time, client_id, client_name, client_email, client_phone, status, outcome, cancel_token, confirmation_sent_at, reminder_sent_at, after_visit_sent_at)
     values (demo, sv[1 + i % 4], sn[1 + i % 4], sp[1 + i % 4], d, time '10:00' + (i % 3) * interval '2 hours', time '10:00' + (i % 3) * interval '2 hours' + make_interval(mins => least(sd[1 + i % 4], 120)),
             ids[1 + (i * 3) % 7], names[1 + (i * 3) % 7], 'shot' || (1 + (i * 3) % 7) || '@example.com', '555010' || lpad((40 + 1 + (i * 3) % 7)::text, 4, '0'), 'confirmed',
