@@ -10,7 +10,7 @@ import { EXAMPLE_IMPORT } from "@/lib/examples";
 import { ExampleTag } from "@/components/dash/Example";
 
 // example: show what an imported list looks like (a new pro, examples on).
-export default function ImportClients({ example = false }) {
+export default function ImportClients({ example = false, importNotes }) {
   const [fileName, setFileName] = useState("");
   const [headers, setHeaders] = useState([]);
   const [rows, setRows] = useState([]);
@@ -107,7 +107,7 @@ export default function ImportClients({ example = false }) {
                 This is what a list from Booksy looks like once it&apos;s read. Nothing here is saved.
               </p>
               <ul>
-                {EXAMPLE_IMPORT.rows.map((c) => (
+                {EXAMPLE_IMPORT.rows.map((c, i) => ({ ...c, note: importNotes?.[i] ?? c.note })).map((c) => (
                   <li key={c.name}>
                     <strong>{c.name}</strong>
                     {c.phone && ` · ${c.phone}`}

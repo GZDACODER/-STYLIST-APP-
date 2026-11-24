@@ -218,7 +218,7 @@ export default async function TodayPage() {
   // appointments.
   let lateNotices = await recentLateNotices(supabase);
   if (!lateNotices.length && exampleNext) {
-    lateNotices = [{ id: "example-late", minutes: 10, example: true, booking: { client_name: "Maya Jones", service_name: "Silk Press", start_time: "14:00:00" } }];
+    lateNotices = [{ id: "example-late", minutes: 10, example: true, booking: { client_name: "Maya Jones", service_name: (await getMyTemplate()).presets.services?.[0]?.name || "Appointment", start_time: "14:00:00" } }];
   }
 
   // What clients did from their email links in the last 3 days (step 53 SQL).

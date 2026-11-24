@@ -8,7 +8,7 @@ import { getMyPlan } from "@/lib/plan";
 import InviteList from "./InviteList";
 import ImportClients from "./ImportClients";
 import PageHeader from "@/components/dash/PageHeader";
-import { exampleData, examplesOn } from "@/lib/examples";
+import { exampleData, examplesOn, sample } from "@/lib/examples";
 import RowList from "@/components/dash/RowList";
 import { ExampleCard, ExampleTag } from "@/components/dash/Example";
 import { BRAND_NAME } from "@/lib/brand";
@@ -207,7 +207,7 @@ export default async function ClientsPage({ searchParams }) {
           <summary>
             <h2>Import clients</h2>
           </summary>
-          <ImportClients example={examples.length > 0} />
+          <ImportClients example={examples.length > 0} importNotes={sample(await getMyTemplate()).importNotes} />
         </details>
       </section>
 

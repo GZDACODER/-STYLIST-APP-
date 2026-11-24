@@ -11,6 +11,8 @@ import { getStripe } from "@/lib/stripe";
 import PageHeader from "@/components/dash/PageHeader";
 import SubmitButton from "@/components/SubmitButton";
 import { loadMoney } from "@/lib/moneyData";
+import { sample } from "@/lib/examples";
+import { getMyTemplate } from "@/lib/templates/server";
 import { KIND_LABEL, METHOD_LABEL, VIEWS } from "@/lib/moneyTab";
 import MoneyChart from "./MoneyChart";
 import RecordPayment from "./RecordPayment";
@@ -129,7 +131,7 @@ export default async function MoneyPage({ searchParams }) {
       <section className="card">
         <h2>Record a payment</h2>
         <p className="muted small-text">Cash, Zelle, Cash App or anything else you take outside the app: tips, product sales or other income.</p>
-        <RecordPayment clients={clients || []} today={m.today} />
+        <RecordPayment clients={clients || []} today={m.today} notePlaceholder={sample(await getMyTemplate()).paymentNote} />
       </section>
 
       <section className="card">

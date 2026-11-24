@@ -9,6 +9,8 @@ import { publicSiteUrl } from "@/lib/siteUrl";
 import PageHeader from "@/components/dash/PageHeader";
 import EmptyState from "@/components/dash/EmptyState";
 import { GiftSwitch, RedeemForm } from "./GiftForms";
+import { sample } from "@/lib/examples";
+import { getMyTemplate } from "@/lib/templates/server";
 
 export const metadata = { title: `Gift cards · ${BRAND_NAME}` };
 
@@ -61,7 +63,7 @@ export default async function GiftCardsPage() {
       <section className="card">
         <h2>Redeem a gift card</h2>
         <p className="muted small-text">When a client pays with a gift card, enter its code and how much to take off.</p>
-        <RedeemForm />
+        <RedeemForm notePlaceholder={sample(await getMyTemplate()).giftNote} />
       </section>
 
       <section className="card">

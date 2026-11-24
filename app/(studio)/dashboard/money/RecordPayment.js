@@ -6,7 +6,7 @@ import FormMessage from "@/components/FormMessage";
 import { KINDS, METHODS } from "@/lib/moneyTab";
 import { addPayment } from "./actions";
 
-export default function RecordPayment({ clients, today }) {
+export default function RecordPayment({ clients, today, notePlaceholder }) {
   const [state, action] = useActionState(addPayment, null);
   const form = useRef(null);
   useEffect(() => {
@@ -57,7 +57,7 @@ export default function RecordPayment({ clients, today }) {
       </label>
       <label>
         Note (optional)
-        <input name="note" maxLength={300} placeholder="e.g. Edge control, 2 jars" />
+        <input name="note" maxLength={300} placeholder={notePlaceholder} />
       </label>
       <SubmitButton pendingText="Saving...">Save payment</SubmitButton>
       <FormMessage state={state} />

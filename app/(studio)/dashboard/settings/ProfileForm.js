@@ -6,7 +6,7 @@ import SubmitButton from "@/components/SubmitButton";
 import FormMessage from "@/components/FormMessage";
 import { PROFILE_SHOW_KEYS, cleanHandle } from "@/lib/profileShared";
 
-export default function ProfileForm({ initial, site }) {
+export default function ProfileForm({ initial, site, hints = {} }) {
   const [state, formAction] = useActionState(saveProfile, null);
   const v = state?.values || null;
   const pick = (k, fallback) => (v ? v[k] ?? "" : fallback ?? "");
@@ -64,7 +64,7 @@ export default function ProfileForm({ initial, site }) {
         <h2>About you</h2>
         <label>
           Your name (owner)
-          <input name="owner_name" type="text" maxLength={80} defaultValue={pick("owner_name", initial.owner_name)} placeholder="e.g. Rosa Martinez" />
+          <input name="owner_name" type="text" maxLength={80} defaultValue={pick("owner_name", initial.owner_name)} placeholder={hints.owner} />
         </label>
         <label>
           City or area
@@ -73,11 +73,11 @@ export default function ProfileForm({ initial, site }) {
         <p className="muted small-text">Just the area. Your street address is never shown here.</p>
         <label>
           Bio
-          <textarea name="bio" rows={5} maxLength={1200} defaultValue={pick("bio", initial.bio)} placeholder="A few lines about you and your work." />
+          <textarea name="bio" rows={5} maxLength={1200} defaultValue={pick("bio", initial.bio)} placeholder={hints.bio} />
         </label>
         <label>
           Specialties
-          <input name="specialties" type="text" maxLength={300} defaultValue={pick("specialties", initial.specialties)} placeholder="e.g. Fine line, Black and grey, Cover-ups" />
+          <input name="specialties" type="text" maxLength={300} defaultValue={pick("specialties", initial.specialties)} placeholder={hints.specialties} />
         </label>
         <p className="muted small-text">Separate them with commas.</p>
         <label>
