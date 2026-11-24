@@ -9,7 +9,7 @@
   --bg-2: #13120f;
   --text: #f3efe6;
   --text-soft: #a9a294;
-  --text-faint: #7a7468;
+  --text-faint: #948c7e;
   --hair: rgba(243, 239, 230, 0.1);
   --hair-strong: rgba(243, 239, 230, 0.18);
   --gold: #b8975a;
@@ -211,8 +211,8 @@ body:has(.hm) {
 }
 
 .hm-hero h1 {
-  font-size: clamp(3rem, 11vw, 6.6rem);
-  line-height: 0.98;
+  font-size: clamp(2.5rem, 8.6vw, 5rem);
+  line-height: 1.02;
   font-weight: 400;
   letter-spacing: -0.025em;
 }
@@ -2133,7 +2133,6 @@ body:has(.hm) {
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--text-soft);
-  opacity: 0.75;
 }
 
 .hm-soon-tag {
@@ -2163,4 +2162,53 @@ body:has(.hm) {
   .hm-find-link {
     padding: 8px 2px;
   }
+}
+
+/* ---------- Homepage rewrite: new feature pictures and the trade switcher ---------- */
+.hm-fx-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 64px;
+  margin: 10px 0 12px;
+}
+
+.hm-fx-bars span {
+  flex: 1;
+  background: var(--gold);
+  opacity: 0.85;
+  border-radius: 2px 2px 0 0;
+}
+
+.hm-fx-stars {
+  font-size: 0.55em;
+  color: var(--gold);
+  vertical-align: middle;
+  margin-left: 6px;
+}
+
+.hm-fx-quote {
+  margin: 10px 0;
+  font-style: italic;
+  color: var(--text-soft);
+}
+
+.hm-trade-panel .hm-button {
+  margin-top: 18px;
+}
+
+/* The headline's second sentence on its own line. */
+.hm-hero h1 em {
+  display: block;
+  margin-top: 0.12em;
+}
+
+@media (min-width: 900px) {
+  .hm-hero h1 {
+    font-size: clamp(2.8rem, 4.7vw, 4.4rem);
+  }
+}
+
+.hm-trade {
+  margin-top: 22px;
 }
