@@ -195,7 +195,7 @@ export default async function HomePage() {
   const ex = Boolean(exampleStats);
   const allCards = {
     today: { label: `Today's ${W.appointments === "appointments" ? "bookings" : W.appointments}`, value: ex ? exampleStats.todays : dash(todays, todays.count ?? 0), href: "/dashboard/today" },
-    revenue: { label: "This week's revenue", value: ex ? money(exampleStats.weekRevenueCents) : dash(weekRows, money(weekRevenue)), note: "Booked Mon–Sun", href: "/dashboard/reports", module: "reports" },
+    revenue: { label: "This week's revenue", value: ex ? money(exampleStats.weekRevenueCents) : dash(weekRows, money(weekRevenue)), note: "Booked Mon–Sun", href: "/dashboard/money", module: "reports" },
     deposits: { label: "Deposits collected", value: ex ? money(exampleStats.depositsCents) : dash(paidDeposits, money(depositsThisWeek)), note: "This week", href: "/dashboard/reports", module: "deposits" },
     newClients: { label: `New ${W.clients}`, value: ex ? exampleStats.newClients : dash(newClients, newThisMonth), note: "This month", href: "/dashboard/clients" },
     waitlist: { label: "Waitlist", value: ex ? exampleStats.waiting : dash(waiting, waitingCount), note: "Waiting now", href: "/dashboard/waitlist", module: "waitlist" },
