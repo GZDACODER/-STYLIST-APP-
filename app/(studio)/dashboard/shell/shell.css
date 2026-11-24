@@ -1586,3 +1586,21 @@
 .db .in-cards {
   align-items: start;
 }
+
+/* Settings list rows: label and note on the left, chevron on the right
+   (the old numbered layout put them in a second column). */
+.db .settings-nav-link .settings-nav-label,
+.db .settings-nav-link .settings-nav-note {
+  grid-column: 1;
+  justify-self: start;
+  text-align: left;
+}
+
+.db .settings-nav-link .db-row-chevron {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+}
+
+.db .settings-nav-link {
+  padding-left: 12px;
+}
