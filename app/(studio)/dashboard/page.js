@@ -405,6 +405,11 @@ export default async function HomePage() {
         </div>
         <p className="muted small-text home-more-links">
           <Link href="/dashboard/today">Today</Link> · <Link href="/dashboard/money">Money</Link> · <Link href="/dashboard/reports">Insights</Link> ·{" "}
+          {tpl.modules.projects && (
+            <>
+              <Link href="/dashboard/projects">Projects</Link> ·{" "}
+            </>
+          )}
           <Link href="/dashboard/wrapup">Wrap up visits</Link> · <Link href="/dashboard/activity">Activity</Link> ·{" "}
           <Link href="/dashboard/feedback">Share feedback</Link>
           {isAdmin(user) && (

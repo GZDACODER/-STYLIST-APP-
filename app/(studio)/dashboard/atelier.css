@@ -1460,3 +1460,43 @@
   margin-bottom: 6px;
   font-weight: 600;
 }
+
+/* ---------- Projects ---------- */
+.db .pj-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.db .pj-bar {
+  display: block;
+  height: 6px;
+  margin-top: 8px;
+  background: var(--border);
+}
+
+.db .pj-bar > span {
+  display: block;
+  height: 100%;
+  background: var(--gold);
+}
+
+.db .pj-sessions {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.db .pj-sessions > li {
+  padding: 12px 0;
+  border-top: 1px solid var(--border);
+}
+
+.db .pj-sub {
+  margin: 20px 0 6px;
+  font-size: 1.1rem;
+}
+
+.db .pj-delete {
+  margin: 10px 0 30px;
+}
