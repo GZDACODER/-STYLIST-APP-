@@ -48,7 +48,8 @@ export default function ReportsView({ period, range, today, s: thisPeriod, befor
         subtitle={
           <>
             {label}: {formatDate(range.from)} – {formatDate(range.to)}
-            {through}. Revenue is the service price of visits that went ahead (not no-shows).
+            {through}. Revenue is the service price of visits that went ahead (not no-shows). Tips, cash and payouts
+            are in <a href="/dashboard/money">Money</a>.
           </>
         }
       />
