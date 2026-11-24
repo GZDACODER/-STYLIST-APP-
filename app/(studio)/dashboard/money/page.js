@@ -145,8 +145,8 @@ export default async function MoneyPage({ searchParams }) {
 
       <section className="card mn-summary">
         <MoneyChart series={t.series} today={m.today} />
-        <div className="g12 mn-breakdown">
-          <dl className="mn-lines span-6">
+        <div className={methods.length > 0 ? "stack-cols mn-breakdown" : "mn-breakdown"}>
+          <dl className="mn-lines stack-col">
             <div>
               <dt>
                 Services · {t.visits} {t.visits === 1 ? "visit" : "visits"}
@@ -167,7 +167,7 @@ export default async function MoneyPage({ searchParams }) {
             </div>
           </dl>
           {methods.length > 0 && (
-            <div className="span-6">
+            <div className="stack-col">
               <p className="muted small-text mn-sub">How you were paid</p>
               <dl className="mn-lines">
                 {methods.map(([k, c]) => (

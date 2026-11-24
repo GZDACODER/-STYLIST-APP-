@@ -311,7 +311,7 @@ export default async function HomePage() {
         </section>
       )}
 
-      <div className="g12">
+      <div className="g12 g12-even">
         <section className="card span-8">
           <div className="home-section-head">
             <h2>Up next</h2>
