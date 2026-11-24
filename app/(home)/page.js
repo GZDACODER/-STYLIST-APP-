@@ -3,7 +3,6 @@ import { createClient } from "@/lib/supabase/server";
 import { BRAND_NAME } from "@/lib/brand";
 import { DEPOSIT_FEE_FIXED_CENTS, DEPOSIT_FEE_PERCENT, PLANS, TRIAL_DAYS } from "@/lib/plans";
 import { formatPrice } from "@/lib/money";
-import HeroObject from "./HeroObject";
 import FeatureTabs from "./FeatureTabs";
 import PricingToggle from "./PricingToggle";
 import Icon from "./Icon";
@@ -177,7 +176,18 @@ export default async function HomePage() {
             </p>
           </div>
           <div className="hm-hero-visual">
-            <HeroObject />
+            {/* A real Clientele booking page (the demo), not a drawing. */}
+            <figure className="hm-phone hm-phone-hero">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/home/hero.webp"
+                alt="A Clientele booking page on a phone: the business name, a short tagline and their services"
+                width={620}
+                height={1056}
+                fetchPriority="high"
+                decoding="async"
+              />
+            </figure>
           </div>
         </section>
 

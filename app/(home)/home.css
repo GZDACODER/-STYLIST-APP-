@@ -2232,3 +2232,25 @@ body:has(.hm) {
   border-radius: 28px;
   background: #f5f1ea;
 }
+
+/* The hero's phone: a little larger, gently tilted on wide screens. */
+.hm-phone-hero {
+  width: min(78vw, 320px);
+}
+
+@media (min-width: 900px) {
+  .hm-phone-hero {
+    width: 340px;
+    transform: rotate(-3deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (min-width: 900px) {
+  .hm-phone-hero {
+    transition: transform 0.4s ease;
+  }
+
+  .hm-phone-hero:hover {
+    transform: rotate(0deg) translateY(-4px);
+  }
+}
