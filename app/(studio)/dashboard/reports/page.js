@@ -137,7 +137,8 @@ export default async function ReportsPage({ searchParams }) {
   if (example) {
     // Sample reviews that match the pro's trade (lib/templates samples).
     const tpl = await getMyTemplate();
-    const svc = (tpl.presets.services || []).map((x) => x.name);
+    // Reviews go on paid services (not a free consultation).
+    const svc = (tpl.presets.services || []).filter((x) => x.price_cents > 0).map((x) => x.name);
     feedbackRows = sample(tpl).reviews.slice(0, 3).map((r, i) => ({
       rating: r.rating,
       comment: i === 1 ? "" : r.comment,

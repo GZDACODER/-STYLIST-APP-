@@ -126,7 +126,7 @@ function Visual({ kind }) {
     case "deposit":
       return (
         <div className="hm-fx-card">
-          <p className="hm-fx-label">Silk press · Thu 10:30 AM</p>
+          <p className="hm-fx-label">Signature service · Thu 10:30 AM</p>
           <p className="hm-fx-big">$20 deposit</p>
           <p className="hm-fx-paid">Paid · goes to your Stripe</p>
           <p className="hm-fx-foot">“Cancel within 24 hours and the deposit is kept.” ✓ Agreed</p>
@@ -181,7 +181,7 @@ function Visual({ kind }) {
           <p className="hm-fx-big">
             Royalty Studio <span className="hm-fx-stars">★ 4.9</span>
           </p>
-          <p className="hm-fx-quote">“Best silk press I&apos;ve had. It lasted all week!”</p>
+          <p className="hm-fx-quote">“So easy to book, and right on time. Already booked my next one.”</p>
           <p className="hm-fx-foot">Next open: Thu 10:30 AM · 128 following</p>
           <span className="hm-fx-button">Notify me of openings</span>
         </div>
