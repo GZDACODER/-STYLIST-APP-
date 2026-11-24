@@ -43,7 +43,7 @@ export default async function ActivityPage({ searchParams }) {
 
   return (
     <>
-      <PageHeader title="Activity" subtitle="What clients did from their links, and everything Clientele support did on your account." />
+      <PageHeader guide="activity" title="Activity" subtitle="What clients did from their links, and everything Clientele support did on your account." />
       <p className={on ? "message success" : "message info"}>
         Support access is {on ? `on (${access.level === "edit" ? "view and edit" : "view only"}) until ${when(access.until)}` : "off"}.{" "}
         <Link href="/dashboard/settings/support">{on ? "Change or turn off" : "Settings"}</Link>

@@ -10,6 +10,7 @@ export default function FeedbackPage() {
   return (
     <>
       <PageHeader
+        guide="feedback"
         title="How's it going?"
         subtitle="Five quick questions about your trial. It takes about two minutes, and your answers go straight to the people building Clientele."
       />

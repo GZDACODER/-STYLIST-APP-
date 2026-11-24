@@ -59,7 +59,7 @@ export default async function ShareKitPage() {
 
   return (
     <>
-      <PageHeader title="Share kit" subtitle="Get your booking link in front of clients." />
+      <PageHeader guide="share" title="Share kit" subtitle="Get your booking link in front of clients." />
 
       <section className="card stack">
         <h2>Your booking link</h2>
