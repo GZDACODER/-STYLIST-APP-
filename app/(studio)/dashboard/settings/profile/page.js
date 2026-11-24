@@ -8,6 +8,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { cleanHandle, DEFAULT_SHOW, handleProblem } from "@/lib/profileShared";
 import { publicSiteUrl } from "@/lib/siteUrl";
 import ProfileForm from "../ProfileForm";
+import ClientLooks from "../ClientLooks";
+import { getMyTemplate } from "@/lib/templates/server";
 
 export const metadata = { title: `Public profile · ${BRAND_NAME}` };
 
@@ -35,6 +37,7 @@ export default async function Page() {
     .eq("id", user.id)
     .maybeSingle();
 
+  const myLookOn = (await getMyTemplate()).modules.myLook !== false;
   const { count: followers } = await supabase
     .from("profile_followers")
     .select("id", { count: "exact", head: true })
@@ -68,6 +71,7 @@ export default async function Page() {
             show: { ...DEFAULT_SHOW, ...(s.profile_show || {}) },
           }}
         />
+        {myLookOn && <ClientLooks />}
         </>
       )}
     </SettingsShell>

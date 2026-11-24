@@ -7,6 +7,7 @@ import { stylistEmails } from "@/lib/waitlist";
 import { clockTime } from "@/lib/availability";
 import { publicSiteUrl } from "@/lib/siteUrl";
 import { TOKEN_RE } from "@/lib/manageLink";
+import { revalidatePath } from "next/cache";
 
 export async function runningLateByLink(token, minutes) {
   if (!TOKEN_RE.test(String(token))) return { error: "This link doesn't work." };
@@ -36,4 +37,24 @@ export async function runningLateByLink(token, minutes) {
     }
   }
   return { success: true, minutes: row?.minutes };
+}
+
+// "My look" on the pro's public profile (step 61 SQL): the client's yes or
+// no, from the link in the email asking them.
+export async function lookConsentByLink(token, yes) {
+  if (!TOKEN_RE.test(String(token))) return { error: "This link doesn't work." };
+  const admin = createAdminClient();
+  const { data: b } = await admin
+    .from("bookings")
+    .select("id, look_photo_path, stylist:stylists(handle)")
+    .eq("cancel_token", String(token))
+    .maybeSingle();
+  if (!b?.look_photo_path) return { error: "This photo isn't shared any more." };
+  const { error } = await admin
+    .from("bookings")
+    .update({ look_consent: yes ? "yes" : "no", look_consent_at: new Date().toISOString() })
+    .eq("id", b.id);
+  if (error) return { error: "That didn't save. Please try again." };
+  if (b.stylist?.handle) revalidatePath(`/p/${b.stylist.handle}`);
+  return { ok: true, yes: Boolean(yes) };
 }

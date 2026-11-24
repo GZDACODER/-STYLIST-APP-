@@ -11,7 +11,7 @@ import MyBookings from "@/app/book/[slug]/MyBookings";
 import PageGuide from "@/components/guide/PageGuide";
 import RegularStar from "@/components/RegularStar";
 import { formatDate } from "@/lib/availability";
-import { clientSignOut, leaveFeedback, runningLate, saveBirthday } from "../actions";
+import { clientSignOut, leaveFeedback, lookConsent as saveLookConsent, runningLate, saveBirthday } from "../actions";
 
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const duration = (min) => {
@@ -228,7 +228,7 @@ function Birthday({ code, home }) {
   );
 }
 
-export default function ClientHome({ code, home, upcoming, today, zoneNote, lookPhoto, google }) {
+export default function ClientHome({ code, home, upcoming, today, zoneNote, lookPhoto, lookConsent, google }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const first = String(home.client_name || "").trim().split(/\s+/)[0];
@@ -315,6 +315,7 @@ export default function ClientHome({ code, home, upcoming, today, zoneNote, look
             <img src={lookPhoto} alt={`Your ${home.look.service_name}`} className="cl-look-photo" />
           )}
           {home.look.note && <p className="cl-look-note">{home.look.note}</p>}
+          {lookPhoto && lookConsent && <LookShare code={code} bookingId={home.look.booking_id} consent={lookConsent} proName={home.business_name} />}
         </section>
       )}
 
@@ -343,6 +344,47 @@ export default function ClientHome({ code, home, upcoming, today, zoneNote, look
           Sign out
         </button>
       </p>
+    </div>
+  );
+}
+
+// "Can your pro show this on their public profile?" Off unless they say yes;
+// they can change their mind any time (step 61 SQL).
+function LookShare({ code, bookingId, consent, proName }) {
+  const [answer, setAnswer] = useState(consent.answer);
+  const [error, setError] = useState(null);
+  const [pending, start] = useTransition();
+  const choose = (yes) =>
+    start(async () => {
+      setError(null);
+      const r = await saveLookConsent(code, bookingId, yes);
+      if (r.error) setError(r.error);
+      else setAnswer(r.consent);
+    });
+  return (
+    <div className="cl-look-share">
+      <p className="small-text">
+        {answer === "yes"
+          ? `${proName} may show this photo on their public profile (never with your name).`
+          : answer === "no"
+            ? "This photo is private between you and your pro."
+            : consent.asked
+              ? `${proName} asked to show this photo on their public profile. Your name is never shown with it.`
+              : `Happy for ${proName} to show this photo on their public profile? Your name is never shown with it.`}
+      </p>
+      <div className="row">
+        {answer !== "yes" && (
+          <button type="button" className="button small" disabled={pending} onClick={() => choose(true)}>
+            Yes, they can share it
+          </button>
+        )}
+        {answer !== "no" && (
+          <button type="button" className="button secondary small" disabled={pending} onClick={() => choose(false)}>
+            {answer === "yes" ? "Stop sharing it" : "Keep it private"}
+          </button>
+        )}
+      </div>
+      {error && <p className="message error">{error}</p>}
     </div>
   );
 }
