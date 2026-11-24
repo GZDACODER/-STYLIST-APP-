@@ -20,7 +20,7 @@ import Words from "@/components/Words";
 export const metadata = { title: `Clients · ${BRAND_NAME}` };
 
 export default async function ClientsPage({ searchParams }) {
-  const { add } = await searchParams;
+  const { add, client: clientParam } = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -197,6 +197,7 @@ export default async function ClientsPage({ searchParams }) {
           nextVisits={nextVisits}
           examples={examples}
           upcomingCounts={upcomingCounts}
+          openId={typeof clientParam === "string" && /^[0-9a-f-]{36}$/i.test(clientParam) ? clientParam : null}
         />
       </section>
 
