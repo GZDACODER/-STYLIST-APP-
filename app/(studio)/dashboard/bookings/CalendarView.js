@@ -297,7 +297,8 @@ export default function CalendarView({
           <BookingList days={days} seriesOf={seriesOf} today={today} />
         )
       ) : (
-        <>
+        <div className="mc-layout">
+          <div className="mc-month">
           <div className="mc-header">
             <button
               type="button"
@@ -323,6 +324,29 @@ export default function CalendarView({
                 Today
               </button>
             )}
+            <details className="mc-key">
+              <summary>Key</summary>
+              <div className="mc-legend">
+            <span>
+              <i className="mc-swatch today" /> Today
+            </span>
+            <span>
+              <i className="mc-swatch off" /> Day off
+            </span>
+            <span>
+              <i className="mc-swatch blocked" /> Blocked
+            </span>
+            <span>
+              <i className="mc-dot holiday" /> Holiday
+            </span>
+            <span>
+              <i className="mc-dot event" /> Your event
+            </span>
+            <span>
+              <i className="mc-dot event blocks" /> Bookings blocked
+            </span>
+              </div>
+            </details>
             {loadingMonth && (
               <span className="muted small-text" role="status">
                 Loading…
@@ -343,26 +367,6 @@ export default function CalendarView({
             ))}
             {cells}
           </div>
-
-          <div className="mc-legend">
-            <span>
-              <i className="mc-swatch today" /> Today
-            </span>
-            <span>
-              <i className="mc-swatch off" /> Day off
-            </span>
-            <span>
-              <i className="mc-swatch blocked" /> Blocked
-            </span>
-            <span>
-              <i className="mc-dot holiday" /> Holiday
-            </span>
-            <span>
-              <i className="mc-dot event" /> Your event
-            </span>
-            <span>
-              <i className="mc-dot event blocks" /> Bookings blocked
-            </span>
           </div>
 
           <div className="mc-day">
@@ -464,7 +468,7 @@ export default function CalendarView({
               </p>
             )}
           </div>
-        </>
+        </div>
       )}
 
       {openBooking?.example && (

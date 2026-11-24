@@ -302,9 +302,14 @@ export default async function TodayPage() {
         guide="today"
         subtitle={daySummary}
         actions={
-          <Link href="/dashboard/openings#add-opening" className="button small">
-            + Add opening
-          </Link>
+          <>
+            <Link href="/dashboard/wrapup" className="button small secondary">
+              Wrap up visits
+            </Link>
+            <Link href="/dashboard/openings#add-opening" className="button small">
+              + Add opening
+            </Link>
+          </>
         }
       />
 
@@ -351,8 +356,8 @@ export default async function TodayPage() {
 
       <StandingFlags flags={Array.isArray(standingFlags) ? standingFlags : []} />
 
-      <div className="db-today">
-      <section className="db-today-main">
+      <div className="db-today g12">
+      <section className="db-today-main card span-8">
         <div className="db-section-head">
           <h2><Words>{"Today's appointments"}</Words></h2>
           <span className="db-label">{timeZoneLabel(tz)} time</span>
@@ -470,7 +475,7 @@ export default async function TodayPage() {
       </section>
 
       {/* Below the timeline; a right-hand column on wide screens (1200px and up). */}
-      <aside className="db-today-side" aria-label="Coming up">
+      <aside className="db-today-side card span-4" aria-label="Coming up">
         <section>
           <div className="db-section-head">
             <h2>Next up</h2>
