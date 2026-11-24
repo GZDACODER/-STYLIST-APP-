@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useTemplate } from "@/components/TemplateContext";
 
 // Thin line icons, drawn for this app (24 x 24, 1.4px strokes).
-const ICONS = {
+export const ICONS = {
   home: (
     <>
       <path d="M3.5 11 12 4l8.5 7" />
