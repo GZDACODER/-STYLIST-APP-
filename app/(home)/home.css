@@ -9,19 +9,18 @@
   --bg-2: rgba(255, 252, 246, 0.72);
   --text: #12100d;
   --text-soft: #5f584d;
-  --text-faint: #7a7266;
+  --text-faint: #6b6357;
   --hair: rgba(14, 13, 11, 0.09);
   --hair-strong: rgba(14, 13, 11, 0.22);
   --gold: #a8874d;
-  --gold-light: #7d6232;
+  --gold-light: #7d6232; /* text gold: 5:1 on the cream */
   --gutter: 16px;
   --max: 1200px;
 
   min-height: 100vh;
-  background:
-    radial-gradient(1100px 760px at 88% -8%, rgba(207, 174, 108, 0.26), transparent 62%),
-    radial-gradient(900px 700px at -12% 60%, rgba(207, 174, 108, 0.14), transparent 60%),
-    var(--bg);
+  position: relative;
+  isolation: isolate;
+  background: var(--bg);
   color: var(--text);
   font-family: var(--font-sans), "Helvetica Neue", Arial, sans-serif;
   font-size: 16px;
@@ -33,6 +32,19 @@
 
 html:has(.hm) {
   scroll-behavior: smooth;
+}
+
+/* The gold glow on a fixed, screen-sized layer (cheap to paint), not the
+   whole page. The homepage draws its own (landing.css). */
+.hm:not(:has(.ln))::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(90vmax 65vmax at 88% -8%, rgba(207, 174, 108, 0.26), transparent 62%),
+    radial-gradient(75vmax 60vmax at -12% 75%, rgba(207, 174, 108, 0.14), transparent 60%);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -106,7 +118,7 @@ body:has(.hm) {
   font-family: var(--font-script), cursive;
   font-size: 1.9rem;
   line-height: 1.1;
-  color: var(--gold);
+  color: var(--gold-light);
   text-decoration: none;
   padding: 0 0.15em;
   white-space: nowrap;
@@ -194,7 +206,7 @@ body:has(.hm) {
   font-weight: 500;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--gold);
+  color: var(--gold-light);
   margin-bottom: 20px !important;
 }
 
@@ -394,7 +406,7 @@ body:has(.hm) {
 
 .hm-for li + li::before {
   content: "·";
-  color: var(--gold);
+  color: var(--gold-light);
   margin: 0 14px;
 }
 
@@ -742,7 +754,7 @@ body:has(.hm) {
 
 .hm-promises li::before {
   content: "✓";
-  color: var(--gold);
+  color: var(--gold-light);
   margin-right: 10px;
 }
 
@@ -932,7 +944,7 @@ body:has(.hm) {
 }
 
 .hm-compare thead th.is-us {
-  color: var(--gold);
+  color: var(--gold-light);
 }
 
 .hm-compare tbody th {
@@ -1000,7 +1012,7 @@ body:has(.hm) {
 
   .hm-compare td.is-us::before {
     content: "Clientele";
-    color: var(--gold);
+    color: var(--gold-light);
   }
 
   .hm-compare td:not(.is-us)::before {
@@ -1159,7 +1171,7 @@ body:has(.hm) {
   font-size: 0.72rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--gold);
+  color: var(--gold-light);
 }
 
 .hm-ledger ul {
@@ -1295,7 +1307,7 @@ body:has(.hm) {
 }
 
 .hm-legal li::marker {
-  color: var(--gold);
+  color: var(--gold-light);
 }
 
 .hm-legal ul + p {
@@ -1357,7 +1369,7 @@ body:has(.hm) {
 .hm-plan-list li::before {
   content: "✓";
   margin-right: 10px;
-  color: var(--gold);
+  color: var(--gold-light);
 }
 
 .hm-plan-team {
@@ -1402,7 +1414,7 @@ body:has(.hm) {
 
 .hm-noextra-list li::before {
   content: "✓";
-  color: var(--gold);
+  color: var(--gold-light);
   margin-right: 10px;
 }
 
@@ -1486,7 +1498,7 @@ body:has(.hm) {
 
 .hm-sw-check li::before {
   content: "✓";
-  color: var(--gold);
+  color: var(--gold-light);
   margin-right: 10px;
 }
 
@@ -1521,7 +1533,7 @@ body:has(.hm) {
   font-family: var(--font-display), Georgia, serif;
   font-size: 1.6rem;
   line-height: 1.1;
-  color: var(--gold);
+  color: var(--gold-light);
 }
 
 .hm-sw-steps h3 {
@@ -1609,7 +1621,7 @@ body:has(.hm) {
   position: absolute;
   right: 4px;
   top: 20px;
-  color: var(--gold);
+  color: var(--gold-light);
   font-size: 1.5rem;
 }
 
@@ -1956,7 +1968,7 @@ body:has(.hm) {
   right: 20px;
   font-family: var(--font-display), Georgia, serif;
   font-size: 1.6rem;
-  color: var(--gold);
+  color: var(--gold-light);
   opacity: 0.6;
 }
 
@@ -2142,7 +2154,7 @@ body:has(.hm) {
 .hm-soon-tag {
   display: inline-block;
   border: 1px solid var(--gold);
-  color: var(--gold);
+  color: var(--gold-light);
   border-radius: 999px;
   padding: 2px 10px;
   margin-right: 8px;
@@ -2186,7 +2198,7 @@ body:has(.hm) {
 
 .hm-fx-stars {
   font-size: 0.55em;
-  color: var(--gold);
+  color: var(--gold-light);
   vertical-align: middle;
   margin-left: 6px;
 }

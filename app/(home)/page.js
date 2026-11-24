@@ -326,19 +326,19 @@ export default async function HomePage() {
           </ul>
           <ol className="ln-steps">
             <li className="ln-card">
-              <span className="ln-step-n">1</span>
+              <span className="ln-step-n" aria-hidden="true">1</span>
               <Icon name="swap" />
               <h3>Import your client list</h3>
               <p>Export a spreadsheet from your old app and import it in a few taps. Names, phones, emails and notes come over.</p>
             </li>
             <li className="ln-card">
-              <span className="ln-step-n">2</span>
+              <span className="ln-step-n" aria-hidden="true">2</span>
               <Icon name="link" />
               <h3>We&apos;ll help you move</h3>
               <p>Can&apos;t find the export, or want it done for you? Email us the file and we&apos;ll import it.</p>
             </li>
             <li className="ln-card">
-              <span className="ln-step-n">3</span>
+              <span className="ln-step-n" aria-hidden="true">3</span>
               <Icon name="repeat" />
               <h3>Run both side by side</h3>
               <p>Bookings already made stay in your old app. New ones come to Clientele. Cancel the old one when you&apos;re ready.</p>

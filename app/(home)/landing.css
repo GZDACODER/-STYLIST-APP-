@@ -9,7 +9,7 @@
 .ln {
   --ink: #12100d;
   --soft: #5f584d;
-  --faint: #7a7266;
+  --faint: #6b6357;
   --gold: #a8874d;
   --gold-bright: #cfae6c;
   --gold-deep: #7d6232;
@@ -29,12 +29,24 @@
   font-family: var(--font-sans), "Helvetica Neue", Arial, sans-serif;
   font-size: 16px;
   line-height: 1.6;
-  background:
-    radial-gradient(1100px 760px at 88% -8%, rgba(207, 174, 108, 0.26), transparent 62%),
-    radial-gradient(900px 700px at -12% 40%, rgba(207, 174, 108, 0.14), transparent 60%),
-    radial-gradient(1000px 800px at 100% 85%, rgba(207, 174, 108, 0.16), transparent 60%),
-    #f4efe6;
+  position: relative;
+  isolation: isolate;
+  background: #f4efe6;
   -webkit-font-smoothing: antialiased;
+}
+
+/* The warm gold glow, on a layer the size of the screen fixed behind the
+   page. (Painted on the whole page, Chrome built it as one image several
+   thousand pixels tall, which cost phones about a second while loading.) */
+.ln::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(90vmax 65vmax at 88% -8%, rgba(207, 174, 108, 0.26), transparent 62%),
+    radial-gradient(75vmax 60vmax at -12% 75%, rgba(207, 174, 108, 0.15), transparent 60%);
 }
 
 body:has(.ln),
@@ -928,7 +940,7 @@ body:has(.ln),
   margin-left: 6px;
   font-size: 0.75rem;
   font-weight: 500;
-  color: var(--gold);
+  color: var(--gold-deep);
 }
 
 .ln-toggle button.active .ln-toggle-save {
