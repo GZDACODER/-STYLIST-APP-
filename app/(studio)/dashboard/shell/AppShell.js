@@ -15,6 +15,8 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTemplate } from "@/components/TemplateContext";
 import { ICONS as BASE_ICONS } from "../DashboardNav";
+import { quickClients } from "./actions";
+import { shareBookingLink } from "./share";
 
 const ICONS = {
   ...BASE_ICONS,
@@ -102,12 +104,15 @@ const MORE = [
 
 const SETTINGS = { href: "/dashboard/settings", label: "Settings", icon: "settings", also: ["/dashboard/services", "/dashboard/availability", "/dashboard/intake"] };
 
-// Quick actions. `fab`: also on the phone's "+" button.
+// Quick actions. `fab`: also on the phone's "+" button. `share`: shares
+// the booking link instead of going somewhere.
 const ACTIONS = [
   { href: "/dashboard/openings#add-opening", label: "Add opening", icon: "openings", fab: true },
   { href: "/dashboard/bookings?add=event", label: "Add event", icon: "calendar", fab: true },
   { href: "/dashboard/clients#add-client", label: "Add client", word: "aClient", icon: "clients", fab: true },
   { href: "/dashboard/money#record", label: "Record payment", icon: "money", fab: true },
+  { share: true, href: "#share", label: "Share booking link", icon: "share" },
+  { href: "/dashboard/share", label: "Share kit (QR code and story)", icon: "share" },
   { href: "/dashboard/gift-cards#redeem", label: "Redeem gift card", icon: "gift" },
 ];
 
@@ -126,7 +131,7 @@ function NavLink({ item, pathname, onClick }) {
   );
 }
 
-export default function AppShell({ businessName, email, logout }) {
+export default function AppShell({ businessName, slug, email, logout }) {
   const pathname = usePathname();
   const router = useRouter();
   const { words, modules } = useTemplate();
@@ -169,9 +174,18 @@ export default function AppShell({ businessName, email, logout }) {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  const go = (href) => {
+  const bookingUrl = `https://www.clientelesuite.com/book/${slug}`;
+  const [toast, setToast] = useState(null);
+  const go = async (item) => {
     setQuick(null);
-    router.push(href);
+    if (item.share) {
+      const r = await shareBookingLink(bookingUrl, businessName);
+      if (r === "copied") setToast("Booking link copied");
+      else if (r === "failed") setToast(bookingUrl);
+      if (r === "copied" || r === "failed") setTimeout(() => setToast(null), 2600);
+      return;
+    }
+    router.push(item.href);
   };
 
   const navBody = (onClick) => (
@@ -180,11 +194,6 @@ export default function AppShell({ businessName, email, logout }) {
         <span className="sh-brand-name">{businessName}</span>
         <span className="sh-brand-mark">Clientele</span>
       </Link>
-      <button type="button" className="sh-search" onClick={() => setQuick("all")}>
-        <Icon name="search" size={16} />
-        <span>Search or add…</span>
-        <kbd className="sh-kbd">{isMac ? "⌘K" : "Ctrl K"}</kbd>
-      </button>
       <nav className="sh-groups" aria-label="Main">
         {groups.map((g) => (
           <div key={g.label} className="sh-group">
@@ -240,10 +249,21 @@ export default function AppShell({ businessName, email, logout }) {
         <Link href="/dashboard" className="sh-top-brand">
           {businessName}
         </Link>
-        <button type="button" className="sh-top-btn" aria-label="Search and quick actions" onClick={() => setQuick("all")}>
+        {/* Search pill (with the keyboard hint), or just the icon on phones. */}
+        <button type="button" className="sh-pill" onClick={() => setQuick("all")}>
+          <Icon name="search" size={16} />
+          <span>Search…</span>
+          <kbd className="sh-kbd">{isMac ? "⌘K" : "Ctrl K"}</kbd>
+        </button>
+        <button type="button" className="sh-top-btn sh-search-icon" aria-label="Search and quick actions" onClick={() => setQuick("all")}>
           <Icon name="search" size={22} />
         </button>
       </header>
+      {toast && (
+        <p className="sh-toast" role="status">
+          {toast}
+        </p>
+      )}
 
       {/* Phones: the bottom tab bar and the "+" button. */}
       <nav className="sh-tabs" aria-label="Main">
@@ -298,6 +318,7 @@ export default function AppShell({ businessName, email, logout }) {
           mode={quick}
           actions={quick === "actions" ? actions.filter((a) => a.fab) : actions}
           pages={quick === "actions" ? [] : [...groups.flatMap((g) => g.items), ...more, SETTINGS]}
+          clientsWord={words.Clients || "Clients"}
           onGo={go}
           onClose={() => setQuick(null)}
         />
@@ -306,12 +327,28 @@ export default function AppShell({ businessName, email, logout }) {
   );
 }
 
-function QuickActions({ mode, actions, pages, onGo, onClose }) {
+function QuickActions({ mode, actions, pages, clientsWord, onGo, onClose }) {
   const [q, setQ] = useState("");
   const [at, setAt] = useState(0);
+  const [clients, setClients] = useState([]);
   const input = useRef(null);
-  const match = (x) => x.label.toLowerCase().includes(q.trim().toLowerCase());
-  const list = [...actions.filter(match).map((a) => ({ ...a, kind: "Add" })), ...pages.filter(match).map((p) => ({ ...p, kind: "Go to" }))];
+  // Clients to jump to (loaded when the search opens).
+  useEffect(() => {
+    if (mode !== "all") return;
+    let live = true;
+    quickClients().then((c) => live && setClients(c)).catch(() => {});
+    return () => {
+      live = false;
+    };
+  }, [mode]);
+  const term = q.trim().toLowerCase();
+  const match = (x) => x.label.toLowerCase().includes(term);
+  const people = term.length >= 1 ? clients.filter((c) => c.name.toLowerCase().includes(term)).slice(0, 8) : [];
+  const list = [
+    ...actions.filter(match).map((a) => ({ ...a, kind: a.share ? "Share" : "Add" })),
+    ...pages.filter(match).map((p) => ({ ...p, kind: "Go to" })),
+    ...people.map((c) => ({ href: `/dashboard/clients?client=${c.id}`, label: c.name, icon: "clients", kind: clientsWord })),
+  ];
   useEffect(() => {
     if (mode === "all") input.current?.focus();
   }, [mode]);
@@ -325,7 +362,7 @@ function QuickActions({ mode, actions, pages, onGo, onClose }) {
       setAt((i) => Math.max(0, i - 1));
     } else if (e.key === "Enter" && list[at]) {
       e.preventDefault();
-      onGo(list[at].href);
+      onGo(list[at]);
     }
   };
   return (
@@ -347,13 +384,13 @@ function QuickActions({ mode, actions, pages, onGo, onClose }) {
         <ul className="sh-quick-list" role="listbox">
           {list.length === 0 && <li className="sh-quick-empty">Nothing matches “{q}”.</li>}
           {list.map((x, i) => (
-            <li key={`${x.kind}${x.href}`} role="option" aria-selected={i === at}>
-              <button type="button" className={i === at ? "sh-quick-item active" : "sh-quick-item"} onMouseEnter={() => setAt(i)} onClick={() => onGo(x.href)}>
+            <li key={`${x.kind}${x.href}${x.label}`} role="option" aria-selected={i === at}>
+              <button type="button" className={i === at ? "sh-quick-item active" : "sh-quick-item"} onMouseEnter={() => setAt(i)} onClick={() => onGo(x)}>
                 <span className="sh-quick-ico">
                   <Icon name={x.kind === "Add" ? "plus" : x.icon} size={16} />
                 </span>
                 <span className="sh-quick-label">{x.label}</span>
-                <span className="sh-quick-kind">{x.kind === "Add" ? "" : "Go to"}</span>
+                <span className="sh-quick-kind">{x.kind === "Add" ? "" : x.kind}</span>
               </button>
             </li>
           ))}

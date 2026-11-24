@@ -40,7 +40,7 @@ export default async function DashboardLayout({ children }) {
 
   let { data: stylist } = await supabase
     .from("stylists")
-    .select("business_name")
+    .select("business_name, slug")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -56,7 +56,7 @@ export default async function DashboardLayout({ children }) {
     if (error) console.error("Couldn't repair stylist profile", error.code, error.message);
     ({ data: stylist } = await supabase
       .from("stylists")
-      .select("business_name")
+      .select("business_name, slug")
       .eq("id", user.id)
       .maybeSingle());
   }
@@ -139,7 +139,7 @@ export default async function DashboardLayout({ children }) {
     <GuideProvider mode="pro" scope={user.id} initialSeen={isDemo(user) ? null : guidesSeen}>
     <div className={`db ${display.variable}`}>
       {/* The frame: grouped nav, drawer, phone tab bar, quick actions. */}
-      <AppShell businessName={stylist.business_name} email={user.email} logout={logout} />
+      <AppShell businessName={stylist.business_name} slug={stylist.slug} email={user.email} logout={logout} />
 
       <main className="db-main">
         <div className="db-page">

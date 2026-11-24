@@ -87,13 +87,14 @@ function ClientRow({ client, next, today, duplicate, onOpen }) {
 
 // examples: example clients (lib/examples.js), shown only while there are
 // no real ones.
-export default function ClientList({ clients: realClients, standing, nextVisits = {}, upcomingCounts = {}, examples = [] }) {
+export default function ClientList({ clients: realClients, standing, nextVisits = {}, upcomingCounts = {}, examples = [], openId = null }) {
   const exampleMode = realClients.length === 0 && examples.length > 0;
   const clients = exampleMode ? examples : realClients;
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
   // The open card: { id, mergeWith } or null.
-  const [open, setOpen] = useState(null);
+  // ?client=<id> (from quick-actions search) opens that client's card.
+  const [open, setOpen] = useState(openId ? { id: openId, mergeWith: null } : null);
 
   // "Invited" isn't a status: invited clients are New (or Regular later).
   const inFilter = (c, value) =>
