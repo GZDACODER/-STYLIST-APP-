@@ -82,6 +82,14 @@ export default async function HomePage() {
           <a href="#pricing" className="hm-hide-phone">
             Pricing
           </a>
+          {/* Clients looking for their pro (search: /find). */}
+          <Link href="/find" className="hm-find-link" aria-label="Find your pro">
+            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <circle cx="10.5" cy="10.5" r="6.5" />
+              <path d="M15.5 15.5 20 20" />
+            </svg>
+            <span>Find your pro</span>
+          </Link>
           {user ? (
             <Link href={account.href} className="hm-button hm-button-small">
               {account.label}
@@ -126,19 +134,6 @@ export default async function HomePage() {
           <div className="hm-hero-visual">
             <HeroObject />
           </div>
-        </section>
-
-        {/* ---------- Clients: find your pro ---------- */}
-        <section className="hm-find" aria-label="Find your pro">
-          <form action="/find" method="get" role="search">
-            <label htmlFor="hm-find-q">Booking with someone? Find your pro</label>
-            <div className="hm-find-row">
-              <input id="hm-find-q" name="q" type="search" placeholder="Name or Pro ID" maxLength={80} enterKeyHint="search" />
-              <button type="submit" className="hm-button">
-                Search
-              </button>
-            </div>
-          </form>
         </section>
 
         {/* ---------- Who it's for ---------- */}
