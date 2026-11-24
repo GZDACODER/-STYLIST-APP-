@@ -126,13 +126,15 @@ body:has(.ln),
   text-align: center;
 }
 
-/* ---------- Frosted card ---------- */
+/* ---------- Frosted card ----------
+   Cards and mockups sit on the still gradient, where a live blur looks the
+   same as a translucent fill but costs a redraw on every frame (slow on
+   phones). So only the sticky nav and the phone menu, which move over
+   content, use backdrop-filter; everything else uses the glass fill. */
 .ln-card {
   border: 1px solid var(--glass-line);
   border-radius: 14px;
   background: var(--glass);
-  -webkit-backdrop-filter: var(--glass-filter);
-  backdrop-filter: var(--glass-filter);
   box-shadow: var(--glass-shadow);
 }
 
@@ -262,7 +264,7 @@ body:has(.ln),
   position: sticky;
   top: 0;
   z-index: 50;
-  background: rgba(250, 246, 239, 0.72);
+  background: rgba(250, 246, 239, 0.78);
   -webkit-backdrop-filter: var(--glass-filter);
   backdrop-filter: var(--glass-filter);
   border-bottom: 1px solid var(--glass-line);
@@ -474,8 +476,6 @@ body:has(.ln),
   border: 1px solid var(--glass-line);
   border-radius: 14px;
   background: var(--glass);
-  -webkit-backdrop-filter: var(--glass-filter);
-  backdrop-filter: var(--glass-filter);
   box-shadow: var(--glass-shadow), 0 40px 80px -40px rgba(60, 45, 20, 0.35);
 }
 
@@ -517,9 +517,7 @@ body:has(.ln),
   padding: 9px;
   border: 1px solid rgba(255, 255, 255, 0.7);
   border-radius: 36px;
-  background: rgba(255, 252, 246, 0.55);
-  -webkit-backdrop-filter: var(--glass-filter);
-  backdrop-filter: var(--glass-filter);
+  background: rgba(255, 252, 246, 0.82);
   box-shadow: var(--glass-shadow), 0 30px 60px -30px rgba(60, 45, 20, 0.4);
 }
 
