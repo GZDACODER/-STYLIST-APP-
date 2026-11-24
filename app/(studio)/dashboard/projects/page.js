@@ -6,6 +6,7 @@ import { BRAND_NAME } from "@/lib/brand";
 import PageHeader from "@/components/dash/PageHeader";
 import EmptyState from "@/components/dash/EmptyState";
 import { NewProjectForm, STATUS_LABEL } from "./ProjectForms";
+import { nowLocal } from "@/lib/localTime";
 
 export const metadata = { title: `Projects · ${BRAND_NAME}` };
 
@@ -17,19 +18,21 @@ export default async function ProjectsPage({ searchParams }) {
   if (!user) redirect("/login");
   const { show } = await searchParams;
   const done = show === "done";
-  const [{ data: projects, error }, { data: clients }, { data: links }] = await Promise.all([
+  const [{ data: projects, error }, { data: clients }, { data: links }, { data: me }] = await Promise.all([
     supabase.from("projects").select("id, title, client_name, placement, sessions_planned, status, updated_at").order("updated_at", { ascending: false }).limit(300),
     supabase.from("clients").select("id, name").order("name").limit(3000),
-    supabase.from("bookings").select("project_id, booking_date, status, outcome").not("project_id", "is", null).limit(5000),
+    supabase.from("bookings").select("project_id, booking_date, start_time, status, outcome").not("project_id", "is", null).limit(5000),
+    supabase.from("stylists").select("timezone").eq("id", user.id).maybeSingle(),
   ]);
   const all = projects || [];
   const list = all.filter((p) => (done ? p.status === "done" : p.status !== "done"));
-  const today = new Date().toISOString().slice(0, 10);
+  // "Done" means the session has started, in the pro's own time zone.
+  const now = nowLocal(me?.timezone || "America/Chicago");
   const countOf = {};
   for (const b of links || []) {
     if (b.status !== "confirmed" || b.outcome === "no_show") continue;
     const c = (countOf[b.project_id] ||= { done: 0, booked: 0 });
-    if (b.booking_date <= today) c.done += 1;
+    if (`${b.booking_date}T${String(b.start_time).slice(0, 5)}` <= now) c.done += 1;
     else c.booked += 1;
   }
 
