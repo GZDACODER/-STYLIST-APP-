@@ -32,14 +32,21 @@ function readClientForm(formData) {
   if (notes.length > 1000) return { error: "Please keep notes under 1000 characters." };
   if (!STATUS_VALUES.includes(status)) return { error: "Please pick Regular, New or Blocked." };
 
-  return {
-    client: { name, phone: phone || null, email: email || null, notes: notes || null, status },
-  };
+  const client = { name, phone: phone || null, email: email || null, notes: notes || null, status };
+  // Parent or guardian (step 68 SQL): only when the form has those fields.
+  if (formData.has("guardian_name")) {
+    const gName = String(formData.get("guardian_name") || "").trim().slice(0, 100);
+    const gEmail = String(formData.get("guardian_email") || "").trim().toLowerCase();
+    if (gEmail && (gEmail.length > 254 || !EMAIL_PATTERN.test(gEmail))) return { error: "The parent's email doesn't look right." };
+    client.guardian_name = gName || null;
+    client.guardian_email = gEmail || null;
+  }
+  return { client };
 }
 
 function formValues(formData) {
   return Object.fromEntries(
-    ["name", "phone", "email", "notes", "status"].map((key) => [key, String(formData.get(key) || "")])
+    ["name", "phone", "email", "notes", "status", "guardian_name", "guardian_email"].map((key) => [key, String(formData.get(key) || "")])
   );
 }
 

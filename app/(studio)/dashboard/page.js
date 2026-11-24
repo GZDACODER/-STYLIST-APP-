@@ -410,6 +410,11 @@ export default async function HomePage() {
               <Link href="/dashboard/projects">Projects</Link> ·{" "}
             </>
           )}
+          {tpl.modules.packages && (
+            <>
+              <Link href="/dashboard/packages">Packages</Link> ·{" "}
+            </>
+          )}
           <Link href="/dashboard/wrapup">Wrap up visits</Link> · <Link href="/dashboard/activity">Activity</Link> ·{" "}
           <Link href="/dashboard/feedback">Share feedback</Link>
           {isAdmin(user) && (

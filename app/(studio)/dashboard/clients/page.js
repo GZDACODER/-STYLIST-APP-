@@ -45,7 +45,7 @@ export default async function ClientsPage({ searchParams }) {
     supabase
       .from("clients")
       .select(
-        "id, name, phone, email, notes, status, auto_regular, completed_visits, invited_at, created_at"
+        "id, name, phone, email, notes, status, auto_regular, completed_visits, invited_at, created_at, guardian_name, guardian_email"
       )
       .order("name", { ascending: true }),
     supabase
