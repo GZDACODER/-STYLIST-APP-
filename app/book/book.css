@@ -2129,3 +2129,58 @@ body:has(dialog.pf-viewer[open]) {
   flex-wrap: wrap;
   gap: 8px;
 }
+
+/* Gift cards (/book/<slug>/gift) */
+.bk .gc-form {
+  display: grid;
+  gap: 14px;
+}
+
+.bk .gc-form fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.bk .gc-form label:not(.pp-chip) {
+  display: grid;
+  gap: 4px;
+  font-size: 0.9rem;
+}
+
+.bk .pp-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.bk .pp-chip input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.bk .pp-chip span {
+  display: inline-block;
+  padding: 10px 14px;
+  border: 1px solid var(--hair);
+  cursor: pointer;
+}
+
+.bk .pp-chip input:checked + span {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+
+.bk .pp-chip input:focus-visible + span {
+  outline: 2px solid var(--accent);
+}
+
+.bk .bk-gift-link {
+  margin: 18px 0 0;
+  text-align: center;
+  font-size: 0.9rem;
+}

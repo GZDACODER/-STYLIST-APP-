@@ -32,3 +32,4 @@ any), how it was tested live, and what happened. Newest at the bottom.
 | Nov 24 | Reports becomes Insights (PR 148, 149) | 63 | Stats, grid, invite back email | Works. Fixed: bookings without a client card weren't counted; owed ignored Money payments. |
 | Nov 24 | Support access levels, Support console, Activity page (PR 150) | 64 | Pro side on/off and Activity | Works. Console needs the owner's admin login; edit access left on Fresh Cuts Test for 24 hours to try. |
 | Nov 24 | Settings merged 15 → 12 sections; tips on every page | – | See next entry | Holidays → Hours, Email → Business, Agreements → Plan. Old links redirect. |
+| Nov 24 | Gift cards: buy on the booking page, Stripe, emails, redeem by code (PR 152) | 65 | See next entry | Sold to the pro's Stripe; redemption is one database step so a card can't be spent twice. |

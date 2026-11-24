@@ -2,6 +2,8 @@
 // out (see DEPOSITS_SETUP.md), and when a stylist's Clientele subscription
 // starts, changes or ends (see BILLING_SETUP.md), and when a client disputes
 // a deposit (charge.dispute.*: lib/disputes.js).
+import { finalizeGiftSession } from "@/lib/giftCards";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { finalizeCheckoutSession, getStripe, releaseCheckoutSession } from "@/lib/stripe";
 import { syncSubscription } from "@/lib/billing";
 import { handleDispute } from "@/lib/disputes";
@@ -57,6 +59,13 @@ export async function POST(request) {
       if (event.type === "checkout.session.completed" && object.subscription) {
         const id = typeof object.subscription === "string" ? object.subscription : object.subscription.id;
         await syncSubscription(await getStripe().subscriptions.retrieve(id));
+      }
+    } else if (event.type.startsWith("checkout.session.") && object.metadata?.gift_card_id) {
+      // A gift card (step 65 SQL): paid, or the payment page closed unpaid.
+      if (event.type === "checkout.session.completed" || event.type === "checkout.session.async_payment_succeeded") {
+        await finalizeGiftSession(object);
+      } else if (event.type === "checkout.session.expired" || event.type === "checkout.session.async_payment_failed") {
+        await createAdminClient().from("gift_cards").update({ status: "void" }).eq("id", object.metadata.gift_card_id).eq("status", "pending");
       }
     } else if (
       event.type === "checkout.session.completed" ||
