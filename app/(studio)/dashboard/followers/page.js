@@ -41,7 +41,7 @@ export default async function FollowersPage() {
 
   return (
     <>
-      <PageHeader title="Following you" subtitle="Clients who asked to hear when you have openings." />
+      <PageHeader guide="followers" title="Following you" subtitle="Clients who asked to hear when you have openings." />
       {error && <p className="message error">Opening alerts aren&apos;t set up yet (step 60 SQL).</p>}
       <section className="card">
         <p className="rv-big">{active.length}</p>

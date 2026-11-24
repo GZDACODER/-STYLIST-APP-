@@ -270,6 +270,7 @@ export default async function TodayPage() {
         mark={Number(today.slice(8))}
         eyebrow={dateLine.replace(/,? \d+$/, "").replace(", ", " · ")}
         title="Today"
+        guide="today"
         subtitle={daySummary}
         actions={
           <Link href="/dashboard/openings#add-opening" className="button small">

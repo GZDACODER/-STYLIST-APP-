@@ -8,6 +8,7 @@ import BlockDatesForm from "./BlockDatesForm";
 import SubmitButton from "@/components/SubmitButton";
 import { BRAND_NAME } from "@/lib/brand";
 import SettingsShell from "@/components/dash/SettingsShell";
+import { HolidaysSection } from "../settings/parts/holidays";
 import RowList from "@/components/dash/RowList";
 import Link from "next/link";
 
@@ -53,7 +54,7 @@ export default async function AvailabilityPage() {
       subtitle={
         <>
           Your week, and dates you can&apos;t work. Federal holidays are under{" "}
-          <Link href="/dashboard/settings/holidays">Holidays</Link>.
+          <a href="#holidays">Holidays</a>.
         </>
       }
     >
@@ -101,6 +102,10 @@ export default async function AvailabilityPage() {
           </>
         )}
       </section>
+      {/* Holidays used to be its own Settings section. */}
+      <div id="holidays">
+        <HolidaysSection />
+      </div>
     </SettingsShell>
   );
 }

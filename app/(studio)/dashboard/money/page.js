@@ -56,7 +56,7 @@ export default async function MoneyPage({ searchParams }) {
 
   return (
     <>
-      <PageHeader title="Money" subtitle="What you've earned, what's owed, and payments you take outside the app." />
+      <PageHeader guide="money" title="Money" subtitle="What you've earned, what's owed, and payments you take outside the app." />
       <p className="small-text">
         Rebooking, busy times and clients to invite back are in <Link href="/dashboard/reports">Insights</Link>.
       </p>

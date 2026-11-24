@@ -39,7 +39,7 @@ export default async function ReviewsPage({ searchParams }) {
 
   return (
     <>
-      <PageHeader title="Reviews" subtitle="Choose which reviews show on your public profile, and reply if you like." />
+      <PageHeader guide="reviews" title="Reviews" subtitle="Choose which reviews show on your public profile, and reply if you like." />
       {error && <p className="message error">Reviews aren&apos;t set up yet (step 58 SQL).</p>}
 
       <section className="card rv-summary">

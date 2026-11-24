@@ -46,7 +46,7 @@ export default async function RequestsPage({ searchParams }) {
 
   return (
     <>
-      <PageHeader title="Requests" subtitle="Clients send their idea and photos; you approve before they book." />
+      <PageHeader guide="requests" title="Requests" subtitle="Clients send their idea and photos; you approve before they book." />
       {error && <p className="message error">Requests aren&apos;t set up yet (step 56 SQL).</p>}
       <nav className="cr-tabs" aria-label="Request status">
         {["new", "approved", "booked", "declined"].map((st) => (

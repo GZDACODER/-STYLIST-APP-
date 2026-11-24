@@ -1,15 +1,6 @@
-// Settings → Email. Each section is its own page, so it loads only its
-// own code (see components/dash/SettingsShell).
-import { BRAND_NAME } from "@/lib/brand";
-import SettingsShell from "@/components/dash/SettingsShell";
-import { EmailSection } from "../parts/email";
-
-export const metadata = { title: `Email · ${BRAND_NAME}` };
+// Email moved into Settings > Business.
+import { redirect } from "next/navigation";
 
 export default function Page() {
-  return (
-    <SettingsShell active="email">
-      <EmailSection />
-    </SettingsShell>
-  );
+  redirect("/dashboard/settings/business#email");
 }
