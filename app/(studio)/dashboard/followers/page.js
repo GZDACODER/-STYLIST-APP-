@@ -58,7 +58,16 @@ export default async function FollowersPage() {
         )}
       </section>
       {active.length === 0 ? (
-        <EmptyState title="No followers yet" text="Share your profile link: clients tap 'Notify me of openings' to follow you." />
+        <EmptyState
+          icon="heart"
+          title="No followers yet"
+          text="Share your profile link: clients tap 'Notify me of openings' to follow you."
+          action={
+            <Link href="/dashboard/share" className="button small secondary">
+              Open Share kit
+            </Link>
+          }
+        />
       ) : (
         <ul className="rq-list">
           {active.map((f) => (

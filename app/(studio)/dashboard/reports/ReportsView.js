@@ -132,7 +132,7 @@ export default function ReportsView({ tab = "revenue", insight = null, period, r
           {s.newClients > 0 && `${s.newClients} new ${s.newClients === 1 ? "client" : "clients"} added.`}
         </p>
         <div className="table-wrap">
-          <table className="rp-table">
+          <table className="rp-table rp-stack">
             <thead>
               <tr>
                 <th scope="col">Clients</th>
@@ -146,17 +146,17 @@ export default function ReportsView({ tab = "revenue", insight = null, period, r
                 <th scope="row">
                   <i className="rp-key regular" aria-hidden="true" /> Regulars
                 </th>
-                <td>{s.regular.visits}</td>
-                <td>{money(s.regular.cents)}</td>
-                <td>{avg(s.regular)}</td>
+                <td data-label="Visits">{s.regular.visits}</td>
+                <td data-label="Revenue">{money(s.regular.cents)}</td>
+                <td data-label="Per visit">{avg(s.regular)}</td>
               </tr>
               <tr>
                 <th scope="row">
                   <i className="rp-key new" aria-hidden="true" /> New
                 </th>
-                <td>{s.newer.visits}</td>
-                <td>{money(s.newer.cents)}</td>
-                <td>{avg(s.newer)}</td>
+                <td data-label="Visits">{s.newer.visits}</td>
+                <td data-label="Revenue">{money(s.newer.cents)}</td>
+                <td data-label="Per visit">{avg(s.newer)}</td>
               </tr>
             </tbody>
           </table>

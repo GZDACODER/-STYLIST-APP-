@@ -60,7 +60,7 @@ export default async function ActivityPage({ searchParams }) {
         ))}
       </nav>
       {rows.length === 0 ? (
-        <EmptyState title="Nothing yet" text="When clients cancel, reschedule or say they're running late, or support helps on your account, it shows here." />
+        <EmptyState icon="activity" title="Nothing yet" text="When clients cancel, reschedule or say they're running late, or support helps on your account, it shows here." />
       ) : (
         <ul className="rq-list">
           {rows.map((r, i) => (

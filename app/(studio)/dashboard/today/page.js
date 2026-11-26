@@ -376,6 +376,7 @@ export default async function TodayPage() {
 
         {!todays.error && appointments.length === 0 && (
           <EmptyState
+            icon="calendar"
             title="Nothing booked today"
             text={todaysEvents.length ? "Just your events below." : "Open some times so clients can book."}
             action={

@@ -216,6 +216,7 @@ export default function ClientList({ clients: realClients, standing, nextVisits 
       )}
       {clients.length === 0 && (
         <EmptyState
+          icon="people"
           title="No clients yet"
           text="Clients appear here when they book, or add them yourself."
           action={
@@ -226,7 +227,23 @@ export default function ClientList({ clients: realClients, standing, nextVisits 
         />
       )}
       {clients.length > 0 && shown.length === 0 && (
-        <EmptyState title="No clients match" text="Try a different search or filter." />
+        <EmptyState
+          icon="search"
+          title="No clients match"
+          text="Try a different search or filter."
+          action={
+            <button
+              type="button"
+              className="button small secondary"
+              onClick={() => {
+                setSearch("");
+                setFilter("all");
+              }}
+            >
+              Show all clients
+            </button>
+          }
+        />
       )}
 
       {shown.length > 0 && (

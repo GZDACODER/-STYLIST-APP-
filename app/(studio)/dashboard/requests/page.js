@@ -1,5 +1,6 @@
 // Requests: clients' requests for services the pro approves first (step 56
 // SQL), newest first, with their reference photos.
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -58,7 +59,12 @@ export default async function RequestsPage({ searchParams }) {
       {list.length === 0 ? (
         <EmptyState
           title={tab === "new" ? "No new requests" : "Nothing here"}
-          text="Turn on 'Ask for a request first' on any service (Settings > Services), and clients send you their idea before booking."
+          text="Turn on 'Ask for a request first' on any service, and clients send you their idea before booking."
+          action={
+            <Link href="/dashboard/services" className="button small secondary">
+              Open Services
+            </Link>
+          }
         />
       ) : (
         <ul className="rq-list">

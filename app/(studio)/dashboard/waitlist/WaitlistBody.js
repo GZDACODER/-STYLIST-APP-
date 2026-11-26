@@ -105,6 +105,7 @@ export default async function WaitlistBody() {
         )}
         {waiting.length === 0 && exampleWaiting.length === 0 && (
           <EmptyState
+            icon="people"
             title="Nobody is waiting"
             text="When no times work, clients can join from your booking page. They're emailed when a time opens up."
           />
