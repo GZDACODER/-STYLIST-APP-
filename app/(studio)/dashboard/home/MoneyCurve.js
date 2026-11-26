@@ -8,6 +8,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { ExampleTag } from "@/components/dash/Example";
 import { useCountUp, useEntrance } from "./useEntrance";
+import "./homeFill.css";
 
 const W = 320;
 const H = 120;
@@ -15,8 +16,11 @@ const PAD = 6;
 const money = (cents) =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(Math.round((cents || 0) / 100));
 
-export default function MoneyCurve({ month, today, moneyHref = "/dashboard/money" }) {
-  const mode = useEntrance(today);
+// moneyHref={null}: no link to Money (the landing page's live demo).
+// tag: shown in the card head instead of the Example tag / Money link.
+// everyVisit: play the entrance on every visit (the landing page).
+export default function MoneyCurve({ month, today, moneyHref = "/dashboard/money", tag = null, everyVisit = false }) {
+  const mode = useEntrance(today, { everyVisit });
   const shown = useCountUp(Math.round(month.total / 100), mode === "play");
   const [tip, setTip] = useState(null);
 
@@ -37,7 +41,7 @@ export default function MoneyCurve({ month, today, moneyHref = "/dashboard/money
     <section className={`card hf-card hf-month${mode === "play" ? " is-play" : ""}`} aria-label="This month">
       <div className="hf-card-head">
         <h2>{month.label}</h2>
-        {month.examples ? <ExampleTag /> : <Link href={moneyHref} className="small-text">Money →</Link>}
+        {tag || (month.examples ? <ExampleTag /> : moneyHref ? <Link href={moneyHref} className="small-text">Money →</Link> : null)}
       </div>
       <p className="hf-figure">
         ${shown.toLocaleString("en-US")}
