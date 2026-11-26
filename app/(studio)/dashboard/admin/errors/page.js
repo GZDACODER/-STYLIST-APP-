@@ -1,5 +1,6 @@
 // The owner's list of recent errors (see lib/errorAlerts.js), newest first.
 // Only for logins in ADMIN_EMAILS.
+import { getUser } from "@/lib/supabase/user";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -17,9 +18,7 @@ const when = (iso) =>
 
 export default async function AdminErrorsPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) redirect("/login");
   if (!isAdmin(user)) notFound();
 

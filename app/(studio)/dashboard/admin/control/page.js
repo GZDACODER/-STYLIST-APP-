@@ -2,6 +2,7 @@
 // (ADMIN_EMAILS). Each service gets a status (fine / look at it / broken),
 // with usage against the free-plan limits, growth, and the nightly
 // autopilot's reports (supabase/migrations/0052_control_room.sql).
+import { getUser } from "@/lib/supabase/user";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -105,9 +106,7 @@ function Meter({ label, used, limit, note }) {
 
 export default async function ControlRoomPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) redirect("/login");
   if (!isAdmin(user)) notFound();
 

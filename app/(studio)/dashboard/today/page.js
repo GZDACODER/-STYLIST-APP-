@@ -1,3 +1,4 @@
+import { getUser } from "@/lib/supabase/user";
 import PageHeader from "@/components/dash/PageHeader";
 import { exampleData, examplesOn } from "@/lib/examples";
 import { ExampleTag } from "@/components/dash/Example";
@@ -65,9 +66,7 @@ function DepositTag({ booking }) {
 
 export default async function TodayPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) redirect("/login");
 
   const { data: stylist } = await supabase
@@ -89,8 +88,26 @@ export default async function TodayPage() {
 
   const stillToCome = `booking_date.gt.${today},and(booking_date.eq.${today},start_time.gt.${nowTime})`;
 
-  const [todays, nextUp, weekOpenings] =
-    await Promise.all([
+  // Wrap up visits: finished visits not marked yet (last 14 days).
+  const [ty, tm, td] = today.split("-").map(Number);
+  const wrapSince = new Date(Date.UTC(ty, tm - 1, td - 13)).toISOString().slice(0, 10);
+
+  // Everything that only needs today's date, read at the same time. Each
+  // read keeps its own result, so a table from a later step's SQL that isn't
+  // there yet just reads as empty (standing appointments: step 16; wrap up:
+  // step 18; events: step 29; late notices: step 46; activity: step 53).
+  const [
+    todays,
+    nextUp,
+    weekOpenings,
+    { data: standingFlags },
+    { data: standingToday },
+    { data: unmarkedRows },
+    { count: owedCount },
+    { data: eventRows },
+    lateRows,
+    { data: activityRows },
+  ] = await Promise.all([
     supabase
       .from("bookings")
       .select(
@@ -116,25 +133,8 @@ export default async function TodayPage() {
       .lte("opening_date", week.end)
       .order("opening_date")
       .order("start_time"),
-  ]);
-  // Standing appointments (read on their own, so the page still opens
-  // before the step 16 SQL is run).
-  const [{ data: standingFlags }, { data: standingToday }] = await Promise.all([
     supabase.rpc("standing_flags"),
-    supabase
-      .from("bookings")
-      .select("id")
-      .eq("booking_date", today)
-      .not("standing_series_id", "is", null),
-  ]);
-  const standingIds = new Set((standingToday || []).map((r) => r.id));
-
-  // Wrap up visits: finished visits not marked yet (last 14 days) and
-  // balances owed. Read on their own, so the page still opens before the
-  // step 18 SQL is run.
-  const [ty, tm, td] = today.split("-").map(Number);
-  const wrapSince = new Date(Date.UTC(ty, tm - 1, td - 13)).toISOString().slice(0, 10);
-  const [{ data: unmarkedRows }, { count: owedCount }] = await Promise.all([
+    supabase.from("bookings").select("id").eq("booking_date", today).not("standing_series_id", "is", null),
     supabase
       .from("bookings")
       .select("booking_date, start_time")
@@ -142,19 +142,20 @@ export default async function TodayPage() {
       .is("outcome", null)
       .gte("booking_date", wrapSince)
       .lte("booking_date", today),
+    supabase.from("bookings").select("id", { count: "exact", head: true }).eq("status", "confirmed").eq("outcome", "completed_owed"),
+    // The stylist's own events (and today's holiday below).
+    supabase.from("calendar_events").select("*").lte("starts_on", week.end).limit(2000),
+    // Clients running late.
+    recentLateNotices(supabase),
+    // What clients did from their email links in the last 3 days.
     supabase
-      .from("bookings")
-      .select("id", { count: "exact", head: true })
-      .eq("status", "confirmed")
-      .eq("outcome", "completed_owed"),
+      .from("client_activity")
+      .select("id, created_at, client_name, action, detail")
+      .gte("created_at", new Date(Date.now() - 3 * 86400000).toISOString())
+      .order("created_at", { ascending: false })
+      .limit(10),
   ]);
-  // The stylist's own events and today's holiday (events are read on their
-  // own, so the page still opens before the step 29 SQL is run).
-  const { data: eventRows } = await supabase
-    .from("calendar_events")
-    .select("*")
-    .lte("starts_on", week.end)
-    .limit(2000);
+  const standingIds = new Set((standingToday || []).map((r) => r.id));
   const allEvents = eventRows || [];
   const todaysEvents = eventsOn(allEvents, today);
   const todaysHolidays = holidaysOn(today);
@@ -191,48 +192,50 @@ export default async function TodayPage() {
   );
   // Bookings whose client hasn't signed the waiver yet (step 55 SQL).
   const realIds = appointments.filter((b) => !b.example && b.id).map((b) => b.id);
-  const { data: missingRows } = realIds.length
-    ? await supabase.rpc("bookings_missing_waiver", { p_booking_ids: realIds })
-    : { data: [] };
-  // Projects (step 67 SQL): "Sleeve · session 2 of 4" on project sessions.
+  // Extras for today's appointments, read at the same time: missing
+  // waivers (step 55 SQL), "Sleeve · session 2 of 4" for project sessions
+  // (step 67), "Package · 7 of 10 left" (step 68) and clients' reference
+  // photos (step 56).
   const projectOf = {};
-  if (realIds.length) {
-    const { data: pj } = await supabase.from("bookings").select("id, project_id, project:projects(id, title, sessions_planned)").in("id", realIds).not("project_id", "is", null);
-    for (const r of pj || []) {
-      if (!r.project) continue;
-      const { data: all } = await supabase
-        .from("bookings")
-        .select("id, booking_date, start_time, status, outcome")
-        .eq("project_id", r.project_id)
-        .order("booking_date")
-        .order("start_time");
-      const kept = (all || []).filter((x) => x.status === "confirmed" && x.outcome !== "no_show");
-      const n = kept.findIndex((x) => x.id === r.id) + 1;
-      projectOf[r.id] = { id: r.project.id, label: `${r.project.title} · session ${n || "?"}${r.project.sessions_planned ? ` of ${r.project.sessions_planned}` : ""}` };
-    }
-  }
-  // Packages (step 68 SQL): "Package · 7 of 10 left" for clients with one.
   const packageOf = {};
-  if (realIds.length) {
+  const photosOf = {};
+  const loadProjects = async () => {
+    const { data: pj } = await supabase.from("bookings").select("id, project_id, project:projects(id, title, sessions_planned)").in("id", realIds).not("project_id", "is", null);
+    await Promise.all(
+      (pj || [])
+        .filter((r) => r.project)
+        .map(async (r) => {
+          const { data: all } = await supabase
+            .from("bookings")
+            .select("id, booking_date, start_time, status, outcome")
+            .eq("project_id", r.project_id)
+            .order("booking_date")
+            .order("start_time");
+          const kept = (all || []).filter((x) => x.status === "confirmed" && x.outcome !== "no_show");
+          const n = kept.findIndex((x) => x.id === r.id) + 1;
+          projectOf[r.id] = { id: r.project.id, label: `${r.project.title} · session ${n || "?"}${r.project.sessions_planned ? ` of ${r.project.sessions_planned}` : ""}` };
+        })
+    );
+  };
+  const loadPackages = async () => {
     const { data: who } = await supabase.from("bookings").select("id, client_id").in("id", realIds).not("client_id", "is", null);
     const ids = [...new Set((who || []).map((w) => w.client_id))];
-    if (ids.length) {
-      const { data: pk } = await supabase.from("client_packages").select("client_id, name, sessions_total, sessions_used").in("client_id", ids).eq("status", "active");
-      const left = {};
-      for (const k of pk || []) left[k.client_id] = `${k.name} · ${k.sessions_total - k.sessions_used} of ${k.sessions_total} left`;
-      for (const w of who || []) if (left[w.client_id]) packageOf[w.id] = left[w.client_id];
-    }
-  }
-  // Reference photos clients added when booking (step 56 SQL).
-  const photosOf = {};
-  if (realIds.length) {
+    if (!ids.length) return;
+    const { data: pk } = await supabase.from("client_packages").select("client_id, name, sessions_total, sessions_used").in("client_id", ids).eq("status", "active");
+    const left = {};
+    for (const k of pk || []) left[k.client_id] = `${k.name} · ${k.sessions_total - k.sessions_used} of ${k.sessions_total} left`;
+    for (const w of who || []) if (left[w.client_id]) packageOf[w.id] = left[w.client_id];
+  };
+  const loadPhotos = async () => {
     const { data: ph } = await supabase.from("booking_photos").select("booking_id, path").in("booking_id", realIds);
-    if (ph?.length) {
-      const { data: signed } = await createAdminClient().storage.from("booking-photos").createSignedUrls(ph.map((p) => p.path), 3600);
-      const urlOf = Object.fromEntries((signed || []).filter((d) => d.signedUrl).map((d) => [d.path, d.signedUrl]));
-      for (const p of ph) if (urlOf[p.path]) (photosOf[p.booking_id] ||= []).push(urlOf[p.path]);
-    }
-  }
+    if (!ph?.length) return;
+    const { data: signed } = await createAdminClient().storage.from("booking-photos").createSignedUrls(ph.map((p) => p.path), 3600);
+    const urlOf = Object.fromEntries((signed || []).filter((d) => d.signedUrl).map((d) => [d.path, d.signedUrl]));
+    for (const p of ph) if (urlOf[p.path]) (photosOf[p.booking_id] ||= []).push(urlOf[p.path]);
+  };
+  const [{ data: missingRows }] = realIds.length
+    ? await Promise.all([supabase.rpc("bookings_missing_waiver", { p_booking_ids: realIds }), loadProjects(), loadPackages(), loadPhotos()])
+    : [{ data: [] }];
   const missingWaiver = new Set((missingRows || []).map((r) => (typeof r === "string" ? r : r.bookings_missing_waiver || r.id)));
 
   // Examples for a new pro with nothing booked at all (today or later):
@@ -245,18 +248,11 @@ export default async function TodayPage() {
   }
   // Clients running late (step 46 SQL); an example one alongside example
   // appointments.
-  let lateNotices = await recentLateNotices(supabase);
+  let lateNotices = lateRows;
   if (!lateNotices.length && exampleNext) {
     lateNotices = [{ id: "example-late", minutes: 10, example: true, booking: { client_name: "Maya Jones", service_name: (await getMyTemplate()).presets.services?.[0]?.name || "Appointment", start_time: "14:00:00" } }];
   }
 
-  // What clients did from their email links in the last 3 days (step 53 SQL).
-  const { data: activityRows } = await supabase
-    .from("client_activity")
-    .select("id, created_at, client_name, action, detail")
-    .gte("created_at", new Date(Date.now() - 3 * 86400000).toISOString())
-    .order("created_at", { ascending: false })
-    .limit(10);
   const clientActivity = activityRows || [];
 
   // Today's timeline: all-day events first, then appointments and timed

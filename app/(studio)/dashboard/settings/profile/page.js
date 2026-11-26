@@ -1,5 +1,6 @@
 // Settings > Public profile: the pro's page at clientelesuite.com/p/<handle>
 // (step 57 SQL). Off until they switch it on; they can preview it first.
+import { getUser } from "@/lib/supabase/user";
 import { redirect } from "next/navigation";
 import { BRAND_NAME } from "@/lib/brand";
 import SettingsShell from "@/components/dash/SettingsShell";
@@ -28,9 +29,7 @@ async function suggestHandle(name, id) {
 
 export default async function Page() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) redirect("/login");
   const { data: s, error } = await supabase
     .from("stylists")

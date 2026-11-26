@@ -1,5 +1,6 @@
 // The Gift cards tab on Money (step 65 SQL): sell them on your booking page
 // (paid to your own Stripe account) and redeem them by code when the client pays.
+import { getUser } from "@/lib/supabase/user";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -16,9 +17,7 @@ const STATUS = { active: "Active", used: "Used up", void: "Not paid", pending: "
 
 export default async function GiftCardsBody() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) redirect("/login");
   const [{ data: s }, { data: cards, error }, { data: reds }] = await Promise.all([
     supabase.from("stylists").select("slug, gift_cards_on, stripe_account_id, stripe_charges_enabled").eq("id", user.id).maybeSingle(),

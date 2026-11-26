@@ -1,3 +1,4 @@
+import { getUser } from "@/lib/supabase/user";
 import { exampleData, examplesOn } from "@/lib/examples";
 import { ExampleCard, ExampleTag } from "@/components/dash/Example";
 import { redirect } from "next/navigation";
@@ -27,9 +28,7 @@ function daysBefore(date, n) {
 export default async function BookingsPage({ searchParams }) {
   const { add } = await searchParams;
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) redirect("/login");
 
   // The time zone, and (at the same time) clients who've had enough

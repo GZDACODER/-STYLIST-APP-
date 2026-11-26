@@ -1,6 +1,7 @@
 // Packages (step 68 SQL): prepaid bundles of sessions. Each session that
 // goes ahead uses one automatically (oldest package first); a no-show or
 // cancellation gives it back.
+import { getUser } from "@/lib/supabase/user";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { BRAND_NAME } from "@/lib/brand";
@@ -19,9 +20,7 @@ export const metadata = { title: `Packages · ${BRAND_NAME}` };
 
 export default async function PackagesPage({ searchParams }) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) redirect("/login");
   const { show } = await searchParams;
   const past = show === "past";

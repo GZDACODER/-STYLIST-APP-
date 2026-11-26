@@ -1,3 +1,4 @@
+import { getUser } from "@/lib/supabase/user";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import AddClientForm from "./AddClientForm";
@@ -24,9 +25,7 @@ export const metadata = { title: `Clients · ${BRAND_NAME}` };
 export default async function ClientsPage({ searchParams }) {
   const { client: clientParam } = await searchParams;
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) redirect("/login");
 
   // Clients who've had enough appointments become Regulars (see Settings).

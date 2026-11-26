@@ -1,6 +1,7 @@
 // Says whether ADMIN_EMAILS is set on this deployment and whether the person
 // looking is on it, without showing the addresses. For setting up the admin
 // pages (any logged-in pro can open it; it reveals nothing about others).
+import { getUser } from "@/lib/supabase/user";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
@@ -12,9 +13,7 @@ export const metadata = { title: `Admin check · ${BRAND_NAME}` };
 
 export default async function AdminCheckPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) redirect("/login");
   const count = adminEmails().length;
   const admin = isAdmin(user);

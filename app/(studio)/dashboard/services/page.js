@@ -1,3 +1,4 @@
+import { getUser } from "@/lib/supabase/user";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { deleteService } from "./actions";
@@ -35,9 +36,7 @@ export default async function ServicesPage() {
   const aftercareOn = myModules.aftercare;
   const requestsOn = myModules.requests;
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) redirect("/login");
 
   const { data: services, error } = await supabase

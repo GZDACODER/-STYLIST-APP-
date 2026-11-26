@@ -1,4 +1,5 @@
 // Settings -> Intake form & waiver.
+import { getUser } from "@/lib/supabase/user";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { BRAND_NAME } from "@/lib/brand";
@@ -15,9 +16,7 @@ export default async function IntakePage() {
   // The starter waiver for the pro's business type (lib/templates).
   const tplForWaiver = await getMyTemplate();
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) redirect("/login");
 
   const [{ data: form, error }, { data: services, error: serviceError }] = await Promise.all([
