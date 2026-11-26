@@ -50,7 +50,7 @@ export default async function PackagesPage({ searchParams }) {
         </a>
       </nav>
       {list.length === 0 ? (
-        <EmptyState title={past ? "Nothing here yet" : "No active packages"} text={`Sell one below, like 10 ${W.appointments} paid up front.`} />
+        <EmptyState icon="gift" title={past ? "Nothing here yet" : "No active packages"} text={`Sell one below, like 10 ${W.appointments} paid up front.`} />
       ) : (
         <ul className="rq-list">
           {list.map((p) => {

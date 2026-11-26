@@ -49,7 +49,7 @@ export default async function ProjectsPage({ searchParams }) {
         </a>
       </nav>
       {list.length === 0 ? (
-        <EmptyState title={done ? "No finished projects yet" : "No projects yet"} text="Start one below for a sleeve, back piece or anything that takes more than one session." />
+        <EmptyState icon="list" title={done ? "No finished projects yet" : "No projects yet"} text="Start one below for a sleeve, back piece or anything that takes more than one session." />
       ) : (
         <ul className="rq-list">
           {list.map((p) => {

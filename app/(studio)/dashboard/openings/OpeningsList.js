@@ -126,6 +126,7 @@ export default function OpeningsList({ openings, bookingCounts, blockedBy = {}, 
   if (shown.length === 0) {
     return (
       <EmptyState
+        icon="clock"
         title="No upcoming openings"
         text="Open some times so clients can book."
         action={

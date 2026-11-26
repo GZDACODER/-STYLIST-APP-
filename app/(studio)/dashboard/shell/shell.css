@@ -1686,3 +1686,83 @@
     grid-auto-columns: minmax(0, 1fr);
   }
 }
+
+/* ---------- Empty states (components/dash/EmptyState): icon, one line, one action ---------- */
+.db .db-empty.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 0;
+  border: 0;
+  text-align: left;
+}
+
+.db .empty-state-line {
+  margin: 0;
+  max-width: 42em;
+  color: var(--muted, #6b655b);
+}
+
+.db .empty-state .db-empty-title {
+  display: inline;
+  margin: 0;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: 600;
+  color: var(--ink, #12100d);
+}
+
+.db .empty-state .db-empty-action {
+  margin: 2px 0 0;
+}
+
+/* Phones: a wide table (Insights, Regulars vs new) becomes stacked cards,
+   one per row, each figure with its label (data-label). */
+@media (max-width: 599px) {
+  .db .rp-stack thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+  .db .rp-stack,
+  .db .rp-stack tbody,
+  .db .rp-stack tr {
+    display: block;
+    width: 100%;
+  }
+  .db .rp-stack tr {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4px 12px;
+    margin-bottom: 10px;
+    padding: 12px 14px;
+    border: 1px solid var(--glass-line);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.5);
+  }
+  .db .rp-stack th[scope="row"] {
+    grid-column: 1 / -1;
+    padding: 0 0 4px;
+    border: 0;
+    text-align: left;
+  }
+  .db .rp-stack td {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    border: 0;
+    text-align: left;
+    font-weight: 600;
+  }
+  .db .rp-stack td::before {
+    content: attr(data-label);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted, #6b655b);
+  }
+}

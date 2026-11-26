@@ -94,6 +94,7 @@ export default async function ReviewsPage({ searchParams }) {
 
       {list.length === 0 ? (
         <EmptyState
+          icon="star"
           title={tab === "new" ? "Nothing to approve" : "Nothing here yet"}
           text={tab === "new" ? "New written reviews wait here until you choose to show them." : "Reviews will show here."}
         />

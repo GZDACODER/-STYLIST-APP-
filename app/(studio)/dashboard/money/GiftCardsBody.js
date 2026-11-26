@@ -66,7 +66,7 @@ export default async function GiftCardsBody() {
       <section className="card">
         <h2>Cards sold</h2>
         {all.length === 0 ? (
-          <EmptyState title="No gift cards yet" text="Cards appear here once they're paid for." />
+          <EmptyState icon="gift" title="No gift cards yet" text="Cards appear here once they're paid for." />
         ) : (
           <>
             <p className="muted small-text">

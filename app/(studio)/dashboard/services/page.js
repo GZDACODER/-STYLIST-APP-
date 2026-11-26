@@ -60,7 +60,7 @@ export default async function ServicesPage() {
         <h2>Your services</h2>
         {error && <p className="message error">Couldn't load services: {error.message}</p>}
         {!error && services.length === 0 && !showExamples && (
-          <EmptyState title="No services yet" text="Add your first one below so clients can book." />
+          <EmptyState icon="list" title="No services yet" text="Add your first one below so clients can book." />
         )}
         {!error && services.length === 0 && showExamples && (
           <>
