@@ -52,3 +52,16 @@ test("deposit policy falls back to a plain default when the pro wrote none", () 
   assert.equal(policyOrDefault("No refunds."), "No refunds.");
   assert.match(DEFAULT_DEPOSIT_POLICY, /24 hours/);
 });
+
+import { exampleServiceRows } from "../lib/exampleServiceRows.js";
+test("example services insert as rows with the same columns (PostgREST bulk insert needs matching keys)", () => {
+  const rows = exampleServiceRows(
+    [
+      { name: "Silk Press", price_cents: 8500, duration_minutes: 90, aftercare: "Wrap it." },
+      { name: "Consultation", price_cents: 0, duration_minutes: 30 },
+    ],
+    "pro-1"
+  );
+  assert.deepEqual(Object.keys(rows[0]).sort(), Object.keys(rows[1]).sort());
+  assert.deepEqual(rows[1], { stylist_id: "pro-1", name: "Consultation", price_cents: 0, duration_minutes: 30, aftercare: null });
+});
