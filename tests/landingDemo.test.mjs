@@ -84,3 +84,13 @@ test("tutor sample uses tutor services and words only", () => {
   assert.ok(s.owed.cents > 0);
   assert.equal(s.owed.name, DEMO_NAMES.tutor.owed);
 });
+
+test("share only counts today's new visits as earned (later days are booked, not earned)", () => {
+  const s = sampleStudio(stylist);
+  const before = demoView(s).month.total;
+  const { state } = applyMove(s, "share");
+  const added = state.bookings.slice(s.bookings.length);
+  const today = added.filter((b) => b.booking_date === "2026-11-18").reduce((a, b) => a + b.priceCents, 0);
+  assert.ok(added.some((b) => b.booking_date > "2026-11-18"), "later days get booked too");
+  assert.equal(demoView(state).month.total, before + today);
+});

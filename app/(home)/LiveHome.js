@@ -67,7 +67,7 @@ export default function LiveHome({ trades, monthLabel, lastMonthLabel }) {
           running = {
             ...running,
             bookings: [...running.bookings, b],
-            thisDays: running.thisDays.map((d) => (d.day === DEMO_TODAY_DAY ? { ...d, cents: d.cents + b.priceCents } : d)),
+            thisDays: b.booking_date === DEMO_TODAY ? running.thisDays.map((d) => (d.day === DEMO_TODAY_DAY ? { ...d, cents: d.cents + b.priceCents } : d)) : running.thisDays,
           };
           setState(n === added.length - 1 ? next : running);
           if (n === added.length - 1) {

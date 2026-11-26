@@ -7,7 +7,7 @@ import FeatureTabs from "./FeatureTabs";
 import PricingToggle from "./PricingToggle";
 import Icon from "./Icon";
 import TrialCta from "./TrialCta";
-import { DeskShot, PhoneShot } from "./Shots";
+import LiveHome from "./LiveHome";
 import "./landing.css";
 import { AVAILABLE_TYPES, COMING_SOON_TYPES } from "@/lib/businessTypes";
 import { templateFor } from "@/lib/templates";
@@ -84,8 +84,16 @@ const TRADES = [
     blurb: tpl.blurb,
     words: { services: tpl.words.services || "services", clients: tpl.words.clients || "clients", appointment: tpl.words.appointment || "appointment" },
     services: (tpl.presets.services || []).slice(0, 4).map((x) => ({ name: x.name, price: x.price_cents ? price(x.price_cents) : "Free" })),
+    // For the hero's live Home: the trade's paid services and its words.
+    demo: {
+      key: t.key,
+      label: tpl.label,
+      words: { client: tpl.words.client || "client", clients: tpl.words.clients || "clients", appointment: tpl.words.appointment || "appointment", appointments: tpl.words.appointments || "appointments" },
+      services: (tpl.presets.services || []).filter((x) => x.price_cents > 0).map((x) => ({ name: x.name, priceCents: x.price_cents, minutes: x.duration_minutes })),
+    },
   };
 });
+const DEMO_TRADES = TRADES.map((t) => t.demo);
 
 const NEVER = ["Booking fees charged to your clients", "A cut of new clients", "A marketplace listing next to other pros"];
 
@@ -145,6 +153,11 @@ export default async function HomePage() {
   const account = user ? { href: "/dashboard", label: "View dashboard" } : { href: "/login", label: "Log in" };
 
   const { allin, team, assistant } = PLANS;
+  // The live Home's month names (UTC; the sample itself is a fixed fixture).
+  const now = new Date();
+  const monthName = (d) => d.toLocaleDateString("en-US", { month: "long", timeZone: "UTC" });
+  const monthLabel = monthName(now);
+  const lastMonthLabel = monthName(new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 15)));
   const included = [
     "Your booking page, portfolio and deposits",
     "Confirmation and reminder emails",
@@ -227,24 +240,10 @@ export default async function HomePage() {
               </a>
             </div>
             <p className="ln-fine">{TRIAL_DAYS} days free. No card needed.</p>
+            <p className="ln-fine ln-try">Tap a move to try it here.</p>
           </div>
           <div className="ln-hero-visual">
-            <div className="ln-hero-desk">
-              <DeskShot
-                src="dash-home"
-                priority
-                hideOnPhones
-                alt="The Clientele dashboard: a good-morning greeting, the next three appointments, what needs attention, and this week's numbers"
-              />
-            </div>
-            <div className="ln-hero-phone">
-              <PhoneShot
-                src="dash-today-phone"
-                height={1208}
-                priority
-                alt="Today in Clientele on a phone: the date, three appointments today and the next one up"
-              />
-            </div>
+            <LiveHome trades={DEMO_TRADES} monthLabel={monthLabel} lastMonthLabel={lastMonthLabel} />
           </div>
         </section>
 

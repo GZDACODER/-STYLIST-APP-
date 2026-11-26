@@ -10,6 +10,8 @@
   --ink: #12100d;
   --soft: #5f584d;
   --faint: #6b6357;
+  /* The Home cards (homeFill.css) use --muted; the site-wide one is too light here. */
+  --muted: #5f584d;
   --gold: #a8874d;
   --gold-bright: #cfae6c;
   --gold-deep: #7d6232;
@@ -437,10 +439,12 @@ body:has(.ln),
 
 .ln-hero-visual {
   position: relative;
+  min-width: 0;
 }
 
-.ln-hero-phone {
-  display: none;
+.ln-try {
+  margin-top: -8px;
+  color: var(--gold-deep);
 }
 
 @media (min-width: 1024px) {
@@ -450,34 +454,169 @@ body:has(.ln),
     gap: 48px;
     padding-top: 88px;
   }
-  .ln-hero-visual {
-    padding-bottom: 40px;
-  }
-  .ln-hero-phone {
-    display: block;
-    position: absolute;
-    left: -36px;
-    bottom: 0;
-    width: 30%;
-  }
 }
 
-/* Phones: the dashboard as it looks on a phone (the window would be too small to read). */
 @media (max-width: 767px) {
   .ln-hero {
     padding-top: 36px;
-    gap: 32px;
-  }
-  .ln-hero-desk {
-    display: none;
-  }
-  .ln-hero-phone {
-    display: block;
-    width: min(320px, 82%);
-    margin: 0 auto;
+    gap: 28px;
   }
   .ln-cta-row .ln-btn {
     flex: 1 1 auto;
+  }
+}
+
+/* ---------- The live Home (LiveHome.js) in a frosted window ---------- */
+.ln-live {
+  max-width: 760px;
+  margin-left: auto;
+}
+
+.ln-live-body {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  background: rgba(244, 239, 230, 0.6);
+}
+
+.ln-live .hf-card {
+  padding: 18px 20px;
+  border: 1px solid var(--glass-line);
+  border-radius: 12px;
+  background: var(--glass);
+  box-shadow: var(--glass-shadow), inset 0 0 0 1px rgba(168, 135, 77, 0.25);
+}
+
+.ln-live .hf-hero {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+  margin: 0;
+}
+
+.ln-live .hf-figure {
+  font-size: clamp(2.2rem, 4.4vw, 3rem);
+}
+
+.ln-live .hf-bars {
+  height: 112px;
+}
+
+.ln-live .hf-curve {
+  max-height: 120px;
+}
+
+.ln-live-label {
+  margin: 4px 0 -4px;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.35rem;
+}
+
+.ln-live .hf-moves {
+  gap: 10px;
+}
+
+.ln-live .hf-move {
+  padding: 14px 16px;
+}
+
+.ln-live .hf-move-title {
+  font-size: 1.12rem;
+}
+
+.ln-sample-tag {
+  padding: 2px 8px;
+  border: 1px solid rgba(168, 135, 77, 0.45);
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold-deep);
+}
+
+.ln-live-done {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+  padding: 14px 16px;
+  border: 1px solid rgba(168, 135, 77, 0.45);
+  border-radius: 12px;
+  background: rgba(168, 135, 77, 0.1);
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.2rem;
+}
+
+.ln-live-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ln-live-trades {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.ln-live-trades-label {
+  margin-right: 2px;
+  font-size: 0.78rem;
+  color: var(--faint);
+}
+
+.ln-live-trade,
+.ln-live-again {
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--glass-line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.6);
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--soft);
+  cursor: pointer;
+}
+
+.ln-live-trade.is-on {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: #fbf6ea;
+}
+
+.ln-live-again {
+  border: 0;
+  background: none;
+  text-decoration: underline;
+  color: var(--ink);
+}
+
+/* Wide screens: week and month side by side, the moves in a row. */
+@media (min-width: 1200px) {
+  .ln-live .hf-hero {
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  }
+  .ln-live .hf-moves {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 700px) and (max-width: 1199px) {
+  .ln-live .hf-moves {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .ln-live {
+    margin: 0 calc(-1 * var(--gutter) + 4px);
+  }
+  .ln-live-body {
+    padding: 12px;
   }
 }
 
