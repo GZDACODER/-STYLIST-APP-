@@ -1779,3 +1779,359 @@
     color: var(--muted, #6b655b);
   }
 }
+
+/* =========================================================
+   Home "Fill your book" (dashboard/home/*): This week, This month,
+   and the moves. Frosted cards with a soft gold edge, big serif figures,
+   hand-drawn bars and curve; entrance motion once a day (.is-play).
+   ========================================================= */
+.hf-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+@media (min-width: 900px) {
+  .hf-hero {
+    grid-template-columns: minmax(0, 8fr) minmax(0, 4fr);
+    align-items: stretch;
+  }
+}
+
+.db .hf-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  box-shadow: var(--glass-shadow), inset 0 0 0 1px rgba(168, 135, 77, 0.25);
+}
+
+.hf-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.db .hf-card-head h2 {
+  margin: 0;
+  font-size: 0.72rem;
+  font-family: inherit;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted, #6b655b);
+}
+
+.db .hf-figure {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin: 2px 0 0;
+  font-family: var(--font-display), "Cormorant Garamond", Georgia, serif;
+  font-size: clamp(2.6rem, 6vw, 3.6rem);
+  line-height: 1;
+  color: var(--ink, #12100d);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.hf-figure-unit {
+  font-family: var(--font-sans), sans-serif;
+  font-size: 0.95rem;
+  color: var(--muted, #6b655b);
+}
+
+.hf-chip {
+  padding: 3px 10px;
+  border: 1px solid var(--glass-line);
+  border-radius: 999px;
+  font-family: var(--font-sans), sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink, #12100d);
+}
+
+.hf-chip.is-up {
+  border-color: rgba(168, 135, 77, 0.45);
+  background: rgba(168, 135, 77, 0.12);
+  color: #7d6232;
+}
+
+.db .hf-sub {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--muted, #6b655b);
+}
+
+.db .hf-sub-tight {
+  margin-top: -2px;
+}
+
+.db .hf-tip {
+  min-height: 1.4em;
+  margin: 0;
+  font-size: 0.85rem;
+  color: #7d6232;
+}
+
+/* This week: seven bars, like a page of an appointment book. */
+.hf-bars {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(32px, 1fr));
+  gap: 8px;
+  height: 150px;
+  margin-top: 10px;
+}
+
+.db .hf-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+
+.hf-bar-track {
+  position: relative;
+  flex: 1;
+  border-radius: 8px;
+  background: rgba(14, 13, 11, 0.05);
+  overflow: hidden;
+}
+
+.hf-bar-fill {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--h);
+  border-radius: 8px;
+  background: linear-gradient(180deg, #cfae6c, #a8874d);
+  transform-origin: bottom;
+}
+
+.hf-bar.is-empty .hf-bar-track {
+  background: repeating-linear-gradient(90deg, rgba(14, 13, 11, 0.16) 0 4px, transparent 4px 8px) bottom / 100% 2px no-repeat;
+}
+
+.hf-bar.is-past .hf-bar-fill {
+  opacity: 0.45;
+}
+
+.hf-bar.is-today .hf-bar-track {
+  box-shadow: inset 0 0 0 1.5px #a8874d;
+}
+
+/* "Now": a thin gold hairline across today's bar. */
+.hf-bar.is-today .hf-bar-track::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: #7d6232;
+}
+
+.hf-bar.is-tip .hf-bar-track,
+.db .hf-bar:focus-visible .hf-bar-track {
+  box-shadow: inset 0 0 0 2px #7d6232;
+}
+
+.db .hf-bar:focus-visible {
+  outline: none;
+}
+
+.hf-bar-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-align: center;
+  text-transform: uppercase;
+  color: var(--muted, #6b655b);
+}
+
+.hf-bar.is-today .hf-bar-label {
+  color: #7d6232;
+}
+
+/* This month: the curve. */
+.hf-curve {
+  width: 100%;
+  height: auto;
+  margin-top: 8px;
+  overflow: visible;
+}
+
+.hf-curve-this {
+  fill: none;
+  stroke: #a8874d;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.hf-curve-last {
+  fill: none;
+  stroke: rgba(14, 13, 11, 0.35);
+  stroke-width: 1.5;
+  stroke-dasharray: 2 4;
+  stroke-linecap: round;
+}
+
+.hf-dot {
+  fill: transparent;
+  stroke: transparent;
+  stroke-width: 14;
+  cursor: pointer;
+  outline: none;
+}
+
+.hf-dot.is-tip {
+  fill: #7d6232;
+  stroke: rgba(168, 135, 77, 0.25);
+  stroke-width: 8;
+}
+
+.hf-deposits {
+  white-space: nowrap;
+}
+
+/* Fill your book. */
+.hf-moves-wrap {
+  margin-bottom: 20px;
+}
+
+.db .hf-moves-wrap > h2 {
+  margin: 0 0 12px;
+}
+
+.hf-moves {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 900px) {
+  .hf-moves {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.db .hf-move {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 18px 20px;
+  border: 1px solid var(--glass-line);
+  border-radius: 14px;
+  background: var(--glass);
+  box-shadow: var(--glass-shadow);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.3s ease;
+}
+
+@media (hover: hover) {
+  .db .hf-move:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--glass-shadow), 0 14px 30px -18px rgba(60, 45, 20, 0.35);
+  }
+}
+
+.db .hf-move.is-done {
+  opacity: 0.6;
+}
+
+.db .hf-move-title {
+  margin: 0;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.3rem;
+  line-height: 1.2;
+  color: var(--ink, #12100d);
+}
+
+.db .hf-move-text {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--muted, #6b655b);
+}
+
+.hf-move-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  margin-top: auto;
+  padding-top: 8px;
+}
+
+.db .hf-move-result {
+  margin: auto 0 0;
+  padding-top: 8px;
+  font-weight: 600;
+  color: #7d6232;
+}
+
+/* Entrance, once a day (useEntrance), only when motion is welcome. */
+@media (prefers-reduced-motion: no-preference) {
+  .hf-week.is-play .hf-bar-fill {
+    animation: hf-grow 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    animation-delay: calc(var(--i) * 60ms);
+  }
+  .hf-month.is-play .hf-curve-this {
+    stroke-dasharray: 1;
+    animation: hf-draw 0.8s ease-out both;
+  }
+  .hf-week.is-full .hf-figure {
+    background: linear-gradient(100deg, var(--ink, #12100d) 40%, #cfae6c 50%, var(--ink, #12100d) 60%) 0 0 / 300% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: hf-shimmer 1.6s ease 1 both;
+  }
+}
+
+@keyframes hf-grow {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes hf-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes hf-shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: 0 0;
+  }
+}
+
+@media (max-width: 599px) {
+  .hf-bars {
+    gap: 5px;
+    height: 130px;
+  }
+}
