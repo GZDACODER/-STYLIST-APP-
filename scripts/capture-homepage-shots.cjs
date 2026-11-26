@@ -2,7 +2,7 @@
 //   node scripts/capture-homepage-shots.cjs [public|dash]
 // "public": phone shots of the booking page, each trade and the public profile.
 // "dash": the redesigned dashboard at desktop size (Home, Today, Clients,
-// Money, Insights) plus Today on a phone. For realistic numbers, add the
+// Money, Insights) plus phone versions of Today, Money, Clients and Insights. For realistic numbers, add the
 // temporary month in scripts/homepage-demo-seed.sql first and remove it after
 // (see docs/BUILD_LOG.md).
 const { chromium, devices } = require('playwright'); const sharp = require('sharp'); const S = 'https://www.clientelesuite.com';
@@ -47,6 +47,11 @@ async function desk(p, name, { scrollSel = null, off = 0 } = {}) {
     // Today on a phone (the hero's small screen on narrow layouts).
     const m = await (await b.newContext({ ...devices['iPhone 13'], storageState: await ctx.storageState() })).newPage();
     await m.goto(S + '/dashboard/today', { waitUntil: 'networkidle' }); await esc(m); await phone(m, 'dash-today-phone', { h: 760 });
+    // Phone versions of the feature-tab screens (the landing page shows these on phones).
+    const scrollM = async (sel, off) => { await m.locator(sel).first().evaluate((el, o) => window.scrollTo(0, window.scrollY + el.getBoundingClientRect().top - o), off); await m.waitForTimeout(400); };
+    await m.goto(S + '/dashboard/money?view=month', { waitUntil: 'networkidle' }); await esc(m); await scrollM('.stat-row', 90); await phone(m, 'dash-money-phone', { h: 760 });
+    await m.goto(S + '/dashboard/clients', { waitUntil: 'networkidle' }); await esc(m); await phone(m, 'dash-clients-phone', { h: 760 });
+    await m.goto(S + '/dashboard/reports?tab=clients', { waitUntil: 'networkidle' }); await esc(m); await scrollM('.page-tabs', 70); await phone(m, 'dash-insights-phone', { h: 760 });
   }
   await b.close();
 })();

@@ -10,6 +10,7 @@ import { getMyTemplate } from "@/lib/templates/server";
 import { METHOD_LABEL } from "@/lib/moneyTab";
 import PageHeader from "@/components/dash/PageHeader";
 import EmptyState from "@/components/dash/EmptyState";
+import AddPanel from "../shell/AddPanel";
 import SubmitButton from "@/components/SubmitButton";
 import SellForm from "./SellForm";
 import { voidPackage } from "./actions";
@@ -39,7 +40,23 @@ export default async function PackagesPage({ searchParams }) {
 
   return (
     <>
-      <PageHeader guide="packages" title="Packages" subtitle={`Prepaid bundles of ${W.appointments}. Each one that goes ahead is counted for you.`} />
+      <PageHeader
+        guide="packages"
+        title="Packages"
+        subtitle={`Prepaid bundles of ${W.appointments}. Each one that goes ahead is counted for you.`}
+        actions={
+          <AddPanel id="sell" label="+ Sell a package" title="Sell a package">
+            <p className="muted small-text">
+              Record a package they&apos;ve paid for (or will pay). From then on, each of their {W.appointments} that goes ahead uses one. A no-show or cancellation doesn&apos;t.
+            </p>
+            {(clients || []).length ? (
+              <SellForm clients={clients} services={services || []} presets={tpl.presets.packages || []} words={W} />
+            ) : (
+              <p className="muted small-text">Add {W.aClient} first in {W.Clients}.</p>
+            )}
+          </AddPanel>
+        }
+      />
       {error && <p className="message error">Packages aren&apos;t set up yet (step 68 SQL).</p>}
       <nav className="cr-tabs" aria-label="Packages">
         <a href="/dashboard/packages" className={!past ? "cr-tab active" : "cr-tab"}>
@@ -50,7 +67,15 @@ export default async function PackagesPage({ searchParams }) {
         </a>
       </nav>
       {list.length === 0 ? (
-        <EmptyState icon="gift" title={past ? "Nothing here yet" : "No active packages"} text={`Sell one below, like 10 ${W.appointments} paid up front.`} />
+        <EmptyState icon="gift" title={past ? "Nothing here yet" : "No active packages"} text={`Sell one, like 10 ${W.appointments} paid up front.`}
+          action={
+            past ? null : (
+              <a href="#sell" className="button small">
+                + Sell a package
+              </a>
+            )
+          }
+        />
       ) : (
         <ul className="rq-list">
           {list.map((p) => {
@@ -89,17 +114,6 @@ export default async function PackagesPage({ searchParams }) {
           })}
         </ul>
       )}
-      <section className="card" id="sell">
-        <h2>Sell a package</h2>
-        <p className="muted small-text">
-          Record a package they&apos;ve paid for (or will pay). From then on, each of their {W.appointments} that goes ahead uses one. A no-show or cancellation doesn&apos;t.
-        </p>
-        {(clients || []).length ? (
-          <SellForm clients={clients} services={services || []} presets={tpl.presets.packages || []} words={W} />
-        ) : (
-          <p className="muted small-text">Add {W.aClient} first in {W.Clients}.</p>
-        )}
-      </section>
     </>
   );
 }

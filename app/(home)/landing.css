@@ -1201,3 +1201,20 @@ body:has(.ln),
     min-height: 44px;
   }
 }
+
+/* Feature tabs: the dashboard window on wide screens, the phone version on phones. */
+.ln-only-phone {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .ln-only-wide {
+    display: none;
+  }
+  .ln-only-phone {
+    display: block;
+  }
+  .ln-fx-visual.is-desk {
+    width: min(320px, 82%);
+  }
+}
