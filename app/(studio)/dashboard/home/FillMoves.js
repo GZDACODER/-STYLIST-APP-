@@ -4,7 +4,7 @@
 // pickMoves): remind a client about a balance, invite an overdue client
 // back, add openings for a thin week, or share the booking link. Each
 // button uses an existing action and shows its result right on the card.
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import Link from "next/link";
 import SubmitButton from "@/components/SubmitButton";
 import { useTemplate } from "@/components/TemplateContext";
@@ -20,7 +20,10 @@ const hours = (m) => {
 };
 
 // A move whose button runs a server action, with its result in place.
-function ActionMove({ kind, title, text, action, fields, button, extra }) {
+// fallback: a link shown instead of the button when the action can't run
+// (no email, or reminded in the last 3 days). Kept in the same component so
+// "✓ Sent" survives the page refreshing right after the action.
+function ActionMove({ kind, title, text, action, fields, button, extra, fallback }) {
   const [state, run] = useActionState(action, null);
   const done = Boolean(state?.success);
   return (
@@ -31,6 +34,8 @@ function ActionMove({ kind, title, text, action, fields, button, extra }) {
         <p className="hf-move-result" role="status">
           ✓ {state.success}
         </p>
+      ) : fallback ? (
+        <div className="hf-move-actions">{fallback}</div>
       ) : (
         <form action={run} className="hf-move-actions">
           {Object.entries(fields).map(([k, v]) => (
@@ -61,18 +66,35 @@ function LinkMove({ kind, title, text, href, button }) {
   );
 }
 
-export default function FillMoves({ moves, bookingUrl, businessName }) {
+export default function FillMoves({ moves: freshMoves, bookingUrl, businessName }) {
   const { words } = useTemplate();
+  // The moves stay put for this visit: an action refreshes the page's data
+  // (e.g. an invited client drops off the overdue list), and the card should
+  // stay to show "✓ Sent" rather than vanish. A new visit gets fresh moves.
+  const [moves] = useState(freshMoves);
   return (
     <ul className="hf-moves">
       {moves.map((m) => {
         if (m.kind === "owed") {
           const title = `${money(m.owedCents)} owed by ${m.clientName}`;
           const text = m.serviceName ? `for ${m.serviceName}` : null;
-          return m.canEmail ? (
-            <ActionMove key="owed" kind="owed" title={title} text={text} action={remindBalance} fields={{ id: m.bookingId, owed: m.owedCents }} button="Send reminder" />
-          ) : (
-            <LinkMove key="owed" kind="owed" title={title} text={text} href="/dashboard/money?tab=owed" button="Open Money" />
+          return (
+            <ActionMove
+              key="owed"
+              kind="owed"
+              title={title}
+              text={text}
+              action={remindBalance}
+              fields={{ id: m.bookingId, owed: m.owedCents }}
+              button="Send reminder"
+              fallback={
+                m.canEmail ? null : (
+                  <Link href="/dashboard/money?tab=owed" className="button small">
+                    Open Money
+                  </Link>
+                )
+              }
+            />
           );
         }
         if (m.kind === "overdue") {
