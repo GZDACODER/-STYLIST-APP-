@@ -4,7 +4,6 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { sendCode, verifyCode } from "../actions";
 import { formatPhone } from "@/lib/phone";
 import { maskEmail } from "@/lib/maskEmail";
-import PageGuide from "@/components/guide/PageGuide";
 
 // Two steps: type your email (or mobile number) -> type the code we sent you.
 // textCodes: false while text message codes are switched off; then it's
@@ -133,7 +132,6 @@ export default function VerifyClient({ onVerified, textCodes = false }) {
 
   return (
     <form onSubmit={submitCode} ref={codeForm}>
-      <PageGuide guideKey="verify" button={false} />
       <p className="message info">
         {isPhone ? (
           <>

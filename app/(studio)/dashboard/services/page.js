@@ -1,7 +1,7 @@
 import { getUser } from "@/lib/supabase/user";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { deleteService } from "./actions";
+import { addExampleServices, deleteService } from "./actions";
 import AddServiceForm from "./AddServiceForm";
 import AftercareForm from "./AftercareForm";
 import SubmitButton from "@/components/SubmitButton";
@@ -63,7 +63,12 @@ export default async function ServicesPage() {
         )}
         {!error && services.length === 0 && showExamples && (
           <>
-            <p className="examples-note">Here are some examples. Add your first service below and they&apos;ll go away.</p>
+            <p className="examples-note">
+              Here are some examples. Start with them and change the prices and times to yours, or add your own below.
+            </p>
+            <form action={addExampleServices} className="examples-use">
+              <SubmitButton pendingText="Adding...">Use these services</SubmitButton>
+            </form>
             <RowList
               label="Services"
               items={exampleServices(await getMyTemplate()).map((s) => ({

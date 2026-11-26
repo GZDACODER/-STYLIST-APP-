@@ -1,5 +1,6 @@
 "use server";
 
+import { policyOrDefault } from "@/lib/depositPolicy";
 import { checkNewOpeningsSafely } from "@/lib/followers";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
@@ -134,7 +135,8 @@ export async function saveDeposits(prevState, formData) {
   const results = await Promise.all([
     supabase
       .from("stylists")
-      .update({ deposits_enabled: enabled, cancellation_policy: policy })
+      // Taking deposits always comes with a policy clients can read.
+      .update({ deposits_enabled: enabled, cancellation_policy: enabled ? policyOrDefault(policy) : policy })
       .eq("id", user.id),
     ...updates.map(({ id, ...values }) => supabase.from("services").update(values).eq("id", id)),
   ]);

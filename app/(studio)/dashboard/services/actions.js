@@ -3,6 +3,8 @@
 // Server actions for adding and removing services.
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { exampleServices } from "@/lib/examples";
+import { getMyTemplate } from "@/lib/templates/server";
 
 export async function addService(prevState, formData) {
   const name = String(formData.get("name") || "").trim();
@@ -50,4 +52,27 @@ export async function deleteService(formData) {
   await supabase.from("services").delete().eq("id", id);
 
   revalidatePath("/dashboard/services");
+}
+
+// "Use these": adds the trade's example services (names, prices, times and
+// aftercare) as the pro's own, to edit or delete. Only when they have none yet.
+export async function addExampleServices() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+  const { count } = await supabase.from("services").select("id", { count: "exact", head: true });
+  if ((count || 0) > 0) return;
+  const rows = exampleServices(await getMyTemplate()).map((x) => ({
+    stylist_id: user.id,
+    name: x.name,
+    price_cents: x.price_cents || 0,
+    duration_minutes: x.duration_minutes,
+    ...(typeof x.aftercare === "string" && x.aftercare ? { aftercare: x.aftercare } : {}),
+  }));
+  const { error } = await supabase.from("services").insert(rows);
+  if (error) console.error("Couldn't add the example services", error.message);
+  revalidatePath("/dashboard/services");
+  revalidatePath("/dashboard");
 }

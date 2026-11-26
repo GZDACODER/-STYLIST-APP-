@@ -97,8 +97,8 @@ async function PaidPageContent({ params, searchParams }) {
         {balance > 0 && <> · {formatPrice(balance)} left to pay at your appointment</>}
       </p>
       <p className="muted small-text">
-        Times are in {timeZoneLabel(timezone)} time. To change or
-        cancel, please contact {business_name} directly.
+        Times are in {timeZoneLabel(timezone)} time. We&apos;ve emailed you a confirmation. Its
+        &quot;Manage my appointment&quot; link lets you move or cancel it.
       </p>
       <Link href={bookingLink} className="button secondary">
         Book another appointment
