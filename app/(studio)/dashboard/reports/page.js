@@ -45,11 +45,44 @@ export default async function ReportsPage({ searchParams }) {
       .gte("deposit_paid_at", `${range.prevFrom}T00:00:00Z`)
       .lte("deposit_paid_at", `${range.to}T23:59:59Z`)
       .limit(5000);
+  // Everything this page reads, at the same time (it used to be about six
+  // trips in a row): the period's bookings with the newest columns, clients,
+  // whether examples are on, this period's feedback (step 46 SQL), and about
+  // a year of bookings plus what's ahead for Insights (step 63 SQL). The
+  // feedback and year are read speculatively; a new pro's example report
+  // simply doesn't use them.
   const extras = ["owed_cents, reschedule_count", "owed_cents", ""];
-  let rows = null;
-  let paidRows = [];
-  let loadError = null;
-  for (const extra of extras) {
+  const back = addDays(today, -400) < range.prevFrom ? addDays(today, -400) : range.prevFrom;
+  const fullCols = `${COLUMNS}, ${extras[0]}`;
+  const [first, firstPaid, { data: clientData }, showExamples, feedbackRes, insightRes] = await Promise.all([
+    load(fullCols, byDate),
+    load(fullCols, byPaid),
+    supabase.from("clients").select("id, status, created_at, name"),
+    examplesOn(supabase, user.id),
+    supabase
+      .from("visit_feedback")
+      .select("rating, comment, created_at, booking:bookings(client_name, service_name, booking_date)")
+      .gte("created_at", `${range.from}T00:00:00Z`)
+      .lte("created_at", `${range.to}T23:59:59Z`)
+      .order("created_at", { ascending: false })
+      .limit(200),
+    Promise.all([
+      supabase
+        .from("bookings")
+        .select("id, client_id, client_name, client_email, service_id, service_name, booking_date, start_time, status, outcome, price_cents, cancelled_at")
+        .gte("booking_date", back)
+        .lte("booking_date", addDays(today, 120))
+        .limit(10000),
+      supabase.from("payments").select("kind, amount_cents, paid_on").gte("paid_on", range.from).lte("paid_on", range.to).limit(5000),
+      supabase.from("working_hours").select("weekday, is_working, start_time, end_time"),
+      supabase.from("clients").select("id, email, invited_back_at"),
+    ]),
+  ]);
+  let rows = first.error ? null : first.data || [];
+  let paidRows = first.error ? [] : firstPaid.data || [];
+  let loadError = first.error || null;
+  // An older database without the newest columns: try with fewer (rare).
+  for (const extra of rows === null ? extras.slice(1) : []) {
     const cols = extra ? `${COLUMNS}, ${extra}` : COLUMNS;
     const [a, b] = await Promise.all([load(cols, byDate), load(cols, byPaid)]);
     if (!a.error) {
@@ -69,12 +102,12 @@ export default async function ReportsPage({ searchParams }) {
     );
   }
 
-  let { data: clientRows } = await supabase.from("clients").select("id, status, created_at, name");
+  let clientRows = clientData;
 
   // A new pro with no bookings or clients yet: an example report, worked out
   // by the same code from a sample book of visits (never saved).
   let example = false;
-  if (!rows.length && !paidRows.length && !(clientRows || []).length && (await examplesOn(supabase, user.id))) {
+  if (!rows.length && !paidRows.length && !(clientRows || []).length && showExamples) {
     const ex = exampleReportData(range.prevFrom, range.to, today);
     rows = ex.bookings;
     clientRows = ex.clients;
@@ -124,13 +157,7 @@ export default async function ReportsPage({ searchParams }) {
       booking: { client_name: r.name, service_name: svc[i % Math.max(1, svc.length)] || "Appointment" },
     }));
   } else {
-    const { data: fb, error: fbError } = await supabase
-      .from("visit_feedback")
-      .select("rating, comment, created_at, booking:bookings(client_name, service_name, booking_date)")
-      .gte("created_at", `${range.from}T00:00:00Z`)
-      .lte("created_at", `${range.to}T23:59:59Z`)
-      .order("created_at", { ascending: false })
-      .limit(200);
+    const { data: fb, error: fbError } = feedbackRes;
     if (!fbError) feedbackRows = fb || [];
   }
   const feedback = {
@@ -144,18 +171,7 @@ export default async function ReportsPage({ searchParams }) {
   // Insights (step 63 SQL): about a year of bookings plus what's booked ahead.
   let insightData = null;
   if (!example) {
-    const back = addDays(today, -400) < range.prevFrom ? addDays(today, -400) : range.prevFrom;
-    const [{ data: all, error: allError }, { data: pays }, { data: hours }, { data: inv }] = await Promise.all([
-      supabase
-        .from("bookings")
-        .select("id, client_id, client_name, client_email, service_id, service_name, booking_date, start_time, status, outcome, price_cents, cancelled_at")
-        .gte("booking_date", back)
-        .lte("booking_date", addDays(today, 120))
-        .limit(10000),
-      supabase.from("payments").select("kind, amount_cents, paid_on").gte("paid_on", range.from).lte("paid_on", range.to).limit(5000),
-      supabase.from("working_hours").select("weekday, is_working, start_time, end_time"),
-      supabase.from("clients").select("id, email, invited_back_at"),
-    ]);
+    const [{ data: all, error: allError }, { data: pays }, { data: hours }, { data: inv }] = insightRes;
     if (!allError) {
       const toLocal = (iso) => (iso ? new Intl.DateTimeFormat("sv-SE", { timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(iso)).replace(" ", "T") : null);
       const workingCells = new Set();

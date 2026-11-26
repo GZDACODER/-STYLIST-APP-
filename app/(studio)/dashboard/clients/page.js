@@ -28,20 +28,40 @@ export default async function ClientsPage({ searchParams }) {
   const user = await getUser();
   if (!user) redirect("/login");
 
-  // Clients who've had enough appointments become Regulars (see Settings).
-  await supabase.rpc("refresh_my_regulars");
+  // Two steps instead of seven. Step 1, together: refresh who's a Regular
+  // (it must finish before clients are read: it can change their status),
+  // the plan, the business row (its time zone sets "today"), whether
+  // examples are on, and the template.
+  const [, plan, { data: stylistRow }, showExamples, tpl] = await Promise.all([
+    supabase.rpc("refresh_my_regulars"),
+    getMyPlan(supabase, user.id),
+    supabase
+      .from("stylists")
+      .select("slug, business_name, regulars_only, timezone, deposits_enabled, stripe_charges_enabled")
+      .eq("id", user.id)
+      .maybeSingle(),
+    examplesOn(supabase, user.id),
+    getMyTemplate(),
+  ]);
+  const stylist = stylistRow;
+  const depositRow = stylistRow;
+  const timeZone = depositRow?.timezone || "America/Chicago";
+  const today = todayInTimeZone(timeZone);
 
-  const plan = await getMyPlan(supabase, user.id);
-
-  // Invites still open, plus ones used (or made) in the last 30 days.
+  // Step 2, together: clients, invites (open, plus ones used or made in the
+  // last 30 days), services, standing appointments (empty before the step 16
+  // SQL), each client's next and last visits, and birthdays and feedback
+  // from the client home (step 46 SQL; none before).
   const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
   const [
     { data: clients, error },
-    { data: stylist },
     { data: inviteRows },
     { data: services },
     { data: series },
-    { data: depositRow },
+    { data: upcomingRows },
+    { data: pastRows },
+    { data: bdayRows, error: bdayError },
+    { data: fbRows, error: fbError },
   ] = await Promise.all([
     supabase
       .from("clients")
@@ -50,11 +70,6 @@ export default async function ClientsPage({ searchParams }) {
       )
       .order("name", { ascending: true }),
     supabase
-      .from("stylists")
-      .select("slug, business_name, regulars_only")
-      .eq("id", user.id)
-      .maybeSingle(),
-    supabase
       .from("client_invites")
       .select(
         "id, token, name, phone, created_at, expires_at, invite_state, bookings(service_name, booking_date, start_time, status)"
@@ -62,7 +77,6 @@ export default async function ClientsPage({ searchParams }) {
       .gte("created_at", since)
       .order("created_at", { ascending: false }),
     supabase.from("services").select("id, name, duration_minutes").order("created_at"),
-    // Standing appointments (empty until the step 16 SQL is run).
     supabase
       .from("standing_series")
       .select(
@@ -71,33 +85,31 @@ export default async function ClientsPage({ searchParams }) {
       .eq("status", "active")
       .order("created_at"),
     supabase
-      .from("stylists")
-      .select("timezone, deposits_enabled, stripe_charges_enabled")
-      .eq("id", user.id)
-      .maybeSingle(),
+      .from("bookings")
+      .select("client_id, booking_date, start_time, service_name")
+      .eq("status", "confirmed")
+      .not("client_id", "is", null)
+      .gte("booking_date", today)
+      .order("booking_date", { ascending: true })
+      .order("start_time", { ascending: true })
+      .limit(2000),
+    supabase
+      .from("bookings")
+      .select("client_id, booking_date, outcome")
+      .eq("status", "confirmed")
+      .not("client_id", "is", null)
+      .lte("booking_date", today)
+      .order("booking_date", { ascending: false })
+      .limit(5000),
+    supabase.from("clients").select("id, birthday").not("birthday", "is", null),
+    supabase
+      .from("visit_feedback")
+      .select("client_id, rating, comment, created_at, booking:bookings(service_name, booking_date)")
+      .order("created_at", { ascending: false })
+      .limit(2000),
   ]);
-  const timeZone = depositRow?.timezone || "America/Chicago";
 
-  // Each client's next appointment, for the slim rows in the list.
-  const today = todayInTimeZone(timeZone);
-  const { data: upcomingRows } = await supabase
-    .from("bookings")
-    .select("client_id, booking_date, start_time, service_name")
-    .eq("status", "confirmed")
-    .not("client_id", "is", null)
-    .gte("booking_date", today)
-    .order("booking_date", { ascending: true })
-    .order("start_time", { ascending: true })
-    .limit(2000);
   // Each client's last visit (most recent one that went ahead).
-  const { data: pastRows } = await supabase
-    .from("bookings")
-    .select("client_id, booking_date, outcome")
-    .eq("status", "confirmed")
-    .not("client_id", "is", null)
-    .lte("booking_date", today)
-    .order("booking_date", { ascending: false })
-    .limit(5000);
   const lastVisits = {};
   for (const b of pastRows || []) {
     if (b.outcome === "no_show" || b.outcome === "replaced") continue;
@@ -117,15 +129,6 @@ export default async function ClientsPage({ searchParams }) {
     };
   }
 
-  // Birthdays and feedback from the client home (step 46 SQL; none before).
-  const [{ data: bdayRows, error: bdayError }, { data: fbRows, error: fbError }] = await Promise.all([
-    supabase.from("clients").select("id, birthday").not("birthday", "is", null),
-    supabase
-      .from("visit_feedback")
-      .select("client_id, rating, comment, created_at, booking:bookings(service_name, booking_date)")
-      .order("created_at", { ascending: false })
-      .limit(2000),
-  ]);
   const birthdayOf = bdayError ? {} : Object.fromEntries((bdayRows || []).map((r) => [r.id, r.birthday]));
   const feedbackOf = {};
   for (const f of fbError ? [] : fbRows || []) {
@@ -140,7 +143,7 @@ export default async function ClientsPage({ searchParams }) {
   }
 
   // Example clients for a new pro (shown until they have real ones).
-  const exAll = clients.length === 0 && (await examplesOn(supabase, user.id)) ? exampleData(todayInTimeZone(timeZone), await getMyTemplate()) : null;
+  const exAll = clients.length === 0 && showExamples ? exampleData(today, tpl) : null;
   const examples = exAll ? exAll.clients : [];
   for (const e of examples) {
     const next = exAll.upcoming.find((b) => b.client_name === e.name);
@@ -164,7 +167,7 @@ export default async function ClientsPage({ searchParams }) {
     return <p className="message error">Couldn't load your clients: {error.message}</p>;
   }
 
-  const importNotes = sample(await getMyTemplate()).importNotes;
+  const importNotes = sample(tpl).importNotes;
 
   return (
     <>

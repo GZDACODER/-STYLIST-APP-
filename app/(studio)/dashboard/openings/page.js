@@ -32,22 +32,33 @@ export default async function OpeningsPage({ searchParams }) {
   const user = await getUser();
   if (!user) redirect("/login");
 
-  const { data: stylist } = await supabase
-    .from("stylists")
-    .select("slug, timezone")
-    .eq("id", user.id)
-    .maybeSingle();
+  // The business row, plan, template and examples setting together.
+  const [{ data: stylist }, plan, tpl, showExamples] = await Promise.all([
+    supabase.from("stylists").select("slug, timezone").eq("id", user.id).maybeSingle(),
+    getMyPlan(supabase, user.id),
+    getMyTemplate(),
+    examplesOn(supabase, user.id),
+  ]);
   if (!stylist) redirect("/dashboard");
 
-  const tpl = await getMyTemplate();
   const waitlistOn = tpl.modules.waitlist !== false;
   const { tab: tabParam } = await searchParams;
   const tab = tabParam === "waitlist" && waitlistOn ? "waitlist" : "openings";
   const today = todayInTimeZone(stylist.timezone);
-  const plan = await getMyPlan(supabase, user.id);
 
-  const [{ data: openings, error }, { data: bookings }, { data: hourRows }, { data: holdRows }] =
-    await Promise.all([
+  // Everything that needs "today", together (it used to be two batches):
+  // openings, bookings, hours, Regulars' holds, and what blocks bookings
+  // inside an opening: "Block bookings" events and closed holidays (both
+  // empty before the step 29 / 34 SQL), and holidays closed for one date.
+  const [
+    { data: openings, error },
+    { data: bookings },
+    { data: hourRows },
+    { data: holdRows },
+    { data: eventRows },
+    { data: holidayRows },
+    { data: closedDateRows },
+  ] = await Promise.all([
       supabase
         .from("openings")
         .select("id, opening_date, start_time, end_time, visibility")
@@ -66,6 +77,9 @@ export default async function OpeningsPage({ searchParams }) {
         .gte("hold_date", today)
         .order("hold_date")
         .order("start_time"),
+      supabase.from("calendar_events").select("*").eq("blocks_bookings", true).limit(2000),
+      supabase.from("stylist_holiday_settings").select("holiday_key").eq("closed", true),
+      supabase.from("blocked_dates").select("blocked_on, reason").gte("blocked_on", today).like("reason", "Closed – %"),
     ]);
   // Only holds inside an "Everyone" opening matter ("Regulars only" openings
   // are for Regulars anyway).
@@ -79,14 +93,6 @@ export default async function OpeningsPage({ searchParams }) {
     )
   );
 
-  // What blocks bookings inside each opening: "Block bookings" events and
-  // closed holidays (both empty before the step 29 / 34 SQL is run).
-  const [{ data: eventRows }, { data: holidayRows }, { data: closedDateRows }] = await Promise.all([
-    supabase.from("calendar_events").select("*").eq("blocks_bookings", true).limit(2000),
-    supabase.from("stylist_holiday_settings").select("holiday_key").eq("closed", true),
-    // Holidays closed for one date only ("Closed this holiday" on the Calendar).
-    supabase.from("blocked_dates").select("blocked_on, reason").gte("blocked_on", today).like("reason", "Closed – %"),
-  ]);
   const closedDates = new Map((closedDateRows || []).map((r) => [r.blocked_on, r.reason]));
   const closedKeys = new Set((holidayRows || []).map((r) => r.holiday_key));
   const hhmm = (t) => String(t).slice(0, 5);
@@ -136,7 +142,7 @@ export default async function OpeningsPage({ searchParams }) {
   }
 
   // Examples for a new pro (only while they have no openings of their own).
-  const examples = !(openings || []).length && (await examplesOn(supabase, user.id)) ? exampleData(today, await getMyTemplate()) : null;
+  const examples = !(openings || []).length && showExamples ? exampleData(today, tpl) : null;
 
   // Weekdays marked as days off on the Availability tab.
   const daysOff = (hourRows || []).filter((row) => !row.is_working).map((row) => row.weekday);

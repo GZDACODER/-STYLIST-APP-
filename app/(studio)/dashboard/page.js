@@ -135,6 +135,7 @@ export default async function HomePage() {
     balancePayments,
     yearVisits,
     clientEmails,
+    late,
   ] = await Promise.all([
     supabase.from("bookings").select("id", { count: "exact", head: true }).eq("status", "confirmed").eq("booking_date", today),
     supabase.from("clients").select("created_at").gte("created_at", new Date(Date.now() - 32 * 24 * 60 * 60 * 1000).toISOString()),
@@ -192,11 +193,16 @@ export default async function HomePage() {
     // Who's overdue (the same read as Insights).
     supabase
       .from("bookings")
-      .select("id, client_id, client_name, client_email, service_id, service_name, booking_date, start_time, status, outcome, price_cents, cancelled_at")
+      // Only visits that happened or are booked: the overdue check never uses
+      // cancelled ones, so they aren't fetched.
+      .select("id, client_id, client_name, client_email, service_id, service_name, booking_date, start_time, status, outcome, price_cents")
+      .eq("status", "confirmed")
       .gte("booking_date", plusDays(today, -400))
       .lte("booking_date", plusDays(today, 120))
       .limit(10000),
     supabase.from("clients").select("id, email, invited_back_at"),
+    // Clients running late (step 46 SQL).
+    recentLateNotices(supabase),
   ]);
 
   // Upcoming bookings of services that need an intake form, without one on file.
@@ -333,7 +339,6 @@ export default async function HomePage() {
   const exampleStatsOn = showExamples && (anyBooking.count || 0) === 0;
   const attention = [];
   // Clients running late (step 46 SQL), or an example one for a new pro.
-  const late = await recentLateNotices(supabase);
   for (const n of late) attention.unshift({ text: lateText(n), href: "/dashboard/today", action: "See" });
   if (!late.length && exampleStatsOn) {
     attention.unshift({ text: "Maya Jones is running 10 min late (Example)", href: "/dashboard/today", action: "See" });
