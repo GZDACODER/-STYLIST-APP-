@@ -40,3 +40,15 @@ throwaway inboxes and Stripe test mode. Test accounts only.
   hosts this environment can't allow; the payment itself was confirmed by the
   webhook. Checklist step 7 covers a real-card check.
 - Tattoo request/approve and tutor flows were checked earlier (BUILD_LOG Nov 23–24).
+
+## Second half (Nov 26, after PRs 186–188)
+| Journey | Result |
+|---|---|
+| Tattoo request → approve → book | Request sent with idea/placement/size; client + pro emails; pro approves with a note; approval email's link opens with the service chosen; client confirms email and books; request marked Booked; pro gets "New booking" |
+| Waitlist | Client joins (code by email); pro sees them; pro opens a time → "New times opened up" email within a second; "Claim this time" books it in one tap + confirmation |
+| Wrap up | "Completed, balance owed" in one tap → $150 shows on Home (Fill your book) and Money "Owed to you"; Send reminder emails the client |
+| Tutor | Wrap up with "Save and email parent"; package counts sessions (8 of 10 left); students list |
+| Healing check-ins | Day 1 / Day 3 emails going out (email log) |
+| Gift cards | Not run: needs a Stripe-connected pro and the same hCaptcha block as deposits. Check after go-live |
+
+Fixed in this pass: Approve/Decline now keep their "Approved/Declined, they've been emailed" message on screen; Requests empty state no longer tells pros to turn on requests they already have; the waitlist claim screen points to the email's manage link; the tutor wrap-up button says Students; the pro's Services list says Free.

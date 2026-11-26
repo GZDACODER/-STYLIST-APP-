@@ -191,7 +191,7 @@ export default async function WrapupPage() {
         subtitle="How did each visit go? No-shows and balances owed show on the client's History and your Today page. Nothing is charged or refunded automatically."
         actions={
           <Link href="/dashboard/clients" className="button secondary small">
-            Clients
+            {tplW.words?.clients ? tplW.words.clients[0].toUpperCase() + tplW.words.clients.slice(1) : "Clients"}
           </Link>
         }
       />

@@ -68,7 +68,7 @@ export default function ClaimOffer({ offer, token, bookingLink, paymentCancelled
         <h2>You&apos;re booked!</h2>
         {when}
         <p className="muted small-text">
-          To cancel, open the booking page and confirm it&apos;s you with a code.
+          We&apos;ve emailed you a confirmation. Its &quot;Manage my appointment&quot; link lets you move or cancel it.
         </p>
         <Link href={bookingLink} className="button secondary">
           Go to the booking page
