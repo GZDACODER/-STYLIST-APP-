@@ -1,5 +1,6 @@
 "use client";
 
+import { DEFAULT_DEPOSIT_POLICY } from "@/lib/depositPolicy";
 import { useActionState, useState } from "react";
 import { saveDeposits } from "./actions";
 import { formatPrice } from "@/lib/money";
@@ -111,12 +112,13 @@ export default function DepositsForm({ enabled, policy, stripeReady, services })
           name="cancellation_policy"
           rows={5}
           maxLength={2000}
-          defaultValue={policy}
+          defaultValue={policy || DEFAULT_DEPOSIT_POLICY}
           placeholder="e.g. Please give 24 hours' notice to cancel or move your appointment. Deposits are not refunded for late cancellations or no-shows."
         />
       </label>
       <p className="muted small-text">
-        Clients see this on your booking page and must agree to it before paying a deposit.
+        Clients see this on your booking page and must agree to it before paying a deposit. We&apos;ve started you
+        with a plain one; change it to suit you.
       </p>
 
       <SubmitButton pendingText="Saving...">Save deposits</SubmitButton>

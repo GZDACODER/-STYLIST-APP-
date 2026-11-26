@@ -59,8 +59,10 @@ export default function CancelVisit({
       {details}
       {depositPaid && (
         <p className="cancel-note">
-          Your {formatPrice(depositCents)} deposit isn&apos;t refunded automatically;{" "}
-          {businessName}&apos;s cancellation policy decides.
+          Your {formatPrice(depositCents)} deposit isn&apos;t refunded automatically.{" "}
+          {policy
+            ? `${businessName}'s cancellation policy below decides.`
+            : `${businessName} will let you know; you can reply to the email we send you.`}
         </p>
       )}
       {policy && (

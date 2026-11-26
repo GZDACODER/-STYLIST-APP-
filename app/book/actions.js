@@ -12,7 +12,7 @@ import {
 import { createAdminClient } from "@/lib/supabase/admin";
 import { normalizePhone, textCodesEnabled } from "@/lib/phone";
 import { emailStylistCancellation, runWaitlistSafely, stylistEmails } from "@/lib/waitlist";
-import { emailReschedule } from "@/lib/bookingEmails";
+import { emailClientCancelled, emailReschedule } from "@/lib/bookingEmails";
 import { headers } from "next/headers";
 import { DEMO_BOOKING_OFF, isDemoSlug } from "@/lib/demo";
 import { finishWaiver, signatureBytes, uploadSignature } from "@/lib/waivers";
@@ -538,7 +538,7 @@ export async function cancelMyBooking(slug, bookingId) {
 
   // Let the stylist know, and tell anyone on the waitlist the time is free.
   const origin = await siteOrigin();
-  await Promise.all([emailStylistCancellation(data), runWaitlistSafely(data.stylist_id, origin)]);
+  await Promise.all([emailStylistCancellation(data), emailClientCancelled(data.id), runWaitlistSafely(data.stylist_id, origin)]);
   return { success: true };
 }
 
@@ -570,7 +570,7 @@ export async function cancelVisitByToken(token) {
 
   // Let the stylist know, and tell anyone on the waitlist the time is free.
   const origin = await siteOrigin();
-  await Promise.all([emailStylistCancellation(data), runWaitlistSafely(data.stylist_id, origin), logClientAction(token, "cancelled")]);
+  await Promise.all([emailStylistCancellation(data), emailClientCancelled(data.id), runWaitlistSafely(data.stylist_id, origin), logClientAction(token, "cancelled")]);
   return { success: true };
 }
 

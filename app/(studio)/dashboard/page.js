@@ -22,6 +22,7 @@ import FillMoves from "./home/FillMoves";
 import FeedbackPrompt from "./FeedbackPrompt";
 import { isAdmin } from "@/lib/admin";
 import { EXAMPLE_HOME_STATS, exampleData, examplesOn } from "@/lib/examples";
+import { setupSteps } from "@/lib/setupSteps";
 import { ExampleTag } from "@/components/dash/Example";
 import { lateText, recentLateNotices } from "@/lib/lateNotices";
 import { isDemo } from "@/lib/demo";
@@ -331,7 +332,8 @@ export default async function HomePage() {
   const exampleStats = showExamples && (anyBooking.count || 0) === 0 && !nextUp.error ? EXAMPLE_HOME_STATS : null;
   const tpl = await getMyTemplate();
   const W = tpl.words;
-  const todayCount = exampleStats ? exampleStats.todays : todays.count ?? 0;
+  // Real visits only: the greeting line never counts example bookings.
+  const todayCount = todays.count ?? 0;
   const newCount = exampleStats ? exampleStats.newClients : newThisMonth;
   const waitCount = exampleStats ? exampleStats.waiting : waitingCount;
 
@@ -376,15 +378,17 @@ export default async function HomePage() {
     attention.push({ text: "Stripe isn't connected, so you can't take deposits", href: "/dashboard/settings/deposits", action: "Connect" });
   }
 
-  // Setup checklist for new accounts; hidden once everything is done.
-  const setup = [
-    { done: (services.count || 0) > 0, text: "Add your services", href: "/dashboard/services" },
-    { done: (hours.count || 0) > 0, text: "Set your working hours", href: "/dashboard/availability" },
-    { done: Boolean(stylist.stripe_charges_enabled), text: "Connect Stripe for deposits", href: "/dashboard/settings/deposits" },
-    { done: Boolean(coverRow?.cover_photo_url), text: "Add a cover photo", href: "/dashboard/settings/booking-page" },
-    { done: (anyBooking.count || 0) > 0, text: "Share your booking link (done after your first booking)", href: "/dashboard/share" },
-  ];
-  const setupLeft = setup.filter((s) => !s.done).length;
+  // Setup checklist for new accounts; hidden once everything is done. Until a
+  // client could actually book (a service and an open time), it leads the page
+  // and the share button waits.
+  const { steps: setup, bookable, left: setupLeft } = setupSteps({
+    services: services.count || 0,
+    hours: hours.count || 0,
+    openingsAhead: realOpenings.filter((o) => o.opening_date >= today).length,
+    stripe: Boolean(stylist.stripe_charges_enabled),
+    cover: Boolean(coverRow?.cover_photo_url),
+    booked: (anyBooking.count || 0) > 0,
+  });
 
   // Example Up next rows for a new pro with nothing booked yet.
   const upNext =
@@ -397,6 +401,28 @@ export default async function HomePage() {
   if (plan.inTrial && !plan.comped && !plan.subscribed && plan.daysLeft <= 11) {
     askFeedback = !feedbackSent.error && !feedbackSent.count;
   }
+
+  const showSetup = setupLeft > 0 && !isDemo(user);
+  const setupFirst = showSetup && !bookable;
+  const setupCard = showSetup ? (
+        <section className={`card home-setup${!bookable ? " home-setup-lead" : ""}`}>
+          <h2>{bookable ? "Get set up" : "Get your booking page ready"}</h2>
+          <p className="muted small-text">
+            {bookable
+              ? `${setup.length - setupLeft} of ${setup.length} done.`
+              : "Clients can book once you have a service and some open times. The examples below show how Home looks after that."}
+          </p>
+          <ul className="home-checklist">
+            {setup.map((s) => (
+              <li key={s.text} className={s.done ? "done" : ""}>
+                <span className="home-check" aria-hidden="true" />
+                {s.done ? <span>{s.text}</span> : <Link href={s.href}>{s.text}</Link>}
+                <span className="visually-hidden">{s.done ? " (done)" : " (to do)"}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+  ) : null;
 
   const name = String(nameRow?.first_name || "").trim();
   const dateLine = parseDateString(today).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
@@ -417,10 +443,12 @@ export default async function HomePage() {
             <a href={bookingLink} target="_blank" rel="noreferrer" className="button small secondary">
               View booking page
             </a>
-            <ShareCta url={bookingLink} businessName={stylist.business_name} />
+            {bookable && <ShareCta url={bookingLink} businessName={stylist.business_name} />}
           </>
         }
       />
+
+      {setupFirst && setupCard}
 
       <section className="hf-hero" aria-label="Your week and your month">
         <WeekMeter week={weekData} today={today} />
@@ -434,23 +462,7 @@ export default async function HomePage() {
 
       {askFeedback && <FeedbackPrompt daysLeft={plan.daysLeft} />}
 
-      {setupLeft > 0 && !isDemo(user) && (
-        <section className="card home-setup">
-          <h2>Get set up</h2>
-          <p className="muted small-text">
-            {setup.length - setupLeft} of {setup.length} done.
-          </p>
-          <ul className="home-checklist">
-            {setup.map((s) => (
-              <li key={s.text} className={s.done ? "done" : ""}>
-                <span className="home-check" aria-hidden="true" />
-                {s.done ? <span>{s.text}</span> : <Link href={s.href}>{s.text}</Link>}
-                <span className="visually-hidden">{s.done ? " (done)" : " (to do)"}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+      {!setupFirst && setupCard}
 
 
       <div className="g12 g12-even">

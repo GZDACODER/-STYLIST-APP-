@@ -1,5 +1,6 @@
 "use client";
 
+import { servicePrice } from "@/lib/servicePrice";
 import { useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -296,8 +297,8 @@ export default function BookingFlow({
           {clockTime(confirmation.start_time)} – {clockTime(confirmation.end_time)}
         </p>
         <p className="muted small-text">
-          {zoneNote} To cancel, come back to this page. To change it, please contact{" "}
-          {business_name} directly.
+          {zoneNote} We&apos;ve emailed you a confirmation. Its &quot;Manage my appointment&quot; link lets you
+          move or cancel it.
         </p>
         <button type="button" className="button secondary" onClick={bookAnother}>
           Book another appointment
@@ -455,7 +456,8 @@ export default function BookingFlow({
         <section className="card">
           <h2 className="bk-h2-help">
             <span className="bk-num">01</span>{W.Service}
-            <PageGuide guideKey="book" className="gd-help-title" />
+            {/* Tips only when the client taps "?": nothing pops up mid-booking. */}
+            <PageGuide guideKey="book" auto={false} className="gd-help-title" />
           </h2>
           {services.length === 0 && <p className="muted">No {W.services} are listed yet.</p>}
           <div className="choice-list">
@@ -468,7 +470,7 @@ export default function BookingFlow({
                 onClick={() => chooseService(s.id)}
               >
                 <span className="service-name">{s.name}</span>
-                <span className="choice-price">{formatPrice(s.price_cents)}</span>
+                <span className="choice-price">{servicePrice(s.price_cents)}</span>
                 <span className="choice-meta">
                   {formatMinutes(s.duration_minutes)}
                   {s.deposit_cents > 0 && ` · ${formatPrice(s.deposit_cents)} deposit`}
@@ -707,7 +709,6 @@ export default function BookingFlow({
 
               {deposit > 0 ? (
                 <>
-                  <PageGuide guideKey="deposit" button={false} />
                   <p className="message info" data-guide="deposit-note">
                     A {formatPrice(deposit)} deposit is due now to book.
                     {service.price_cents > deposit &&
