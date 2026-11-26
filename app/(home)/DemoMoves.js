@@ -2,6 +2,9 @@
 
 // The live Home's three moves, in the app's "Fill your book" card style.
 // Nothing is sent: each tap only changes the sample studio (lib/landingDemo).
+// When a move's button turns into its "✓" result, keyboard focus moves to
+// that result instead of falling back to the top of the page.
+import { useEffect, useRef } from "react";
 const money = (cents) => `$${(cents / 100).toLocaleString("en-US", { maximumFractionDigits: cents % 100 ? 2 : 0 })}`;
 const hours = (m) => {
   const h = Math.round((m / 60) * 2) / 2;
@@ -9,15 +12,28 @@ const hours = (m) => {
 };
 
 function Move({ kind, title, text, button, done, disabled, onMove }) {
+  const result = useRef(null);
+  const tapped = useRef(false);
+  useEffect(() => {
+    if (done && tapped.current) {
+      tapped.current = false;
+      result.current?.focus();
+    }
+  }, [done]);
   return (
     <li className={`hf-move hf-move-${kind}${done ? " is-done" : ""}`}>
       <p className="hf-move-title">{title}</p>
       {text && <p className="hf-move-text">{text}</p>}
       <div className="hf-move-actions">
         {done ? (
-          <p className="hf-move-result">✓ {done}</p>
+          <p className="hf-move-result" tabIndex={-1} ref={result}>
+            ✓ {done}
+          </p>
         ) : (
-          <button type="button" className="ln-btn ln-btn-gold ln-btn-small" disabled={disabled} onClick={() => onMove(kind)}>
+          <button type="button" className="ln-btn ln-btn-gold ln-btn-small" disabled={disabled} onClick={() => {
+              tapped.current = true;
+              onMove(kind);
+            }}>
             {button}
           </button>
         )}

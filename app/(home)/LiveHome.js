@@ -25,6 +25,15 @@ export default function LiveHome({ trades, monthLabel, lastMonthLabel }) {
   const [announce, setAnnounce] = useState("");
   const [busy, setBusy] = useState(false);
   const timers = useRef([]);
+  const movesRef = useRef(null);
+  const focusFirstMove = useRef(false);
+  // After "Play again" (which disappears when clicked), focus the first move.
+  useEffect(() => {
+    if (focusFirstMove.current) {
+      focusFirstMove.current = false;
+      movesRef.current?.querySelector("button")?.focus();
+    }
+  });
 
   const clearTimers = () => {
     timers.current.forEach(clearTimeout);
@@ -104,7 +113,9 @@ export default function LiveHome({ trades, monthLabel, lastMonthLabel }) {
           <MoneyCurve month={month} today={DEMO_TODAY} moneyHref={null} tag={tag} everyVisit />
         </div>
         <p className="ln-live-label">Fill your book</p>
-        <DemoMoves state={state} openMinLeft={view.week.openMinLeft} onMove={onMove} busy={busy} words={trade.words} />
+        <div ref={movesRef}>
+          <DemoMoves state={state} openMinLeft={view.week.openMinLeft} onMove={onMove} busy={busy} words={trade.words} />
+        </div>
         {allDone && (
           <div className="ln-live-done">
             <p>That&apos;s your week in Clientele.</p>
@@ -128,7 +139,14 @@ export default function LiveHome({ trades, monthLabel, lastMonthLabel }) {
             ))}
           </div>
           {anyDone && (
-            <button type="button" className="ln-live-again" onClick={() => reset(sampleStudio(trade))}>
+            <button
+              type="button"
+              className="ln-live-again"
+              onClick={() => {
+                focusFirstMove.current = true;
+                reset(sampleStudio(trade));
+              }}
+            >
               Play again
             </button>
           )}

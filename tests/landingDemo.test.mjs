@@ -94,3 +94,16 @@ test("share only counts today's new visits as earned (later days are booked, not
   assert.ok(added.some((b) => b.booking_date > "2026-11-18"), "later days get booked too");
   assert.equal(demoView(state).month.total, before + today);
 });
+
+test("a slot shorter than the service is priced by the time it takes (no $900 three-hour slots)", () => {
+  const tattoo = trade("tattoo", [["Small Tattoo", 15000, 60], ["Full-Day Session", 90000, 360]]);
+  let s = sampleStudio(tattoo);
+  for (const k of ["share", "invite", "remind"]) s = applyMove(s, k).state;
+  const { month } = demoView(s);
+  assert.ok(month.changePct <= 45, `change ${month.changePct}%`);
+  for (const b of s.bookings.filter((x) => x.service === "Full-Day Session")) {
+    const [sh, sm] = b.start_time.split(":").map(Number);
+    const [eh, em] = b.end_time.split(":").map(Number);
+    assert.ok(b.priceCents <= Math.ceil((90000 * (eh * 60 + em - (sh * 60 + sm))) / 360), `${b.start_time}-${b.end_time} $${b.priceCents / 100}`);
+  }
+});

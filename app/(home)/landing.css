@@ -467,6 +467,10 @@ body:has(.ln),
 }
 
 /* ---------- The live Home (LiveHome.js) in a frosted window ---------- */
+.ln-live .ln-btn {
+  min-height: 44px;
+}
+
 .ln-live {
   max-width: 760px;
   margin-left: auto;

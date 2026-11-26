@@ -18,7 +18,8 @@
   }
 }
 
-.db .hf-card,
+/* .card.hf-card: outweighs the dashboard's .db .card whichever stylesheet loads last. */
+.db .card.hf-card,
 .ln .hf-card {
   display: flex;
   flex-direction: column;
@@ -387,7 +388,7 @@
 
 /* Bars glide to a new height when the numbers change (the landing demo). */
 @media (prefers-reduced-motion: no-preference) {
-  .hf-bar-fill {
+  .ln .hf-bar-fill {
     transition: height 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
   }
 }
