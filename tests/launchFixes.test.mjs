@@ -54,7 +54,7 @@ test("deposit policy falls back to a plain default when the pro wrote none", () 
 });
 
 import { exampleServiceRows } from "../lib/exampleServiceRows.js";
-test("example services insert as rows with the same columns (PostgREST bulk insert needs matching keys)", () => {
+test("example services insert as rows with the same columns (PostgREST bulk insert needs matching keys; aftercare is NOT NULL)", () => {
   const rows = exampleServiceRows(
     [
       { name: "Silk Press", price_cents: 8500, duration_minutes: 90, aftercare: "Wrap it." },
@@ -63,5 +63,5 @@ test("example services insert as rows with the same columns (PostgREST bulk inse
     "pro-1"
   );
   assert.deepEqual(Object.keys(rows[0]).sort(), Object.keys(rows[1]).sort());
-  assert.deepEqual(rows[1], { stylist_id: "pro-1", name: "Consultation", price_cents: 0, duration_minutes: 30, aftercare: null });
+  assert.deepEqual(rows[1], { stylist_id: "pro-1", name: "Consultation", price_cents: 0, duration_minutes: 30, aftercare: "" });
 });
