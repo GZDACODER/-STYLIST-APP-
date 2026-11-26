@@ -417,6 +417,16 @@ export default async function HomePage() {
         }
       />
 
+      <section className="hf-hero" aria-label="Your week and your month">
+        <WeekMeter week={weekData} today={today} />
+        <MoneyCurve month={monthData} today={today} />
+      </section>
+
+      <section className="hf-moves-wrap" aria-labelledby="fill-your-book">
+        <h2 id="fill-your-book">Fill your book</h2>
+        <FillMoves moves={movesData} bookingUrl={bookingLink} businessName={stylist.business_name} />
+      </section>
+
       {askFeedback && <FeedbackPrompt daysLeft={plan.daysLeft} />}
 
       {setupLeft > 0 && !isDemo(user) && (
@@ -437,15 +447,6 @@ export default async function HomePage() {
         </section>
       )}
 
-      <section className="hf-hero" aria-label="Your week and your month">
-        <WeekMeter week={weekData} today={today} />
-        <MoneyCurve month={monthData} today={today} />
-      </section>
-
-      <section className="hf-moves-wrap" aria-labelledby="fill-your-book">
-        <h2 id="fill-your-book">Fill your book</h2>
-        <FillMoves moves={movesData} bookingUrl={bookingLink} businessName={stylist.business_name} />
-      </section>
 
       <div className="g12 g12-even">
         <section className="card span-8">
