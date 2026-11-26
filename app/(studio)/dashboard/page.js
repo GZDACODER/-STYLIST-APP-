@@ -16,6 +16,9 @@ import CopyLinkButton from "@/components/dash/CopyLinkButton";
 import { RowChevron } from "@/components/dash/RowList";
 import RegularStar from "@/components/RegularStar";
 import ShareCta from "./shell/ShareCta";
+import WeekMeter from "./home/WeekMeter";
+import MoneyCurve from "./home/MoneyCurve";
+import FillMoves from "./home/FillMoves";
 import FeedbackPrompt from "./FeedbackPrompt";
 import { isAdmin } from "@/lib/admin";
 import { EXAMPLE_HOME_STATS, exampleData, examplesOn } from "@/lib/examples";
@@ -23,6 +26,9 @@ import { ExampleTag } from "@/components/dash/Example";
 import { lateText, recentLateNotices } from "@/lib/lateNotices";
 import { isDemo } from "@/lib/demo";
 import { getMyTemplate } from "@/lib/templates/server";
+import { earnings, moneyPeriod, owedOn } from "@/lib/moneyTab";
+import { insights } from "@/lib/insights";
+import { monthCurve, pickMoves, weekFill } from "@/lib/homeFill";
 
 export const metadata = { title: `Home · ${BRAND_NAME}` };
 
@@ -44,6 +50,17 @@ function weekRange(today) {
   sunday.setDate(monday.getDate() + 6);
   return { start: toDateString(monday), end: toDateString(sunday) };
 }
+
+// "YYYY-MM-DD" + n days.
+const plusDays = (date, n) => {
+  const d = parseDateString(date);
+  d.setDate(d.getDate() + n);
+  return toDateString(d);
+};
+
+// What earnings() needs from bookings (the same columns Money reads).
+const MONEY_COLS =
+  "id, booking_date, start_time, status, outcome, price_cents, deposit_cents, deposit_status, deposit_paid_at, owed_cents, client_id, client_name, client_email, service_name";
 
 const money = (cents) =>
   new Intl.NumberFormat("en-US", {
@@ -87,12 +104,15 @@ export default async function HomePage() {
   const stillToCome = `booking_date.gt.${today},and(booking_date.eq.${today},start_time.gt.${nowTime})`;
   const [ty, tm, td] = today.split("-").map(Number);
   const wrapSince = new Date(Date.UTC(ty, tm - 1, td - 13)).toISOString().slice(0, 10);
-  const paidSince = new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString();
+  // Fill your book: this week and next (openings), this month and last
+  // (money), and about a year of visits (who's overdue, as Insights works it out).
+  const nextWeekEnd = plusDays(week.end, 7);
+  const thisMonth = moneyPeriod("month", today);
+  const lastMonth = moneyPeriod("month", thisMonth.prev);
+  const nowLocal = `${today}T${nowTime}`;
 
   const [
     todays,
-    weekRows,
-    paidDeposits,
     newClients,
     waiting,
     nextUp,
@@ -106,15 +126,17 @@ export default async function HomePage() {
     { data: upcomingIds },
     { data: disputeRows },
     feedbackSent,
+    fillOpenings,
+    fillBookings,
+    moneyVisits,
+    moneyDepositsPaid,
+    moneyPayments,
+    owedVisits,
+    balancePayments,
+    yearVisits,
+    clientEmails,
   ] = await Promise.all([
     supabase.from("bookings").select("id", { count: "exact", head: true }).eq("status", "confirmed").eq("booking_date", today),
-    supabase
-      .from("bookings")
-      .select("price_cents, outcome")
-      .eq("status", "confirmed")
-      .gte("booking_date", week.start)
-      .lte("booking_date", week.end),
-    supabase.from("bookings").select("deposit_cents, deposit_paid_at").eq("deposit_status", "paid").gte("deposit_paid_at", paidSince),
     supabase.from("clients").select("created_at").gte("created_at", new Date(Date.now() - 32 * 24 * 60 * 60 * 1000).toISOString()),
     supabase
       .from("waitlist_entries")
@@ -147,6 +169,34 @@ export default async function HomePage() {
     supabase.from("deposit_disputes").select("id, status"),
     // Trial feedback already sent (step 38 SQL).
     supabase.from("trial_feedback").select("id", { count: "exact", head: true }).eq("stylist_id", user.id),
+    // Fill your book: openings this week and next, and this week's bookings.
+    supabase.from("openings").select("opening_date, start_time, end_time").gte("opening_date", week.start).lte("opening_date", nextWeekEnd).limit(2000),
+    supabase
+      .from("bookings")
+      .select("booking_date, start_time, end_time, status")
+      .in("status", ["confirmed", "pending_payment"])
+      .gte("booking_date", week.start)
+      .lte("booking_date", week.end),
+    // This month and last, read the way Money reads them (lib/moneyData.js).
+    supabase.from("bookings").select(MONEY_COLS).gte("booking_date", lastMonth.from).lte("booking_date", thisMonth.to).limit(5000),
+    supabase
+      .from("bookings")
+      .select(MONEY_COLS)
+      .gte("deposit_paid_at", `${plusDays(lastMonth.from, -1)}T00:00:00Z`)
+      .lte("deposit_paid_at", `${plusDays(thisMonth.to, 1)}T23:59:59Z`)
+      .limit(5000),
+    supabase.from("payments").select("booking_id, kind, method, amount_cents, paid_on").gte("paid_on", lastMonth.from).lte("paid_on", thisMonth.to).limit(5000),
+    // Balances owed, less balances already paid.
+    supabase.from("bookings").select(`${MONEY_COLS}, balance_reminded_at`).eq("status", "confirmed").eq("outcome", "completed_owed").limit(500),
+    supabase.from("payments").select("booking_id, amount_cents").eq("kind", "balance").limit(5000),
+    // Who's overdue (the same read as Insights).
+    supabase
+      .from("bookings")
+      .select("id, client_id, client_name, client_email, service_id, service_name, booking_date, start_time, status, outcome, price_cents, cancelled_at")
+      .gte("booking_date", plusDays(today, -400))
+      .lte("booking_date", plusDays(today, 120))
+      .limit(10000),
+    supabase.from("clients").select("id, email, invited_back_at"),
   ]);
 
   // Upcoming bookings of services that need an intake form, without one on file.
@@ -157,15 +207,6 @@ export default async function HomePage() {
   }
 
   const dayOf = (iso) => new Intl.DateTimeFormat("en-CA", { timeZone: tz }).format(new Date(iso));
-  const weekRevenue = (weekRows.data || [])
-    .filter((b) => b.outcome !== "no_show")
-    .reduce((sum, b) => sum + (b.price_cents || 0), 0);
-  const depositsThisWeek = (paidDeposits.data || [])
-    .filter((b) => {
-      const day = dayOf(b.deposit_paid_at);
-      return day >= week.start && day <= week.end;
-    })
-    .reduce((sum, b) => sum + (b.deposit_cents || 0), 0);
   const newThisMonth = (newClients.data || []).filter((c) => dayOf(c.created_at) >= monthStart).length;
   const waitingCount = (waiting.data || []).length;
   const emailProblems = (waiting.data || []).filter((e) =>
@@ -177,30 +218,116 @@ export default async function HomePage() {
   const owedCount = owed.count || 0;
   const flagCount = (standingFlags.data || []).length;
 
+  // ---------- Fill your book ----------
+  const tplFill = await getMyTemplate();
+  const fillEx = showExamples ? exampleData(today, tplFill) : null;
+  const realOpenings = fillOpenings.data || [];
+  const realWeekBookings = fillBookings.data || [];
+  const thisWeekOpenings = realOpenings.filter((o) => o.opening_date <= week.end);
+  // Examples only when the week has no real openings and no real bookings.
+  const weekExamples = Boolean(fillEx) && thisWeekOpenings.length === 0 && realWeekBookings.length === 0;
+  const weekData = {
+    ...weekFill({
+      week,
+      today,
+      nowTime,
+      openings: weekExamples ? fillEx.openings.filter((o) => o.opening_date >= week.start && o.opening_date <= week.end) : thisWeekOpenings,
+      bookings: weekExamples ? fillEx.bookings.filter((b) => b.booking_date >= week.start && b.booking_date <= week.end) : realWeekBookings,
+    }),
+    examples: weekExamples,
+  };
+
+  // Money: merged and dated the way lib/moneyData.js does, so the totals match Money.
+  const localDay = (iso) => (iso ? new Intl.DateTimeFormat("en-CA", { timeZone: tz }).format(new Date(iso)) : null);
+  const moneyRows = new Map();
+  for (const b of [...(moneyVisits.data || []), ...(moneyDepositsPaid.data || [])]) moneyRows.set(b.id, { ...b, deposit_paid_at: localDay(b.deposit_paid_at) });
+  const thisEarned = earnings({ bookings: [...moneyRows.values()], payments: moneyPayments.data || [], period: thisMonth, now: nowLocal });
+  const lastEarned = earnings({ bookings: [...moneyRows.values()], payments: moneyPayments.data || [], period: lastMonth, now: nowLocal });
+  const toDays = (e) => e.series.map((s, i) => ({ day: i + 1, cents: s.cents }));
+  // Examples only when neither month has anything.
+  const monthExamples = Boolean(fillEx) && thisEarned.totalCents === 0 && lastEarned.totalCents === 0;
+  const exEarned = monthExamples
+    ? earnings({ bookings: fillEx.past.map((b) => ({ ...b, status: "confirmed" })), payments: [], period: thisMonth, now: nowLocal })
+    : null;
+  const monthName = (p) => parseDateString(p.from).toLocaleDateString("en-US", { month: "long" });
+  const monthData = {
+    ...monthCurve({
+      thisDays: toDays(exEarned || thisEarned),
+      lastDays: monthExamples ? [] : toDays(lastEarned),
+      todayDay: Number(today.slice(8, 10)),
+    }),
+    label: monthName(thisMonth),
+    lastLabel: monthName(lastMonth),
+    depositsCents: (exEarned || thisEarned).depositsCents,
+    examples: monthExamples,
+  };
+
+  // Moves: biggest balance owed, an overdue client, a thin week ahead, or sharing.
+  const paidBalances = new Map();
+  for (const p of balancePayments.data || []) paidBalances.set(p.booking_id, (paidBalances.get(p.booking_id) || 0) + p.amount_cents);
+  const owedList = (owedVisits.data || [])
+    .map((b) => ({
+      bookingId: b.id,
+      clientName: b.client_name,
+      serviceName: b.service_name,
+      owedCents: owedOn(b, paidBalances),
+      hasEmail: Boolean(b.client_email),
+      // remindBalance allows one reminder every 3 days.
+      remindedRecently: Boolean(b.balance_reminded_at) && Date.now() - new Date(b.balance_reminded_at).getTime() < 3 * 86400000,
+    }))
+    .filter((o) => o.owedCents > 0);
+  const clientsById = new Map((clientEmails.data || []).map((c) => [c.id, c]));
+  const recently = (c) => Boolean(c?.invited_back_at) && Date.now() - new Date(c.invited_back_at).getTime() < 30 * 86400000;
+  const overdueList = yearVisits.error
+    ? []
+    : insights({
+        bookings: yearVisits.data || [],
+        payments: [],
+        range: { from: thisMonth.from, to: today, prevFrom: lastMonth.from, prevTo: lastMonth.to },
+        now: nowLocal,
+        today,
+        workingCells: new Set(),
+      }).overdue.map((o) => ({
+        clientId: o.clientId,
+        bookingId: o.bookingId,
+        serviceId: o.serviceId,
+        name: o.name,
+        usualWeeks: o.usual ? Math.max(1, Math.round(o.usual / 7)) : null,
+        sinceWeeks: Math.round(o.since / 7),
+        hasEmail: Boolean((o.clientId && clientsById.get(o.clientId)?.email) || o.email),
+        invitedRecently: recently(o.clientId && clientsById.get(o.clientId)),
+      }));
+  // Openings are time ranges, so next week is measured in open minutes.
+  const spanMin = (o) => {
+    const [sh, sm] = String(o.start_time).split(":").map(Number);
+    const [eh, em] = String(o.end_time).split(":").map(Number);
+    return Math.max(0, eh * 60 + em - (sh * 60 + sm));
+  };
+  const nextWeekOpenMin = realOpenings.filter((o) => o.opening_date > week.end).reduce((a, o) => a + spanMin(o), 0);
+  const movesData = pickMoves({
+    owed: owedList,
+    overdue: overdueList,
+    nextWeekOpenMin,
+    thisWeekOfferedMin: thisWeekOpenings.reduce((a, o) => a + spanMin(o), 0),
+    thisWeekOpenMinLeft: weekData.openMinLeft,
+    hasServices: (services.count || 0) > 0,
+    hasOpeningsAhead: realOpenings.some((o) => o.opening_date >= today),
+  });
+
   const h = await headers();
   const host = h.get("x-forwarded-host") || h.get("host");
   const proto = h.get("x-forwarded-proto") || (host?.startsWith("localhost") ? "http" : "https");
   const bookingLink = `${publicSiteUrl(`${proto}://${host}`)}/book/${stylist.slug}`;
 
-  const dash = (q, value) => (q.error ? "—" : value);
-  // A new pro with nothing booked yet sees example numbers (tagged Example).
+  // The old stats row's figures, in their new places: today's count in the
+  // greeting line, new clients and the waitlist in More (deposits are under
+  // This month). A new pro with nothing booked sees example numbers.
   const exampleStats = showExamples && (anyBooking.count || 0) === 0 && !nextUp.error ? EXAMPLE_HOME_STATS : null;
-  // Home's cards follow the pro's template: its order, its words, and only
-  // for features that are on.
   const tpl = await getMyTemplate();
   const W = tpl.words;
-  const ex = Boolean(exampleStats);
-  const allCards = {
-    today: { label: `Today's ${W.appointments === "appointments" ? "bookings" : W.appointments}`, value: ex ? exampleStats.todays : dash(todays, todays.count ?? 0), href: "/dashboard/today" },
-    revenue: { label: "This week's revenue", value: ex ? money(exampleStats.weekRevenueCents) : dash(weekRows, money(weekRevenue)), note: "Booked Mon–Sun", href: "/dashboard/money", module: "reports" },
-    deposits: { label: "Deposits collected", value: ex ? money(exampleStats.depositsCents) : dash(paidDeposits, money(depositsThisWeek)), note: "This week", href: "/dashboard/reports", module: "deposits" },
-    newClients: { label: `New ${W.clients}`, value: ex ? exampleStats.newClients : dash(newClients, newThisMonth), note: "This month", href: "/dashboard/clients" },
-    waitlist: { label: "Waitlist", value: ex ? exampleStats.waiting : dash(waiting, waitingCount), note: "Waiting now", href: "/dashboard/waitlist", module: "waitlist" },
-  };
-  const cards = tpl.homeCards
-    .map((k) => allCards[k])
-    .filter((c) => c && (!c.module || tpl.modules[c.module]))
-    .map((c) => ({ ...c, example: ex }));
+  const todayCount = exampleStats ? exampleStats.todays : todays.count ?? 0;
+  const newCount = exampleStats ? exampleStats.newClients : newThisMonth;
+  const waitCount = exampleStats ? exampleStats.waiting : waitingCount;
 
   // Needs attention: only what's actually there.
   const exampleStatsOn = showExamples && (anyBooking.count || 0) === 0;
@@ -278,7 +405,7 @@ export default async function HomePage() {
         guide="home"
         eyebrow={dateLine}
         title={name ? `${greeting(tz)}, ${name}` : greeting(tz)}
-        subtitle={stylist.business_name}
+        subtitle={`${todayCount} ${todayCount === 1 ? W.appointment || "appointment" : W.appointments || "appointments"} today · ${stylist.business_name}`}
         actions={
           <>
             {proCode && <CopyLinkButton link={proCode} label={`Pro ID ${proCode}`} className="button small ghost" />}
@@ -309,6 +436,16 @@ export default async function HomePage() {
           </ul>
         </section>
       )}
+
+      <section className="hf-hero" aria-label="Your week and your month">
+        <WeekMeter week={weekData} today={today} />
+        <MoneyCurve month={monthData} today={today} />
+      </section>
+
+      <section className="hf-moves-wrap" aria-labelledby="fill-your-book">
+        <h2 id="fill-your-book">Fill your book</h2>
+        <FillMoves moves={movesData} bookingUrl={bookingLink} businessName={stylist.business_name} />
+      </section>
 
       <div className="g12 g12-even">
         <section className="card span-8">
@@ -385,19 +522,21 @@ export default async function HomePage() {
         </section>
       </div>
 
-      <section className="stat-row" aria-label="At a glance">
-        {cards.map((c) => (
-          <Link key={c.label} href={c.href} className="stat-tile">
-            <span className="stat-label">{c.label}</span>
-            <strong className="stat-value">{c.value}</strong>
-            {c.note && <span className="stat-note">{c.note}</span>}
-            {c.example && <ExampleTag />}
-          </Link>
-        ))}
-      </section>
 
       <details className="card fold">
         <summary>More</summary>
+        <p className="fold-stats">
+          New {W.clients || "clients"} this month: <strong>{newCount}</strong>
+          {tpl.modules.waitlist !== false && (
+            <>
+              {" · "}
+              <Link href="/dashboard/openings?tab=waitlist">
+                Waiting on your waitlist: <strong>{waitCount}</strong>
+              </Link>
+            </>
+          )}
+          {exampleStats && <> <ExampleTag /></>}
+        </p>
         <ul className="fold-links">
           <li>
             <Link href="/dashboard/wrapup">Wrap up visits</Link>
