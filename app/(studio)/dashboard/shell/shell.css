@@ -2135,3 +2135,10 @@
     height: 130px;
   }
 }
+
+.db .fold-stats {
+  margin: 0;
+  padding: 0 22px 10px;
+  font-size: 0.92rem;
+  color: var(--muted, #6b655b);
+}

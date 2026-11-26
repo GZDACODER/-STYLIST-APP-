@@ -16,6 +16,9 @@ import CopyLinkButton from "@/components/dash/CopyLinkButton";
 import { RowChevron } from "@/components/dash/RowList";
 import RegularStar from "@/components/RegularStar";
 import ShareCta from "./shell/ShareCta";
+import WeekMeter from "./home/WeekMeter";
+import MoneyCurve from "./home/MoneyCurve";
+import FillMoves from "./home/FillMoves";
 import FeedbackPrompt from "./FeedbackPrompt";
 import { isAdmin } from "@/lib/admin";
 import { EXAMPLE_HOME_STATS, exampleData, examplesOn } from "@/lib/examples";
@@ -101,7 +104,6 @@ export default async function HomePage() {
   const stillToCome = `booking_date.gt.${today},and(booking_date.eq.${today},start_time.gt.${nowTime})`;
   const [ty, tm, td] = today.split("-").map(Number);
   const wrapSince = new Date(Date.UTC(ty, tm - 1, td - 13)).toISOString().slice(0, 10);
-  const paidSince = new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString();
   // Fill your book: this week and next (openings), this month and last
   // (money), and about a year of visits (who's overdue, as Insights works it out).
   const nextWeekEnd = plusDays(week.end, 7);
@@ -111,8 +113,6 @@ export default async function HomePage() {
 
   const [
     todays,
-    weekRows,
-    paidDeposits,
     newClients,
     waiting,
     nextUp,
@@ -137,13 +137,6 @@ export default async function HomePage() {
     clientEmails,
   ] = await Promise.all([
     supabase.from("bookings").select("id", { count: "exact", head: true }).eq("status", "confirmed").eq("booking_date", today),
-    supabase
-      .from("bookings")
-      .select("price_cents, outcome")
-      .eq("status", "confirmed")
-      .gte("booking_date", week.start)
-      .lte("booking_date", week.end),
-    supabase.from("bookings").select("deposit_cents, deposit_paid_at").eq("deposit_status", "paid").gte("deposit_paid_at", paidSince),
     supabase.from("clients").select("created_at").gte("created_at", new Date(Date.now() - 32 * 24 * 60 * 60 * 1000).toISOString()),
     supabase
       .from("waitlist_entries")
@@ -214,15 +207,6 @@ export default async function HomePage() {
   }
 
   const dayOf = (iso) => new Intl.DateTimeFormat("en-CA", { timeZone: tz }).format(new Date(iso));
-  const weekRevenue = (weekRows.data || [])
-    .filter((b) => b.outcome !== "no_show")
-    .reduce((sum, b) => sum + (b.price_cents || 0), 0);
-  const depositsThisWeek = (paidDeposits.data || [])
-    .filter((b) => {
-      const day = dayOf(b.deposit_paid_at);
-      return day >= week.start && day <= week.end;
-    })
-    .reduce((sum, b) => sum + (b.deposit_cents || 0), 0);
   const newThisMonth = (newClients.data || []).filter((c) => dayOf(c.created_at) >= monthStart).length;
   const waitingCount = (waiting.data || []).length;
   const emailProblems = (waiting.data || []).filter((e) =>
@@ -320,25 +304,15 @@ export default async function HomePage() {
   const proto = h.get("x-forwarded-proto") || (host?.startsWith("localhost") ? "http" : "https");
   const bookingLink = `${publicSiteUrl(`${proto}://${host}`)}/book/${stylist.slug}`;
 
-  const dash = (q, value) => (q.error ? "—" : value);
-  // A new pro with nothing booked yet sees example numbers (tagged Example).
+  // The old stats row's figures, in their new places: today's count in the
+  // greeting line, new clients and the waitlist in More (deposits are under
+  // This month). A new pro with nothing booked sees example numbers.
   const exampleStats = showExamples && (anyBooking.count || 0) === 0 && !nextUp.error ? EXAMPLE_HOME_STATS : null;
-  // Home's cards follow the pro's template: its order, its words, and only
-  // for features that are on.
   const tpl = await getMyTemplate();
   const W = tpl.words;
-  const ex = Boolean(exampleStats);
-  const allCards = {
-    today: { label: `Today's ${W.appointments === "appointments" ? "bookings" : W.appointments}`, value: ex ? exampleStats.todays : dash(todays, todays.count ?? 0), href: "/dashboard/today" },
-    revenue: { label: "This week's revenue", value: ex ? money(exampleStats.weekRevenueCents) : dash(weekRows, money(weekRevenue)), note: "Booked Mon–Sun", href: "/dashboard/money", module: "reports" },
-    deposits: { label: "Deposits collected", value: ex ? money(exampleStats.depositsCents) : dash(paidDeposits, money(depositsThisWeek)), note: "This week", href: "/dashboard/reports", module: "deposits" },
-    newClients: { label: `New ${W.clients}`, value: ex ? exampleStats.newClients : dash(newClients, newThisMonth), note: "This month", href: "/dashboard/clients" },
-    waitlist: { label: "Waitlist", value: ex ? exampleStats.waiting : dash(waiting, waitingCount), note: "Waiting now", href: "/dashboard/waitlist", module: "waitlist" },
-  };
-  const cards = tpl.homeCards
-    .map((k) => allCards[k])
-    .filter((c) => c && (!c.module || tpl.modules[c.module]))
-    .map((c) => ({ ...c, example: ex }));
+  const todayCount = exampleStats ? exampleStats.todays : todays.count ?? 0;
+  const newCount = exampleStats ? exampleStats.newClients : newThisMonth;
+  const waitCount = exampleStats ? exampleStats.waiting : waitingCount;
 
   // Needs attention: only what's actually there.
   const exampleStatsOn = showExamples && (anyBooking.count || 0) === 0;
@@ -416,7 +390,7 @@ export default async function HomePage() {
         guide="home"
         eyebrow={dateLine}
         title={name ? `${greeting(tz)}, ${name}` : greeting(tz)}
-        subtitle={stylist.business_name}
+        subtitle={`${todayCount} ${todayCount === 1 ? W.appointment || "appointment" : W.appointments || "appointments"} today · ${stylist.business_name}`}
         actions={
           <>
             {proCode && <CopyLinkButton link={proCode} label={`Pro ID ${proCode}`} className="button small ghost" />}
@@ -447,6 +421,16 @@ export default async function HomePage() {
           </ul>
         </section>
       )}
+
+      <section className="hf-hero" aria-label="Your week and your month">
+        <WeekMeter week={weekData} today={today} />
+        <MoneyCurve month={monthData} today={today} />
+      </section>
+
+      <section className="hf-moves-wrap" aria-labelledby="fill-your-book">
+        <h2 id="fill-your-book">Fill your book</h2>
+        <FillMoves moves={movesData} bookingUrl={bookingLink} businessName={stylist.business_name} />
+      </section>
 
       <div className="g12 g12-even">
         <section className="card span-8">
@@ -523,19 +507,21 @@ export default async function HomePage() {
         </section>
       </div>
 
-      <section className="stat-row" aria-label="At a glance">
-        {cards.map((c) => (
-          <Link key={c.label} href={c.href} className="stat-tile">
-            <span className="stat-label">{c.label}</span>
-            <strong className="stat-value">{c.value}</strong>
-            {c.note && <span className="stat-note">{c.note}</span>}
-            {c.example && <ExampleTag />}
-          </Link>
-        ))}
-      </section>
 
       <details className="card fold">
         <summary>More</summary>
+        <p className="fold-stats">
+          New {W.clients || "clients"} this month: <strong>{newCount}</strong>
+          {tpl.modules.waitlist !== false && (
+            <>
+              {" · "}
+              <Link href="/dashboard/openings?tab=waitlist">
+                Waiting on your waitlist: <strong>{waitCount}</strong>
+              </Link>
+            </>
+          )}
+          {exampleStats && <> <ExampleTag /></>}
+        </p>
         <ul className="fold-links">
           <li>
             <Link href="/dashboard/wrapup">Wrap up visits</Link>
