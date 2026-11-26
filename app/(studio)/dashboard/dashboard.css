@@ -5318,3 +5318,88 @@ body:has(dialog.client-sheet[open]) {
 .db .examples-use {
   margin: 0 0 16px;
 }
+
+/* ---------- Admin: Launch week ---------- */
+.db .lw-funnel {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0 0 20px;
+}
+.db .lw-step {
+  margin: 0;
+  padding: 16px;
+}
+.db .lw-step-label {
+  margin: 0;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.db .lw-step-count {
+  margin: 4px 0;
+  font-family: var(--serif, Georgia, serif);
+  font-size: 34px;
+  line-height: 1;
+}
+.db .lw-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+.db .lw-pro {
+  margin: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+.db .lw-pro.is-stuck {
+  border-left: 2px solid var(--gold);
+}
+.db .lw-pro p {
+  margin: 0 0 4px;
+}
+.db .lw-pro-name {
+  font-weight: 600;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.db .lw-pro-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.db .lw-dots {
+  list-style: none;
+  display: flex;
+  gap: 6px;
+  margin: 8px 0;
+  padding: 0;
+}
+.db .lw-dots li {
+  width: 28px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--divider);
+}
+.db .lw-dots li.on {
+  background: var(--gold);
+}
+@media (max-width: 720px) {
+  .db .lw-funnel {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .db .lw-pro {
+    flex-direction: column;
+  }
+  .db .lw-pro-actions {
+    align-items: flex-start;
+  }
+}

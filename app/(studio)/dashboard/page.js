@@ -586,6 +586,9 @@ export default async function HomePage() {
           <summary>Admin</summary>
           <ul className="fold-links">
             <li>
+              <Link href="/dashboard/admin/launch">Launch week</Link>
+            </li>
+            <li>
               <Link href="/dashboard/admin/control">Control Room</Link>
             </li>
             <li>
