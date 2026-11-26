@@ -36,7 +36,9 @@ export default function WeekMeter({ week, today, calendarHref = "/dashboard/book
   const none = week.offeredMin === 0 && week.bookedMin === 0;
   const tipDay = tip === null ? null : week.days[tip];
   const dayText = (d) =>
-    `${d.label}, ${d.bookedCount} booked${d.hasOpenings ? `, ${hours(Math.max(0, d.offeredMin - d.bookedMin))} hours open` : ", no open times"}`;
+    d.past
+      ? `${d.label}, ${d.bookedCount} booked` // past: its open time is gone
+      : `${d.label}, ${d.bookedCount} booked${d.hasOpenings ? `, ${hours(Math.max(0, d.offeredMin - d.bookedMin))} hours open` : ", no open times"}`;
 
   return (
     <section className={`card hf-card hf-week${mode === "play" ? " is-play" : ""}${full ? " is-full" : ""}`} aria-label="This week">
