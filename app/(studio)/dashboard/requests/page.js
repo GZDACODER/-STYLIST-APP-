@@ -30,7 +30,7 @@ export default async function RequestsPage({ searchParams }) {
   const tab = ["new", "approved", "declined", "booked"].includes(show) ? show : "new";
   const [{ data: rows, error }, { data: services }, { data: me }] = await Promise.all([
     supabase.from("booking_requests").select("*").order("created_at", { ascending: false }).limit(200),
-    supabase.from("services").select("id, name").order("name"),
+    supabase.from("services").select("id, name, request_first").order("name"),
     supabase.from("stylists").select("timezone").eq("id", user.id).maybeSingle(),
   ]);
   const all = rows || [];
@@ -43,6 +43,7 @@ export default async function RequestsPage({ searchParams }) {
     for (const d of data || []) if (d.signedUrl) urlOf[d.path] = d.signedUrl;
   }
   const count = (st) => all.filter((r) => r.status === st).length;
+  const anyRequestFirst = (services || []).some((s) => s.request_first);
 
   return (
     <>
@@ -58,11 +59,17 @@ export default async function RequestsPage({ searchParams }) {
       {list.length === 0 ? (
         <EmptyState
           title={tab === "new" ? "No new requests" : "Nothing here"}
-          text="Turn on 'Ask for a request first' on any service, and clients send you their idea before booking."
+          text={
+            anyRequestFirst
+              ? "New requests show here, with the client's idea and photos."
+              : "Turn on 'Ask for a request first' on any service, and clients send you their idea before booking."
+          }
           action={
-            <Link href="/dashboard/services" className="button small secondary">
-              Open Services
-            </Link>
+            anyRequestFirst ? null : (
+              <Link href="/dashboard/services" className="button small secondary">
+                Open Services
+              </Link>
+            )
           }
         />
       ) : (

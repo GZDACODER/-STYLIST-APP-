@@ -54,7 +54,8 @@ export async function approveRequest(prev, formData) {
       },
     ]).catch(() => {});
   }
-  revalidatePath("/dashboard/requests");
+  // No revalidate here: the card stays with its "Approved" message (the
+  // tabs update next time the page opens).
   return { success: `Approved. ${rq.client_name} has been emailed a link to book.`, link };
 }
 
@@ -82,7 +83,6 @@ export async function declineRequest(prev, formData) {
       },
     ]).catch(() => {});
   }
-  revalidatePath("/dashboard/requests");
   return { success: "Declined. They've been emailed." };
 }
 

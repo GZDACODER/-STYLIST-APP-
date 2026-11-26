@@ -101,13 +101,13 @@ export default async function ServicesPage() {
             items={services.map((service) => ({
               key: service.id,
               title: service.name,
-              sub: `${formatPrice(service.price_cents)} · ${formatDuration(service.duration_minutes)}${requestFirstOf?.[service.id] ? " · Request first" : ""}`,
+              sub: `${service.price_cents ? formatPrice(service.price_cents) : "Free"} · ${formatDuration(service.duration_minutes)}${requestFirstOf?.[service.id] ? " · Request first" : ""}`,
               panel: (
                 <>
                   <dl className="booking-facts">
                     <div>
                       <dt>Price</dt>
-                      <dd>{formatPrice(service.price_cents)}</dd>
+                      <dd>{service.price_cents ? formatPrice(service.price_cents) : "Free"}</dd>
                     </div>
                     <div>
                       <dt>Length</dt>
