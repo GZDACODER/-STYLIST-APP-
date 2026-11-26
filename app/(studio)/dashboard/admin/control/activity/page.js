@@ -2,6 +2,7 @@
 // Money, the sign-up funnel, pros who could use a nudge, every pro in one
 // table, and a live feed. Clients appear only as counts and first names.
 // Data from ops_activity() (supabase/migrations/0053_control_room_activity.sql).
+import { getUser } from "@/lib/supabase/user";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -106,9 +107,7 @@ function feedLine(e) {
 
 export default async function ActivityPage({ searchParams }) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) redirect("/login");
   if (!isAdmin(user)) notFound();
 

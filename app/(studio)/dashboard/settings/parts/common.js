@@ -1,12 +1,11 @@
 // Settings: helpers shared by the section files (server only).
+import { getUser } from "@/lib/supabase/user";
 import { createClient } from "@/lib/supabase/server";
 
 // The logged-in stylist's row (only these columns), or null.
 export async function me(columns) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) return { supabase, user: null, row: null };
   const { data: row } = await supabase.from("stylists").select(columns).eq("id", user.id).maybeSingle();
   return { supabase, user, row: row || {} };

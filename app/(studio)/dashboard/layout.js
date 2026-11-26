@@ -1,3 +1,4 @@
+import { getUser } from "@/lib/supabase/user";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { Cormorant_Garamond } from "next/font/google";
@@ -33,16 +34,17 @@ export const viewport = { themeColor: "#0E0E0E" };
 // and iPad portrait) and the page on warm ivory.
 export default async function DashboardLayout({ children }) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) redirect("/login");
 
-  let { data: stylist } = await supabase
-    .from("stylists")
-    .select("business_name, slug")
-    .eq("id", user.id)
-    .maybeSingle();
+  // One read of the business row (first name too, for the Assistant).
+  const STYLIST_COLS = "business_name, slug, first_name";
+  const readStylist = async () => {
+    const r = await supabase.from("stylists").select(STYLIST_COLS).eq("id", user.id).maybeSingle();
+    // A database from before the first-name column: read without it.
+    return r.error ? (await supabase.from("stylists").select("business_name, slug").eq("id", user.id).maybeSingle()).data : r.data;
+  };
+  let stylist = await readStylist();
 
   // Signed up as a stylist (the business name is on the login) but no
   // profile was made, for example because the email already had a login
@@ -54,33 +56,7 @@ export default async function DashboardLayout({ children }) {
       p_first_name: String(user.user_metadata?.first_name || ""),
     });
     if (error) console.error("Couldn't repair stylist profile", error.code, error.message);
-    ({ data: stylist } = await supabase
-      .from("stylists")
-      .select("business_name, slug")
-      .eq("id", user.id)
-      .maybeSingle());
-  }
-
-  // The plan, and which first-visit tips they've seen (null before the
-  // step 44 SQL is run: then only this phone remembers).
-  const [plan, guidesSeen] = stylist
-    ? await Promise.all([
-        getMyPlan(supabase, user.id),
-        Promise.resolve(supabase.from("onboarding_guides_seen").select("guide_key")).then(({ data, error }) =>
-          error ? null : (data || []).map((r) => r.guide_key)
-        ),
-      ])
-    : [null, null];
-  // The pop-up Assistant: its button shows for every pro once it's switched
-  // on for the app (ANTHROPIC_API_KEY in Vercel). Without it on their plan
-  // (the add-on, or the free trial) it opens an "Add the Assistant" card
-  // instead of the chat.
-  const assistantOn = Boolean(stylist && process.env.ANTHROPIC_API_KEY);
-  const assistantLocked = !plan?.has.assistant;
-  let firstName = "";
-  if (assistantOn) {
-    const { data: nameRow } = await supabase.from("stylists").select("first_name").eq("id", user.id).maybeSingle();
-    firstName = nameRow?.first_name || "";
+    stylist = await readStylist();
   }
 
   // Clients who verified on a booking page have a login too, but no stylist
@@ -110,23 +86,41 @@ export default async function DashboardLayout({ children }) {
     );
   }
 
-  // The Clientele agreement (step 54 SQL): signed before using the dashboard,
-  // and again when its version changes. Demo accounts are exempt.
-  if (!isDemo(user)) {
-    const { data: signedTerms, error: termsError } = await supabase
-      .from("pro_agreements")
-      .select("id")
-      .eq("stylist_id", user.id)
-      .eq("kind", "pro_terms")
-      .gte("version", PRO_TERMS_VERSION)
-      .limit(1);
-    if (!termsError && !signedTerms?.length) redirect("/agreement");
-  }
+  // Everything else the frame needs, at the same time (they don't depend on
+  // each other): the plan, which first-visit tips they've seen (null before
+  // the step 44 SQL: then only this phone remembers), the Clientele
+  // agreement check (step 54 SQL; demo accounts are exempt), the
+  // business-type template, and the cookies.
+  const [plan, guidesSeen, signed, tpl, cookieStore] = await Promise.all([
+    getMyPlan(supabase, user.id),
+    Promise.resolve(supabase.from("onboarding_guides_seen").select("guide_key")).then(({ data, error }) =>
+      error ? null : (data || []).map((r) => r.guide_key)
+    ),
+    isDemo(user)
+      ? { data: [true], error: null }
+      : supabase
+          .from("pro_agreements")
+          .select("id")
+          .eq("stylist_id", user.id)
+          .eq("kind", "pro_terms")
+          .gte("version", PRO_TERMS_VERSION)
+          .limit(1),
+    getMyTemplate(),
+    cookies(),
+  ]);
+  // Not signed (or an older version): sign before using the dashboard.
+  if (!signed.error && !signed.data?.length) redirect("/agreement");
 
-  // The pro's business-type template: words and which features are on.
-  const tpl = await getMyTemplate();
+  // The pop-up Assistant: its button shows for every pro once it's switched
+  // on for the app (ANTHROPIC_API_KEY in Vercel). Without it on their plan
+  // (the add-on, or the free trial) it opens an "Add the Assistant" card
+  // instead of the chat.
+  const assistantOn = Boolean(process.env.ANTHROPIC_API_KEY);
+  const assistantLocked = !plan?.has.assistant;
+  const firstName = assistantOn ? stylist.first_name || "" : "";
+
   // The owner previewing a business type from the Control Room.
-  const hasReturn = Boolean((await cookies()).get("cl_admin_return")?.value);
+  const hasReturn = Boolean(cookieStore.get("cl_admin_return")?.value);
   const previewing = isDemo(user) && hasReturn;
   // The owner inside one of their own extra accounts (Control Room > Your accounts).
   const switchedIn = !isDemo(user) && hasReturn;

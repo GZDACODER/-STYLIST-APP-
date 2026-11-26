@@ -1,6 +1,7 @@
 // Share kit: everything a pro needs to get their booking link out there:
 // the link, a QR code, an Instagram story image, a printable card for the
 // station, and messages ready to copy.
+import { getUser } from "@/lib/supabase/user";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
@@ -14,9 +15,7 @@ export const metadata = { title: `Share kit · ${BRAND_NAME}` };
 
 export default async function ShareKitPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) redirect("/login");
   const { data: stylist } = await supabase.from("stylists").select("slug, business_name").eq("id", user.id).maybeSingle();
   const { data: codeRow } = await supabase.from("stylists").select("pro_code").eq("id", user.id).maybeSingle();

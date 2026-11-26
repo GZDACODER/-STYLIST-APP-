@@ -1,5 +1,6 @@
 // Wrap up visits: how did each finished visit go? Linked from the 8 PM
 // email and from the Today page. Shows the last 14 days.
+import { getUser } from "@/lib/supabase/user";
 import PageHeader from "@/components/dash/PageHeader";
 import { exampleData, examplesOn } from "@/lib/examples";
 import { ExampleTag } from "@/components/dash/Example";
@@ -51,9 +52,7 @@ export default async function WrapupPage() {
   // Parent notes (step 68 SQL), for tutors by default.
   const showParent = tplW.modules.parentNotes;
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) redirect("/login");
 
   const { data: stylist } = await supabase.from("stylists").select("timezone").eq("id", user.id).maybeSingle();

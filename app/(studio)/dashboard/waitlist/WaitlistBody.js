@@ -1,3 +1,4 @@
+import { getUser } from "@/lib/supabase/user";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { waitlistConfigured } from "@/lib/waitlist";
@@ -19,9 +20,7 @@ import Words from "@/components/Words";
 // then settings in one fold, then "Booked since joining" folded.
 export default async function WaitlistBody() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) redirect("/login");
 
   const { data: stylist } = await supabase

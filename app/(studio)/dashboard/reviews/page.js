@@ -1,5 +1,6 @@
 // Reviews: every rating clients have left after a visit. Written reviews are
 // private until the pro chooses to show them on their public profile.
+import { getUser } from "@/lib/supabase/user";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -18,9 +19,7 @@ const day = (iso) => new Date(iso).toLocaleDateString("en-US", { month: "short",
 
 export default async function ReviewsPage({ searchParams }) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) redirect("/login");
   const { show } = await searchParams;
   const tab = ["new", "public", "all"].includes(show) ? show : "new";

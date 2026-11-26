@@ -1,13 +1,12 @@
 // Your signed Clientele agreement(s), with PDFs (Settings > Plan & billing).
+import { getUser } from "@/lib/supabase/user";
 import { createClient } from "@/lib/supabase/server";
 
 const when = (iso) => new Date(iso).toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" });
 
 export async function AgreementsSection() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) return null;
   const { data: rows } = await supabase
     .from("pro_agreements")

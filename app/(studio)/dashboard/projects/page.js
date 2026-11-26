@@ -1,4 +1,5 @@
 // Projects (step 67 SQL): multi-session pieces, each with its sessions.
+import { getUser } from "@/lib/supabase/user";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -13,9 +14,7 @@ export const metadata = { title: `Projects · ${BRAND_NAME}` };
 
 export default async function ProjectsPage({ searchParams }) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) redirect("/login");
   const { show } = await searchParams;
   const done = show === "done";

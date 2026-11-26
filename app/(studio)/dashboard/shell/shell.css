@@ -614,10 +614,23 @@
   --glass-shadow: 0 1px 2px rgba(14, 13, 11, 0.04), 0 10px 30px -14px rgba(14, 13, 11, 0.18);
   --glass-filter: blur(var(--sh-blur)) saturate(140%);
   min-height: 100vh;
+  position: relative;
+  isolation: isolate;
+  background: #f4efe6;
+}
+
+/* The warm gold glow, on a screen-sized layer fixed behind the app.
+   (Painted on the whole page, Chrome built it as one image as tall as the
+   page, which cost phones up to a second while loading.) */
+.db::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
   background:
-    radial-gradient(1100px 760px at 88% -8%, rgba(207, 174, 108, 0.26), transparent 62%),
-    radial-gradient(900px 700px at -12% 108%, rgba(207, 174, 108, 0.14), transparent 60%),
-    #f4efe6;
+    radial-gradient(90vmax 65vmax at 88% -8%, rgba(207, 174, 108, 0.26), transparent 62%),
+    radial-gradient(75vmax 60vmax at -12% 108%, rgba(207, 174, 108, 0.14), transparent 60%);
 }
 
 /* The brand in the nav (a link colour rule painted it dark). */

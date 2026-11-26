@@ -1,3 +1,4 @@
+import { getUser } from "@/lib/supabase/user";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate, hoursByWeekday } from "@/lib/availability";
@@ -16,9 +17,7 @@ export const metadata = { title: `Availability · ${BRAND_NAME}` };
 
 export default async function AvailabilityPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) redirect("/login");
 
   // Skip old blocked dates. We go back two days so a stylist in a

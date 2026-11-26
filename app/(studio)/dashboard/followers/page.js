@@ -1,5 +1,6 @@
 // Following you: clients who asked for opening alerts from the pro's public
 // profile (step 60 SQL). Alerts go out automatically when new times open.
+import { getUser } from "@/lib/supabase/user";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -23,9 +24,7 @@ function wantsText(f, serviceName) {
 
 export default async function FollowersPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) redirect("/login");
   const [{ data: rows, error }, { data: services }, { data: me }] = await Promise.all([
     supabase

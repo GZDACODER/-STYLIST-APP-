@@ -2,6 +2,7 @@
 // chart), then tabs: payments you recorded outside the app (cash, Zelle,
 // Cash App...), balances owed, Stripe payouts and gift cards. Record a
 // payment opens in the slide-over; exports are in the Export menu (step 62 SQL).
+import { getUser } from "@/lib/supabase/user";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -53,9 +54,7 @@ async function stripeInfo(stylist) {
 
 export default async function MoneyPage({ searchParams }) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) redirect("/login");
   const sp = await searchParams;
   const m = await loadMoney(supabase, user.id, { view: sp.view, date: sp.date });

@@ -1,5 +1,6 @@
 // The owner's list of deposit disputes (chargebacks), newest first, with the
 // evidence Clientele has for each. Only for logins in ADMIN_EMAILS.
+import { getUser } from "@/lib/supabase/user";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -16,9 +17,7 @@ const day = (iso) => (iso ? new Date(iso).toLocaleDateString("en-US", { month: "
 
 export default async function AdminDisputesPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) redirect("/login");
   if (!isAdmin(user)) notFound();
 

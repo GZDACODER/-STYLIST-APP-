@@ -1,6 +1,7 @@
 // Insights: revenue, visits, no-shows, Regulars vs new clients and deposits
 // for a period (this month by default), compared with the
 // period before. Worked out from the bookings already stored; see lib/reports.js.
+import { getUser } from "@/lib/supabase/user";
 import PageHeader from "@/components/dash/PageHeader";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -20,9 +21,7 @@ const COLUMNS =
 
 export default async function ReportsPage({ searchParams }) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) redirect("/login");
 
   const { data: stylist } = await supabase.from("stylists").select("timezone").eq("id", user.id).maybeSingle();

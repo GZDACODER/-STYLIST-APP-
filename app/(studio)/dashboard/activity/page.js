@@ -1,6 +1,7 @@
 // Activity: what happened on the account, newest first. What clients did
 // from their email links (cancelled, rescheduled, running late, requests,
 // waivers) and everything done with support access (and turning it on/off).
+import { getUser } from "@/lib/supabase/user";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -21,9 +22,7 @@ const CLIENT_ACTION = {
 
 export default async function ActivityPage({ searchParams }) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) redirect("/login");
   const { show } = await searchParams;
   const tab = ["all", "clients", "support"].includes(show) ? show : "all";

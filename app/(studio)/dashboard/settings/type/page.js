@@ -1,4 +1,5 @@
 // Settings → Business type: switch type, and turn features on or off.
+import { getUser } from "@/lib/supabase/user";
 import { redirect } from "next/navigation";
 import { BRAND_NAME } from "@/lib/brand";
 import SettingsShell from "@/components/dash/SettingsShell";
@@ -10,9 +11,7 @@ export const metadata = { title: `Business type · ${BRAND_NAME}` };
 
 export default async function Page() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) redirect("/login");
   let { data: row, error } = await supabase.from("stylists").select("business_type, modules").eq("id", user.id).maybeSingle();
   if (error) ({ data: row } = await supabase.from("stylists").select("business_type").eq("id", user.id).maybeSingle());

@@ -1,5 +1,6 @@
 // Settings > Booking rules (step 66 SQL): notice, how far ahead, breaks,
 // start times and a daily limit. Used by the booking page and at booking.
+import { getUser } from "@/lib/supabase/user";
 import { redirect } from "next/navigation";
 import { BRAND_NAME } from "@/lib/brand";
 import SettingsShell from "@/components/dash/SettingsShell";
@@ -11,9 +12,7 @@ export const metadata = { title: `Booking rules · ${BRAND_NAME}` };
 
 export default async function Page() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) redirect("/login");
   const { data: r, error } = await supabase
     .from("stylists")

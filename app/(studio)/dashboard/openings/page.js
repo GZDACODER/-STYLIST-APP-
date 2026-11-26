@@ -1,3 +1,4 @@
+import { getUser } from "@/lib/supabase/user";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -28,9 +29,7 @@ export const metadata = { title: `Openings · ${BRAND_NAME}` };
 
 export default async function OpeningsPage({ searchParams }) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) redirect("/login");
 
   const { data: stylist } = await supabase

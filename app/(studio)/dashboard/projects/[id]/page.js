@@ -1,5 +1,6 @@
 // One project: its details, its sessions, and the client's other bookings
 // to add to it.
+import { getUser } from "@/lib/supabase/user";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -14,9 +15,7 @@ export const metadata = { title: `Project · ${BRAND_NAME}` };
 
 export default async function ProjectPage({ params }) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) redirect("/login");
   const { id } = await params;
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();

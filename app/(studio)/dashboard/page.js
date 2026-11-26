@@ -2,6 +2,7 @@
 // booking link, this week's numbers, the next few bookings, anything that
 // needs attention, quick actions, and a setup checklist for new accounts.
 // The detailed day view is Today (/dashboard/today).
+import { getUser } from "@/lib/supabase/user";
 import Link from "next/link";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -55,9 +56,7 @@ const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
 
 export default async function HomePage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) redirect("/login");
 
   // All at once (the extra columns are read on their own, so Home still

@@ -1,4 +1,5 @@
 // Settings > Notifications (step 66 SQL): which emails the pro gets.
+import { getUser } from "@/lib/supabase/user";
 import { redirect } from "next/navigation";
 import { BRAND_NAME } from "@/lib/brand";
 import SettingsShell from "@/components/dash/SettingsShell";
@@ -10,9 +11,7 @@ export const metadata = { title: `Notifications · ${BRAND_NAME}` };
 
 export default async function Page() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) redirect("/login");
   const { data: s, error } = await supabase.from("stylists").select("notify").eq("id", user.id).maybeSingle();
   return (

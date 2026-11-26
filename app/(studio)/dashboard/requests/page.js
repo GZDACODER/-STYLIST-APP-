@@ -1,5 +1,6 @@
 // Requests: clients' requests for services the pro approves first (step 56
 // SQL), newest first, with their reference photos.
+import { getUser } from "@/lib/supabase/user";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -23,9 +24,7 @@ const STATUS = { new: "New", approved: "Approved · link sent", declined: "Decli
 
 export default async function RequestsPage({ searchParams }) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) redirect("/login");
   const { show } = await searchParams;
   const tab = ["new", "approved", "declined", "booked"].includes(show) ? show : "new";
