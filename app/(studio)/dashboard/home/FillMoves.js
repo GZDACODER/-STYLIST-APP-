@@ -95,15 +95,13 @@ export default function FillMoves({ moves, bookingUrl, businessName }) {
           );
         }
         if (m.kind === "thin") {
-          return (
-            <LinkMove
-              key="thin"
-              kind="thin"
-              title={`Next week has ${m.nextWeekOpenTimes === 0 ? "no open times yet" : `only ${m.nextWeekOpenTimes} open ${m.nextWeekOpenTimes === 1 ? "time" : "times"}`}.`}
-              href="/dashboard/openings#add-opening"
-              button="Add opening"
-            />
-          );
+          const title =
+            m.when === "this"
+              ? "No open times this week yet."
+              : m.nextWeekOpenMin === 0
+                ? "Next week has no open times yet."
+                : `Next week has only ${hours(m.nextWeekOpenMin)} ${hours(m.nextWeekOpenMin) === "1" ? "hour" : "hours"} open.`;
+          return <LinkMove key={`thin-${m.when}`} kind="thin" title={title} href="/dashboard/openings#add-opening" button="Add opening" />;
         }
         if (m.kind === "setup-services") {
           return <LinkMove key="ss" kind="setup" title={`Add your ${words.services || "services"} so ${words.clients || "clients"} can book.`} href="/dashboard/services" button={`Add ${words.services || "services"}`} />;

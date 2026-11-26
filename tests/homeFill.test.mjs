@@ -103,10 +103,10 @@ test("monthCurve: clamps to a shorter last month", () => {
 
 const owedRow = { bookingId: "b1", clientName: "Jordan", serviceName: "Braids", owedCents: 15000, hasEmail: true };
 const od = (n, extra = {}) => ({ clientId: `c${n}`, bookingId: `b${n}`, serviceId: `s${n}`, name: `Client ${n}`, usualWeeks: 4, sinceWeeks: 7, hasEmail: true, invitedRecently: false, ...extra });
-const base = { owed: [], overdue: [], nextWeekOpenTimes: 10, thisWeekOpenMinLeft: 300, hasServices: true, hasOpeningsAhead: true };
+const base = { owed: [], overdue: [], nextWeekOpenMin: 2400, thisWeekOfferedMin: 2400, thisWeekOpenMinLeft: 300, hasServices: true, hasOpeningsAhead: true };
 
 test("pickMoves: priority and cap", () => {
-  const moves = pickMoves({ ...base, owed: [owedRow], overdue: [od(1), od(2)], nextWeekOpenTimes: 0 });
+  const moves = pickMoves({ ...base, owed: [owedRow], overdue: [od(1), od(2)], nextWeekOpenMin: 0 });
   assert.deepEqual(moves.map((m) => m.kind), ["owed", "overdue", "thin"]);
   assert.equal(moves[1].more, 1);
   assert.equal(moves[0].canEmail, true);
@@ -134,4 +134,31 @@ test("pickMoves: share fallback", () => {
   const moves = pickMoves(base);
   assert.deepEqual(moves.map((m) => m.kind), ["share"]);
   assert.equal(moves[0].thisWeekOpenMinLeft, 300);
+});
+
+// ---- Final review fixes ----
+
+test("pickMoves: a balance reminded in the last 3 days can't be re-sent (Open Money instead)", () => {
+  const moves = pickMoves({ ...base, owed: [{ ...owedRow, remindedRecently: true }] });
+  assert.equal(moves[0].kind, "owed");
+  assert.equal(moves[0].canEmail, false);
+});
+
+test("pickMoves: an overdue client without a client card is skipped", () => {
+  const moves = pickMoves({ ...base, overdue: [od(1, { clientId: null })] });
+  assert.equal(moves.some((m) => m.kind === "overdue"), false);
+});
+
+test("pickMoves: no openings this week puts Add opening first", () => {
+  const moves = pickMoves({ ...base, owed: [owedRow], overdue: [od(1)], thisWeekOfferedMin: 0 });
+  assert.equal(moves[0].kind, "thin");
+  assert.equal(moves[0].when, "this");
+});
+
+test("pickMoves: next week thin is measured in open hours, not opening blocks", () => {
+  // Two full 9–5 days next week (960 min) is not thin; 3 hours is.
+  assert.equal(pickMoves({ ...base, nextWeekOpenMin: 960 }).some((m) => m.kind === "thin"), false);
+  const thin = pickMoves({ ...base, nextWeekOpenMin: 180 });
+  assert.equal(thin.find((m) => m.kind === "thin").nextWeekOpenMin, 180);
+  assert.equal(thin.find((m) => m.kind === "thin").when, "next");
 });

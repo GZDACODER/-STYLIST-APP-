@@ -4,21 +4,20 @@
 // money line draws, figures count up. Later visits that day (and anyone
 // who prefers reduced motion) see the finished state straight away.
 import { useEffect, useState } from "react";
+import { decideEntrance } from "./entrance";
 
 export function useEntrance(dateKey) {
   const [mode, setMode] = useState("static");
   useEffect(() => {
-    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
-    const key = `home-anim:${dateKey}`;
-    let seen = false;
+    // Decided once per page load and shared by every card (./entrance.js).
+    const reduced = Boolean(window.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
+    let storage = null;
     try {
-      seen = localStorage.getItem(key) === "1";
-      localStorage.setItem(key, "1");
+      storage = window.localStorage;
     } catch {
-      // Storage blocked (private mode): just don't animate.
-      seen = true;
+      // Blocked: decideEntrance treats a throwing storage as "static".
     }
-    if (!seen) setMode("play");
+    setMode(decideEntrance(dateKey, { storage: storage || { getItem: () => { throw new Error("blocked"); } }, reduced }));
   }, [dateKey]);
   return mode;
 }

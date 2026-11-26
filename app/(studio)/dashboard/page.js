@@ -187,7 +187,7 @@ export default async function HomePage() {
       .limit(5000),
     supabase.from("payments").select("booking_id, kind, method, amount_cents, paid_on").gte("paid_on", lastMonth.from).lte("paid_on", thisMonth.to).limit(5000),
     // Balances owed, less balances already paid.
-    supabase.from("bookings").select(MONEY_COLS).eq("status", "confirmed").eq("outcome", "completed_owed").limit(500),
+    supabase.from("bookings").select(`${MONEY_COLS}, balance_reminded_at`).eq("status", "confirmed").eq("outcome", "completed_owed").limit(500),
     supabase.from("payments").select("booking_id, amount_cents").eq("kind", "balance").limit(5000),
     // Who's overdue (the same read as Insights).
     supabase
@@ -266,7 +266,15 @@ export default async function HomePage() {
   const paidBalances = new Map();
   for (const p of balancePayments.data || []) paidBalances.set(p.booking_id, (paidBalances.get(p.booking_id) || 0) + p.amount_cents);
   const owedList = (owedVisits.data || [])
-    .map((b) => ({ bookingId: b.id, clientName: b.client_name, serviceName: b.service_name, owedCents: owedOn(b, paidBalances), hasEmail: Boolean(b.client_email) }))
+    .map((b) => ({
+      bookingId: b.id,
+      clientName: b.client_name,
+      serviceName: b.service_name,
+      owedCents: owedOn(b, paidBalances),
+      hasEmail: Boolean(b.client_email),
+      // remindBalance allows one reminder every 3 days.
+      remindedRecently: Boolean(b.balance_reminded_at) && Date.now() - new Date(b.balance_reminded_at).getTime() < 3 * 86400000,
+    }))
     .filter((o) => o.owedCents > 0);
   const clientsById = new Map((clientEmails.data || []).map((c) => [c.id, c]));
   const recently = (c) => Boolean(c?.invited_back_at) && Date.now() - new Date(c.invited_back_at).getTime() < 30 * 86400000;
@@ -289,11 +297,18 @@ export default async function HomePage() {
         hasEmail: Boolean((o.clientId && clientsById.get(o.clientId)?.email) || o.email),
         invitedRecently: recently(o.clientId && clientsById.get(o.clientId)),
       }));
-  const nextWeekOpenTimes = realOpenings.filter((o) => o.opening_date > week.end).length;
+  // Openings are time ranges, so next week is measured in open minutes.
+  const spanMin = (o) => {
+    const [sh, sm] = String(o.start_time).split(":").map(Number);
+    const [eh, em] = String(o.end_time).split(":").map(Number);
+    return Math.max(0, eh * 60 + em - (sh * 60 + sm));
+  };
+  const nextWeekOpenMin = realOpenings.filter((o) => o.opening_date > week.end).reduce((a, o) => a + spanMin(o), 0);
   const movesData = pickMoves({
     owed: owedList,
     overdue: overdueList,
-    nextWeekOpenTimes,
+    nextWeekOpenMin,
+    thisWeekOfferedMin: thisWeekOpenings.reduce((a, o) => a + spanMin(o), 0),
     thisWeekOpenMinLeft: weekData.openMinLeft,
     hasServices: (services.count || 0) > 0,
     hasOpeningsAhead: realOpenings.some((o) => o.opening_date >= today),

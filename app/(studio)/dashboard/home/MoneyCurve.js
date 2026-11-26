@@ -48,7 +48,7 @@ export default function MoneyCurve({ month, today, moneyHref = "/dashboard/money
         )}
       </p>
       <p className="hf-sub hf-sub-tight">Earned in {month.label}</p>
-      <svg className="hf-curve" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Earned so far: ${money(month.total)}. ${month.lastLabel}: ${money(month.lastTotal)} in all.`} onMouseLeave={() => setTip(null)}>
+      <svg className="hf-curve" viewBox={`0 0 ${W} ${H}`} role="group" aria-label={`Earned so far: ${money(month.total)}. ${month.lastLabel}: ${money(month.lastTotal)} in all.`} onMouseLeave={() => setTip(null)}>
         {month.lastPoints.length > 1 && <path className="hf-curve-last" d={path(month.lastPoints)} />}
         {month.points.length > 1 && <path className="hf-curve-this" d={path(month.points)} pathLength="1" />}
         {month.points.map((p, i) => (

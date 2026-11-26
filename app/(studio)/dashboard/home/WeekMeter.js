@@ -3,7 +3,7 @@
 // Home > This week: how full the week is (booked minutes against the
 // openings' minutes), a bar per day, Mon to Sun. Hover or tap a bar for
 // its numbers; tap it again to open the calendar.
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ExampleTag } from "@/components/dash/Example";
 import { useCountUp, useEntrance } from "./useEntrance";
@@ -19,6 +19,19 @@ export default function WeekMeter({ week, today, calendarHref = "/dashboard/book
   const mode = useEntrance(today);
   const pct = useCountUp(week.pct, mode === "play");
   const [tip, setTip] = useState(null);
+  // Touch: the first tap shows a day's numbers, a second tap on the same day
+  // opens the calendar. Mouse (hover already shows them) and keyboard open it
+  // straight away. Focus alone never "arms" the second tap.
+  const pointer = useRef(null);
+  const tapped = useRef(null);
+  const pick = (i) => {
+    if (pointer.current === "touch" || pointer.current === "pen") {
+      if (tapped.current === i) return router.push(calendarHref);
+      tapped.current = i;
+      return setTip(i);
+    }
+    router.push(calendarHref);
+  };
   const full = week.pct >= 100 && week.offeredMin > 0;
   const none = week.offeredMin === 0 && week.bookedMin === 0;
   const tipDay = tip === null ? null : week.days[tip];
@@ -42,9 +55,15 @@ export default function WeekMeter({ week, today, calendarHref = "/dashboard/book
             className={`hf-bar${d.past ? " is-past" : ""}${d.isToday ? " is-today" : ""}${d.hasOpenings ? "" : " is-empty"}${tip === i ? " is-tip" : ""}`}
             style={{ "--h": `${d.hasOpenings || d.bookedMin ? Math.max(d.pct, 4) : 0}%`, "--i": i }}
             aria-label={dayText(d)}
+            onPointerDown={(e) => {
+              pointer.current = e.pointerType;
+            }}
             onMouseEnter={() => setTip(i)}
             onFocus={() => setTip(i)}
-            onClick={() => (tip === i ? router.push(calendarHref) : setTip(i))}
+            onClick={() => {
+              pick(i);
+              pointer.current = null;
+            }}
           >
             <span className="hf-bar-track">
               <span className="hf-bar-fill" />

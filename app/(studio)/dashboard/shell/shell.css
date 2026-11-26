@@ -2093,7 +2093,7 @@
     stroke-dasharray: 1;
     animation: hf-draw 0.8s ease-out both;
   }
-  .hf-week.is-full .hf-figure {
+  .hf-week.is-play.is-full .hf-figure {
     background: linear-gradient(100deg, var(--ink, #12100d) 40%, #cfae6c 50%, var(--ink, #12100d) 60%) 0 0 / 300% 100%;
     -webkit-background-clip: text;
     background-clip: text;
