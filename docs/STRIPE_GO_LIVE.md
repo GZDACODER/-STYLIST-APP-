@@ -12,6 +12,15 @@ Stripe Dashboard → **Activate payments** (top banner) or Settings → Business
 - Statement descriptor: what shows on card statements, e.g. `CLIENTELE`.
 - Wait until the dashboard no longer shows "activate".
 
+- **Public business name:** Settings → Business → Public details. Clients see
+  this at the top of every checkout page. It currently reads "Go stylist app";
+  set it to **Clientele**.
+- **Payment methods:** Settings → Payment methods. Checkout currently offers
+  Card, Cash App Pay, Klarna, Amazon Pay and Bank (ACH) for deposits. A booking
+  is only held ~35 minutes while the client pays, and bank payments take days
+  to clear, so turn **off** Bank/ACH and Klarna. Keep Card, Apple Pay, Google
+  Pay and Link (Cash App / Amazon Pay are fine either way).
+
 ## 2. Turn on Connect in live mode (pros get deposits paid to them)
 Dashboard, **live mode** (toggle "Test mode" off) → **Connect**.
 - Finish the **platform profile**: Clientele is a platform for independent pros
