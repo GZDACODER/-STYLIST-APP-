@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { BRAND_NAME } from "@/lib/brand";
 import PageHeader from "@/components/dash/PageHeader";
 import EmptyState from "@/components/dash/EmptyState";
+import AddPanel from "../shell/AddPanel";
 import { NewProjectForm, STATUS_LABEL } from "./ProjectForms";
 import { nowLocal } from "@/lib/localTime";
 
@@ -38,7 +39,16 @@ export default async function ProjectsPage({ searchParams }) {
 
   return (
     <>
-      <PageHeader guide="projects" title="Projects" subtitle="Multi-session pieces, with every session in one place." />
+      <PageHeader
+        guide="projects"
+        title="Projects"
+        subtitle="Multi-session pieces, with every session in one place."
+        actions={
+          <AddPanel id="new-project" label="+ Start a project" title="Start a project">
+            {(clients || []).length ? <NewProjectForm clients={clients} /> : <p className="muted small-text">Add the client first in Clients.</p>}
+          </AddPanel>
+        }
+      />
       {error && <p className="message error">Projects aren&apos;t set up yet (step 67 SQL).</p>}
       <nav className="cr-tabs" aria-label="Projects">
         <a href="/dashboard/projects" className={!done ? "cr-tab active" : "cr-tab"}>
@@ -49,7 +59,15 @@ export default async function ProjectsPage({ searchParams }) {
         </a>
       </nav>
       {list.length === 0 ? (
-        <EmptyState icon="list" title={done ? "No finished projects yet" : "No projects yet"} text="Start one below for a sleeve, back piece or anything that takes more than one session." />
+        <EmptyState icon="list" title={done ? "No finished projects yet" : "No projects yet"} text="Start one for a sleeve, back piece or anything that takes more than one session."
+          action={
+            done ? null : (
+              <a href="#new-project" className="button small">
+                + Start a project
+              </a>
+            )
+          }
+        />
       ) : (
         <ul className="rq-list">
           {list.map((p) => {
@@ -79,10 +97,6 @@ export default async function ProjectsPage({ searchParams }) {
           })}
         </ul>
       )}
-      <section className="card" id="new-project">
-        <h2>Start a project</h2>
-        {(clients || []).length ? <NewProjectForm clients={clients} /> : <p className="muted small-text">Add the client first in Clients.</p>}
-      </section>
     </>
   );
 }

@@ -26,6 +26,7 @@ const TABS = [
     key: "regulars",
     shot: "dash-today",
     desk: true,
+    phoneShot: "dash-today-phone",
     alt: "Today in Clientele: the date, appointments with Regular badges and deposits paid, next up and open times",
     label: "Regulars first",
     title: "Your best clients never fight for a spot.",
@@ -40,6 +41,7 @@ const TABS = [
     key: "money",
     shot: "dash-money",
     desk: true,
+    phoneShot: "dash-money-phone",
     alt: "Money in Clientele: earned, deposits online, owed to you and payouts, a chart and how you were paid",
     label: "Money",
     title: "Every dollar in one place.",
@@ -54,6 +56,7 @@ const TABS = [
     key: "clients",
     shot: "dash-clients",
     desk: true,
+    phoneShot: "dash-clients-phone",
     alt: "Clients in Clientele: a table of names, phones, last and next visits, with Regular tags",
     label: "Clients",
     title: "Remember everything about everyone.",
@@ -81,6 +84,7 @@ const TABS = [
     key: "insights",
     shot: "dash-insights",
     desk: true,
+    phoneShot: "dash-insights-phone",
     alt: "Insights in Clientele: revenue and visits this month, how clients come back and top regulars",
     label: "Insights",
     title: "Know what's working.",
@@ -141,7 +145,19 @@ export default function FeatureTabs() {
           </ul>
         </div>
         <div className={tab.desk ? "ln-fx-visual is-desk" : "ln-fx-visual"}>
-          {tab.desk ? <DeskShot src={tab.shot} alt={tab.alt} /> : <PhoneShot src={tab.shot} alt={tab.alt} />}
+          {tab.desk ? (
+            <>
+              {/* Wide screens: the window. Phones: the same page on a phone (readable at that size). */}
+              <div className="ln-only-wide">
+                <DeskShot src={tab.shot} alt={tab.alt} hideOnPhones />
+              </div>
+              <div className="ln-only-phone">
+                <PhoneShot src={tab.phoneShot} height={1208} alt={tab.alt} />
+              </div>
+            </>
+          ) : (
+            <PhoneShot src={tab.shot} alt={tab.alt} />
+          )}
         </div>
       </div>
     </div>
