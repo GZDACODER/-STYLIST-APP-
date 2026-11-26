@@ -5,9 +5,15 @@
 // link to that trade's live demo.
 import { useState } from "react";
 import { PhoneShot } from "./Shots";
+import { announceTrade, useTradeSync } from "./tradeSync";
 
 export default function TradeSwitcher({ trades }) {
   const [i, setI] = useState(0);
+  // In step with the live Home's "Sample:" pills in the hero.
+  useTradeSync("switcher", (key) => {
+    const n = trades.findIndex((x) => x.key === key);
+    if (n >= 0) setI(n);
+  });
   const t = trades[i];
   return (
     <div className="ln-trade">
@@ -21,7 +27,10 @@ export default function TradeSwitcher({ trades }) {
             aria-controls="trade-panel"
             id={`trade-${x.key}`}
             className={n === i ? "ln-tab active" : "ln-tab"}
-            onClick={() => setI(n)}
+            onClick={() => {
+              setI(n);
+              announceTrade(x.key, "switcher");
+            }}
           >
             {x.label}
           </button>
