@@ -7,6 +7,7 @@ import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ExampleTag } from "@/components/dash/Example";
 import { useCountUp, useEntrance } from "./useEntrance";
+import "./homeFill.css";
 
 // Minutes → "6", "6.5" hours (nearest half hour).
 const hours = (m) => {
@@ -14,9 +15,12 @@ const hours = (m) => {
   return Number.isInteger(h) ? String(h) : h.toFixed(1);
 };
 
-export default function WeekMeter({ week, today, calendarHref = "/dashboard/bookings" }) {
+// calendarHref={null}: a tap only shows the day's numbers (the landing page's
+// live demo). tag: shown in the card head instead of the Example tag.
+// everyVisit: play the entrance on every visit (the landing page).
+export default function WeekMeter({ week, today, calendarHref = "/dashboard/bookings", tag = null, everyVisit = false }) {
   const router = useRouter();
-  const mode = useEntrance(today);
+  const mode = useEntrance(today, { everyVisit });
   const pct = useCountUp(week.pct, mode === "play");
   const [tip, setTip] = useState(null);
   // Touch: the first tap shows a day's numbers, a second tap on the same day
@@ -25,6 +29,7 @@ export default function WeekMeter({ week, today, calendarHref = "/dashboard/book
   const pointer = useRef(null);
   const tapped = useRef(null);
   const pick = (i) => {
+    if (!calendarHref) return setTip(i);
     if (pointer.current === "touch" || pointer.current === "pen") {
       if (tapped.current === i) return router.push(calendarHref);
       tapped.current = i;
@@ -44,7 +49,7 @@ export default function WeekMeter({ week, today, calendarHref = "/dashboard/book
     <section className={`card hf-card hf-week${mode === "play" ? " is-play" : ""}${full ? " is-full" : ""}`} aria-label="This week">
       <div className="hf-card-head">
         <h2>This week</h2>
-        {week.examples && <ExampleTag />}
+        {tag || (week.examples && <ExampleTag />)}
       </div>
       <p className="hf-figure">
         {pct}%<span className="hf-figure-unit">booked</span>
@@ -75,7 +80,7 @@ export default function WeekMeter({ week, today, calendarHref = "/dashboard/book
         ))}
       </div>
       <p className="hf-tip" aria-live="polite">
-        {tipDay ? `${dayText(tipDay)}. Tap again to open your calendar.` : " "}
+        {tipDay ? `${dayText(tipDay)}.${calendarHref ? " Tap again to open your calendar." : ""}` : " "}
       </p>
       <p className="hf-sub">
         {full
