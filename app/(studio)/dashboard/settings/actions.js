@@ -235,7 +235,9 @@ async function removeOldCovers(supabase, userId, keepPath) {
     console.error("Couldn't list old cover photos", error);
     return;
   }
+  // Only cover photos: the logo (logo-*) lives in the same folder.
   const old = (files || [])
+    .filter((file) => file.name.startsWith("cover-"))
     .map((file) => `${userId}/${file.name}`)
     .filter((path) => path !== keepPath);
   if (old.length) {
@@ -389,4 +391,91 @@ export async function setShowExamples(formData) {
   const { error } = await supabase.from("stylists").update({ show_examples: on }).eq("id", user.id);
   if (error) console.error("Couldn't change examples", error.message);
   revalidatePath("/dashboard", "layout");
+}
+
+// ---------- Logo and brand colour (0083 SQL) ----------
+const LOGO_FILE = /^logo-\d{10,16}\.(png|jpg|webp)$/;
+
+// Step 1 of a logo upload: a one-time upload link for covers/<id>/logo-123.<ext>.
+export async function startLogoUpload(ext) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Please log in again." };
+  if (isDemo(user)) return { error: DEMO_LOCKED };
+  const type = ["png", "jpg", "webp"].includes(ext) ? ext : "png";
+  const path = `${user.id}/logo-${Date.now()}.${type}`;
+  const { data, error } = await supabase.storage.from("covers").createSignedUploadUrl(path);
+  if (error) return { error: `The logo couldn't be uploaded: ${error.message}` };
+  return { path: data.path, token: data.token };
+}
+
+async function removeOldLogos(supabase, userId, keepPath) {
+  const { data: files } = await supabase.storage.from("covers").list(userId, { limit: 100 });
+  const old = (files || [])
+    .filter((file) => file.name.startsWith("logo-"))
+    .map((file) => `${userId}/${file.name}`)
+    .filter((path) => path !== keepPath);
+  if (old.length) await supabase.storage.from("covers").remove(old);
+}
+
+// Step 2: save the uploaded logo's link.
+export async function saveLogo(path) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Please log in again." };
+  if (isDemo(user)) return { error: DEMO_LOCKED };
+  const filePath = String(path || "");
+  const [folder, fileName, ...rest] = filePath.split("/");
+  if (folder !== user.id || rest.length || !LOGO_FILE.test(fileName || "")) {
+    return { error: "That logo didn't upload properly. Please try again." };
+  }
+  const {
+    data: { publicUrl },
+  } = supabase.storage.from("covers").getPublicUrl(filePath);
+  const { error } = await supabase.from("stylists").update({ logo_url: publicUrl }).eq("id", user.id);
+  if (error) {
+    await supabase.storage.from("covers").remove([filePath]);
+    return { error: saveError(error) };
+  }
+  await removeOldLogos(supabase, user.id, filePath);
+  revalidatePath("/dashboard/settings", "layout");
+  revalidatePath("/book", "layout");
+  return { success: "Logo saved. It's on your booking page now." };
+}
+
+export async function removeLogo() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Please log in again." };
+  if (isDemo(user)) return { error: DEMO_LOCKED };
+  const { error } = await supabase.from("stylists").update({ logo_url: "" }).eq("id", user.id);
+  if (error) return { error: saveError(error) };
+  await removeOldLogos(supabase, user.id, null);
+  revalidatePath("/dashboard/settings", "layout");
+  revalidatePath("/book", "layout");
+  return { success: "Logo removed." };
+}
+
+// The brand colour for buttons and highlights on the booking page ("" = gold).
+export async function saveAccentColor(prevState, formData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Please log in again." };
+  if (isDemo(user)) return { error: DEMO_LOCKED };
+  const reset = formData.get("reset") === "1";
+  const color = reset ? "" : String(formData.get("accent_color") || "").trim().toLowerCase();
+  if (color && !/^#[0-9a-f]{6}$/.test(color)) return { error: "Please pick a colour." };
+  const { error } = await supabase.from("stylists").update({ accent_color: color }).eq("id", user.id);
+  if (error) return { error: saveError(error) };
+  revalidatePath("/dashboard/settings", "layout");
+  revalidatePath("/book", "layout");
+  return { success: color ? "Colour saved." : "Back to the standard gold." };
 }
