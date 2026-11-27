@@ -173,6 +173,11 @@ p {
   gap: 14px;
 }
 
+/* display: flex above would otherwise show a hidden stack (sign-up step 1). */
+.stack[hidden] {
+  display: none;
+}
+
 /* ---------- Cards ---------- */
 .card {
   background: linear-gradient(180deg, var(--surface-2), var(--surface));
