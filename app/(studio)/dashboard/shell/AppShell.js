@@ -115,6 +115,7 @@ const MORE = [
 // The owner's admin pages (ADMIN_EMAILS only; the pages check too).
 const ADMIN = [
   { href: "/dashboard/admin/control/activity", label: "Overview", icon: "reports" },
+  { href: "/dashboard/admin/briefings", label: "Briefings", icon: "sparkle" },
   { href: "/dashboard/admin/pros", label: "Pros", icon: "clients" },
   { href: "/dashboard/admin/money", label: "Money", icon: "money" },
   { href: "/dashboard/admin/announce", label: "Email all pros", icon: "share" },
