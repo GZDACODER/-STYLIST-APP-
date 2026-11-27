@@ -432,6 +432,7 @@ export default async function HomePage() {
           <nav aria-label="Company">
             <h3>Company</h3>
             <Link href={account.href}>{account.label}</Link>
+            <Link href="/help">Help</Link>
             <Link href="/terms">Terms</Link>
             <Link href="/privacy">Privacy</Link>
             <a href="mailto:hello@clientelesuite.com">hello@clientelesuite.com</a>

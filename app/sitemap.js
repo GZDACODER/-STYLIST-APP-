@@ -10,6 +10,7 @@ export default function sitemap() {
     page("/find", 0.7, "daily"),
     page("/signup", 0.7),
     page("/login", 0.3, "yearly"),
+    page("/help", 0.4, "monthly"),
     page("/terms", 0.2, "yearly"),
     page("/privacy", 0.2, "yearly"),
   ];

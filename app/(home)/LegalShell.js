@@ -4,7 +4,7 @@ import Link from "next/link";
 import { BRAND_NAME } from "@/lib/brand";
 import { CONTACT_EMAIL, LEGAL_UPDATED } from "@/lib/legal";
 
-export default function LegalShell({ title, children }) {
+export default function LegalShell({ title, children, kicker }) {
   return (
     <>
       <header className="hm-nav">
@@ -22,7 +22,7 @@ export default function LegalShell({ title, children }) {
       </header>
 
       <main className="hm-legal">
-        <p className="hm-kicker">Last updated {LEGAL_UPDATED}</p>
+        <p className="hm-kicker">{kicker || `Last updated ${LEGAL_UPDATED}`}</p>
         <h1>{title}</h1>
         {children}
       </main>
@@ -30,6 +30,7 @@ export default function LegalShell({ title, children }) {
       <footer className="hm-footer">
         <span className="hm-logo hm-logo-small">{BRAND_NAME}</span>
         <nav aria-label="Footer">
+          <Link href="/help">Help</Link>
           <Link href="/terms">Terms</Link>
           <Link href="/privacy">Privacy</Link>
           <a href={`mailto:${CONTACT_EMAIL}`}>Contact · {CONTACT_EMAIL}</a>
