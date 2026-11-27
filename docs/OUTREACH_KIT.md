@@ -21,15 +21,14 @@ the customer.
 
 ## 2. The founding-pro offer
 
-> **Founding pro:** free for 3 months (normally $25/month), I set you up
-> myself, and you tell me what to fix. Keep the founding price of $15/month
-> for life after that if you stay.
+> **Founding pro:** free for 2 months (normally $25/month), I set you up
+> myself, and you tell me what to fix.
 
 - Keep it to 5–10 people so it stays personal.
-- The free months: Claude can mark their account comped (`stylist_plans.comped`)
-  once they sign up. Just send their business name.
-- The lifetime price is a promise you make; decide it before you send
-  anything. Drop that line if you'd rather not.
+- The free months: once they sign up, send Claude their business name. Their
+  free trial is stretched to 2 months from signup. After that they see the
+  normal "choose your plan" prompt and pay $25/month (or $250/year) if they
+  stay. No card is needed until then.
 
 ---
 
@@ -41,14 +40,14 @@ Short, personal, one question at the end. Send from your own account.
 > Hi [name], love your silk presses! I'm building Clientele, a booking app
 > for independent stylists: clients book and pay a deposit from one link, get
 > reminders, and you see your week and what you've earned at a glance. I'm
-> looking for 5 founding stylists to use it free for 3 months and tell me
+> looking for 5 founding stylists to use it free for 2 months and tell me
 > what to fix. Would you be up for a 10-minute look?
 
 **Barber**
 > Hey [name], your fades are clean. I'm building Clientele, a booking app for
 > independent barbers: one link for your bio, reminders so fewer no-shows,
 > and a waitlist that fills cancellations for you. Looking for a few founding
-> barbers to use it free for 3 months and tell me what's missing. Want to
+> barbers to use it free for 2 months and tell me what's missing. Want to
 > take a look?
 
 **Tattoo artist**
@@ -56,14 +55,14 @@ Short, personal, one question at the end. Send from your own account.
 > independent tattoo artists: clients send their idea, placement and
 > reference photos first, you approve before they book, deposits go straight
 > to you, and healing check-ins go out on their own. Looking for a few
-> founding artists to use it free for 3 months and tell me what to fix. Open
+> founding artists to use it free for 2 months and tell me what to fix. Open
 > to a quick look?
 
 **Tutor**
 > Hi [name], I'm building Clientele, a booking app for independent tutors:
 > students (or parents) book from one link, you can send session notes to
 > parents after each lesson, and session packs count down on their own. I'm
-> looking for a few founding tutors to use it free for 3 months and give me
+> looking for a few founding tutors to use it free for 2 months and give me
 > honest feedback. Would you be up for trying it?
 
 **If they say "what is it exactly?"**
