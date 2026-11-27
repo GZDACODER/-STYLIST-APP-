@@ -17,12 +17,14 @@ const day = (iso) =>
 const daysText = (n) => (n <= 1 ? "less than a day" : `${n} days`);
 
 // assistantAvailable: the Assistant is switched on for this app (its API key is set).
-export default function PlanCard({ plan, billingNotice, canPay, assistantAvailable = false }) {
+// extraChairs: other chairs in the shop this pro owns (added to the plan).
+export default function PlanCard({ plan, billingNotice, canPay, assistantAvailable = false, extraChairs = 0 }) {
   const notice = NOTICES[billingNotice];
   const yearly = plan.interval === "year";
   const per = yearly ? "/yr" : "/mo";
   const planCents = yearly ? PLANS.allin.yearlyCents : PLANS.allin.monthlyCents;
   const seatCents = yearly ? PLANS.team.yearlyCents : PLANS.team.monthlyCents;
+  const chairCents = yearly ? PLANS.chair.yearlyCents : PLANS.chair.monthlyCents;
   const assistantCents = yearly ? PLANS.assistant.yearlyCents : PLANS.assistant.monthlyCents;
   const on = plan.has.base;
 
@@ -41,7 +43,12 @@ export default function PlanCard({ plan, billingNotice, canPay, assistantAvailab
         <span className={on ? "badge paid" : "badge"}>{on ? "On" : "Paused"}</span>
       </div>
 
-      {plan.comped ? (
+      {plan.shopCovered ? (
+        <p className="muted">
+          <strong>Your shop pays for your plan.</strong> Everything stays on while you&apos;re a chair in the shop, and
+          you&apos;re never billed. See <a href="/dashboard/shop">Shop</a>.
+        </p>
+      ) : plan.comped ? (
         <p className="muted">
           Founding account: your plan is free and you&apos;re never billed for it.
           {assistantAvailable && " The Assistant add-on is the one thing that's paid."}
@@ -85,6 +92,15 @@ export default function PlanCard({ plan, billingNotice, canPay, assistantAvailab
                 {per}
               </dd>
             </div>
+            {plan.shopChairs > 0 && (
+              <div>
+                <dt>Extra chairs × {plan.shopChairs}</dt>
+                <dd>
+                  {formatPrice(plan.shopChairs * chairCents)}
+                  {per}
+                </dd>
+              </div>
+            )}
             {plan.assistantPaid && (
               <div>
                 <dt>{PLANS.assistant.name}</dt>
@@ -97,7 +113,7 @@ export default function PlanCard({ plan, billingNotice, canPay, assistantAvailab
             <div className="plan-sum-total">
               <dt>Total</dt>
               <dd>
-                {formatPrice(planCents + plan.teamMembers * seatCents + (plan.assistantPaid ? assistantCents : 0))}
+                {formatPrice(planCents + plan.teamMembers * seatCents + plan.shopChairs * chairCents + (plan.assistantPaid ? assistantCents : 0))}
                 {per}
               </dd>
             </div>
@@ -137,9 +153,9 @@ export default function PlanCard({ plan, billingNotice, canPay, assistantAvailab
         </p>
       )}
 
-      {!plan.comped && !plan.subscribed &&
+      {!plan.comped && !plan.subscribed && !plan.shopCovered &&
         (canPay ? (
-          <ChoosePlanForm inTrial={plan.inTrial} assistantAvailable={assistantAvailable} />
+          <ChoosePlanForm inTrial={plan.inTrial} assistantAvailable={assistantAvailable} extraChairs={extraChairs} />
         ) : (
           <p className="message warning">Paying isn&apos;t set up yet (the Stripe keys are missing in Vercel).</p>
         ))}

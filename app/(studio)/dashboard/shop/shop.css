@@ -1,0 +1,94 @@
+/* Shop page (one owner, several chairs). */
+.sh-chairs {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+  margin: 16px 0;
+}
+.sh-chair {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+}
+.sh-chair-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.sh-chair-head h2 {
+  margin: 0;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.sh-chair-head p {
+  margin: 2px 0 0;
+}
+.sh-avatar {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #efe6d6;
+}
+.sh-mono {
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 20px;
+  color: #7d6232;
+}
+.sh-ok {
+  color: #3d6b45;
+}
+.sh-warn {
+  color: #9a5b1f;
+}
+.sh-nums {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  font-size: 14px;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.sh-today {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid rgba(14, 13, 11, 0.09);
+}
+.sh-today li {
+  display: flex;
+  gap: 12px;
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(14, 13, 11, 0.06);
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+.sh-time {
+  flex: none;
+  width: 68px;
+  color: #5f584d;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.sh-link {
+  font-size: 12px;
+  overflow-wrap: anywhere;
+  word-break: break-all;
+}
+.sh-invite {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  overflow-wrap: anywhere;
+}
+.sh-rename input {
+  flex: 1;
+  min-width: 0;
+}
