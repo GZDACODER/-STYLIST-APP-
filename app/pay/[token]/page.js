@@ -1,6 +1,6 @@
 // A payment link (Money → Payment links, 0080 SQL): one card with who's
 // asking, how much and what for. Apple Pay / Google Pay right here
-// (WalletPay), or "Pay with card" on Stripe's page, which sends them back
+// (WalletButtons), or "Pay with card" on Stripe's page, which sends them back
 // with ?session_id=… once paid.
 import { notFound, redirect } from "next/navigation";
 import { headers } from "next/headers";
@@ -8,7 +8,8 @@ import { getStripe } from "@/lib/stripe";
 import { createPaymentLinkCheckout, finalizePaymentLinkIntent, finalizePaymentLinkSession, loadPaymentLink } from "@/lib/paymentLinksServer";
 import { formatLinkAmount } from "@/lib/paymentLinks";
 import SubmitButton from "@/components/SubmitButton";
-import WalletPay from "./WalletPay";
+import WalletButtons from "@/components/pay/WalletButtons";
+import { finishWalletPayment, startWalletPayment } from "./walletActions";
 
 export const dynamic = "force-dynamic";
 
@@ -122,7 +123,12 @@ export default async function PayPage({ params, searchParams }) {
           )}
           {PROBLEM[problem] && <p className="message error">{PROBLEM[problem]}</p>}
           <div className="py-actions">
-            <WalletPay token={link.token} amountCents={link.amount_cents} />
+            <WalletButtons
+              amountCents={link.amount_cents}
+              start={startWalletPayment.bind(null, link.token)}
+              finish={finishWalletPayment.bind(null, link.token)}
+              returnPath={`/pay/${link.token}`}
+            />
             <form action={pay}>
               <input type="hidden" name="token" value={link.token} />
               <SubmitButton className="py-btn" pendingText="Opening secure payment...">

@@ -14,17 +14,21 @@ async function loadResult(sessionId) {
     const session = await getStripe().checkout.sessions.retrieve(sessionId);
     // The webhook usually confirms the booking first; doing it here too means
     // the client sees "You're booked!" even if the webhook is running late.
-    const outcome = await finalizeCheckoutSession(session);
+    let outcome = await finalizeCheckoutSession(session);
 
     const { data: booking } = await createAdminClient()
       .from("bookings")
       .select(
-        "service_name, booking_date, start_time, end_time, price_cents, deposit_cents, stylist:stylists(business_name, timezone)"
+        "service_name, booking_date, start_time, end_time, price_cents, deposit_cents, deposit_status, status, stylist:stylists(business_name, timezone)"
       )
       .eq("id", session.metadata?.booking_id)
       .eq("stripe_checkout_session_id", session.id)
       .maybeSingle();
     if (!booking) return null;
+    // Paid with Apple Pay / Google Pay on our page (lib/walletCheckout.js):
+    // Stripe's page was closed unpaid, but the booking is paid.
+    if (outcome === "unpaid" && booking.deposit_status === "paid") outcome = "already_confirmed";
+    if (outcome === "unpaid" && booking.deposit_status === "refunded") outcome = "refunded";
     return { outcome, booking };
   } catch (error) {
     console.error("Couldn't load paid booking", error);
