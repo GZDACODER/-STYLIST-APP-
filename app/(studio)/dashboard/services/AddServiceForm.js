@@ -5,7 +5,7 @@ import { addService } from "./actions";
 import SubmitButton from "@/components/SubmitButton";
 import FormMessage from "@/components/FormMessage";
 
-export default function AddServiceForm() {
+export default function AddServiceForm({ example = {} }) {
   const [state, formAction] = useActionState(addService, null);
   // If there was a mistake, keep what the stylist typed so they can fix it.
   const values = state?.values || {};
@@ -17,7 +17,7 @@ export default function AddServiceForm() {
         <input
           name="name"
           type="text"
-          placeholder="e.g. Women's cut & style"
+          placeholder={`e.g. ${example.name || "Women's cut & style"}`}
           maxLength={100}
           defaultValue={values.name}
           required
@@ -52,6 +52,17 @@ export default function AddServiceForm() {
           />
         </label>
       </div>
+      <label>
+        Description (optional)
+        <textarea
+          name="description"
+          rows={2}
+          maxLength={300}
+          placeholder={`e.g. ${example.description || "What's included, in a sentence."}`}
+          defaultValue={values.description}
+        />
+      </label>
+      <p className="muted small-text">Shows under the service on your booking page.</p>
       <SubmitButton pendingText="Adding...">Add service</SubmitButton>
       <FormMessage state={state} />
     </form>

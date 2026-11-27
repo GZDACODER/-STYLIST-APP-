@@ -63,5 +63,5 @@ test("example services insert as rows with the same columns (PostgREST bulk inse
     "pro-1"
   );
   assert.deepEqual(Object.keys(rows[0]).sort(), Object.keys(rows[1]).sort());
-  assert.deepEqual(rows[1], { stylist_id: "pro-1", name: "Consultation", price_cents: 0, duration_minutes: 30, aftercare: "" });
+  assert.deepEqual(rows[1], { stylist_id: "pro-1", name: "Consultation", price_cents: 0, duration_minutes: 30, aftercare: "", description: "" });
 });
