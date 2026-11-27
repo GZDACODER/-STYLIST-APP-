@@ -5,7 +5,8 @@ import { checkNewOpeningsSafely } from "@/lib/followers";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { isValidTimeZone } from "@/lib/availability";
-import { cleanInstagram } from "@/lib/profileLinks";
+import { cleanContactEmail, cleanFacebook, cleanInstagram, cleanPhone } from "@/lib/profileLinks";
+import { tiktokUrl, websiteUrl } from "@/lib/profileShared";
 import { planErrorMessage } from "@/lib/plan";
 import { DEMO_LOCKED, isDemo } from "@/lib/demo";
 
@@ -339,6 +340,19 @@ export async function saveBusinessLinks(prevState, formData) {
     return { error: "Please enter your Instagram name, like @cutsbysam, or leave it empty." };
   }
   if (location.length > 200) return { error: "Please keep the location to 200 characters." };
+  const tiktokText = String(formData.get("tiktok") || "").trim();
+  const tiktok = tiktokText ? tiktokUrl(tiktokText)?.replace("https://www.tiktok.com/@", "") || null : "";
+  if (tiktok === null) return { error: "That TikTok name doesn't look right (like @yourname)." };
+  const facebook = cleanFacebook(formData.get("facebook"));
+  if (facebook === null) return { error: "Please enter your Facebook page link (like facebook.com/yourpage), or leave it empty." };
+  const websiteText = String(formData.get("website") || "").trim();
+  const website = websiteText ? websiteUrl(websiteText) : "";
+  if (website === null) return { error: "That website doesn't look right (like yourwebsite.com)." };
+  const contactPhone = cleanPhone(formData.get("contact_phone"));
+  if (contactPhone === null) return { error: "Please check the phone number." };
+  const contactEmail = cleanContactEmail(formData.get("contact_email"));
+  if (contactEmail === null) return { error: "Please check the email address." };
+  const showMap = formData.get("show_map") === "on";
 
   const supabase = await createClient();
   const {
@@ -352,6 +366,12 @@ export async function saveBusinessLinks(prevState, formData) {
     .update({ instagram, location })
     .eq("id", user.id);
   if (error) return { error: saveError(error) };
+  // The rest (0082 SQL; profile's TikTok and website columns).
+  const { error: moreError } = await supabase
+    .from("stylists")
+    .update({ tiktok: tiktok || null, website: website || null, facebook, contact_phone: contactPhone, contact_email: contactEmail, show_map: showMap })
+    .eq("id", user.id);
+  if (moreError) return { error: saveError(moreError) };
 
   revalidatePath("/dashboard/settings", "layout");
   revalidatePath("/book", "layout");

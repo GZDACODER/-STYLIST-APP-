@@ -4,7 +4,7 @@ import Link from "next/link";
 // the trial ends within 3 days, a payment failed, or the trial is over.
 // Nothing for founding accounts or anyone paying normally.
 export default function PlanBanner({ plan }) {
-  if (!plan?.ready || plan.comped) return null;
+  if (!plan?.ready || plan.comped || plan.shopCovered) return null;
 
   let text = null;
   if (plan.stripeStatus === "past_due") {

@@ -3,6 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { BRAND_NAME } from "@/lib/brand";
 import { DEPOSIT_FEE_FIXED_CENTS, DEPOSIT_FEE_PERCENT, PLANS, TRIAL_DAYS } from "@/lib/plans";
 import { formatPrice } from "@/lib/money";
+import { payLaterAvailable } from "@/lib/payLaterServer";
+import { PAY_LATER_FEE_FIXED_CENTS, PAY_LATER_FEE_PERCENT, payLaterNames } from "@/lib/payLater";
 import FeatureTabs from "./FeatureTabs";
 import PricingToggle from "./PricingToggle";
 import Icon from "./Icon";
@@ -43,6 +45,9 @@ const NO_EXTRA = [
   "Insights",
   "Public profile and reviews",
   "Gift cards",
+  "Payment links by text or Instagram",
+  "Apple Pay and Google Pay checkout",
+  "Contact section and map on your page",
   "Opening alerts for followers",
   "Calendar events and holidays",
   "Client import and export",
@@ -121,7 +126,7 @@ const FAQ = [
   },
   {
     q: "What does it cost to take deposits?",
-    a: `${DEPOSIT_FEE_PERCENT}% + ${DEPOSIT_FEE_FIXED_CENTS}¢ per deposit, which covers card processing. Deposits go straight to your own Stripe account.`,
+    a: `${DEPOSIT_FEE_PERCENT}% + ${DEPOSIT_FEE_FIXED_CENTS}¢ per deposit, which covers card processing. Clients pay by card, Apple Pay or Google Pay, and it goes straight to your own Stripe account.`,
   },
   {
     q: "Can I bring my clients from Booksy, GlossGenius or Square?",
@@ -136,8 +141,8 @@ const FAQ = [
     a: "Yes, from Settings, with no fees. You can download all your clients, bookings and payments first.",
   },
   {
-    q: "Does it work for my team?",
-    a: `Yes. Add team members for ${price(PLANS.team.monthlyCents)}/mo each, half the price of the plan.`,
+    q: "Does it work for a shop?",
+    a: `Yes. Shop accounts are ${price(PLANS.allin.monthlyCents)}/mo for your chair plus ${price(PLANS.chair.monthlyCents)}/mo for each other chair, on one bill. Every chair gets their own booking page, calendar and Stripe payouts, and you see all of them on one page.`,
   },
 ];
 
@@ -152,7 +157,19 @@ export default async function HomePage() {
   } = await supabase.auth.getUser();
   const account = user ? { href: "/dashboard", label: "View dashboard" } : { href: "/login", label: "Log in" };
 
-  const { allin, team, assistant } = PLANS;
+  const { allin, chair, assistant } = PLANS;
+  // Pay over time is only mentioned once it's switched on in Stripe.
+  const payLater = (await payLaterAvailable().catch(() => [])).length > 0;
+  const faq = payLater
+    ? [
+        ...FAQ.slice(0, 3),
+        {
+          q: "Can clients pay over time?",
+          a: `Yes, if you turn it on. Deposits and payment links of $50 or more can be split with ${payLaterNames(await payLaterAvailable())}. You're paid in full right away; the fee on those payments is ${PAY_LATER_FEE_PERCENT}% + ${PAY_LATER_FEE_FIXED_CENTS}¢.`,
+        },
+        ...FAQ.slice(3),
+      ]
+    : FAQ;
   // The live Home's month names (UTC; the sample itself is a fixed fixture).
   const now = new Date();
   const monthName = (d) => d.toLocaleDateString("en-US", { month: "long", timeZone: "UTC" });
@@ -170,6 +187,7 @@ export default async function HomePage() {
   const navLinks = [
     ["#features", "Features"],
     ["#trades", "Your trade"],
+    ["#shops", "Shops"],
     ["#pricing", "Pricing"],
   ];
 
@@ -298,6 +316,38 @@ export default async function HomePage() {
           <FeatureTabs />
         </section>
 
+        {/* ---------- Get paid ---------- */}
+        <section id="get-paid" className="ln-section ln-wrap">
+          <header className="ln-head">
+            <p className="ln-eyebrow">Get paid your way</p>
+            <h2>
+              Money in, <em>before they sit down.</em>
+            </h2>
+            <p className="ln-lede">Deposits, balances and anything else, paid in a tap and sent straight to your own Stripe account.</p>
+          </header>
+          <ul className="ln-steps">
+            <li className="ln-card">
+              <Icon name="card" />
+              <h3>Apple Pay and Google Pay</h3>
+              <p>Clients pay deposits and gift cards with one tap on their phone, right on your page. Or by card.</p>
+            </li>
+            <li className="ln-card">
+              <Icon name="link" />
+              <h3>Payment links</h3>
+              <p>Type an amount, send the link by text or Instagram, and see it marked paid in Money. Great for balances.</p>
+            </li>
+            <li className="ln-card">
+              <Icon name="shield" />
+              <h3>Deposits that stop no-shows</h3>
+              <p>
+                {payLater
+                  ? "Ask for a deposit on any service. Bigger tickets? Clients can pay over time with Klarna, Afterpay or Affirm."
+                  : `Ask for a deposit on any service. ${DEPOSIT_FEE_PERCENT}% + ${DEPOSIT_FEE_FIXED_CENTS}¢ covers card processing, and your clients never pay booking fees.`}
+              </p>
+            </li>
+          </ul>
+        </section>
+
         {/* ---------- Made for your trade ---------- */}
         <section id="trades" className="ln-section ln-wrap">
           <header className="ln-head">
@@ -349,6 +399,45 @@ export default async function HomePage() {
           </div>
         </section>
 
+        {/* ---------- Shops ---------- */}
+        <section id="shops" className="ln-section ln-wrap">
+          <header className="ln-head">
+            <p className="ln-eyebrow">Run a shop?</p>
+            <h2>
+              Every chair, <em>one bill.</em>
+            </h2>
+            <p className="ln-lede">
+              Put your whole shop on Clientele. Each barber or stylist gets their own setup, and you see the whole floor from one
+              page.
+            </p>
+          </header>
+          <ul className="ln-steps">
+            <li className="ln-card">
+              <Icon name="star" />
+              <h3>Their own page</h3>
+              <p>Every chair gets its own booking page, calendar, clients and Stripe payouts. Their money goes to them.</p>
+            </li>
+            <li className="ln-card">
+              <Icon name="chart" />
+              <h3>The whole shop at a glance</h3>
+              <p>Today&apos;s appointments, the week ahead and this month&apos;s money for every chair, on one page.</p>
+            </li>
+            <li className="ln-card">
+              <Icon name="repeat" />
+              <h3>One bill that keeps up</h3>
+              <p>
+                {price(allin.monthlyCents)}/mo for your chair, {price(chair.monthlyCents)}/mo for each other one. A 4-chair shop is{" "}
+                {price(allin.monthlyCents + 3 * chair.monthlyCents)}/mo. Chairs join or leave and it adjusts itself.
+              </p>
+            </li>
+          </ul>
+          <div className="ln-center">
+            <Link href="/signup" className="ln-btn ln-btn-ghost">
+              Start your shop free
+            </Link>
+          </div>
+        </section>
+
         {/* ---------- Pricing ---------- */}
         <section id="pricing" className="ln-section ln-wrap">
           <header className="ln-head">
@@ -361,7 +450,7 @@ export default async function HomePage() {
           </header>
           <PricingToggle
             allin={allin}
-            team={team}
+            chair={chair}
             assistant={assistant}
             trialDays={TRIAL_DAYS}
             included={[...new Set([...included, ...NO_EXTRA])]}
@@ -384,7 +473,7 @@ export default async function HomePage() {
             <h2>Good to know.</h2>
           </header>
           <div className="ln-faq">
-            {FAQ.map((f) => (
+            {faq.map((f) => (
               <details key={f.q} className="ln-faq-item">
                 <summary>{f.q}</summary>
                 <p>{f.a}</p>

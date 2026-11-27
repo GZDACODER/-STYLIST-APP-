@@ -17,7 +17,7 @@ const TABS = [
     title: "A booking page that looks like you.",
     text: "Your name, your work and your prices. Clients book, pay a deposit and manage their visit from one link. No app to download.",
     points: [
-      "Deposits paid straight to your own Stripe account.",
+      "Deposits by card, Apple Pay or Google Pay, straight to your Stripe.",
       "A waitlist that fills cancellations for you.",
       "Booking rules: notice, breaks, start times, a daily limit.",
     ],
@@ -48,7 +48,7 @@ const TABS = [
     text: "What you earned by day, week, month or year, including cash, Zelle and Cash App. Balances owed, payouts and gift cards too.",
     points: [
       "Record tips and product sales in seconds.",
-      "Friendly balance reminders, one tap.",
+      "Payment links you send by text or Instagram.",
       "Spreadsheet and PDF downloads for tax time.",
     ],
   },

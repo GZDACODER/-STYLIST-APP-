@@ -13,6 +13,7 @@ import { revalidatePath } from "next/cache";
 import { paymentsConfigured, getStripe } from "@/lib/stripe";
 import { publicSiteUrl } from "@/lib/siteUrl";
 import { DEMO_LOCKED, isDemo } from "@/lib/demo";
+import { extraChairCount } from "@/lib/shopsServer";
 
 async function origin() {
   const h = await headers();
@@ -47,6 +48,9 @@ export async function startCheckout(prevState, formData) {
   if (plan.subscribed) {
     return { error: "You already have a plan. Use Manage billing to change or cancel it." };
   }
+  if (plan.shopCovered) return { error: "Your shop pays for your plan, so there's nothing to pay." };
+  // Shop owners: their other chairs go on the same subscription.
+  const chairs = await extraChairCount(user.id);
 
   const { data: stylist } = await supabase
     .from("stylists")
@@ -59,6 +63,7 @@ export async function startCheckout(prevState, formData) {
     // All-in, plus team members as a quantity on a second item (if any).
     const lineItems = [{ price: await ensurePrice("allin", interval), quantity: 1 }];
     if (team > 0) lineItems.push({ price: await ensurePrice("team", interval), quantity: team });
+    if (chairs > 0) lineItems.push({ price: await ensurePrice("chair", interval), quantity: chairs });
     if (withAssistant) lineItems.push({ price: await ensurePrice("assistant", interval), quantity: 1 });
     const customer = await ensureCustomer(user.id, user.email, stylist?.business_name);
     const site = await origin();

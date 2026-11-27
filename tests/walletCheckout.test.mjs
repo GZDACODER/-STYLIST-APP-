@@ -54,5 +54,6 @@ test("the deposit paid page says booked after a wallet payment closed Stripe's p
 test("no wallet on the device: straight on to Stripe's page", () => {
   const w = read("components/pay/WalletButtons.js");
   assert.match(w, /if \(!any && fallbackUrl\) window\.location\.replace\(fallbackUrl\)/);
-  assert.match(read("app/pay/c/[session]/page.js"), /fallbackUrl=\{session\.url\}/);
+  // ...unless Pay over time is on offer: then they stay to choose.
+  assert.match(read("app/pay/c/[session]/page.js"), /fallbackUrl=\{later\.length \? null : session\.url\}/);
 });

@@ -94,6 +94,7 @@ const GROUPS = [
     items: [
       { href: "/dashboard/money", label: "Money", icon: "money", also: ["/dashboard/gift-cards"] },
       { href: "/dashboard/reports", label: "Insights", icon: "reports", module: "reports" },
+      { href: "/dashboard/shop", label: "Shop", icon: "clients" },
     ],
   },
 ];

@@ -12,7 +12,7 @@ export async function BookingPageSection() {
   if (!user) return null;
   const [tagline, profile, cutoff, portfolio, proCode] = await Promise.all([
     optional(supabase, user.id, "tagline"),
-    supabase.from("stylists").select("cover_photo_url, instagram, location").eq("id", user.id).maybeSingle(),
+    supabase.from("stylists").select("cover_photo_url, instagram, location, tiktok, website, facebook, contact_phone, contact_email, show_map").eq("id", user.id).maybeSingle(),
     optional(supabase, user.id, "reschedule_cutoff_hours"),
     supabase.from("portfolio_photos").select("id, url, caption, position").order("position").order("created_at"),
     optional(supabase, user.id, "pro_code"),
@@ -33,7 +33,16 @@ export async function BookingPageSection() {
         <h2>Photos &amp; links</h2>
         <CoverPhotoForm userId={user.id} coverUrl={p.cover_photo_url || ""} />
         <PortfolioForm photos={portfolio.data || []} ready={!portfolio.error} />
-        <BusinessLinksForm instagram={p.instagram || ""} location={p.location || ""} />
+        <BusinessLinksForm
+          instagram={p.instagram || ""}
+          location={p.location || ""}
+          tiktok={p.tiktok || ""}
+          facebook={p.facebook || ""}
+          website={p.website || ""}
+          phone={p.contact_phone || ""}
+          email={p.contact_email || ""}
+          showMap={Boolean(p.show_map)}
+        />
       </section>
       <section className="card">
         <h2>Rescheduling</h2>

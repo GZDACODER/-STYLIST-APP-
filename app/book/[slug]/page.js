@@ -1,4 +1,6 @@
 import ShareThisPage from "./ShareThisPage";
+import ContactSection from "./ContactSection";
+import { loadBookingHeader } from "@/lib/bookingHeader";
 import { cache } from "react";
 import { notFound } from "next/navigation";
 import { createBookingClient } from "@/lib/supabase/booking";
@@ -224,6 +226,7 @@ export default async function BookingPage({ params, searchParams }) {
             <a href={`/book/${slug}/gift`}>Give a gift card</a>
           </p>
         )}
+        <ContactSection header={await loadBookingHeader(slug)} />
       </div>
     </div>
   );

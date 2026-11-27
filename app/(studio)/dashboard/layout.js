@@ -20,6 +20,8 @@ import { getMyTemplate } from "@/lib/templates/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { HELP_COOKIE, helpState } from "@/lib/helpMode";
 import { endHelp } from "./settings/helpActions";
+import { invitesForEmail } from "@/lib/shopsServer";
+import { JoinShopForm } from "./shop/ShopForms";
 import "./dashboard.css";
 import "./atelier.css";
 import "./shell/shell.css";
@@ -155,6 +157,8 @@ export default async function DashboardLayout({ children }) {
   // The owner inside one of their own extra accounts (Control Room > Your accounts).
   const switchedIn = !isDemo(user) && hasReturn;
   const tplValue = { key: tpl.key, words: tpl.words, modules: tpl.modules };
+  // A shop invited this email to take a chair (0081 SQL): offer Join.
+  const shopInvite = !isDemo(user) && !helping ? (await invitesForEmail(user.email).catch(() => []))[0] : null;
 
   // The demo salon is shared, so each visitor's own browser remembers which
   // tips they've seen (null = this browser only): everyone gets the tour.
@@ -221,6 +225,15 @@ export default async function DashboardLayout({ children }) {
             </div>
           ) : (
             <PlanBanner plan={plan} />
+          )}
+          {shopInvite && (
+            <div className="demo-banner" role="note">
+              <p>
+                <strong>{shopInvite.shop?.name || "A shop"} invited you to take a chair.</strong> The shop pays for your plan;
+                your booking page, clients and payouts stay yours.
+              </p>
+              <JoinShopForm token={shopInvite.invite_token} label="Join" />
+            </div>
           )}
           {children}
         </div>
