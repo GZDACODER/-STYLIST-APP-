@@ -59,11 +59,11 @@ test("the payment page has its own look, not the booking page's cover photo", ()
   assert.match(read("app/pay/layout.js"), /pay\.css/);
 });
 
-test("Apple Pay / Google Pay on the page, with Pay with card always there", () => {
+test("Apple Pay / Google Pay on the payment link page, with Pay with card always there", () => {
   const page = read("app/pay/[token]/page.js");
-  assert.match(page, /<WalletPay /);
+  assert.match(page, /<WalletButtons/);
   assert.match(page, /with card/);
-  const wallet = read("app/pay/[token]/WalletPay.js");
+  const wallet = read("components/pay/WalletButtons.js");
   assert.match(wallet, /expressCheckout/);
   assert.match(wallet, /NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY/);
 });

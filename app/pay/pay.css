@@ -269,3 +269,20 @@ body:has(.py) {
   visibility: hidden;
   margin-bottom: -12px; /* cancel the gap it would leave */
 }
+
+.py-btn-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.py-back {
+  margin: 0;
+  text-align: center;
+  font-size: 13px;
+}
+
+.py-back a {
+  color: var(--soft);
+}

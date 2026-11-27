@@ -4,6 +4,7 @@
 // a deposit (charge.dispute.*: lib/disputes.js).
 import { finalizeGiftSession } from "@/lib/giftCards";
 import { finalizePaymentLinkSession, finalizePaymentLinkIntent } from "@/lib/paymentLinksServer";
+import { finalizeCheckoutWallet } from "@/lib/walletCheckout";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { finalizeCheckoutSession, getStripe, releaseCheckoutSession } from "@/lib/stripe";
 import { syncSubscription } from "@/lib/billing";
@@ -74,6 +75,10 @@ export async function POST(request) {
       if (event.type === "checkout.session.completed" || event.type === "checkout.session.async_payment_succeeded") {
         await finalizePaymentLinkSession(object);
       }
+    } else if (event.type === "payment_intent.succeeded" && object.metadata?.checkout_session) {
+      // A deposit or gift card paid on our page with Apple Pay / Google Pay
+      // (lib/walletCheckout.js): recorded as its Stripe page's payment.
+      await finalizeCheckoutWallet(object);
     } else if (event.type === "payment_intent.succeeded" && object.metadata?.payment_link_id) {
       // A payment link paid on the page with Apple Pay / Google Pay.
       await finalizePaymentLinkIntent(object);

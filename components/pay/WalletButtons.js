@@ -1,11 +1,14 @@
 "use client";
 
-// Apple Pay / Google Pay right on the payment page (Stripe's Express
-// Checkout Element). Shows nothing when the phone or browser has no wallet,
-// or before the publishable key is set: "Pay with card" is always there.
+// Apple Pay / Google Pay right on our payment pages (Stripe's Express
+// Checkout Element): payment links, deposits and gift cards.
+// start(): a server action making the PaymentIntent → { clientSecret } or
+// { error }. finish(intentId): records it → { url } to go to, or nothing to
+// refresh. Shows nothing when the phone or browser has no wallet, or before
+// the publishable key is set: "Pay with card" is always there. With
+// fallbackUrl, a device with no wallet goes straight there instead.
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { finishWalletPayment, startWalletPayment } from "./walletActions";
 
 const KEY = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
 
@@ -29,17 +32,24 @@ const PROBLEM = {
   no_payouts: "This business can't take online payments yet.",
   cancelled: "This payment link was cancelled.",
   paid: "This has already been paid.",
+  expired: "This payment page timed out. Please go back and try again.",
 };
 
-export default function WalletPay({ token, amountCents }) {
+export default function WalletButtons({ amountCents, start, finish, returnPath, fallbackUrl }) {
   const box = useRef(null);
   const router = useRouter();
   const [shown, setShown] = useState(false);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  // Bound server actions are new each render; the buttons mount once.
+  const actions = useRef({ start, finish });
+  actions.current = { start, finish };
 
   useEffect(() => {
-    if (!KEY) return undefined;
+    if (!KEY) {
+      if (fallbackUrl) window.location.replace(fallbackUrl);
+      return undefined;
+    }
     let element;
     let cancelled = false;
     loadStripeJs()
@@ -61,6 +71,7 @@ export default function WalletPay({ token, amountCents }) {
         element.on("ready", ({ availablePaymentMethods }) => {
           const any = Boolean(availablePaymentMethods && Object.values(availablePaymentMethods).some(Boolean));
           setShown(any);
+          if (!any && fallbackUrl) window.location.replace(fallbackUrl);
         });
         element.on("confirm", async () => {
           setError("");
@@ -71,7 +82,7 @@ export default function WalletPay({ token, amountCents }) {
             setError(submitError.message || "That didn't go through.");
             return;
           }
-          const started = await startWalletPayment(token);
+          const started = await actions.current.start();
           if (!started?.clientSecret) {
             element.paymentFailed?.();
             setBusy(false);
@@ -81,7 +92,7 @@ export default function WalletPay({ token, amountCents }) {
           const { error: payError, paymentIntent } = await stripe.confirmPayment({
             elements,
             clientSecret: started.clientSecret,
-            confirmParams: { return_url: `${window.location.origin}/pay/${token}` },
+            confirmParams: { return_url: `${window.location.origin}${returnPath}` },
             redirect: "if_required",
           });
           if (payError) {
@@ -89,17 +100,20 @@ export default function WalletPay({ token, amountCents }) {
             setError(payError.message || "That payment didn't go through. Try again or pay with card.");
             return;
           }
-          if (paymentIntent?.id) await finishWalletPayment(token, paymentIntent.id);
-          router.refresh();
+          const done = paymentIntent?.id ? await actions.current.finish(paymentIntent.id) : null;
+          if (done?.url) window.location.assign(done.url);
+          else router.refresh();
         });
         element.mount(box.current);
       })
-      .catch(() => {});
+      .catch(() => {
+        if (fallbackUrl) window.location.replace(fallbackUrl);
+      });
     return () => {
       cancelled = true;
       element?.destroy?.();
     };
-  }, [token, amountCents, router]);
+  }, [amountCents, returnPath, fallbackUrl, router]);
 
   if (!KEY) return null;
   return (
