@@ -2238,10 +2238,9 @@ body:has(dialog.pf-viewer[open]) {
   margin-top: 2px;
   font-size: 0.9rem;
   line-height: 1.45;
-  color: var(--muted, #6b6357);
+  color: #5f574c;
 }
 
 .bk .choice.selected .choice-desc {
-  color: inherit;
-  opacity: 0.8;
+  color: rgba(245, 241, 234, 0.78);
 }
