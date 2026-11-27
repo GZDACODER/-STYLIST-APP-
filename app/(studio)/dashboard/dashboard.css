@@ -5959,3 +5959,37 @@ body:has(dialog.client-sheet[open]) {
   overflow-wrap: anywhere;
   line-height: 1.6;
 }
+
+/* ---------- Money > Payment links ---------- */
+.db .pl-url {
+  margin: 8px 0 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(168, 135, 77, 0.1);
+  font-size: 0.86rem;
+  overflow-wrap: anywhere;
+  user-select: all;
+}
+
+.db .pl-status {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: #eee8dc;
+  color: #5f574c;
+}
+
+.db .pl-status.is-paid {
+  background: #dcefe2;
+  color: #2f6b3f;
+}
+
+.db .pl-status.is-cancelled {
+  background: #f1e3e0;
+  color: #9a3b2e;
+}
+
+.db .pl-row-actions {
+  align-items: center;
+  gap: 12px;
+}

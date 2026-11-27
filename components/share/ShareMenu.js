@@ -68,7 +68,7 @@ async function copy(text) {
   }
 }
 
-export default function ShareMenu({ url, businessName, trigger, align = "right", heading = "Share your booking link" }) {
+export default function ShareMenu({ url, businessName, trigger, align = "right", heading = "Share your booking link", message = "" }) {
   const [open, setOpen] = useState(false);
   const [note, setNote] = useState(null);
   const [native, setNative] = useState(false);
@@ -98,7 +98,7 @@ export default function ShareMenu({ url, businessName, trigger, align = "right",
 
   const nativeShare = async () => {
     try {
-      await navigator.share({ title: businessName, text: `Book with ${businessName}`, url });
+      await navigator.share({ title: businessName, text: message || `Book with ${businessName}`, url });
       return true;
     } catch (e) {
       return e?.name === "AbortError";
@@ -127,7 +127,7 @@ export default function ShareMenu({ url, businessName, trigger, align = "right",
     else window.location.href = t.href;
   };
 
-  const targets = shareTargets(url, businessName);
+  const targets = shareTargets(url, businessName, message);
   if (native) targets.push({ key: "more", label: "More apps…" });
 
   return (

@@ -2244,3 +2244,40 @@ body:has(dialog.pf-viewer[open]) {
 .bk .choice.selected .choice-desc {
   color: rgba(245, 241, 234, 0.78);
 }
+
+/* A payment link's page (/pay/<token>, 0080 SQL). */
+.bk .pl-card {
+  max-width: 30rem;
+  padding: 32px 0 48px;
+}
+
+.bk .pl-amount {
+  margin: 12px 0 4px;
+  font-family: var(--font-display), "Cormorant Garamond", Georgia, serif;
+  font-size: clamp(2.6rem, 11vw, 3.6rem);
+  line-height: 1;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.bk .pl-for {
+  margin: 8px 0 6px;
+  font-size: 1.05rem;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.bk .pl-pay {
+  width: 100%;
+  margin-top: 20px;
+  min-height: 52px;
+  font-size: 1rem;
+}
+
+.bk .pl-secure {
+  margin-top: 10px;
+}
+
+.bk .pl-done {
+  margin-top: 20px;
+}
