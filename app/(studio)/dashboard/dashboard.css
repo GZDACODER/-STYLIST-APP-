@@ -5435,3 +5435,185 @@ body:has(dialog.client-sheet[open]) {
     justify-content: flex-start;
   }
 }
+
+/* ---------- Admin > Pros (admin/pros) ---------- */
+.db .ap-search {
+  display: flex;
+  gap: 8px;
+  margin: 0 0 12px;
+}
+
+.db .ap-search input {
+  flex: 1;
+  min-width: 0;
+}
+
+.db .ap-filters {
+  flex-wrap: wrap;
+  margin: 0 0 16px;
+}
+
+.db .ap-table-card {
+  padding: 0;
+  overflow-x: auto;
+}
+
+.db .ap-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.db .ap-table th {
+  padding: 12px 16px;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-align: left;
+  color: var(--muted, #6b655b);
+  border-bottom: 1px solid var(--line, #e6dfd2);
+}
+
+.db .ap-table td {
+  padding: 12px 16px;
+  vertical-align: top;
+  border-bottom: 1px solid var(--line, #e6dfd2);
+}
+
+.db .ap-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.db .ap-name {
+  font-weight: 600;
+  color: var(--ink, #0e0d0b);
+}
+
+.db .ap-sub {
+  display: block;
+}
+
+.db .ap-plan.is-paying {
+  color: #2f6b3f;
+}
+
+.db .ap-plan.is-ended {
+  color: #9a3b2e;
+}
+
+.db .ap-stuck {
+  margin-left: 6px;
+}
+
+.db .ap-cols {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+@media (min-width: 900px) {
+  .db .ap-cols {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+.db .ap-facts {
+  margin: 0 0 12px;
+}
+
+.db .ap-facts > div {
+  display: grid;
+  grid-template-columns: 9.5rem minmax(0, 1fr);
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line, #e6dfd2);
+}
+
+.db .ap-facts dt {
+  color: var(--muted, #6b655b);
+  font-size: 0.88rem;
+}
+
+.db .ap-facts dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.db .ap-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line, #e6dfd2);
+}
+
+.db .ap-action p {
+  margin: 0;
+}
+
+.db .ap-action-title {
+  font-weight: 600;
+  margin: 0;
+}
+
+.db .ap-inline {
+  display: flex;
+  gap: 8px;
+  flex: none;
+}
+
+.db .ap-action .button {
+  flex: none;
+}
+
+.db .ap-email {
+  display: grid;
+  gap: 8px;
+  padding-top: 14px;
+}
+
+.db .ap-email p {
+  margin: 0;
+}
+
+.db .ap-email .button {
+  justify-self: start;
+}
+
+.db .ap-log {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.db .ap-log li {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line, #e6dfd2);
+}
+
+.db .ap-log-when {
+  display: inline-block;
+  min-width: 7.5rem;
+  color: var(--muted, #6b655b);
+  font-size: 0.86rem;
+}
+
+@media (max-width: 640px) {
+  .db .ap-table th:nth-child(4),
+  .db .ap-table td:nth-child(4),
+  .db .ap-table th:nth-child(5),
+  .db .ap-table td:nth-child(5) {
+    display: none;
+  }
+  .db .ap-action {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .db .ap-facts > div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
+  }
+}

@@ -112,6 +112,19 @@ const MORE = [
   { href: "/dashboard/share", label: "Share kit", icon: "share" },
 ];
 
+// The owner's admin pages (ADMIN_EMAILS only; the pages check too).
+const ADMIN = [
+  { href: "/dashboard/admin/control/activity", label: "Overview", icon: "reports" },
+  { href: "/dashboard/admin/pros", label: "Pros", icon: "clients" },
+  { href: "/dashboard/admin/launch", label: "Launch week", icon: "sparkle" },
+  { href: "/dashboard/admin/control", label: "Site health", icon: "activity", exact: true },
+  { href: "/dashboard/admin/control/support", label: "Support access", icon: "followers" },
+  { href: "/dashboard/admin/control/reviews", label: "Reported reviews", icon: "reviews" },
+  { href: "/dashboard/admin/feedback", label: "Trial feedback", icon: "notes" },
+  { href: "/dashboard/admin/disputes", label: "Disputes", icon: "money" },
+  { href: "/dashboard/admin/errors", label: "Errors", icon: "settings" },
+];
+
 const SETTINGS = { href: "/dashboard/settings", label: "Settings", icon: "settings", also: ["/dashboard/services", "/dashboard/availability", "/dashboard/intake"] };
 
 // Quick actions. `fab`: also on the phone's "+" button. `share`: shares
@@ -141,7 +154,7 @@ function NavLink({ item, pathname, onClick }) {
   );
 }
 
-export default function AppShell({ businessName, slug, email, logout, assistant = false }) {
+export default function AppShell({ businessName, slug, email, logout, assistant = false, admin = false }) {
   const pathname = usePathname();
   const router = useRouter();
   const { words, modules } = useTemplate();
@@ -157,6 +170,8 @@ export default function AppShell({ businessName, slug, email, logout, assistant 
     [on, label]
   );
   const more = useMemo(() => MORE.filter(on), [on]);
+  const adminItems = admin ? ADMIN : [];
+  const adminOpen = pathname.startsWith("/dashboard/admin");
   const moreOpen = more.some((i) => isActive(i, pathname));
   const actions = useMemo(
     () => [...ACTIONS, ...(assistant ? [ASSISTANT_ACTION] : [])].map((a) => ({ ...a, label: label(a) })),
@@ -229,6 +244,16 @@ export default function AppShell({ businessName, slug, email, logout, assistant 
             <NavLink key={i.href} item={i} pathname={pathname} onClick={onClick} />
           ))}
         </details>
+        {adminItems.length > 0 && (
+          <details className="sh-group sh-more sh-admin" open={adminOpen || undefined}>
+            <summary className="sh-group-label">
+              Admin <Icon name="chevron" size={12} className="sh-chev" />
+            </summary>
+            {adminItems.map((i) => (
+              <NavLink key={i.href} item={i} pathname={pathname} onClick={onClick} />
+            ))}
+          </details>
+        )}
       </nav>
       <div className="sh-foot">
         <NavLink item={SETTINGS} pathname={pathname} onClick={onClick} />
@@ -330,6 +355,16 @@ export default function AppShell({ businessName, slug, email, logout, assistant 
                 <NavLink key={i.href} item={i} pathname={pathname} onClick={() => setSheet(false)} />
               ))}
             </div>
+            {adminItems.length > 0 && (
+              <>
+                <p className="sh-group-label sh-sheet-label">Admin</p>
+                <div className="sh-sheet-list">
+                  {adminItems.map((i) => (
+                    <NavLink key={i.href} item={i} pathname={pathname} onClick={() => setSheet(false)} />
+                  ))}
+                </div>
+              </>
+            )}
             <div className="sh-sheet-foot">
               <span className="sh-email">{email}</span>
               <form action={logout}>
@@ -346,7 +381,7 @@ export default function AppShell({ businessName, slug, email, logout, assistant 
         <QuickActions
           mode={quick}
           actions={quick === "actions" ? actions.filter((a) => a.fab) : actions}
-          pages={quick === "actions" ? [] : [...groups.flatMap((g) => g.items), ...more, SETTINGS]}
+          pages={quick === "actions" ? [] : [...groups.flatMap((g) => g.items), ...more, SETTINGS, ...adminItems]}
           clientsWord={words.Clients || "Clients"}
           onGo={go}
           onClose={() => setQuick(null)}
