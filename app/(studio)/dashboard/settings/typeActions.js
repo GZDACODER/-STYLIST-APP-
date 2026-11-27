@@ -1,5 +1,6 @@
 "use server";
 
+import { blockedInHelpMode } from "@/lib/helpModeServer";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { SUPPORT_LENGTHS } from "@/lib/support";
 
@@ -53,6 +54,8 @@ export async function saveModules(prev, formData) {
 }
 
 export async function setSupportAccess(prev, formData) {
+  const helpBlock = await blockedInHelpMode();
+  if (helpBlock) return helpBlock;
   const { supabase, user } = await me();
   if (!user) return { error: "Please log in again." };
   if (isDemo(user)) return { error: DEMO_LOCKED };

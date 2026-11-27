@@ -5914,3 +5914,31 @@ body:has(dialog.client-sheet[open]) {
     justify-self: start;
   }
 }
+
+/* ---------- Help mode (settings/HelpModeCard, admin/help, layout banners) ---------- */
+.db .demo-banner.help-banner {
+  background: #1d2a22;
+  color: #eef3ee;
+}
+
+.db .demo-banner.help-banner a:not(.button) {
+  color: inherit;
+}
+
+.db .demo-banner.help-banner form {
+  margin: 0;
+}
+
+.db .help-points {
+  margin: 0 0 16px;
+  padding-left: 20px;
+  line-height: 1.6;
+}
+
+.db .hm-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}

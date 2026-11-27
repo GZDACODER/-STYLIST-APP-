@@ -1,11 +1,14 @@
 // "Open Stripe" on the Settings tab: signs the stylist in to their own Stripe
 // dashboard, where they see payments, refunds and payouts to their bank.
+import { blockedRouteInHelpMode } from "@/lib/helpModeServer";
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getStripe, paymentsConfigured } from "@/lib/stripe";
 import { DEMO_LOCKED, isDemo } from "@/lib/demo";
 
 export async function GET(request) {
+  const helpBlock = await blockedRouteInHelpMode();
+  if (helpBlock) return helpBlock;
   const origin = new URL(request.url).origin;
   if (!paymentsConfigured()) return NextResponse.redirect(`${origin}/dashboard/settings`);
 

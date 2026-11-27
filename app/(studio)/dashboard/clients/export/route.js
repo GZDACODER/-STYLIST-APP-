@@ -1,6 +1,7 @@
 // "Export clients" on the Clients tab: downloads the stylist's client list
 // as a CSV file (opens in Excel, Numbers or Google Sheets). The columns match
 // what "Import clients" reads, so the file can be imported again.
+import { blockedRouteInHelpMode } from "@/lib/helpModeServer";
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { displayPhone } from "@/lib/phone";
@@ -18,6 +19,8 @@ function cell(value) {
 }
 
 export async function GET(request) {
+  const helpBlock = await blockedRouteInHelpMode();
+  if (helpBlock) return helpBlock;
   const origin = new URL(request.url).origin;
   const supabase = await createClient();
   const {

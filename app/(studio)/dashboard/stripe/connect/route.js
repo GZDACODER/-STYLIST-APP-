@@ -1,6 +1,7 @@
 // "Connect Stripe" on the Settings tab opens this. It makes the stylist's own
 // Stripe account (the first time only), then sends them to Stripe to fill in
 // their details. Stripe also sends them back here if that link expires.
+import { blockedRouteInHelpMode } from "@/lib/helpModeServer";
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -8,6 +9,8 @@ import { getStripe, paymentsConfigured } from "@/lib/stripe";
 import { DEMO_LOCKED, isDemo } from "@/lib/demo";
 
 export async function GET(request) {
+  const helpBlock = await blockedRouteInHelpMode();
+  if (helpBlock) return helpBlock;
   const origin = new URL(request.url).origin;
   const settings = (status, reason = "") =>
     NextResponse.redirect(

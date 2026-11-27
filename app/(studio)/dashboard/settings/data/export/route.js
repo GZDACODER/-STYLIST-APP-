@@ -1,5 +1,6 @@
 // Settings > Your data: download your clients, bookings or payments as a
 // spreadsheet (CSV). Only the logged-in pro's own rows (row security).
+import { blockedRouteInHelpMode } from "@/lib/helpModeServer";
 import { createClient } from "@/lib/supabase/server";
 
 const cell = (v) => {
@@ -34,6 +35,8 @@ const KINDS = {
 };
 
 export async function GET(request) {
+  const helpBlock = await blockedRouteInHelpMode();
+  if (helpBlock) return helpBlock;
   const supabase = await createClient();
   const {
     data: { user },

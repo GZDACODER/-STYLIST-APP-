@@ -6,6 +6,7 @@ import { BRAND_NAME } from "@/lib/brand";
 import SettingsShell from "@/components/dash/SettingsShell";
 import { createClient } from "@/lib/supabase/server";
 import SupportAccessForm from "../SupportAccessForm";
+import HelpModeCard from "../HelpModeCard";
 import { DataSection } from "../parts/data";
 
 export const metadata = { title: `Privacy & support · ${BRAND_NAME}` };
@@ -22,12 +23,23 @@ export default async function Page() {
     supabase.from("support_log").select("created_at, actor, action, detail").eq("stylist_id", user.id).order("created_at", { ascending: false }).limit(50),
   ]);
   const { data: me } = await supabase.from("stylists").select("timezone").eq("id", user.id).maybeSingle();
+  // Help mode (0078 SQL): an open window, if any.
+  const { data: help } = await supabase
+    .from("help_sessions")
+    .select("expires_at")
+    .is("ended_at", null)
+    .gt("expires_at", new Date().toISOString())
+    .order("created_at", { ascending: false })
+    .limit(1);
   const zone = me?.timezone || "America/Chicago";
   const until = access?.until && new Date(access.until) > new Date() ? access.until : null;
   const forever = until && new Date(until).getFullYear() - new Date().getFullYear() > 5;
 
   return (
     <SettingsShell active="support" subtitle="Off unless you turn it on.">
+      <HelpModeCard
+        openUntil={help?.[0] ? new Date(help[0].expires_at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZone: zone }) : null}
+      />
       <section className="card">
         <h2>Support access</h2>
         <p>

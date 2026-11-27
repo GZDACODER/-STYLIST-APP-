@@ -17,6 +17,9 @@ import { isDemo } from "@/lib/demo";
 import { PRO_TERMS_VERSION } from "@/lib/agreements";
 import { TemplateProvider } from "@/components/TemplateContext";
 import { getMyTemplate } from "@/lib/templates/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { HELP_COOKIE, helpState } from "@/lib/helpMode";
+import { endHelp } from "./settings/helpActions";
 import "./dashboard.css";
 import "./atelier.css";
 import "./shell/shell.css";
@@ -39,7 +42,7 @@ export default async function DashboardLayout({ children }) {
   if (!user) redirect("/login");
 
   // One read of the business row (first name too, for the Assistant).
-  const STYLIST_COLS = "business_name, slug, first_name";
+  const STYLIST_COLS = "business_name, slug, first_name, timezone";
   const readStylist = async () => {
     const r = await supabase.from("stylists").select(STYLIST_COLS).eq("id", user.id).maybeSingle();
     // A database from before the first-name column: read without it.
@@ -121,6 +124,32 @@ export default async function DashboardLayout({ children }) {
   const firstName = assistantOn ? stylist.first_name || "" : "";
 
   // The owner previewing a business type from the Control Room.
+  // Help mode (0078 SQL). Support inside this account: the session must still
+  // be open and for this pro, or support goes straight back to their own.
+  const helpId = cookieStore.get(HELP_COOKIE)?.value;
+  let helping = null;
+  if (helpId) {
+    const { data: hs } = await createAdminClient()
+      .from("help_sessions")
+      .select("id, stylist_id, expires_at, ended_at")
+      .eq("id", helpId)
+      .maybeSingle();
+    if (!hs || hs.stylist_id !== user.id || helpState(hs) !== "open") redirect("/dashboard/admin/help/exit?reason=ended");
+    helping = hs;
+  }
+  // The pro's own view: help mode is on for their account.
+  let helpOpen = null;
+  if (!helping) {
+    const { data: mine } = await supabase
+      .from("help_sessions")
+      .select("expires_at")
+      .is("ended_at", null)
+      .gt("expires_at", new Date().toISOString())
+      .limit(1);
+    helpOpen = mine?.[0] || null;
+  }
+  const helpTime = (iso) => new Date(iso).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZone: stylist.timezone || "America/Chicago" });
+
   const hasReturn = Boolean(cookieStore.get("cl_admin_return")?.value);
   const previewing = isDemo(user) && hasReturn;
   // The owner inside one of their own extra accounts (Control Room > Your accounts).
@@ -138,7 +167,29 @@ export default async function DashboardLayout({ children }) {
 
       <main className="db-main">
         <div className="db-page">
-          {isDemo(user) && previewing ? (
+          {helping ? (
+            <div className="demo-banner help-banner" role="note">
+              <p>
+                <strong>Help mode: you&apos;re in {stylist.business_name}&apos;s account.</strong> Everything you change is
+                real, logged and emailed to them. Billing, payouts and exports are locked. Ends at {helpTime(helping.expires_at)}.
+              </p>
+              <a href="/dashboard/admin/help/exit" className="button small">
+                Finish and go back
+              </a>
+            </div>
+          ) : helpOpen ? (
+            <div className="demo-banner help-banner" role="note">
+              <p>
+                <strong>Help mode is on until {helpTime(helpOpen.expires_at)}.</strong> Clientele support can open your
+                dashboard to help. Every change is listed in <a href="/dashboard/settings/support">Settings → Support</a>.
+              </p>
+              <form action={endHelp}>
+                <button type="submit" className="button small secondary">
+                  End help
+                </button>
+              </form>
+            </div>
+          ) : isDemo(user) && previewing ? (
             <div className="demo-banner" role="note">
               <p>
                 <strong>Previewing as {tpl.label}</strong>: a sample account with example data, exactly what a new{" "}

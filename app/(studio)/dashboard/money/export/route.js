@@ -1,5 +1,6 @@
 // Money exports for the period on screen: a spreadsheet (CSV) of every
 // visit and recorded payment, or a one-page-plus summary (PDF).
+import { blockedRouteInHelpMode } from "@/lib/helpModeServer";
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import { createClient } from "@/lib/supabase/server";
 import { loadMoney } from "@/lib/moneyData";
@@ -24,6 +25,8 @@ function entries(m) {
 }
 
 export async function GET(request) {
+  const helpBlock = await blockedRouteInHelpMode();
+  if (helpBlock) return helpBlock;
   const supabase = await createClient();
   const {
     data: { user },

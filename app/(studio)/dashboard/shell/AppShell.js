@@ -120,6 +120,7 @@ const ADMIN = [
   { href: "/dashboard/admin/announce", label: "Email all pros", icon: "share" },
   { href: "/dashboard/admin/launch", label: "Launch week", icon: "sparkle" },
   { href: "/dashboard/admin/control", label: "Site health", icon: "activity", exact: true },
+  { href: "/dashboard/admin/help", label: "Help requests", icon: "followers" },
   { href: "/dashboard/admin/control/support", label: "Support access", icon: "followers" },
   { href: "/dashboard/admin/control/reviews", label: "Reported reviews", icon: "reviews" },
   { href: "/dashboard/admin/feedback", label: "Trial feedback", icon: "notes" },
