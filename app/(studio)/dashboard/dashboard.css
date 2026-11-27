@@ -5942,3 +5942,20 @@ body:has(dialog.client-sheet[open]) {
   justify-content: space-between;
   gap: 10px;
 }
+
+/* ---------- Admin > Briefings ---------- */
+@media (min-width: 900px) {
+  .db .br-cols {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.6fr);
+  }
+}
+
+.db .br-on {
+  background: rgba(168, 135, 77, 0.1);
+}
+
+.db .br-body {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.6;
+}
