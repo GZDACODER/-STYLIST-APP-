@@ -7,6 +7,7 @@ import { logout } from "@/app/auth/actions";
 import PlanBanner from "./PlanBanner";
 import CreateStylistForm from "./CreateStylistForm";
 import { getMyPlan } from "@/lib/plan";
+import { isAdmin } from "@/lib/admin";
 import AppShell from "./shell/AppShell";
 import AssistantWidget from "./assistant/AssistantWidget";
 import { PLANS } from "@/lib/plans";
@@ -133,7 +134,7 @@ export default async function DashboardLayout({ children }) {
     <GuideProvider mode="pro" scope={user.id} initialSeen={isDemo(user) ? null : guidesSeen}>
     <div className={`db ${display.variable}`}>
       {/* The frame: grouped nav, drawer, phone tab bar, quick actions. */}
-      <AppShell businessName={stylist.business_name} slug={stylist.slug} email={user.email} logout={logout} assistant={assistantOn} />
+      <AppShell businessName={stylist.business_name} slug={stylist.slug} email={user.email} logout={logout} assistant={assistantOn} admin={isAdmin(user)} />
 
       <main className="db-main">
         <div className="db-page">
