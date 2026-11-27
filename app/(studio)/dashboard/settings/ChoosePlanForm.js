@@ -12,7 +12,7 @@ import FormMessage from "@/components/FormMessage";
 export default function ChoosePlanForm({ inTrial, assistantAvailable = false, extraChairs = 0 }) {
   const [state, formAction] = useActionState(startCheckout, null);
   const [interval, setInterval] = useState("month");
-  const [team, setTeam] = useState(0);
+  const team = 0;
   const [assistant, setAssistant] = useState(false);
 
   const yearly = interval === "year";
@@ -63,17 +63,8 @@ export default function ChoosePlanForm({ inTrial, assistantAvailable = false, ex
         </p>
       )}
 
-      <label className="plan-team">
-        Team members ({formatPrice(seat)}
-        {per} each)
-        <select name="team_members" value={team} onChange={(e) => setTeam(Number(e.target.value))}>
-          {Array.from({ length: 11 }, (_, n) => (
-            <option key={n} value={n}>
-              {n === 0 ? "None (just me)" : `${n} team ${n === 1 ? "member" : "members"}`}
-            </option>
-          ))}
-        </select>
-      </label>
+      {/* Team members are replaced by shop chairs (Shop page): none for new plans. */}
+      <input type="hidden" name="team_members" value="0" />
 
       {assistantAvailable && (
         <label className="check-row">

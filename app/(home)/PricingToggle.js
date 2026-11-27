@@ -10,7 +10,7 @@ const money = (cents) => {
   return `$${dollars % 1 ? dollars.toFixed(2) : dollars}`;
 };
 
-export default function PricingToggle({ allin, team, assistant, trialDays, included, assistantOn }) {
+export default function PricingToggle({ allin, chair, assistant, trialDays, included, assistantOn }) {
   const [yearly, setYearly] = useState(false);
   const per = yearly ? "/yr" : "/mo";
   const pick = (plan) => money(yearly ? plan.yearlyCents : plan.monthlyCents);
@@ -48,12 +48,14 @@ export default function PricingToggle({ allin, team, assistant, trialDays, inclu
         </div>
 
         <div className="ln-card ln-price-card">
-          <span className="ln-eyebrow">Team members</span>
+          <span className="ln-eyebrow">Run a shop? · Each extra chair</span>
           <p className="ln-price is-small">
-            {pick(team)}
+            {pick(chair)}
             <span>{per} each</span>
           </p>
-          <p className="ln-muted">Half the price of the plan. Add or remove any time.</p>
+          <p className="ln-muted">
+            Every chair gets its own booking page, calendar and payouts. You see them all on one page, on one bill.
+          </p>
         </div>
 
         {assistantOn && (

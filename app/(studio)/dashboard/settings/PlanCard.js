@@ -83,6 +83,7 @@ export default function PlanCard({ plan, billingNotice, canPay, assistantAvailab
                 {per}
               </dd>
             </div>
+            {plan.teamMembers > 0 && (
             <div>
               <dt>
                 Team members × {plan.teamMembers}
@@ -92,6 +93,7 @@ export default function PlanCard({ plan, billingNotice, canPay, assistantAvailab
                 {per}
               </dd>
             </div>
+            )}
             {plan.shopChairs > 0 && (
               <div>
                 <dt>Extra chairs × {plan.shopChairs}</dt>
@@ -121,7 +123,7 @@ export default function PlanCard({ plan, billingNotice, canPay, assistantAvailab
           <p className="muted small-text">
             If you signed up on an earlier plan, Stripe keeps your original price; Manage billing shows it.
           </p>
-          {canPay && <TeamMembersForm key={plan.teamMembers} count={plan.teamMembers} yearly={yearly} />}
+          {canPay && plan.teamMembers > 0 && <TeamMembersForm key={plan.teamMembers} count={plan.teamMembers} yearly={yearly} />}
         </>
       ) : plan.stripeStatus === "canceled" ? (
         <p className="muted">
@@ -165,8 +167,8 @@ export default function PlanCard({ plan, billingNotice, canPay, assistantAvailab
         would help.
       </p>
       <p className="muted small-text">
-        Team members are {formatPrice(PLANS.team.monthlyCents)}/mo ({formatPrice(PLANS.team.yearlyCents)}/yr)
-        each, half the price of the plan.
+        Run a shop? Each other chair is {formatPrice(PLANS.chair.monthlyCents)}/mo on your plan, with its own booking page,
+        calendar and payouts. <a href="/dashboard/shop">Start a shop</a>
       </p>
     </section>
   );
