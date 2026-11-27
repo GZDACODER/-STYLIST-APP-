@@ -25,7 +25,7 @@ export default function AddPanel({ id, label, title, className = "button small",
   return (
     <>
       {trigger && (
-        <button type="button" className={className} onClick={() => setOpen(true)} aria-haspopup="dialog">
+        <button type="button" className={className} onClick={() => setOpen(true)} aria-haspopup="dialog" data-guide-add={id}>
           {label}
         </button>
       )}

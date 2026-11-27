@@ -8,7 +8,6 @@ import { PARTS_OF_DAY } from "@/lib/preferences";
 import { formatPhone } from "@/lib/phone";
 import VerifyClient from "./VerifyClient";
 import { maskEmail } from "@/lib/maskEmail";
-import PageGuide from "@/components/guide/PageGuide";
 
 // Join the waitlist for one service: pick days and times of day, confirm
 // your phone number, and we'll email you when a time opens up.
@@ -145,7 +144,6 @@ export default function WaitlistForm({
         </>
       ) : (
         <form onSubmit={submit}>
-          <PageGuide guideKey="waitlist_join" button={false} />
           <label>
             Your name
             <input
