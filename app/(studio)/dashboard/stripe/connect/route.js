@@ -59,9 +59,15 @@ export async function GET(request) {
               product_description: "Appointments and bookings",
             },
           },
+          // Recipient: receives the deposits this app passes on. Merchant (card
+          // payments): Stripe only covers losses ("stripe" above) on accounts
+          // that can take payments themselves.
           configuration: {
             recipient: {
               capabilities: { stripe_balance: { stripe_transfers: { requested: true } } },
+            },
+            merchant: {
+              capabilities: { card_payments: { requested: true } },
             },
           },
           metadata: { stylist_id: user.id },
