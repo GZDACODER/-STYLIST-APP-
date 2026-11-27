@@ -1,0 +1,271 @@
+/* =========================================================
+   Payment link page (/pay/[token]). Everything is inside .py.
+   ========================================================= */
+
+.py {
+  --bg: #f4efe6;
+  --ink: #12100d;
+  --soft: #5f584d;
+  --gold: #a8874d;
+  --gold-deep: #7d6232;
+  --line: rgba(14, 13, 11, 0.09);
+  --glass: rgba(255, 252, 246, 0.72);
+  --glass-shadow: 0 1px 2px rgba(14, 13, 11, 0.04), 0 10px 30px -14px rgba(14, 13, 11, 0.18);
+
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  isolation: isolate;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans), "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+  color-scheme: light;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+  padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom))
+    max(16px, env(safe-area-inset-left));
+}
+
+body:has(.py) {
+  background: #f4efe6;
+}
+
+.py::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(90vmax 65vmax at 88% -8%, rgba(207, 174, 108, 0.28), transparent 62%),
+    radial-gradient(75vmax 60vmax at -12% 80%, rgba(207, 174, 108, 0.14), transparent 60%);
+}
+
+.py-main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 0;
+}
+
+.py-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--glass);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: var(--glass-shadow);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  backdrop-filter: blur(16px) saturate(140%);
+  padding: 28px 24px 22px;
+  text-align: center;
+}
+
+.py-pro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.py-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  background: #efe6d6;
+}
+
+.py-monogram {
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 26px;
+  color: var(--gold-deep);
+}
+
+.py-name {
+  margin: 0;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.py-name a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.py-kicker {
+  margin: 0;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--soft);
+}
+
+.py-amount {
+  margin: 4px 0 2px;
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 500;
+  font-size: clamp(52px, 15vw, 68px);
+  line-height: 1.05;
+  font-variant-numeric: lining-nums tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+.py-for {
+  margin: 0;
+  font-size: 17px;
+  overflow-wrap: anywhere;
+}
+
+.py-client {
+  margin: 4px 0 0;
+  font-size: 14px;
+  color: var(--soft);
+}
+
+.py-actions {
+  margin-top: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: left;
+}
+
+
+.py-or {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--soft);
+}
+
+.py-or::before,
+.py-or::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+
+.py-btn {
+  width: 100%;
+  min-height: 50px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--gold);
+  color: #14110a;
+  font: inherit;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  font-variant-numeric: lining-nums;
+}
+
+.py-btn:hover {
+  background: #b8975b;
+}
+
+.py-btn:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.py-btn.is-quiet {
+  background: transparent;
+  border: 1px solid rgba(14, 13, 11, 0.22);
+  color: var(--ink);
+}
+
+.py-btn.is-quiet:hover {
+  background: rgba(255, 252, 246, 0.9);
+}
+
+.py-secure {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--soft);
+  text-align: center;
+}
+
+.py-secure svg {
+  flex: none;
+}
+
+.py-card .message {
+  margin: 16px 0 0;
+  text-align: left;
+}
+
+.py-done {
+  margin-top: 22px;
+}
+
+.py-check {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 10px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(168, 135, 77, 0.16);
+  color: var(--gold-deep);
+}
+
+.py-done p {
+  margin: 0;
+}
+
+.py-done .py-done-sub {
+  margin-top: 4px;
+  font-size: 14px;
+  color: var(--soft);
+}
+
+.py-foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--soft);
+  padding-bottom: 4px;
+}
+
+.py-foot a {
+  color: inherit;
+}
+
+.py-signature {
+  font-family: var(--font-script), cursive;
+  font-size: 20px;
+  color: var(--gold-deep);
+  line-height: 1;
+}
+
+.py-wallet-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.py-wallet-wrap:not(.is-shown) {
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  margin-bottom: -12px; /* cancel the gap it would leave */
+}
