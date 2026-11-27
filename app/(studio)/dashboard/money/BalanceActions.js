@@ -5,11 +5,14 @@ import SubmitButton from "@/components/SubmitButton";
 import FormMessage from "@/components/FormMessage";
 import { METHODS } from "@/lib/moneyTab";
 import { markBalancePaid, remindBalance } from "./actions";
+import { createPaymentLink } from "./linkActions";
+import LinkShare from "./LinkShare";
 
-export default function BalanceActions({ id, owedCents, canEmail }) {
+export default function BalanceActions({ id, owedCents, canEmail, canLink = false }) {
   const [paying, setPaying] = useState(false);
   const [pState, pay] = useActionState(markBalancePaid, null);
   const [rState, remind] = useActionState(remindBalance, null);
+  const [lState, makeLink] = useActionState(createPaymentLink, null);
   if (pState?.success) return <FormMessage state={pState} />;
   return (
     <div className="rq-actions">
@@ -45,6 +48,16 @@ export default function BalanceActions({ id, owedCents, canEmail }) {
           <button type="button" className="button small" onClick={() => setPaying(true)}>
             Mark paid
           </button>
+          {canLink && !lState?.link && (
+            <form action={makeLink}>
+              <input type="hidden" name="booking_id" value={id} />
+              <input type="hidden" name="amount" value={(owedCents / 100).toFixed(2)} />
+              <SubmitButton className="button small secondary" pendingText="Making link...">
+                Send payment link
+              </SubmitButton>
+            </form>
+          )}
+          {lState?.link && <LinkShare url={lState.link.url} message={lState.link.message} businessName={lState.link.businessName} primary />}
           {canEmail && (
             <form action={remind}>
               <input type="hidden" name="id" value={id} />
@@ -57,6 +70,7 @@ export default function BalanceActions({ id, owedCents, canEmail }) {
         </div>
       )}
       <FormMessage state={rState} />
+      {lState?.error && <FormMessage state={lState} />}
     </div>
   );
 }

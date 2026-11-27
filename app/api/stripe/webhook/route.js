@@ -3,6 +3,7 @@
 // starts, changes or ends (see BILLING_SETUP.md), and when a client disputes
 // a deposit (charge.dispute.*: lib/disputes.js).
 import { finalizeGiftSession } from "@/lib/giftCards";
+import { finalizePaymentLinkSession } from "@/lib/paymentLinksServer";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { finalizeCheckoutSession, getStripe, releaseCheckoutSession } from "@/lib/stripe";
 import { syncSubscription } from "@/lib/billing";
@@ -66,6 +67,12 @@ export async function POST(request) {
         await finalizeGiftSession(object);
       } else if (event.type === "checkout.session.expired" || event.type === "checkout.session.async_payment_failed") {
         await createAdminClient().from("gift_cards").update({ status: "void" }).eq("id", object.metadata.gift_card_id).eq("status", "pending");
+      }
+    } else if (event.type.startsWith("checkout.session.") && object.metadata?.payment_link_id) {
+      // A payment link (0080 SQL): record it once paid. An unpaid page
+      // leaves the link open for another try.
+      if (event.type === "checkout.session.completed" || event.type === "checkout.session.async_payment_succeeded") {
+        await finalizePaymentLinkSession(object);
       }
     } else if (
       event.type === "checkout.session.completed" ||

@@ -2,6 +2,7 @@
 // chart), then tabs: payments you recorded outside the app (cash, Zelle,
 // Cash App...), balances owed, Stripe payouts and gift cards. Record a
 // payment opens in the slide-over; exports are in the Export menu (step 62 SQL).
+// Payment links (0080 SQL): their own tab, and "Send payment link" on a balance.
 import { getUser } from "@/lib/supabase/user";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -23,10 +24,13 @@ import { deletePayment } from "./actions";
 import AddPanel from "../shell/AddPanel";
 import SplitMenu from "../shell/SplitMenu";
 import GiftCardsBody from "./GiftCardsBody";
+import PaymentLinksBody from "./PaymentLinksBody";
+import { exampleServices } from "@/lib/examples";
 
 const TABS = [
   ["payments", "Payments"],
   ["owed", "Balances owed"],
+  ["links", "Payment links"],
   ["payouts", "Stripe payouts"],
   ["gifts", "Gift cards"],
 ];
@@ -217,7 +221,12 @@ export default async function MoneyPage({ searchParams }) {
                     {b.service_name} · {formatDate(b.booking_date)}
                     {b.balance_reminded_at ? ` · reminded ${short(b.balance_reminded_at.slice(0, 10))}` : ""}
                   </p>
-                  <BalanceActions id={b.id} owedCents={b.owedNow} canEmail={Boolean(b.client_email)} />
+                  <BalanceActions
+                    id={b.id}
+                    owedCents={b.owedNow}
+                    canEmail={Boolean(b.client_email)}
+                    canLink={Boolean(m.stylist?.stripe_account_id && m.stylist?.stripe_charges_enabled)}
+                  />
                 </li>
               ))}
             </ul>
@@ -306,6 +315,9 @@ export default async function MoneyPage({ searchParams }) {
       )}
 
       {tab === "gifts" && <GiftCardsBody />}
+      {tab === "links" && (
+        <PaymentLinksBody stylist={m.stylist} example={`Balance for ${(exampleServices(await getMyTemplate())[0]?.name || "silk press").toLowerCase()}`} />
+      )}
     </>
   );
 }
