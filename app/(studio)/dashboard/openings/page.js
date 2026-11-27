@@ -157,7 +157,7 @@ export default async function OpeningsPage({ searchParams }) {
 
   return (
     <>
-      <PageHeader guide="openings"
+      <PageHeader guide={tab === "waitlist" ? "waitlist" : "openings"}
         title="Openings"
         subtitle={
           <>
