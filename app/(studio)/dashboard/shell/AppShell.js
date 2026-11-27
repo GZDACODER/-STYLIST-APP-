@@ -116,6 +116,8 @@ const MORE = [
 const ADMIN = [
   { href: "/dashboard/admin/control/activity", label: "Overview", icon: "reports" },
   { href: "/dashboard/admin/pros", label: "Pros", icon: "clients" },
+  { href: "/dashboard/admin/money", label: "Money", icon: "money" },
+  { href: "/dashboard/admin/announce", label: "Email all pros", icon: "share" },
   { href: "/dashboard/admin/launch", label: "Launch week", icon: "sparkle" },
   { href: "/dashboard/admin/control", label: "Site health", icon: "activity", exact: true },
   { href: "/dashboard/admin/control/support", label: "Support access", icon: "followers" },

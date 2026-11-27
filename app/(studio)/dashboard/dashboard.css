@@ -5623,3 +5623,64 @@ body:has(dialog.client-sheet[open]) {
     gap: 2px;
   }
 }
+
+/* ---------- Admin > Money, Email all pros, Pause ---------- */
+.db .am-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.db .am-tile p {
+  margin: 0;
+}
+
+.db .am-k {
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted, #6b655b);
+}
+
+.db .am-tile .am-v {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 2rem;
+  line-height: 1.2;
+  margin: 6px 0 4px;
+}
+
+.db form.an-form {
+  display: grid;
+  gap: 14px;
+  max-width: 44rem;
+  text-align: left;
+}
+
+.db .an-form label {
+  display: grid;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.db .an-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.db .ap-pause input {
+  margin-top: 8px;
+  width: 100%;
+}
+
+.db .button.danger {
+  color: #9a3b2e;
+  border-color: #9a3b2e;
+}
+
+.db .badge.ap-paused {
+  background: #f4dcd6;
+  color: #9a3b2e;
+}
