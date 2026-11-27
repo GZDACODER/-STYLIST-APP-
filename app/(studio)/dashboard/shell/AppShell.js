@@ -17,6 +17,7 @@ import { useTemplate } from "@/components/TemplateContext";
 import { ICONS as BASE_ICONS } from "../DashboardNav";
 import { quickClients } from "./actions";
 import { shareBookingLink } from "./share";
+import ShareMenu from "./ShareMenu";
 
 const ICONS = {
   ...BASE_ICONS,
@@ -275,6 +276,17 @@ export default function AppShell({ businessName, slug, email, logout, assistant 
         <button type="button" className="sh-top-btn sh-search-icon" aria-label="Search and quick actions" onClick={() => setQuick("all")}>
           <Icon name="search" size={22} />
         </button>
+        {/* Every page: share the booking link (phone share sheet, or a menu). */}
+        <ShareMenu
+          url={bookingUrl}
+          businessName={businessName}
+          trigger={({ onClick, open }) => (
+            <button type="button" className="sh-share" aria-haspopup="menu" aria-expanded={open} onClick={onClick}>
+              <Icon name="share" size={17} />
+              <span>Share my link</span>
+            </button>
+          )}
+        />
       </header>
       {toast && (
         <p className="sh-toast" role="status">
