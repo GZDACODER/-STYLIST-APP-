@@ -69,3 +69,13 @@ test("sample pages for prospects work like demos: booking off", async () => {
   assert.equal(isDemoSlug("iheartink"), false);
   assert.equal(isSampleSlug("sample-"), false);
 });
+
+test("logo and brand colour: saved per pro, and a new cover photo never deletes the logo", () => {
+  const actions = read("app/(studio)/dashboard/settings/actions.js");
+  assert.match(actions, /\.filter\(\(file\) => file\.name\.startsWith\("cover-"\)\)/);
+  assert.match(actions, /\.filter\(\(file\) => file\.name\.startsWith\("logo-"\)\)/);
+  assert.match(actions, /color && !\/\^#\[0-9a-f\]\{6\}\$\/\.test\(color\)/);
+  const sql = read("supabase/migrations/0083_logo_accent.sql");
+  assert.match(sql, /'logo_url', v_stylist\.logo_url/);
+  assert.match(sql, /'accent_color', v_stylist\.accent_color/);
+});

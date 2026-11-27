@@ -5993,3 +5993,27 @@ body:has(dialog.client-sheet[open]) {
   align-items: center;
   gap: 12px;
 }
+
+/* Settings → Booking page: logo and brand colour (LogoForm.js). */
+.db .logo-preview {
+  display: block;
+  max-height: 64px;
+  max-width: 220px;
+  margin: 6px 0 10px;
+  padding: 8px;
+  border-radius: 8px;
+  background: repeating-conic-gradient(#f1ece3 0 25%, #fff 0 50%) 0 0 / 14px 14px;
+}
+.db .accent-form {
+  margin-top: 18px;
+  display: grid;
+  gap: 8px;
+}
+.db .accent-pick input[type="color"] {
+  width: 48px;
+  height: 36px;
+  padding: 2px;
+  border: 1px solid rgba(14, 13, 11, 0.2);
+  border-radius: 8px;
+  background: #fff;
+}
