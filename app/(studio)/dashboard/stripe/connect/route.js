@@ -12,7 +12,7 @@ export async function GET(request) {
   const settings = (status, reason = "") =>
     NextResponse.redirect(
       `${origin}/dashboard/settings/deposits?stripe=${status}` +
-        (reason ? `&reason=${encodeURIComponent(reason.slice(0, 300))}` : "")
+        (reason ? `&reason=${encodeURIComponent(reason.slice(0, 1000))}` : "")
     );
 
   if (!paymentsConfigured()) return settings("not_configured");
