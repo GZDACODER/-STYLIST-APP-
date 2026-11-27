@@ -60,3 +60,12 @@ test("the map is only for a typed address, and only when the pro turns it on", (
 test("PAY_LATER_TYPES lists the three methods", () => {
   assert.deepEqual(PAY_LATER_TYPES, ["klarna", "afterpay_clearpay", "affirm"]);
 });
+
+test("sample pages for prospects work like demos: booking off", async () => {
+  const { isDemoSlug, isSampleSlug } = await import("../lib/demo.js");
+  assert.equal(isSampleSlug("sample-iheartink-4d2e92"), true);
+  assert.equal(isDemoSlug("sample-iheartink-4d2e92"), true);
+  assert.equal(isDemoSlug("demo-tattoo-a1b2c3"), true);
+  assert.equal(isDemoSlug("iheartink"), false);
+  assert.equal(isSampleSlug("sample-"), false);
+});

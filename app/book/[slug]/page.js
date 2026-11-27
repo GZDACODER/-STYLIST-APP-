@@ -13,7 +13,7 @@ import { displayName } from "@/lib/bookingHeader";
 import { BRAND_NAME } from "@/lib/brand";
 import { myProsEnabled } from "@/lib/myPros";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { isDemoSlug } from "@/lib/demo";
+import { isDemoSlug, isSampleSlug } from "@/lib/demo";
 import { TemplateProvider } from "@/components/TemplateContext";
 import { swapWords, templateFor } from "@/lib/templates";
 
@@ -63,6 +63,8 @@ export async function generateMetadata({ params, searchParams }) {
   return {
     title,
     description,
+    // Demo and sample pages stay out of search engines.
+    ...(isDemoSlug(slug) ? { robots: { index: false, follow: false } } : {}),
     openGraph: { title, description, siteName: BRAND_NAME, type: "website", url: `/book/${slug}` },
     twitter: { card: "summary_large_image", title, description },
   };
@@ -198,12 +200,18 @@ export default async function BookingPage({ params, searchParams }) {
         </div>
       )}
       <div className="bk-flow">
-        {isDemoSlug(slug) && (
-          <p className="message info bk-demo-note">
-            <strong>This is a demo booking page.</strong> Pick a service and a time to see how booking works. The
-            last step is switched off, so nothing is booked and nothing is sent.
-          </p>
-        )}
+        {isDemoSlug(slug) &&
+          (isSampleSlug(slug) ? (
+            <p className="message info bk-demo-note">
+              <strong>This is a sample page</strong>, made to show what booking with {look.name} could look like on
+              Clientele. Booking is switched off, so nothing is booked and nothing is sent.
+            </p>
+          ) : (
+            <p className="message info bk-demo-note">
+              <strong>This is a demo booking page.</strong> Pick a service and a time to see how booking works. The
+              last step is switched off, so nothing is booked and nothing is sent.
+            </p>
+          ))}
         <Portfolio photos={portfolio} name={look.name} />
         <TemplateProvider value={bookingTemplate}>
         <BookingFlow
