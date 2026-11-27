@@ -48,10 +48,12 @@ export async function GET(request) {
           identity: { country: "us" },
           defaults: {
             currency: "usd",
-            // The platform (this app) handles Stripe's fees and covers it if a
-            // stylist's account can't pay back a refund or dispute. Stripe only
-            // allows "application" for recipient accounts like these.
-            responsibilities: { fees_collector: "application", losses_collector: "application" },
+            // The platform (this app) handles Stripe's fees on deposits. Stripe
+            // covers a stylist's account if it can't pay back a refund or
+            // dispute: live Stripe requires losses_collector "stripe" for this
+            // platform ("Managed Risk"). Deposits are destination charges, so
+            // disputes on them still land on the platform's own balance first.
+            responsibilities: { fees_collector: "application", losses_collector: "stripe" },
             profile: {
               doing_business_as: stylist.business_name,
               product_description: "Appointments and bookings",
