@@ -26,7 +26,7 @@ Dashboard, **live mode** (toggle "Test mode" off) → **Connect**.
 - Finish the **platform profile**: Clientele is a platform for independent pros
   (stylists, barbers, tattoo artists, tutors) who take booking deposits.
 - Clientele makes pros' accounts as **Express** accounts, collects Stripe's fees
-  itself (`fees_collector: application`) and **covers losses**
+  itself (`fees_collector: application`). Stripe covers pros' negative balances (`losses_collector: stripe`, "Managed Risk"), which live Stripe requires for this platform; disputes on deposits still land on your platform balance first
   (`losses_collector: application`). In plain words: if a client disputes a
   deposit and the pro's balance can't cover it, Clientele's Stripe balance pays.
   Stripe asks you to accept this when Connect goes live.
