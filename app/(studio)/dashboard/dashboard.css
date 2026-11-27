@@ -5684,3 +5684,233 @@ body:has(dialog.client-sheet[open]) {
   background: #f4dcd6;
   color: #9a3b2e;
 }
+
+/* ---------- Services → Import from another app (services/import) ---------- */
+.db .si-services-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+  margin-bottom: 8px;
+}
+
+.db .si-services-head h2 {
+  margin: 0;
+}
+
+.db .si-drop {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  margin: 16px 0;
+  padding: 32px 16px;
+  border: 2px dashed var(--line, #d8ccb4);
+  border-radius: 14px;
+  text-align: center;
+}
+
+.db .si-thumbs {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 10px;
+  margin: 0 0 16px;
+  padding: 0;
+  list-style: none;
+}
+
+.db .si-thumbs li {
+  position: relative;
+  aspect-ratio: 9 / 16;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #eee6d8;
+}
+
+.db .si-thumbs img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.db .si-thumb-x {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(14, 13, 11, 0.75);
+  color: #fff;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.db .si-reading {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 48px 16px;
+  text-align: center;
+}
+
+.db .si-reading h2,
+.db .si-reading p {
+  margin: 0;
+}
+
+.db .si-spinner {
+  width: 36px;
+  height: 36px;
+  margin-bottom: 8px;
+  border: 3px solid rgba(168, 135, 77, 0.25);
+  border-top-color: var(--gold, #a8874d);
+  border-radius: 50%;
+  animation: si-spin 0.9s linear infinite;
+}
+
+@keyframes si-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .db .si-spinner {
+    animation-duration: 3s;
+  }
+}
+
+.db .si-table {
+  display: grid;
+  gap: 0;
+  margin: 16px 0;
+}
+
+.db .si-row {
+  display: grid;
+  grid-template-columns: minmax(0, 2.2fr) 0.8fr 0.8fr minmax(0, 1.1fr) minmax(0, 1.8fr) auto;
+  gap: 8px;
+  align-items: start;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line, #e6dfd2);
+}
+
+.db .si-head {
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted, #6b655b);
+}
+
+.db .si-cell {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  font-weight: 400;
+}
+
+.db .si-cell input {
+  width: 100%;
+  min-width: 0;
+  min-height: 40px;
+}
+
+.db .si-cell input.is-missing {
+  border-color: #c08a2e;
+  background: #fdf6e7;
+}
+
+.db .si-label {
+  display: none;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted, #6b655b);
+}
+
+.db .si-flags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.db .si-flag {
+  font-size: 0.74rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.db .si-flag.is-warn {
+  background: #fbecd0;
+  color: #7a5310;
+}
+
+.db .si-flag.is-dup {
+  background: #e9e3f4;
+  color: #4b3c78;
+}
+
+.db .si-del {
+  min-height: 40px;
+  border: 0;
+  background: none;
+  color: #9a3b2e;
+  font: inherit;
+  font-size: 0.86rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.db .si-row.has-error {
+  background: #fbefec;
+}
+
+.db .si-row-error {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: #9a3b2e;
+  font-size: 0.86rem;
+}
+
+.db .si-approve {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  margin-top: 20px;
+}
+
+.db .si-approve p {
+  margin: 0;
+}
+
+.db .si-done-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* Phones: each service as a small card. */
+@media (max-width: 760px) {
+  .db .si-head {
+    display: none;
+  }
+  .db .si-row {
+    grid-template-columns: 1fr 1fr;
+    padding: 14px 0;
+  }
+  .db .si-name,
+  .db .si-desc {
+    grid-column: 1 / -1;
+  }
+  .db .si-label {
+    display: block;
+  }
+  .db .si-del {
+    justify-self: start;
+  }
+}

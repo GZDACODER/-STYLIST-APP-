@@ -227,14 +227,13 @@ export default async function HomePage() {
           <div className="ln-hero-copy">
             <p className="ln-eyebrow">Booking and business tools for independent pros</p>
             <h1>
-              Run your whole business from one place. <em>Your regulars come first.</em>
+              Switching is free. <em>We&apos;ll move your whole menu for you.</em>
             </h1>
             <p className="ln-lede">
-              Bookings, deposits, money, clients, reviews and insights in one app, for hair stylists, barbers, tattoo
-              artists and tutors.
+              Upload screenshots of your services from any app, and your Clientele page is ready in minutes.
             </p>
             <div className="ln-cta-row">
-              <TrialCta />
+              <TrialCta label="Start free" href="/signup?next=import" />
               <a href="/demo" className="ln-btn ln-btn-ghost">
                 Try the live demo
               </a>

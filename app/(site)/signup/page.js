@@ -9,7 +9,9 @@ export const metadata = {
   alternates: { canonical: "/signup" },
 };
 
-export default function SignupPage() {
+export default async function SignupPage({ searchParams }) {
+  // From the homepage's "Start free": after signing up, go to Import your services.
+  const next = (await searchParams)?.next === "import" ? "import" : "";
   return (
     <>
       <p className="au-kicker">14 days free</p>
@@ -18,7 +20,7 @@ export default function SignupPage() {
         Free for {TRIAL_DAYS} days with everything included. No card needed.
       </p>
       <div className="card">
-        <SignupForm />
+        <SignupForm after={next} />
       </div>
       <p className="muted small-text">
         By creating an account, you agree to the <Link href="/terms">Terms of Service</Link> and{" "}

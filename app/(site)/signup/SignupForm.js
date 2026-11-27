@@ -12,7 +12,7 @@ import ResendConfirmation from "@/components/ResendConfirmation";
 import ConfirmCodeForm from "@/components/ConfirmCodeForm";
 import { COMING_SOON, TYPE_CHOICES } from "@/lib/templates";
 
-export default function SignupForm() {
+export default function SignupForm({ after = "" }) {
   const [state, formAction] = useActionState(signup, null);
   const [step, setStep] = useState(1);
   const [type, setType] = useState("");
@@ -32,6 +32,7 @@ export default function SignupForm() {
   return (
     <>
       <form action={formAction}>
+        {after && <input type="hidden" name="next" value={after} />}
         {/* Step 1 stays in the form (hidden on step 2) so it's sent too. */}
         <div ref={firstStep} className="stack" hidden={step !== 1}>
           <label>

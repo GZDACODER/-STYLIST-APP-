@@ -2,11 +2,13 @@
 
 // Server actions for sign-up, log-in and log-out.
 // These run on the server, never in the browser.
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { TYPE_CHOICES } from "@/lib/templates";
 import { DEMO_LOCKED, isDemo } from "@/lib/demo";
+
+const AFTER_SIGNUP = "cl_after_signup";
 
 export async function signup(prevState, formData) {
   const businessName = String(formData.get("business_name") || "").trim();
@@ -50,8 +52,14 @@ export async function signup(prevState, formData) {
 
   if (error) return { error: signupErrorMessage(error) };
 
+  // "Start free" on the homepage: after the agreement, open Import your
+  // services (read and cleared in app/(site)/agreement/actions.js).
+  if (formData.get("next") === "import") {
+    (await cookies()).set(AFTER_SIGNUP, "import", { path: "/", maxAge: 86400, httpOnly: true, sameSite: "lax", secure: true });
+  }
+
   // If email confirmation is turned off in Supabase, they're logged in now.
-  if (data.session) redirect("/dashboard");
+  if (data.session) redirect(formData.get("next") === "import" ? "/dashboard/services/import" : "/dashboard");
 
   // An account with this email already exists: Supabase sends no email and
   // gives no error (so nobody can check who has an account), but the user it

@@ -3,7 +3,7 @@
 // Saves a pro's signed Clientele agreement (layer 1): the signature image
 // and a PDF copy in private storage, a permanent record of exactly what was
 // signed, and an email with the PDF.
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -84,6 +84,12 @@ export async function signProTerms(prev, formData) {
         attachments: [{ filename: "Clientele-agreement.pdf", content: Buffer.from(pdf).toString("base64") }],
       },
     ]).catch(() => {});
+  }
+  // New pros who came from "Start free" go straight to Import your services.
+  const jar = await cookies();
+  if (jar.get("cl_after_signup")?.value === "import") {
+    jar.delete("cl_after_signup");
+    redirect("/dashboard/services/import");
   }
   redirect("/dashboard");
 }
