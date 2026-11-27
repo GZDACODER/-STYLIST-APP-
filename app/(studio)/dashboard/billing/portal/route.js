@@ -1,5 +1,6 @@
 // "Manage billing": opens Stripe's own billing page, where the stylist can
 // change their card, switch plans, see receipts or cancel.
+import { blockedRouteInHelpMode } from "@/lib/helpModeServer";
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getStripe, paymentsConfigured } from "@/lib/stripe";
@@ -7,6 +8,8 @@ import { publicSiteUrl } from "@/lib/siteUrl";
 import { DEMO_LOCKED, isDemo } from "@/lib/demo";
 
 export async function GET(request) {
+  const helpBlock = await blockedRouteInHelpMode();
+  if (helpBlock) return helpBlock;
   const site = publicSiteUrl(new URL(request.url).origin);
   const back = `${site}/dashboard/settings/plan`;
   if (!paymentsConfigured()) return NextResponse.redirect(back);

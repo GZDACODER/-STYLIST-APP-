@@ -3,6 +3,7 @@
 // Paying for Clientele: opens Stripe's payment page for All-in (monthly or
 // yearly, plus any team members), and changes the team member count later.
 // The plan switches on when Stripe tells the webhook it's paid.
+import { blockedInHelpMode } from "@/lib/helpModeServer";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
@@ -21,6 +22,8 @@ async function origin() {
 }
 
 export async function startCheckout(prevState, formData) {
+  const helpBlock = await blockedInHelpMode();
+  if (helpBlock) return helpBlock;
   if (!paymentsConfigured()) {
     return { error: "Stripe isn't set up for this app yet. Add the Stripe keys in Vercel first." };
   }
@@ -91,6 +94,8 @@ export async function startCheckout(prevState, formData) {
 
 // Settings: change how many team members the plan pays for (prorated).
 export async function changeTeamMembers(prevState, formData) {
+  const helpBlock = await blockedInHelpMode();
+  if (helpBlock) return helpBlock;
   if (!paymentsConfigured()) return { error: "Stripe isn't set up for this app yet." };
   const count = Number(formData.get("team_members"));
   if (!Number.isInteger(count) || count < 0 || count > MAX_TEAM_MEMBERS) {
@@ -127,6 +132,8 @@ export async function changeTeamMembers(prevState, formData) {
 // founding (free) accounts, which pay for it like everyone else. Opens
 // Stripe's payment page for just the Assistant.
 export async function startAssistantCheckout(prevState, formData) {
+  const helpBlock = await blockedInHelpMode();
+  if (helpBlock) return helpBlock;
   if (!paymentsConfigured()) return { error: "Stripe isn't set up for this app yet." };
   const interval = formData.get("interval") === "year" ? "year" : "month";
   const supabase = await createClient();
@@ -166,6 +173,8 @@ export async function startAssistantCheckout(prevState, formData) {
 
 // Settings: add or remove the Assistant on an existing subscription (prorated).
 export async function changeAssistant(prevState, formData) {
+  const helpBlock = await blockedInHelpMode();
+  if (helpBlock) return helpBlock;
   if (!paymentsConfigured()) return { error: "Stripe isn't set up for this app yet." };
   const wanted = formData.get("assistant") === "on";
   const supabase = await createClient();
