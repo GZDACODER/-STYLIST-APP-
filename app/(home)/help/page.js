@@ -77,7 +77,7 @@ export default function HelpPage() {
       <h3>Deposits and payouts</h3>
       <p>
         Deposits go to your own Stripe account (Settings → Deposits → Connect Stripe). Refunds are up to
-        your policy: issue them from Stripe (Settings → Deposits → Open Stripe).
+        your policy: cancel the booking in your Calendar, then tap <strong>Refund deposit</strong> in the Cancelled list. The money goes back to the client&apos;s card.
       </p>
 
       <h2>Contact us</h2>
