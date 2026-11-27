@@ -2231,3 +2231,17 @@ body:has(dialog.pf-viewer[open]) {
 .bk-paused .bk-headline {
   margin: 10px 0 12px;
 }
+
+/* A service's description, under its name and length (0077 SQL). */
+.bk .choice-desc {
+  grid-column: 1 / -1;
+  margin-top: 2px;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: var(--muted, #6b6357);
+}
+
+.bk .choice.selected .choice-desc {
+  color: inherit;
+  opacity: 0.8;
+}

@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { addExampleServices, deleteService } from "./actions";
 import AddServiceForm from "./AddServiceForm";
 import AftercareForm from "./AftercareForm";
+import DescriptionForm from "./DescriptionForm";
 import SubmitButton from "@/components/SubmitButton";
 import { BRAND_NAME } from "@/lib/brand";
 import SettingsShell from "@/components/dash/SettingsShell";
@@ -42,7 +43,7 @@ export default async function ServicesPage() {
 
   const { data: services, error } = await supabase
     .from("services")
-    .select("id, name, price_cents, duration_minutes")
+    .select("id, name, price_cents, duration_minutes, description")
     .order("created_at", { ascending: true });
   const showExamples = await examplesOn(supabase, user.id);
   // Aftercare tips (step 46 SQL); the form shows once it's run.
@@ -53,6 +54,9 @@ export default async function ServicesPage() {
     : { data: null, error: true };
   const requestFirstOf = rfError ? null : Object.fromEntries((rfRows || []).map((r) => [r.id, Boolean(r.request_first)]));
   const aftercareOf = aftercareError ? null : Object.fromEntries((aftercareRows || []).map((r) => [r.id, r.aftercare || ""]));
+
+  // Example text from the pro's own trade, for the form placeholders.
+  const sample = exampleServices(await getMyTemplate()).find((x) => x.description) || {};
 
   return (
     <SettingsShell active="services" subtitle="What clients can book on your booking page.">
@@ -140,6 +144,7 @@ export default async function ServicesPage() {
                       </SubmitButton>
                     </form>
                   )}
+                  <DescriptionForm id={service.id} description={service.description || ""} placeholder={sample.description} />
                   {aftercareOn && aftercareOf && <AftercareForm id={service.id} aftercare={aftercareOf[service.id] || ""} />}
                   <form action={deleteService}>
                     <input type="hidden" name="id" value={service.id} />
@@ -156,7 +161,7 @@ export default async function ServicesPage() {
 
       <section className="card" id="add-service">
         <h2>Add a service</h2>
-        <AddServiceForm />
+        <AddServiceForm example={{ name: sample.name, description: sample.description }} />
       </section>
     </SettingsShell>
   );

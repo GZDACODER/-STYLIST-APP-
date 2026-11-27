@@ -475,6 +475,7 @@ export default function BookingFlow({
                   {formatMinutes(s.duration_minutes)}
                   {s.deposit_cents > 0 && ` · ${formatPrice(s.deposit_cents)} deposit`}
                 </span>
+                {s.description && <span className="choice-desc">{s.description}</span>}
               </button>
             ))}
           </div>

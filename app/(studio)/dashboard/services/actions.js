@@ -6,12 +6,14 @@ import { createClient } from "@/lib/supabase/server";
 import { exampleServices } from "@/lib/examples";
 import { exampleServiceRows } from "@/lib/exampleServiceRows";
 import { getMyTemplate } from "@/lib/templates/server";
+import { cleanDescription } from "@/lib/serviceDescription";
 
 export async function addService(prevState, formData) {
   const name = String(formData.get("name") || "").trim();
   const priceText = String(formData.get("price") || "").trim();
   const durationText = String(formData.get("duration_minutes") || "").trim();
-  const values = { name, price: priceText, duration_minutes: durationText };
+  const description = cleanDescription(formData.get("description"));
+  const values = { name, price: priceText, duration_minutes: durationText, description };
 
   const price = Number(priceText);
   const duration = Number(durationText);
@@ -37,6 +39,7 @@ export async function addService(prevState, formData) {
     // Money is stored in cents (e.g. $45.50 -> 4550) to avoid rounding errors.
     price_cents: Math.round(price * 100),
     duration_minutes: duration,
+    description,
   });
 
   if (error) return { error: error.message, values };
@@ -70,4 +73,20 @@ export async function addExampleServices() {
   if (error) console.error("Couldn't add the example services", error.message);
   revalidatePath("/dashboard/services");
   revalidatePath("/dashboard");
+}
+
+// A service's description (the line under it on the booking page).
+export async function saveDescription(prevState, formData) {
+  const id = String(formData.get("id") || "");
+  const description = cleanDescription(formData.get("description"));
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Please log in again." };
+  // The database's security rules only let a pro change their own services.
+  const { error } = await supabase.from("services").update({ description }).eq("id", id);
+  if (error) return { error: "The description couldn't be saved. Please try again." };
+  revalidatePath("/dashboard/services");
+  return { success: description ? "Saved. It shows on your booking page." : "Removed." };
 }

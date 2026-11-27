@@ -87,9 +87,9 @@ test("validate: ready rows become services in cents and minutes", () => {
   ]);
   assert.deepEqual(errors, []);
   assert.deepEqual(services, [
-    { name: "Silk Press", price_cents: 8500, duration_minutes: 90 },
-    { name: "Consult", price_cents: 0, duration_minutes: 15 },
-    { name: "Trim", price_cents: 4250, duration_minutes: 45 },
+    { name: "Silk Press", price_cents: 8500, duration_minutes: 90, description: "x" },
+    { name: "Consult", price_cents: 0, duration_minutes: 15, description: "" },
+    { name: "Trim", price_cents: 4250, duration_minutes: 45, description: "" },
   ]);
 });
 

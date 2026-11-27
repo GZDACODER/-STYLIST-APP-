@@ -115,7 +115,7 @@ export default function ReviewTable({ importId, initialRows, existingNames }) {
         <button type="button" className="button" onClick={approve} disabled={saving || rows.length === 0}>
           {saving ? "Adding…" : `Approve and add to my page (${rows.length})`}
         </button>
-        <p className="muted small-text">Categories and descriptions are kept with your import for reference.</p>
+        <p className="muted small-text">Descriptions show under each service on your booking page.</p>
       </div>
     </section>
   );
