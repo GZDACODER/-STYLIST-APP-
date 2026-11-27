@@ -5403,3 +5403,35 @@ body:has(dialog.client-sheet[open]) {
     align-items: flex-start;
   }
 }
+.db .lw-send {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+.db .lw-confirm {
+  max-width: 260px;
+  text-align: right;
+}
+.db .lw-confirm p {
+  margin: 0 0 6px;
+}
+.db .lw-confirm-row {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+.db .lw-sent,
+.db .lw-nudged {
+  color: var(--gold-deep, #7d6232);
+}
+@media (max-width: 720px) {
+  .db .lw-send,
+  .db .lw-confirm {
+    align-items: flex-start;
+    text-align: left;
+  }
+  .db .lw-confirm-row {
+    justify-content: flex-start;
+  }
+}

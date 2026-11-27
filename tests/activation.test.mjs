@@ -58,3 +58,13 @@ test("test accounts are spotted (plus addresses, our own domain, demo, Test in t
   assert.equal(looksLikeTest(pro({ businessName: "Launch Check Studio" })), true);
   assert.equal(looksLikeTest(pro()), false);
 });
+
+import { noteParagraphs } from "../lib/activation.js";
+test("a note splits into paragraphs for the email, with a sign-off", () => {
+  const n = nudge(pro(), "signed_up", "https://x.com");
+  const paras = noteParagraphs(n.body);
+  assert.equal(paras[0], "Hi Sam,");
+  assert.ok(paras.includes("https://x.com/dashboard/services"));
+  assert.equal(paras.some((p) => p === ""), false);
+  assert.match(paras.at(-1), /^Thanks,\nFounder, Clientele$/);
+});
