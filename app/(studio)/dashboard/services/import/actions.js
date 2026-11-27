@@ -17,6 +17,19 @@ const BUCKET = "service-imports";
 // Reads a pro can start in a day (each one is a paid call to Claude).
 const READS_PER_DAY = 8;
 const UUID = /^[0-9a-f-]{36}$/i;
+const TOO_MANY = "You've imported a lot today. Please try again tomorrow, or add the rest by hand.";
+
+// True when the pro has used today's reads (only imports that were sent to
+// be read count, not uploads that never finished).
+async function readsToday(supabase) {
+  const since = new Date(Date.now() - 86400000).toISOString();
+  const { count } = await supabase
+    .from("service_imports")
+    .select("id", { count: "exact", head: true })
+    .gte("created_at", since)
+    .neq("status", "uploading");
+  return (count || 0) >= READS_PER_DAY;
+}
 
 async function me() {
   const supabase = await createClient();
@@ -35,14 +48,7 @@ export async function startImport(count) {
     return { error: `Choose 1 to ${IMPORT_MAX_SCREENSHOTS} screenshots.` };
   }
 
-  const since = new Date(Date.now() - 86400000).toISOString();
-  const { count: today } = await supabase
-    .from("service_imports")
-    .select("id", { count: "exact", head: true })
-    .gte("created_at", since);
-  if ((today || 0) >= READS_PER_DAY) {
-    return { error: "You've imported a lot today. Please try again tomorrow, or add the rest by hand." };
-  }
+  if (await readsToday(supabase)) return { error: TOO_MANY };
 
   const { data: row, error } = await supabase.from("service_imports").insert({ stylist_id: user.id }).select("id").single();
   if (error) {
@@ -76,6 +82,7 @@ export async function readImport(id) {
   const paths = (row.screenshot_paths || []).filter((p) => p.startsWith(`${user.id}/${row.id}/`));
   if (!paths.length) return { error: "No screenshots were uploaded. Please try again." };
 
+  if (await readsToday(supabase)) return { error: TOO_MANY };
   await supabase.from("service_imports").update({ status: "reading", error: null }).eq("id", row.id);
 
   const images = [];
