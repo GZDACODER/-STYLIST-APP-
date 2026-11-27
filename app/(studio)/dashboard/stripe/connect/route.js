@@ -74,7 +74,12 @@ export async function GET(request) {
         },
         // A double tap within the same minute still makes only one account.
         // (Kept short so a failed try isn't replayed for Stripe's 24 hours.)
-        { idempotencyKey: `connect-account-${user.id}-${Math.floor(Date.now() / 60000)}` }
+        // Express accounts with platform pricing and Stripe covering losses
+        // need API version 2026-11-18 or later (Stripe changelog, Nov 18 2026).
+        {
+          idempotencyKey: `connect-account-${user.id}-${Math.floor(Date.now() / 60000)}`,
+          apiVersion: "2026-11-18.endive",
+        }
       );
       accountId = account.id;
 
