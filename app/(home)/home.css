@@ -1289,6 +1289,13 @@ body:has(.hm) {
   color: var(--text);
 }
 
+/* Help page sub-questions: room above each, close to their answer. */
+.hm-legal h3 {
+  font-size: 1.2rem;
+  margin: 28px 0 6px;
+  color: var(--text);
+}
+
 .hm-legal p + p {
   margin-top: 12px;
 }
