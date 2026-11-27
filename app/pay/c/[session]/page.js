@@ -5,7 +5,10 @@ import { notFound, redirect } from "next/navigation";
 import WalletButtons from "@/components/pay/WalletButtons";
 import { formatLinkAmount } from "@/lib/paymentLinks";
 import { finishCheckoutWallet, loadWalletCheckout, successUrl } from "@/lib/walletCheckout";
-import { finishCheckoutPayment, startCheckoutPayment } from "./actions";
+import { finishCheckoutPayment, payLaterDeposit, startCheckoutPayment } from "./actions";
+import { payLaterFor } from "@/lib/payLaterServer";
+import { payLaterNames } from "@/lib/payLater";
+import SubmitButton from "@/components/SubmitButton";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Payment", robots: { index: false, follow: false } };
@@ -19,7 +22,7 @@ const Lock = () => (
 
 export default async function CheckoutWalletPage({ params, searchParams }) {
   const { session: sessionId } = await params;
-  const { payment_intent: intentId } = await searchParams;
+  const { payment_intent: intentId, problem } = await searchParams;
   const c = await loadWalletCheckout(sessionId);
   if (!c) notFound();
   const { session, kind, stylist: s } = c;
@@ -37,6 +40,8 @@ export default async function CheckoutWalletPage({ params, searchParams }) {
   if (session.status !== "open") redirect(session.cancel_url || `/book/${s.slug}`);
 
   const name = s.business_name || "";
+  // Deposits can be paid over time if the pro has it on (gift cards can't).
+  const later = kind === "deposit" ? await payLaterFor(s, c.amountCents) : [];
   const amount = formatLinkAmount(c.amountCents);
   const photo = /^https:\/\//.test(s.cover_photo_url || "") ? s.cover_photo_url : null;
 
@@ -65,11 +70,22 @@ export default async function CheckoutWalletPage({ params, searchParams }) {
           start={startCheckoutPayment.bind(null, session.id)}
           finish={finishCheckoutPayment.bind(null, session.id)}
           returnPath={`/pay/c/${session.id}`}
-          fallbackUrl={session.url}
+          /* With "Pay over time" on offer, stay here so they can choose it. */
+          fallbackUrl={later.length ? null : session.url}
         />
         <a className="py-btn py-btn-link" href={session.url}>
           Pay {amount} with card
         </a>
+        {later.length > 0 && (
+          <form action={payLaterDeposit}>
+            <input type="hidden" name="session" value={session.id} />
+            <SubmitButton className="py-btn is-quiet" pendingText="Opening...">
+              Pay over time
+            </SubmitButton>
+            <p className="py-later">Split it into payments with {payLaterNames(later)}.</p>
+          </form>
+        )}
+        {problem === "no_pay_later" && <p className="message info">Pay over time isn&apos;t available for this payment. Please pay with card.</p>}
         <p className="py-secure">
           <Lock /> Secure payment by Stripe
         </p>

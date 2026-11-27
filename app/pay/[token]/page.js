@@ -9,6 +9,8 @@ import { createPaymentLinkCheckout, finalizePaymentLinkIntent, finalizePaymentLi
 import { formatLinkAmount } from "@/lib/paymentLinks";
 import SubmitButton from "@/components/SubmitButton";
 import WalletButtons from "@/components/pay/WalletButtons";
+import { payLaterFor } from "@/lib/payLaterServer";
+import { payLaterNames } from "@/lib/payLater";
 import { finishWalletPayment, startWalletPayment } from "./walletActions";
 
 export const dynamic = "force-dynamic";
@@ -27,11 +29,12 @@ export async function generateMetadata({ params }) {
 async function pay(formData) {
   "use server";
   const token = String(formData.get("token") || "");
+  const payLater = formData.get("later") === "1";
   const h = await headers();
   const origin = h.get("origin") || `https://${h.get("host")}`;
   let url;
   try {
-    url = await createPaymentLinkCheckout(token, origin);
+    url = await createPaymentLinkCheckout(token, origin, { payLater });
   } catch (error) {
     redirect(`/pay/${encodeURIComponent(token)}?problem=${encodeURIComponent(error.message || "failed")}`);
   }
@@ -43,6 +46,7 @@ const PROBLEM = {
   cancelled: "This payment link was cancelled.",
   paid: "This has already been paid.",
   failed: "The payment page couldn't open. Please try again in a moment.",
+  no_pay_later: "Pay over time isn't available for this payment. Please pay with card.",
 };
 
 const Lock = () => (
@@ -78,6 +82,7 @@ export default async function PayPage({ params, searchParams }) {
   const name = s.business_name || "";
   const amount = formatLinkAmount(link.amount_cents);
   const canPay = Boolean(s.stripe_account_id && s.stripe_charges_enabled);
+  const later = canPay && link.status === "open" ? await payLaterFor(s, link.amount_cents) : [];
   const photo = /^https:\/\//.test(s.cover_photo_url || "") ? s.cover_photo_url : null;
 
   return (
@@ -135,6 +140,16 @@ export default async function PayPage({ params, searchParams }) {
                 Pay {amount} with card
               </SubmitButton>
             </form>
+            {later.length > 0 && (
+              <form action={pay}>
+                <input type="hidden" name="token" value={link.token} />
+                <input type="hidden" name="later" value="1" />
+                <SubmitButton className="py-btn is-quiet" pendingText="Opening...">
+                  Pay over time
+                </SubmitButton>
+                <p className="py-later">Split it into payments with {payLaterNames(later)}.</p>
+              </form>
+            )}
             <p className="py-secure">
               <Lock /> Secure payment by Stripe
             </p>

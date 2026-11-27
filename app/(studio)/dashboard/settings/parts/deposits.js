@@ -2,6 +2,8 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe, paymentsConfigured } from "@/lib/stripe";
 import DepositsForm from "../DepositsForm";
+import PayLaterForm from "../PayLaterForm";
+import { payLaterAvailable } from "@/lib/payLaterServer";
 import { me, optional } from "./common";
 
 const STRIPE_NOTICES = {
@@ -53,6 +55,8 @@ export async function DepositsSection({ stripeParam, reason }) {
     }
   }
   const notice = STRIPE_NOTICES[stripeParam];
+  // Before the 0082 SQL there's no column: shown as off.
+  const payLater = await supabase.from("stylists").select("pay_later_on").eq("id", user.id).maybeSingle();
   return (
     <>
       <section className="card">
@@ -111,6 +115,11 @@ export async function DepositsSection({ stripeParam, reason }) {
           stripeReady={stripe.enabled}
           services={services || []}
         />
+      </section>
+
+      <section className="card" id="pay-later">
+        <h2>Pay over time</h2>
+        <PayLaterForm on={Boolean(payLater.data?.pay_later_on)} live={(await payLaterAvailable()).length > 0} stripeReady={stripe.enabled} />
       </section>
     </>
   );

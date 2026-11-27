@@ -334,3 +334,10 @@ body:has(.py) {
   font-weight: 600;
   cursor: pointer;
 }
+
+.py-later {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: var(--soft);
+  text-align: center;
+}
