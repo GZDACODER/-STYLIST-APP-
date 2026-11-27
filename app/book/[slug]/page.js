@@ -1,3 +1,4 @@
+import ShareThisPage from "./ShareThisPage";
 import { cache } from "react";
 import { notFound } from "next/navigation";
 import { createBookingClient } from "@/lib/supabase/booking";
@@ -145,6 +146,7 @@ export default async function BookingPage({ params, searchParams }) {
           black panel (over their cover photo, if they've added one). Here
           there's just a small label, or their tagline. */}
       <header className="bk-masthead bk-masthead-quiet">
+        <ShareThisPage url={`https://www.clientelesuite.com/book/${slug}`} name={look.name} />
         {look.logo && <img className="bk-logo" src={look.logo} alt="" decoding="async" />}
         <h1 className="visually-hidden">Book with {look.name}</h1>
         {data.tagline ? (

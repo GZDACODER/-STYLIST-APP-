@@ -6,6 +6,7 @@
 // places (lib/shareTargets.js). `trigger({ onClick, open })` draws the button.
 import { useEffect, useRef, useState } from "react";
 import { shareTargets } from "@/lib/shareTargets";
+import "./share-menu.css";
 
 const GLYPH = {
   sms: (
@@ -67,7 +68,7 @@ async function copy(text) {
   }
 }
 
-export default function ShareMenu({ url, businessName, trigger, align = "right" }) {
+export default function ShareMenu({ url, businessName, trigger, align = "right", heading = "Share your booking link" }) {
   const [open, setOpen] = useState(false);
   const [note, setNote] = useState(null);
   const [native, setNative] = useState(false);
@@ -133,8 +134,8 @@ export default function ShareMenu({ url, businessName, trigger, align = "right" 
     <span className="sm-wrap" ref={wrap}>
       {trigger({ onClick, open })}
       {open && (
-        <div className={`sm-menu sm-${align}`} role="menu" aria-label="Share your booking link">
-          <p className="sm-head">Share your booking link</p>
+        <div className={`sm-menu sm-${align}`} role="menu" aria-label={heading}>
+          <p className="sm-head">{heading}</p>
           <p className="sm-url">{url.replace(/^https:\/\/(www\.)?/, "")}</p>
           {targets.map((t) => (
             <button key={t.key} type="button" role="menuitem" className={`sm-item sm-${t.key}`} onClick={() => pick(t)}>
