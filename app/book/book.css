@@ -2221,3 +2221,13 @@ body:has(dialog.pf-viewer[open]) {
   outline: 2px solid var(--accent, #a8874d);
   outline-offset: 2px;
 }
+
+/* A paused booking page (Admin > Pros > Pause). */
+.bk-paused {
+  max-width: 34rem;
+  padding: 48px 0 64px;
+}
+
+.bk-paused .bk-headline {
+  margin: 10px 0 12px;
+}

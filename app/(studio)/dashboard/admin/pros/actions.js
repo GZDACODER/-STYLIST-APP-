@@ -105,3 +105,24 @@ export async function emailPro(prev, formData) {
   await record(admin, user, pro, "email", `Emailed "${subject}"`);
   return { success: `Sent to ${to}.` };
 }
+
+// Pause: their booking page says it's paused and no client can book
+// (supabase/migrations/0075_pause_accounts.sql). Bookings they already have
+// stay. Unpause puts everything back.
+export async function setPaused(prev, formData) {
+  const user = await owner();
+  if (!user) return { error: "Only the owner can do this." };
+  const on = formData.get("on") === "1";
+  const reason = String(formData.get("reason") || "").trim().slice(0, 300);
+  if (on && !reason) return { error: "Add a short reason (only you see it)." };
+  const admin = createAdminClient();
+  const pro = await loadPro(admin, String(formData.get("id") || ""));
+  if (!pro) return { error: "Couldn't find that pro." };
+  const { error } = await admin
+    .from("stylists")
+    .update(on ? { paused_at: new Date().toISOString(), paused_reason: reason } : { paused_at: null, paused_reason: "" })
+    .eq("id", pro.id);
+  if (error) return { error: error.message };
+  await record(admin, user, pro, on ? "pause" : "unpause", on ? `Paused: ${reason}` : "Unpaused, taking bookings again");
+  return { success: on ? "Paused. Their booking page is off and nobody can book." : "Unpaused. Clients can book again." };
+}

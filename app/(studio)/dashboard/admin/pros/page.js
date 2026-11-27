@@ -21,10 +21,11 @@ const FILTERS = [
   { key: "free", label: "Free" },
   { key: "ended", label: "Trial ended" },
   { key: "stuck", label: "Stuck" },
+  { key: "paused", label: "Paused" },
 ];
 
 const match = (p, f) =>
-  f === "all" ? true : f === "founding" ? p.founding : f === "stuck" ? p.stuck : p.status.key === f;
+  f === "all" ? true : f === "founding" ? p.founding : f === "stuck" ? p.stuck : f === "paused" ? p.paused : p.status.key === f;
 
 const ago = (iso) => {
   if (!iso) return "never";
@@ -107,6 +108,7 @@ export default async function ProsPage({ searchParams }) {
                     </Link>
                     {p.you && <span className="badge">You</span>}
                     {!p.you && p.test && <span className="badge">Test</span>}
+                    {p.paused && <span className="badge ap-paused">Paused</span>}
                     <span className="muted small-text ap-sub">{[p.email, p.trade].filter(Boolean).join(" · ")}</span>
                   </td>
                   <td className={`ap-plan is-${p.status.key}`}>{p.status.label}</td>

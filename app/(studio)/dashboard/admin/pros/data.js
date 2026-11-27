@@ -10,7 +10,7 @@ export async function loadProsAdmin() {
   const [{ pros, error }, plans, stylists, founding] = await Promise.all([
     loadPros(),
     admin.from("stylist_plans").select("stylist_id, comped, trial_ends_at, base_active, regulars_active, waitlist_active, billing_interval, stripe_status, current_period_end, cancel_at_period_end").limit(5000),
-    admin.from("stylists").select("id, stripe_account_id, stripe_charges_enabled").limit(5000),
+    admin.from("stylists").select("id, stripe_account_id, stripe_charges_enabled, paused_at, paused_reason, notify").limit(5000),
     admin.from("admin_actions").select("stylist_id").eq("action", "founding").limit(5000),
   ]);
   const planOf = new Map((plans.data || []).map((p) => [p.stylist_id, p]));
@@ -31,6 +31,10 @@ export async function loadProsAdmin() {
       founding: isFounding,
       status: planStatus(plan, now, { founding: isFounding }),
       payouts: pay.stripe_charges_enabled ? "on" : pay.stripe_account_id ? "started" : "off",
+      paused: Boolean(pay.paused_at),
+      pausedAt: pay.paused_at || null,
+      pausedReason: pay.paused_reason || "",
+      notify: pay.notify || {},
     };
   });
   return { pros: list, error: error || plans.error || stylists.error };

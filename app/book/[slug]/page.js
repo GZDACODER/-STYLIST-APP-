@@ -93,6 +93,24 @@ export default async function BookingPage({ params, searchParams }) {
 
   const look = stylistLook(data);
 
+  // Paused by Clientele (Admin > Pros, 0075 SQL): no booking flow, just a note.
+  let paused = false;
+  try {
+    const { data: ps } = await createAdminClient().from("stylists").select("paused_at").eq("slug", slug).maybeSingle();
+    paused = Boolean(ps?.paused_at);
+  } catch {
+    paused = false;
+  }
+  if (paused) {
+    return (
+      <div className="bk-paused">
+        <p className="bk-kicker">Booking with {look.name}</p>
+        <h1 className="bk-headline">Online booking is paused right now.</h1>
+        <p className="muted">Please contact {look.name} directly to book, or check back soon.</p>
+      </div>
+    );
+  }
+
   // Portfolio photos (step 26 SQL); none before it's run.
   let portfolio = [];
   try {

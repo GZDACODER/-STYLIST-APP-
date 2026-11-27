@@ -47,7 +47,7 @@ export default async function ProAdminPage({ params }) {
         guide="admin_pro"
         eyebrow="Admin · Pro"
         title={p.businessName}
-        subtitle={p.founding ? "Founding pro" : p.you ? "Your own account" : p.test ? "Test or demo account" : undefined}
+        subtitle={[p.paused && "Paused", p.founding && "Founding pro", p.you ? "Your own account" : p.test && "Test or demo account"].filter(Boolean).join(" · ") || undefined}
         actions={
           <a href={link} target="_blank" rel="noreferrer" className="button small secondary">
             Booking page
@@ -80,6 +80,8 @@ export default async function ProAdminPage({ params }) {
           founding={p.founding}
           firstName={p.firstName}
           email={p.email}
+          paused={p.paused}
+          pausedReason={p.pausedReason}
         />
       </div>
 

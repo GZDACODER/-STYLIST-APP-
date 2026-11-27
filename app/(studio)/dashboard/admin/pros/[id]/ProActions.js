@@ -3,7 +3,7 @@
 // The owner's actions on one pro (../actions.js): founding pro, more free
 // days, free account on/off, and an email from hello@clientelesuite.com.
 import { useActionState } from "react";
-import { emailPro, extendTrial, makeFounding, setFree } from "../actions";
+import { emailPro, extendTrial, makeFounding, setFree, setPaused } from "../actions";
 
 function Result({ state }) {
   if (state?.error) return <p className="message error small-text">{state.error}</p>;
@@ -11,11 +11,12 @@ function Result({ state }) {
   return null;
 }
 
-export default function ProActions({ id, paying, free, founding, firstName, email }) {
+export default function ProActions({ id, paying, free, founding, firstName, email, paused, pausedReason }) {
   const [fState, fAction, fPending] = useActionState(makeFounding, null);
   const [xState, xAction, xPending] = useActionState(extendTrial, null);
   const [cState, cAction, cPending] = useActionState(setFree, null);
   const [eState, eAction, ePending] = useActionState(emailPro, null);
+  const [pState, pAction, pPending] = useActionState(setPaused, null);
 
   return (
     <section className="card ap-actions">
@@ -69,6 +70,24 @@ export default function ProActions({ id, paying, free, founding, firstName, emai
         </button>
       </form>
       <Result state={cState} />
+
+      <form action={pAction} className="ap-action ap-pause">
+        <input type="hidden" name="id" value={id} />
+        <input type="hidden" name="on" value={paused ? "0" : "1"} />
+        <div>
+          <p className="ap-action-title">{paused ? "Paused" : "Pause account"}</p>
+          <p className="muted small-text">
+            {paused
+              ? `Their booking page is off. Reason: ${pausedReason || "none given"}`
+              : "Takes their booking page offline so no client can book. Bookings they already have stay. For abuse or payment problems."}
+          </p>
+          {!paused && <input name="reason" placeholder="Reason (only you see it)" maxLength={300} aria-label="Reason for pausing" />}
+        </div>
+        <button type="submit" className={`button small${paused ? "" : " secondary danger"}`} disabled={pPending}>
+          {pPending ? "Saving…" : paused ? "Unpause" : "Pause"}
+        </button>
+      </form>
+      <Result state={pState} />
 
       <form action={eAction} className="ap-email">
         <input type="hidden" name="id" value={id} />
