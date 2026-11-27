@@ -35,7 +35,12 @@ const reducedMotion = () => window.matchMedia?.("(prefers-reduced-motion: reduce
 export default function GuideTour({ guide, onFinish }) {
   // The pro's own words ("students" for a tutor); unchanged elsewhere.
   const swap = useWords();
-  const steps = guide.steps;
+  // A step marked optional only shows when its button or area is on the
+  // page (e.g. the example services button, which goes once you have services).
+  const [steps] = useState(() => {
+    const kept = guide.steps.filter((st) => !st.optional || findTarget(st.target));
+    return kept.length ? kept : guide.steps;
+  });
   const [index, setIndex] = useState(0);
   const [rect, setRect] = useState(null); // the highlighted element, or null
   const [cardPos, setCardPos] = useState(null);
