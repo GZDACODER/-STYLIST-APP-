@@ -5,7 +5,7 @@
 // fades, comes back in from the bottom-left, ~1.2s). On touch it plays once
 // when tapped. Respects reduced motion. Opens the share menu (ShareMenu).
 import { useState } from "react";
-import ShareMenu from "./ShareMenu";
+import ShareMenu from "@/components/share/ShareMenu";
 
 export default function ShareCta({ url, businessName, className = "" }) {
   const [tapped, setTapped] = useState(false);

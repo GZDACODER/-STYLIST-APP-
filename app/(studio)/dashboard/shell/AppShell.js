@@ -17,7 +17,7 @@ import { useTemplate } from "@/components/TemplateContext";
 import { ICONS as BASE_ICONS } from "../DashboardNav";
 import { quickClients } from "./actions";
 import { shareBookingLink } from "./share";
-import ShareMenu from "./ShareMenu";
+import ShareMenu from "@/components/share/ShareMenu";
 
 const ICONS = {
   ...BASE_ICONS,
