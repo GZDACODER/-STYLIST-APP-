@@ -7,11 +7,11 @@
 import Link from "next/link";
 import { useState } from "react";
 
-export default function TrialCta({ label = "Start free trial", alt = "Claim your book", small = false }) {
+export default function TrialCta({ label = "Start free trial", alt = "Claim your book", small = false, href = "/signup" }) {
   const [tapped, setTapped] = useState(false);
   return (
     <Link
-      href="/signup"
+      href={href}
       className={`ln-btn ln-btn-gold ln-cta${small ? " ln-btn-small" : ""}${tapped ? " is-tapped" : ""}`}
       onPointerDown={(e) => {
         if (e.pointerType !== "mouse") {

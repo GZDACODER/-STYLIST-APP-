@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getUser } from "@/lib/supabase/user";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -56,7 +57,12 @@ export default async function ServicesPage() {
   return (
     <SettingsShell active="services" subtitle="What clients can book on your booking page.">
       <section className="card">
-        <h2>Your services</h2>
+        <div className="si-services-head">
+          <h2>Your services</h2>
+          <Link href="/dashboard/services/import" className="button secondary small si-import-link">
+            Import from another app (free)
+          </Link>
+        </div>
         {error && <p className="message error">Couldn't load services: {error.message}</p>}
         {!error && services.length === 0 && !showExamples && (
           <EmptyState icon="list" title="No services yet" text="Add your first one below so clients can book." />
