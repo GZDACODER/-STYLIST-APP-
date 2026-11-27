@@ -1,13 +1,14 @@
-// A payment link (Money → Payment links, 0080 SQL): the client sees who's
-// asking, how much and what for, and pays on Stripe's page. Stripe sends
-// them back here with ?session_id=… once paid.
+// A payment link (Money → Payment links, 0080 SQL): one card with who's
+// asking, how much and what for. Apple Pay / Google Pay right here
+// (WalletPay), or "Pay with card" on Stripe's page, which sends them back
+// with ?session_id=… once paid.
 import { notFound, redirect } from "next/navigation";
 import { headers } from "next/headers";
-import StylistShell from "@/app/book/[slug]/StylistShell";
 import { getStripe } from "@/lib/stripe";
-import { createPaymentLinkCheckout, finalizePaymentLinkSession, loadPaymentLink } from "@/lib/paymentLinksServer";
+import { createPaymentLinkCheckout, finalizePaymentLinkIntent, finalizePaymentLinkSession, loadPaymentLink } from "@/lib/paymentLinksServer";
 import { formatLinkAmount } from "@/lib/paymentLinks";
 import SubmitButton from "@/components/SubmitButton";
+import WalletPay from "./WalletPay";
 
 export const dynamic = "force-dynamic";
 
@@ -43,17 +44,29 @@ const PROBLEM = {
   failed: "The payment page couldn't open. Please try again in a moment.",
 };
 
+const Lock = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+    <rect x="4" y="10" width="16" height="11" rx="2" />
+    <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+  </svg>
+);
+
 export default async function PayPage({ params, searchParams }) {
   const { token } = await params;
-  const { session_id: sessionId, problem } = await searchParams;
+  const { session_id: sessionId, payment_intent: intentId, problem } = await searchParams;
   let link = await loadPaymentLink(token);
   if (!link) notFound();
 
   // Back from Stripe: record it now if the webhook hasn't yet (safe twice).
-  if (String(sessionId || "").startsWith("cs_") && link.status !== "paid") {
+  if (link.status !== "paid" && (String(sessionId || "").startsWith("cs_") || String(intentId || "").startsWith("pi_"))) {
     try {
-      const session = await getStripe().checkout.sessions.retrieve(sessionId);
-      if (session.metadata?.payment_link_id === link.id) await finalizePaymentLinkSession(session);
+      if (sessionId) {
+        const session = await getStripe().checkout.sessions.retrieve(sessionId);
+        if (session.metadata?.payment_link_id === link.id) await finalizePaymentLinkSession(session);
+      } else {
+        const intent = await getStripe().paymentIntents.retrieve(intentId, { expand: ["latest_charge"] });
+        if (intent.metadata?.payment_link_id === link.id) await finalizePaymentLinkIntent(intent);
+      }
       link = (await loadPaymentLink(token)) || link;
     } catch {
       // The webhook will record it.
@@ -61,39 +74,67 @@ export default async function PayPage({ params, searchParams }) {
   }
 
   const s = link.stylist || {};
+  const name = s.business_name || "";
   const amount = formatLinkAmount(link.amount_cents);
   const canPay = Boolean(s.stripe_account_id && s.stripe_charges_enabled);
+  const photo = /^https:\/\//.test(s.cover_photo_url || "") ? s.cover_photo_url : null;
 
   return (
-    <StylistShell slug={s.slug}>
-      <section className="pl-card">
-        <p className="bk-kicker">Payment request from {s.business_name}</p>
-        <p className="pl-amount">{amount}</p>
-        <p className="pl-for">{link.description}</p>
-        {link.client_name && <p className="muted small-text">For {link.client_name}</p>}
-
-        {link.status === "paid" ? (
-          <p className="message success pl-done">
-            <strong>Paid. Thank you!</strong> Stripe emails your receipt, and {s.business_name} has been told.
-          </p>
-        ) : link.status === "cancelled" ? (
-          <p className="message info">This payment link was cancelled. If you think that&apos;s a mistake, contact {s.business_name}.</p>
-        ) : !canPay ? (
-          <p className="message info">{PROBLEM.no_payouts}</p>
+    <section className="py-card" aria-labelledby="py-amount">
+      <header className="py-pro">
+        {photo ? (
+          <img className="py-avatar" src={photo} alt="" width="56" height="56" />
         ) : (
-          <>
-            {sessionId && <p className="message info">We haven&apos;t received this payment yet. If you paid, it can take a minute. Otherwise, try again below.</p>}
-            {PROBLEM[problem] && <p className="message error">{PROBLEM[problem]}</p>}
+          <span className="py-avatar py-monogram" aria-hidden="true">
+            {(name.trim()[0] || "C").toUpperCase()}
+          </span>
+        )}
+        <p className="py-name">{s.slug ? <a href={`/book/${s.slug}`}>{name}</a> : name}</p>
+        <p className="py-kicker">{link.status === "paid" ? "Payment received" : "Payment request"}</p>
+      </header>
+
+      <p className="py-amount" id="py-amount">
+        {amount}
+      </p>
+      <p className="py-for">{link.description}</p>
+      {link.client_name && <p className="py-client">For {link.client_name}</p>}
+
+      {link.status === "paid" ? (
+        <div className="py-done" role="status">
+          <div className="py-check" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
+              <path d="M5 12.5l4.5 4.5L19 7.5" />
+            </svg>
+          </div>
+          <p>
+            <strong>Paid. Thank you!</strong>
+          </p>
+          <p className="py-done-sub">Stripe emails your receipt, and {name} has been told.</p>
+        </div>
+      ) : link.status === "cancelled" ? (
+        <p className="message info">This payment link was cancelled. If you think that&apos;s a mistake, contact {name}.</p>
+      ) : !canPay ? (
+        <p className="message info">{PROBLEM.no_payouts}</p>
+      ) : (
+        <>
+          {(sessionId || intentId) && (
+            <p className="message info">We haven&apos;t received this payment yet. If you paid, it can take a minute. Otherwise, try again below.</p>
+          )}
+          {PROBLEM[problem] && <p className="message error">{PROBLEM[problem]}</p>}
+          <div className="py-actions">
+            <WalletPay token={link.token} amountCents={link.amount_cents} />
             <form action={pay}>
               <input type="hidden" name="token" value={link.token} />
-              <SubmitButton className="button pl-pay" pendingText="Opening secure payment...">
-                Pay {amount}
+              <SubmitButton className="py-btn" pendingText="Opening secure payment...">
+                Pay {amount} with card
               </SubmitButton>
             </form>
-            <p className="muted small-text pl-secure">Secure payment by Stripe: card, Apple Pay, Google Pay, Cash App Pay or Link.</p>
-          </>
-        )}
-      </section>
-    </StylistShell>
+            <p className="py-secure">
+              <Lock /> Secure payment by Stripe
+            </p>
+          </div>
+        </>
+      )}
+    </section>
   );
 }

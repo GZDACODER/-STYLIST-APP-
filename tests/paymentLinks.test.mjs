@@ -47,3 +47,33 @@ test("share targets can carry a payment message instead of 'Book with'", () => {
   const d = Object.fromEntries(shareTargets("https://x.com/book/s", "Studio Sam").map((x) => [x.key, x]));
   assert.match(decodeURIComponent(d.sms.href), /Book with Studio Sam: https:\/\/x\.com\/book\/s/);
 });
+
+// The redesigned payment page (own look, on-page wallets) and the webhook
+// that records a wallet payment.
+import { readFileSync } from "node:fs";
+const read = (p) => readFileSync(new URL(`../${p}`, import.meta.url), "utf8");
+
+test("the payment page has its own look, not the booking page's cover photo", () => {
+  assert.doesNotMatch(read("app/pay/layout.js"), /book\/layout/);
+  assert.doesNotMatch(read("app/pay/[token]/page.js"), /StylistShell/);
+  assert.match(read("app/pay/layout.js"), /pay\.css/);
+});
+
+test("Apple Pay / Google Pay on the page, with Pay with card always there", () => {
+  const page = read("app/pay/[token]/page.js");
+  assert.match(page, /<WalletPay /);
+  assert.match(page, /with card/);
+  const wallet = read("app/pay/[token]/WalletPay.js");
+  assert.match(wallet, /expressCheckout/);
+  assert.match(wallet, /NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY/);
+});
+
+test("a wallet payment is recorded by the webhook and paid to the pro", () => {
+  const hook = read("app/api/stripe/webhook/route.js");
+  assert.match(hook, /payment_intent\.succeeded" && object\.metadata\?\.payment_link_id/);
+  const server = read("lib/paymentLinksServer.js");
+  const create = server.slice(server.indexOf("export async function createPaymentLinkIntent"));
+  assert.match(create, /transfer_data: \{ destination: s\.stripe_account_id \}/);
+  assert.match(create, /application_fee_amount: linkFeeCents\(link\.amount_cents\)/);
+  assert.match(create, /metadata: \{ payment_link_id: link\.id \}/);
+});

@@ -3,7 +3,7 @@
 // starts, changes or ends (see BILLING_SETUP.md), and when a client disputes
 // a deposit (charge.dispute.*: lib/disputes.js).
 import { finalizeGiftSession } from "@/lib/giftCards";
-import { finalizePaymentLinkSession } from "@/lib/paymentLinksServer";
+import { finalizePaymentLinkSession, finalizePaymentLinkIntent } from "@/lib/paymentLinksServer";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { finalizeCheckoutSession, getStripe, releaseCheckoutSession } from "@/lib/stripe";
 import { syncSubscription } from "@/lib/billing";
@@ -74,6 +74,9 @@ export async function POST(request) {
       if (event.type === "checkout.session.completed" || event.type === "checkout.session.async_payment_succeeded") {
         await finalizePaymentLinkSession(object);
       }
+    } else if (event.type === "payment_intent.succeeded" && object.metadata?.payment_link_id) {
+      // A payment link paid on the page with Apple Pay / Google Pay.
+      await finalizePaymentLinkIntent(object);
     } else if (
       event.type === "checkout.session.completed" ||
       // A slow payment method (e.g. a bank payment) finally cleared.
